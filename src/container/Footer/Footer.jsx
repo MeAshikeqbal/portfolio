@@ -43,7 +43,7 @@ const Footer = () => {
   return (
     <>
       <h2 className="head-text">
-        Contact <span>&</span> chat with me
+        Contact <span>Me</span>
       </h2>
 
       <div className="app__footer-cards">
