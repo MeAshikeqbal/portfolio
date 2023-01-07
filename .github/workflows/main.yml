@@ -40,5 +40,5 @@ jobs:
         env:
           FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
           projectId: ${{ secrets.REACT_APP__SANITY_PROJECT_ID }}
-          token: ${{secret.process.env.REACT_APP__SANITY_TOKEN}}
+          token: ${{secret.REACT_APP__SANITY_TOKEN}}
           
