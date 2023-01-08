@@ -13,7 +13,8 @@ const Blog = () => {
   const [animateCard, setAnimateCard] = useState({ y: 0, opacity: 1 });
 
   useEffect(() => {
-    const query = '*[_type == "blogs"]{ name, date, excerpt, imgUrl, tags, postLink}';
+    const query =
+      '*[_type == "blogs"]{ name, date, excerpt, imgUrl, tags, postLink}';
 
     client.fetch(query).then((data) => {
       setBlogs(data);
@@ -38,6 +39,10 @@ const Blog = () => {
 
   return (
     <>
+      <head>
+        <title>Ashik Eqbal</title>
+      </head>
+
       <h2 className="head-text">
         My <span>Blog</span>
       </h2>
@@ -78,7 +83,7 @@ const Blog = () => {
                 className="app__blog-hover app__flex"
               >
                 <Link
-                  to={`/blog/${blog.postLink.current}`} //this saposed to link to SingleBlogPost 
+                  to={`/blog/${blog.postLink.current}`} //this saposed to link to SingleBlogPost
                 >
                   <motion.div
                     whileInView={{ scale: [0, 1] }}

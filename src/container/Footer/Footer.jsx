@@ -42,6 +42,10 @@ const Footer = () => {
 
   return (
     <>
+      <head>
+        <title>Ashik Eqbal</title>
+      </head>
+
       <h2 className="head-text">
         Contact <span>Me</span>
       </h2>

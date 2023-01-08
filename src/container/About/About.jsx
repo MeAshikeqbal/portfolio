@@ -18,6 +18,10 @@ const About = () => {
 
   return (
     <>
+      <head>
+        <title>Ashik Eqbal</title>
+      </head>
+
       <h2 className="head-text">
         About <span>Me</span>
       </h2>
