@@ -6,7 +6,6 @@ import BlockContent from "@sanity/block-content-to-react";
 import { SlCalender } from "react-icons/sl";
 import "./SingleBlogPost.scss";
 
-
 const builder = imageUrlBuilder(client);
 function urlFor(source) {
   return builder.image(source);
@@ -41,6 +40,9 @@ export default function SingleBlogPost() {
 
   return (
     <div className="app__post-page">
+      <head>
+        <title>{singleBlogPost.title}</title>
+      </head>
       <div className="app__post">
         <div className="app__post-img">
           <img
