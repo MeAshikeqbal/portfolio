@@ -2,7 +2,7 @@ import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Navbar } from './components';
 import { Home } from './container/index'
-import { SingleBlogPost, Error } from './Pages';
+import { SingleBlogPost, Error,Blog } from './Pages';
 import './App.scss'
 
 const App = () => {
@@ -13,6 +13,7 @@ const App = () => {
           <Routes>
             <Route path="/" exact element={<Home />} />
             <Route path="/blog/:postLink" element={<SingleBlogPost />} />
+            <Route path="/blog" element={<Blog />} />
             <Route path="*" element={<Error />} />
           </Routes>
       </BrowserRouter>

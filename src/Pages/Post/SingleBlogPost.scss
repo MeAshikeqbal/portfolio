@@ -24,7 +24,7 @@
 }
 
 .app__post-date {
-    margin: 1px;
+    margin: 2px;
     padding: .5rem;
     display: flex;
     justify-content: center;
@@ -51,6 +51,8 @@
     padding: 1rem;
     align-items: flex-start;
     color: rgba(0, 0, 0, 0.70);
+    text-align: justify;
+    max-width: calc(100% - 10px);
 
     blockquote {
         line-height: 1.5;
@@ -62,15 +64,33 @@
     }
 
     p {
-        max-width: calc(100% - 10px);
         padding-left: 10px;
         padding-top: 1.5rem;
         line-height: 1.5em;
-        text-align: justify;
+    }
+
+    ol{
+        padding-left: 20px;
+        padding-top: 1.5rem;
+        line-height: 1.5em;
+        margin: 1rem 3rem;
+    }
+    ul{
+        padding-left: 20px;
+        padding-top: 1.5rem;
+        line-height: 1.5em;
+        margin: 1rem 3rem;
     }
 
     h2 {
         color: rgb(24, 24, 24);
-        padding: 2rem;
+        padding: 1.5rem;
+    }
+
+    h3{
+        color: rgba(24, 24, 24, 0.80);
+        padding: 1.5rem;
+        padding-bottom: 0;
+        text-align: start;
     }
 }
