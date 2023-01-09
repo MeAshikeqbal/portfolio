@@ -14,6 +14,7 @@ import {
   FacebookMessengerShareButton,
   TwitterShareButton,
 } from "react-share";
+import moment from "moment";
 import "./SingleBlogPost.scss";
 
 const builder = imageUrlBuilder(client);
@@ -93,7 +94,9 @@ export default function SingleBlogPost() {
             <div className="app__post-date">
               <SlCalender />
             </div>
-            <h3>{singleBlogPost.date}</h3>
+            <moment>
+              {moment(singleBlogPost.date).format("Do MMM YYYY")}
+            </moment>
           </div>
           <BlockContent
             className="app__post-content"
