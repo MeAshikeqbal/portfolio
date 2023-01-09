@@ -4,24 +4,15 @@ import { client } from "../../client";
 import imageUrlBuilder from "@sanity/image-url";
 import BlockContent from "@sanity/block-content-to-react";
 import { SlCalender } from "react-icons/sl";
-import { AiOutlineMail } from "react-icons/ai";
+import { BsFacebook } from "react-icons/bs";
+import { FaFacebookMessenger, FaTwitter } from "react-icons/fa";
+import { MdEmail } from "react-icons/md";
+import { motion, useScroll } from "framer-motion";
 import {
   EmailShareButton,
   FacebookShareButton,
-  LinkedinShareButton,
-  RedditShareButton,
-  TelegramShareButton,
+  FacebookMessengerShareButton,
   TwitterShareButton,
-  WhatsappShareButton,
-} from "react-share";
-import {
-  FacebookShareCount,
-  HatenaShareCount,
-  OKShareCount,
-  PinterestShareCount,
-  RedditShareCount,
-  TumblrShareCount,
-  VKShareCount,
 } from "react-share";
 import "./SingleBlogPost.scss";
 
@@ -34,6 +25,8 @@ function urlFor(source) {
 export default function SingleBlogPost() {
   const [singleBlogPost, setSingalBlogPost] = useState(null);
   const { postLink } = useParams();
+  const { scrollYProgress } = useScroll();
+  const url = window.location.href;
 
   useEffect(() => {
     client
@@ -76,24 +69,41 @@ export default function SingleBlogPost() {
           <div className="app__post-title">
             <h1>{singleBlogPost.title}</h1>
           </div>
+          <div className="app__post-shere">
+            <FacebookShareButton url={url}>
+              <BsFacebook />
+            </FacebookShareButton>
+            <FacebookMessengerShareButton url={url}>
+              <FaFacebookMessenger />
+            </FacebookMessengerShareButton>
+            <TwitterShareButton url={url}>
+              <FaTwitter />
+            </TwitterShareButton>
+            <EmailShareButton url={url}>
+              <MdEmail />
+            </EmailShareButton>
+          </div>
+          <div className="app__post-tags">
+            <h3>Topic:</h3>
+            {singleBlogPost.tags.map((tag) => (
+              <h3 key={tag}>{tag}</h3>
+            ))}
+          </div>
           <div className="app__post-date">
             <div className="app__post-date">
               <SlCalender />
             </div>
             <h3>{singleBlogPost.date}</h3>
           </div>
-          <div className="app__post-share">
-            <FacebookShareCount >
-              {(shareCount) => (
-                <span className="myShareCountWrapper">{shareCount}</span>
-              )}
-            </FacebookShareCount>{" "}
-          </div>
           <BlockContent
             className="app__post-content"
             blocks={singleBlogPost.content}
           />
         </div>
+        <motion.div
+          className="progress-bar"
+          style={{ scaleX: scrollYProgress }}
+        />
       </div>
     </>
   );

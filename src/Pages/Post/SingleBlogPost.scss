@@ -2,6 +2,18 @@
     background-color: rgba(160, 164, 168, 0.432);
 }
 
+.progress-bar {
+    background-color: rgba(0, 0, 0, 0.664);
+    height: 9px;
+    width: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 999;
+    transform-origin: 0%;
+}
+
 .app__post {
     padding-top: 90px;
     margin: 0 auto;
@@ -20,6 +32,20 @@
         height: 80%;
         border-radius: 2%;
         object-fit: cover;
+    }
+}
+
+.app__post-tags {
+    display: flex;
+    align-self: center;
+    justify-content: center;
+    align-items: center;
+    margin: 2px;
+    
+    h3{
+        font-size: 1rem;
+        color: rgba(48, 48, 48, 0.7);
+        padding-left: 5px;
     }
 }
 
@@ -46,6 +72,20 @@
     }
 }
 
+.app__post-shere{
+    margin: 2px;
+    padding: .5rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 2rem;
+    color: rgba(48, 48, 48, 0.7);
+
+    :nth-child(1){
+        padding-right: .4rem;
+    }
+}
+
 .app__post-content {
     margin: 0;
     padding: 1rem;
@@ -69,13 +109,14 @@
         line-height: 1.5em;
     }
 
-    ol{
+    ol {
         padding-left: 20px;
         padding-top: 1.5rem;
         line-height: 1.5em;
         margin: 1rem 3rem;
     }
-    ul{
+
+    ul {
         padding-left: 20px;
         padding-top: 1.5rem;
         line-height: 1.5em;
@@ -87,7 +128,7 @@
         padding: 1.5rem;
     }
 
-    h3{
+    h3 {
         color: rgba(24, 24, 24, 0.80);
         padding: 1.5rem;
         padding-bottom: 0;
