@@ -3,7 +3,6 @@
   width: 100%;
   flex-direction: column;
 }
-
 .app__blog-filter {
   display: flex;
   flex-direction: row;
@@ -47,10 +46,11 @@
   justify-content: center;
   align-items: center;
 
+
   .app__blog-item {
     width: 270px;
     flex-direction: column;
-
+    text-decoration: none;
     margin: 2rem;
     padding: 1rem;
     border-radius: 0.5rem;

@@ -95,7 +95,7 @@ export default function SingleBlogPost() {
               <SlCalender />
             </div>
             <moment>
-              {moment(singleBlogPost.date).format("Do MMM YYYY")}
+              {moment(singleBlogPost.date).format("MMM Do YYYY")}
             </moment>
           </div>
           <BlockContent

@@ -14,7 +14,7 @@ const Blog = () => {
 
   useEffect(() => {
     const query =
-      '*[_type == "blogs"]{ name, title, date, excerpt, imgUrl, tags, postLink}';
+      '*[_type == "blogs"]{ title, excerpt, imgUrl, tags, postLink}';
 
     client.fetch(query).then((data) => {
       setBlogs(data);
@@ -69,21 +69,21 @@ const Blog = () => {
         className="app__blog-portfolio"
       >
         {filterBlog.map((blog, index) => (
-          <div className="app__blog-item app__flex" key={index}>
-            <div className="app__blog-img app__flex">
-              <img src={urlFor(blog.imgUrl)} alt={blog.name} />
+          <Link
+            to={`/blog/${blog.postLink.current}`}
+          >
+            <div className="app__blog-item app__flex" key={index}>
+              <div className="app__blog-img app__flex">
+                <img src={urlFor(blog.imgUrl)} alt={blog.name} />
 
-              <motion.div
-                whileHover={{ opacity: [0, 1] }}
-                transition={{
-                  duration: 0.25,
-                  ease: "easeInOut",
-                  staggerChildren: 0.5,
-                }}
-                className="app__blog-hover app__flex"
-              >
-                <Link
-                  to={`/blog/${blog.postLink.current}`} //this saposed to link to SingleBlogPost
+                <motion.div
+                  whileHover={{ opacity: [0, 1] }}
+                  transition={{
+                    duration: 0.25,
+                    ease: "easeInOut",
+                    staggerChildren: 0.5,
+                  }}
+                  className="app__blog-hover app__flex"
                 >
                   <motion.div
                     whileInView={{ scale: [0, 1] }}
@@ -93,21 +93,21 @@ const Blog = () => {
                   >
                     <AiFillEye />
                   </motion.div>
-                </Link>
-              </motion.div>
-            </div>
+                </motion.div>
+              </div>
 
-            <div className="app__blog-content app__flex">
-              <h4 className="bold-text">{blog.title}</h4>
-              <p className="p-text" style={{ marginTop: 10 }}>
-                {blog.excerpt}
-              </p>
+              <div className="app__blog-content app__flex">
+                <h4 className="bold-text">{blog.title}</h4>
+                <p className="p-text" style={{ marginTop: 10 }}>
+                  {blog.excerpt}
+                </p>
 
-              <div className="app__blog-tag app__flex">
-                <p className="p-text">{blog.tags[0]}</p>
+                <div className="app__blog-tag app__flex">
+                  <p className="p-text">{blog.tags[0]}</p>
+                </div>
               </div>
             </div>
-          </div>
+          </Link>
         ))}
       </motion.div>
     </>
