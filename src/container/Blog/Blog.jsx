@@ -14,7 +14,7 @@ const Blog = () => {
 
   useEffect(() => {
     const query =
-      '*[_type == "blogs"]{ name, date, excerpt, imgUrl, tags, postLink}';
+      '*[_type == "blogs"]{ name, title, date, excerpt, imgUrl, tags, postLink}';
 
     client.fetch(query).then((data) => {
       setBlogs(data);
