@@ -38,4 +38,4 @@ jobs:
         with:
           args: deploy --only hosting
         env:
-          GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}          
+           FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
