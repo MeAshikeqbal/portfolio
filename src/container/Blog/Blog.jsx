@@ -69,10 +69,8 @@ const Blog = () => {
         className="app__blog-portfolio"
       >
         {filterBlog.map((blog, index) => (
-          <Link
-            to={`/blog/${blog.postLink.current}`}
-          >
-            <div className="app__blog-item app__flex" key={index}>
+          <div className="app__blog-item app__flex" key={index}>
+            <Link to={`/blog/${blog.postLink.current}`}>
               <div className="app__blog-img app__flex">
                 <img src={urlFor(blog.imgUrl)} alt={blog.name} />
 
@@ -106,8 +104,8 @@ const Blog = () => {
                   <p className="p-text">{blog.tags[0]}</p>
                 </div>
               </div>
-            </div>
-          </Link>
+            </Link>
+          </div>
         ))}
       </motion.div>
     </>
