@@ -69,9 +69,7 @@ const BlogPage = () => {
         className="app__blog-portfolio"
       >
         {filterBlog.map((blog, index) => (
-          <Link
-            to={`/blog/${blog.postLink.current}`}
-          >
+          <Link to={`/blog/${blog.postLink.current}`}>
             <div className="app__blog-item app__flex" key={index}>
               <div className="app__blog-img app__flex">
                 <img src={urlFor(blog.imgUrl)} alt={blog.name} />
@@ -114,4 +112,8 @@ const BlogPage = () => {
   );
 };
 
-export default AppWrap(MotionWrap(BlogPage, "app__blogs"), "BlogPage", "app__whitebg");
+export default AppWrap(
+  MotionWrap(BlogPage, "app__blogs"),
+  "BlogPage",
+  "app__whitebg"
+);
