@@ -10,6 +10,8 @@ jobs:
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v2.3.2
+      - name: Set environment variables
+        run: echo "::set-env name=ENV_FILE::${{ secrets.ENV_FILE }}"
       - name: Install Dependencies
         run: npm install      
       - name: Build
