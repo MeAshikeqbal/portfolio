@@ -95,9 +95,9 @@ const Blog = () => {
 
               <div className="app__blog-content app__flex">
                 <h4 className="bold-text">{blog.title}</h4>
-                <p className="p-text" style={{ marginTop: 10 }}>
-                  {blog.excerpt}
-                </p>
+                  <p className="p-text" style={{ marginTop: 10 }}>
+                    {blog.excerpt}
+                  </p>
 
                 <div className="app__blog-tag app__flex">
                   <p className="p-text">{blog.tags[0]}</p>
