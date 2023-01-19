@@ -60,6 +60,7 @@ export default function SingleBlogPost() {
         <title>{singleBlogPost.title}</title>
         <meta name="description" content={singleBlogPost.excerpt} />
         <meta name="keywords" content={singleBlogPost.title}/>
+        <meta name="author" content={singleBlogPost.author} />
       </head>
       <div className="app__post-page">
         <div className="app__post">
