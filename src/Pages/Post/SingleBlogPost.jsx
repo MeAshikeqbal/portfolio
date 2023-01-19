@@ -58,8 +58,9 @@ export default function SingleBlogPost() {
     <>
       <head>
         <title>{singleBlogPost.title}</title>
+        <meta name="title" content={singleBlogPost.title} />
         <meta name="description" content={singleBlogPost.excerpt} />
-        <meta name="keywords" content={singleBlogPost.title}/>
+        <meta name="keywords" content={singleBlogPost.tags} />
         <meta name="author" content={singleBlogPost.author} />
       </head>
       <div className="app__post-page">
@@ -100,9 +101,7 @@ export default function SingleBlogPost() {
             <div className="app__post-date">
               <SlCalender />
             </div>
-            <moment>
-              {moment(singleBlogPost.date).format("MMM Do YYYY")}
-            </moment>
+            <moment>{moment(singleBlogPost.date).format("MMM Do YYYY")}</moment>
           </div>
           <BlockContent
             className="app__post-content"
