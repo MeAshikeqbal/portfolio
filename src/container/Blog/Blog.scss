@@ -3,6 +3,7 @@
   width: 100%;
   flex-direction: column;
 }
+
 .app__blog-filter {
   display: flex;
   flex-direction: row;
@@ -152,5 +153,37 @@
     border-radius: 10px;
     background-color: #fff;
     top: -25px;
+  }
+}
+
+.app__blog-btn {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 2rem 0.5ram 0 0.5rem;
+  width: 100%;
+
+  button {
+    padding: 1rem 2rem;
+    border-radius: 10px;
+    border: none;
+    background-color: var(--secondary-color);
+    font-weight: 400;
+    color: rgba(255, 255, 255, 0.993);
+    outline: none;
+    margin: 2rem 0 0 0;
+    font-family: var(--font-base);
+
+    transition: cubic-bezier(0.55, 0.085, 0.68, 0.53);
+    cursor: pointer;
+
+    &:hover {
+      background-color: #e2e2e2;
+    }
+  }
+
+  @media screen and (max-width: 768px) {
+    width: 100%;
+    margin: 1rem 0;
   }
 }

@@ -5,6 +5,7 @@ import { AppWrap, MotionWrap } from "../../wrapper";
 import { urlFor, client } from "../../client";
 import "./Blog.scss";
 import { Link } from "react-router-dom";
+import { images } from "../../constants";
 
 const BlogPage = () => {
   const [blogs, setBlogs] = useState([]);
@@ -40,18 +41,21 @@ const BlogPage = () => {
   return (
     <>
       <head>
-        <title>Ashik Eqbal</title>
+        <title>Blog</title>
       </head>
 
-      <h2 className="head-text">
-        My <span>Blog</span>
-      </h2>
+      <div className="app__blog">
+        <img src={images.blogbg} alt="blog-bg" />
+        <h2 className="head-text">
+          My <span>Blog</span>
+        </h2>
+      </div>
 
       <div className="app__blog-filter">
         {["Technology", "AI", "Tech Update", "Cyber Security", "All"].map(
-          (item, index) => (
+          (item, indexB) => (
             <div
-              key={index}
+              key={indexB}
               onClick={() => handleBlogFilter(item)}
               className={`app__blog-filter-item app__flex p-text ${
                 activeFilter === item ? "item-active" : ""

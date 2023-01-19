@@ -1,9 +1,23 @@
-#BlogPage{
+#BlogPage {
 
     .copyright {
         display: none;
     }
-    .app__navigation{
+
+    .app__navigation {
         display: none;
+    }
+}
+
+
+.app__blog {
+    position: relative;
+    text-align: center;
+
+    h2 {
+        position: absolute;
+        top: 8px;
+        right: 16px;
+
     }
 }

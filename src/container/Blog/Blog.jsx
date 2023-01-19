@@ -107,6 +107,12 @@ const Blog = () => {
           </div>
         ))}
       </motion.div>
+
+      <div className="app__blog-btn app__flex">
+        <Link to="/blog">
+          <button>Read More</button>
+        </Link>
+      </div>
     </>
   );
 };

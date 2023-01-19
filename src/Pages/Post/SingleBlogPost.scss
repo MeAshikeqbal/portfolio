@@ -71,6 +71,15 @@
         color: rgba(0, 0, 0, 0.70);
     }
 }
+.app__post-author{
+    margin: 2px;
+    padding: .5rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1rem;
+    color: rgba(48, 48, 48, 0.7);
+}
 
 .app__post-shere{
     margin: 2px;

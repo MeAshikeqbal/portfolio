@@ -34,6 +34,7 @@ export default function SingleBlogPost() {
       .fetch(
         `*[postLink.current == "${postLink}"] {
             title,
+            author,
             date,
             excerpt,
             postLink,
@@ -57,7 +58,8 @@ export default function SingleBlogPost() {
     <>
       <head>
         <title>{singleBlogPost.title}</title>
-        <meta name={singleBlogPost.title} content={singleBlogPost.excerpt} />
+        <meta name="description" content={singleBlogPost.excerpt} />
+        <meta name="keywords" content={singleBlogPost.title}/>
       </head>
       <div className="app__post-page">
         <div className="app__post">
@@ -69,6 +71,9 @@ export default function SingleBlogPost() {
           </div>
           <div className="app__post-title">
             <h1>{singleBlogPost.title}</h1>
+          </div>
+          <div className="app__post-author">
+            <h3>Author: {singleBlogPost.author}</h3>
           </div>
           <div className="app__post-shere">
             <FacebookShareButton url={url}>
