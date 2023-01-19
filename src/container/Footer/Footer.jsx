@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-
+import { AiOutlineHeart } from "react-icons/ai";
 import { images } from "../../constants";
 import { AppWrap, MotionWrap } from "../../wrapper";
 import { client } from "../../client";
@@ -103,6 +103,12 @@ const Footer = () => {
           <h3 className="head-text">Thank you for getting in touch!</h3>
         </div>
       )}
+      <div className="app__footer-repo">
+        <p>Find an issue with this page?</p>
+        <a href="https://github.com/MeAshikeqbal/portfolio" target="_blank" rel="noreferrer">
+          <p> Fix it on GitHub</p>
+        </a>
+      </div>
     </>
   );
 };
