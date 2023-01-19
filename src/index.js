@@ -1,10 +1,6 @@
-import { hydrate, render } from "react-dom";
+import { createRoot } from 'react-dom/client';
 import App from './App';
 import './index.css';
 
-const rootElement = document.getElementById("root");
-if (rootElement.hasChildNodes()) {
-  hydrate(<App />, rootElement);
-} else {
-  render(<App />, rootElement);
-}
+const rootElement = document.getElementById('root');
+createRoot(rootElement).render(<App />);
