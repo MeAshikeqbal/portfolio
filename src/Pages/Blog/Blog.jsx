@@ -45,23 +45,22 @@ const BlogPage = () => {
       </head>
 
       <div className="app__blog">
-        <img src={images.blogbg} alt="blog-bg" />
-        <h2 className="head-text">
+        <h2 className="app__blog-text head-text">
           My <span>Blog</span>
         </h2>
       </div>
 
       <div className="app__blog-filter">
         {["Technology", "AI", "Tech Update", "Cyber Security", "All"].map(
-          (item, indexB) => (
+          (itemB, indexB) => (
             <div
               key={indexB}
-              onClick={() => handleBlogFilter(item)}
+              onClick={() => handleBlogFilter(itemB)}
               className={`app__blog-filter-item app__flex p-text ${
-                activeFilter === item ? "item-active" : ""
+                activeFilter === itemB ? "item-active" : ""
               }`}
             >
-              {item}
+              {itemB}
             </div>
           )
         )}
@@ -116,8 +115,4 @@ const BlogPage = () => {
   );
 };
 
-export default AppWrap(
-  MotionWrap(BlogPage, "app__blogs"),
-  "BlogPage",
-  "app__whitebg"
-);
+export default BlogPage;

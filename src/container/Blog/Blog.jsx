@@ -14,28 +14,13 @@ const Blog = () => {
 
   useEffect(() => {
     const query =
-      '*[_type == "blogs"]{ title, excerpt, imgUrl, tags, postLink}';
+      '*[_type == "blogs"][0...4]{ title, excerpt, imgUrl, tags, postLink}';
 
     client.fetch(query).then((data) => {
       setBlogs(data);
       setFilterBlog(data);
     });
   }, []);
-
-  const handleBlogFilter = (item) => {
-    setActiveFilter(item);
-    setAnimateCard([{ y: 100, opacity: 0 }]);
-
-    setTimeout(() => {
-      setAnimateCard([{ y: 0, opacity: 1 }]);
-
-      if (item === "All") {
-        setFilterBlog(blogs);
-      } else {
-        setFilterBlog(blogs.filter((blog) => blog.tags.includes(item)));
-      }
-    }, 500);
-  };
 
   return (
     <>
@@ -44,24 +29,10 @@ const Blog = () => {
       </head>
 
       <h2 className="head-text">
-        My <span>Blog</span>
+        Latest <span>Blog</span>
       </h2>
+    
 
-      <div className="app__blog-filter">
-        {["Technology", "AI", "Tech Update", "Cyber Security", "All"].map(
-          (item, index) => (
-            <div
-              key={index}
-              onClick={() => handleBlogFilter(item)}
-              className={`app__blog-filter-item app__flex p-text ${
-                activeFilter === item ? "item-active" : ""
-              }`}
-            >
-              {item}
-            </div>
-          )
-        )}
-      </div>
       <motion.div
         animate={animateCard}
         transition={{ duration: 0.5, delayChildren: 0.5 }}
