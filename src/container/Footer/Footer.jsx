@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { AiOutlineHeart } from "react-icons/ai";
 import { images } from "../../constants";
 import { AppWrap, MotionWrap } from "../../wrapper";
 import { client } from "../../client";

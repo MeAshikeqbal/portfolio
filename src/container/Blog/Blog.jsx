@@ -8,18 +8,13 @@ import { Link } from "react-router-dom";
 
 const Blog = () => {
   const [blogs, setBlogs] = useState([]);
-  const [filterBlog, setFilterBlog] = useState([]);
-  const [activeFilter, setActiveFilter] = useState("All");
-  const [animateCard, setAnimateCard] = useState({ y: 0, opacity: 1 });
+  const [animateCard] = useState({ y: 0, opacity: 1 });
 
   useEffect(() => {
     const query =
       '*[_type == "blogs"][0...4]{ title, excerpt, imgUrl, tags, postLink}';
 
-    client.fetch(query).then((data) => {
-      setBlogs(data);
-      setFilterBlog(data);
-    });
+    client.fetch(query).then((data) => setBlogs(data));
   }, []);
 
   return (
@@ -31,14 +26,13 @@ const Blog = () => {
       <h2 className="head-text">
         Latest <span>Blog</span>
       </h2>
-    
 
       <motion.div
         animate={animateCard}
         transition={{ duration: 0.5, delayChildren: 0.5 }}
         className="app__blog-portfolio"
       >
-        {filterBlog.map((blog, index) => (
+        {blogs.map((blog, index) => (
           <div className="app__blog-item app__flex" key={index}>
             <Link to={`/blog/${blog.postLink.current}`}>
               <div className="app__blog-img app__flex">
@@ -66,9 +60,9 @@ const Blog = () => {
 
               <div className="app__blog-content app__flex">
                 <h4 className="bold-text">{blog.title}</h4>
-                  <p className="p-text" style={{ marginTop: 10 }}>
-                    {blog.excerpt}
-                  </p>
+                <p className="p-text" style={{ marginTop: 10 }}>
+                  {blog.excerpt}
+                </p>
 
                 <div className="app__blog-tag app__flex">
                   <p className="p-text">{blog.tags[0]}</p>
