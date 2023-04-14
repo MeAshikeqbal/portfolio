@@ -1,0 +1,21 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Ubuntu:wght@400;500;700&display=swap");
+
+html,
+body {
+  font-family: "ubuntu", sans-serif;
+  --primary-color: #e2e2e2bb;
+  --secondary-color: rgba(53, 53, 53, 0.548);
+  --black-color: #333333;
+  --lightGray-color: #e4e4e4;
+  --gray-color: #7d838d;
+  --brown-color: #494849;
+  --dark-color: #a3a2a280;
+}
+
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+  scroll-behavior: smooth;
+  text-decoration: none;
+}
