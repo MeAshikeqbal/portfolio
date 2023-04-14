@@ -1,11 +1,9 @@
 import React from "react";
 import Link from "next/link";
-import { Navbar, Footer_git } from "@/components";
 
 const Error = () => {
   return (
     <>
-      <Navbar />
       <section class="page_404">
         <div class="container">
           <div class="row">
@@ -29,7 +27,6 @@ const Error = () => {
           </div>
         </div>
       </section>
-      <Footer_git />
     </>
   );
 };
