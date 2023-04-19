@@ -18,10 +18,6 @@ export default function Home() {
         <Skills />
         <Blog />
       </main>
-      <footer>
-        <Footer/>
-        <Footer_git />
-      </footer>
     </>
   )
 }
