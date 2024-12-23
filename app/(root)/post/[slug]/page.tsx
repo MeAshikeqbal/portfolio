@@ -148,7 +148,7 @@ export default async function PostPage({ params }: { params: Promise<{ slug?: st
             <div className="flex flex-col md:flex-row items-center justify-between gap-4">
               <div className="flex items-center space-x-4">
                 <Avatar className="h-12 w-12 border-2 border-primary">
-                  <AvatarImage src={post.author?.image ? urlFor(post.author.image).width(100).height(100).url() : undefined} />
+                  <AvatarImage src={post.author?.image ? urlFor(post.author.image).width(100).height(100).url() : undefined} alt={post.author?.name} />
                   <AvatarFallback>{post.author?.name?.slice(0, 2).toUpperCase()}</AvatarFallback>
                 </Avatar>
                 <div>
