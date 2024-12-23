@@ -133,6 +133,7 @@ export default async function PostPage({ params }: { params: Promise<{ slug?: st
             style={{ objectFit: 'cover' }}
             className="transition-transform duration-300"
             fill
+            quality={50}
           />
         )}
         <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
