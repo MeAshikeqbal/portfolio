@@ -1,7 +1,5 @@
 import { Roboto, Roboto_Mono } from 'next/font/google';
 import "./globals.css";
-//import Footer from "@/components/sections/footer";
-//import { NavBar } from "@/components/NavBar";
 import { ThemeProvider } from "@/components/theme-provider";
 
 const roboto = Roboto({
