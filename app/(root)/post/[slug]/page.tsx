@@ -11,6 +11,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 
 export const revalidate = 60
+
 interface Author {
   name: string
   image?: {
@@ -40,7 +41,7 @@ interface Post {
   excerpt?: string
 }
 
-async function getPost(slug: string): Promise<Post> {
+async function getPost(slug: string): Promise<Post | null> {
   return await client.fetch(`
     *[_type == "post" && slug.current == $slug][0]{
       title,
@@ -58,25 +59,34 @@ async function getPost(slug: string): Promise<Post> {
   `, { slug })
 }
 
-export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata | undefined> {
-  const post = await getPost(params.slug)
+export async function generateMetadata({ params }: { params: Promise<{ slug?: string }> }): Promise<Metadata | undefined> {
+  const { slug } = await params;
 
-  if (!post) {
+  if (!slug) {
     return {
       title: 'Post Not Found',
-    }
+    };
   }
 
-  return {
-    title: post.title,
-    description: post.excerpt || `Read ${post.title} on our blog`,
-    openGraph: {
+  try {
+    const post = await getPost(slug);
+
+    if (!post) {
+      return {
+        title: 'Post Not Found',
+      };
+    }
+
+    return {
       title: post.title,
-      description: post.excerpt || `Read ${post.title} on our blog`,
-      type: 'article',
-      url: `https://yourdomain.com/blog/${post.slug.current}`,
-      images: post.mainImage
-        ? [
+      description: post.excerpt || `Read ${post.title} on my blog`,
+      openGraph: {
+        title: post.title,
+        description: post.excerpt || `Read ${post.title} on my blog`,
+        type: 'article',
+        url: `https://itsashik.info/post/${post.slug.current}`,
+        images: post.mainImage
+          ? [
             {
               url: urlFor(post.mainImage.asset._ref).width(1200).height(630).url(),
               width: 1200,
@@ -84,16 +94,33 @@ export async function generateMetadata({ params }: { params: { slug: string } })
               alt: post.mainImage.alt || post.title,
             },
           ]
-        : [],
-    },
+          : [],
+      },
+    };
+  } catch (error) {
+    console.error('Failed to fetch post metadata:', error);
+    return {
+      title: 'Error Loading Post',
+    };
   }
 }
 
-export default async function PostPage({ params }: { params: { slug: string } }): Promise<JSX.Element | void> {
-  const post = await getPost(params.slug)
+export default async function PostPage({ params }: { params: Promise<{ slug?: string }> }): Promise<JSX.Element | void> {
+  const { slug } = await params;
+
+  if (!slug) {
+    notFound();
+  }
+
+  let post: Post | null = null;
+  try {
+    post = await getPost(slug);
+  } catch (error) {
+    console.error('Failed to fetch post:', error);
+  }
 
   if (!post) {
-    notFound()
+    notFound();
   }
 
   return (
@@ -106,7 +133,6 @@ export default async function PostPage({ params }: { params: { slug: string } })
             style={{ objectFit: 'cover' }}
             className="transition-transform duration-300"
             fill
-            
           />
         )}
         <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
@@ -133,7 +159,7 @@ export default async function PostPage({ params }: { params: { slug: string } })
                       {new Date(post.publishedAt).toLocaleDateString('en-US', {
                         year: 'numeric',
                         month: 'long',
-                        day: 'numeric'
+                        day: 'numeric',
                       })}
                     </p>
                   )}
@@ -199,5 +225,5 @@ export default async function PostPage({ params }: { params: { slug: string } })
         </div>
       </div>
     </article>
-  )
+  );
 }
