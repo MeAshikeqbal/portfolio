@@ -104,9 +104,9 @@ export default async function PostPage({ params }: { params: { slug: string } })
             src={urlFor(post.mainImage.asset._ref).width(1920).height(1080).url()}
             alt={post.mainImage.alt || post.title}
             style={{ objectFit: 'cover' }}
-            priority
             className="transition-transform duration-300"
             fill
+            
           />
         )}
         <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">

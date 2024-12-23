@@ -42,7 +42,7 @@ interface Post {
 // Sanity Query
 const fetchPosts = async (): Promise<Post[]> => {
   return await client.fetch(`
-    *[_type == "post"] | order(publishedAt desc) [0...6] {
+    *[_type == "post"] | order(publishedAt desc) [0...3] {
       _id,
       title,
       slug,
@@ -146,6 +146,15 @@ export default async function PostSection() {
               </CardFooter>
             </Card>
           ))}
+        </div>
+        <div
+          className="flex justify-center"
+        >
+          <Button asChild variant="outline" className="mt-8">
+            <Link href="/post">
+              View All Posts
+            </Link>
+          </Button>
         </div>
       </div>
     </section>
