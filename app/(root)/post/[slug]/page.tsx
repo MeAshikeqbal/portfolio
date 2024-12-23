@@ -58,7 +58,7 @@ async function getPost(slug: string): Promise<Post> {
   `, { slug })
 }
 
-export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
+export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata | undefined> {
   const post = await getPost(params.slug)
 
   if (!post) {
@@ -89,7 +89,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   }
 }
 
-export default async function PostPage({ params }: { params: { slug: string } }) {
+export default async function PostPage({ params }: { params: { slug: string } }): Promise<JSX.Element | void> {
   const post = await getPost(params.slug)
 
   if (!post) {
