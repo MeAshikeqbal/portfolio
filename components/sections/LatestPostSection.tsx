@@ -93,6 +93,7 @@ export default async function PostSection() {
                       fill
                       style={{ objectFit: 'cover' }}
                       className="rounded-t-lg"
+                      sizes='(min-width: 640px) 400px, (min-width: 768px) 300px, 100vw'
                     />
                   </div>
                 ) : (

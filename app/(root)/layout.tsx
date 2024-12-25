@@ -7,10 +7,10 @@ export default function StudioLayout({
     children: React.ReactNode
 }) {
     return (
-        <div>
+        <>
             <NavBar />
             {children}
             <Footer />
-        </div>
+        </>
     )
 }
