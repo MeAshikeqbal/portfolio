@@ -134,6 +134,8 @@ export default async function PostPage({ params }: { params: Promise<{ slug?: st
             className="transition-transform duration-300"
             fill
             quality={50}
+            //placeholder='blur'
+            //blurDataURL={urlFor(post.mainIm).width(20).height(12).url() || undefined}
           />
         )}
         <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
