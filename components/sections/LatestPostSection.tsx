@@ -84,7 +84,7 @@ export default async function PostSection() {
         <h2 className="text-4xl font-bold mb-12 text-center">Latest from Our Blog</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {posts.map((post) => (
-            <Card key={post._id} className="flex flex-col">
+            <Card key={post._id} className="flex flex-col hover:drop-shadow-md">
               <CardHeader className="p-0">
                 {post.mainImage?.asset?._ref ? (
                   <div className="relative h-48 w-full">

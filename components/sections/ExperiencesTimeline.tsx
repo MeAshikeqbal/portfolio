@@ -56,7 +56,7 @@ export default async function ExperiencesTimeline() {
                                 <h3 className="text-3xl font-bold text-primary mb-4">{exp.year}</h3>
                             </div>
                             <div className="w-8 h-8 absolute left-1/2 transform -translate-x-1/2 -translate-y-3 rounded-full bg-primary border-4 border-background hidden md:block"></div>
-                            <Card className={`w-full md:w-1/2 ${index % 2 === 0 ? 'md:ml-8' : 'md:mr-8'}`}>
+                            <Card className={`w-full hover:drop-shadow-md md:w-1/2 ${index % 2 === 0 ? 'md:ml-8' : 'md:mr-8'}`}>
                                 <CardContent className="p-6">
                                     <h3 className="text-2xl font-bold text-primary mb-4 md:hidden">{exp.year}</h3>
                                     {exp.works.map((work, workIndex) => (
