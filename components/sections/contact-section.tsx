@@ -9,7 +9,7 @@ export function ContactSection() {
   const [isSubmitted, setIsSubmitted] = useState(false)
 
   return (
-    <section id="contact" className="min-h-screen flex items-center bg-background">
+    <section id="contact" className="min-h-screen flex items-center bg-background py-8">
       <div className="container mx-auto px-4">
         <h2 className="text-4xl font-bold text-center mb-8 text-foreground">Get in Touch</h2>
         <div className="max-w-md mx-auto">

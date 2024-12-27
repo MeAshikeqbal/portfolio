@@ -69,7 +69,7 @@ export default async function PostSection() {
 
   if (!posts || posts.length === 0) {
     return (
-      <section id="blog" className="min-h-screen flex items-center justify-center bg-background">
+      <section id="blog" className="min-h-screen flex items-center justify-center bg-background px-4">
         <div className="text-center">
           <h2 className="text-3xl font-bold mb-6">Latest Posts</h2>
           <p className="text-muted-foreground">No posts available at the moment. Check back soon!</p>
