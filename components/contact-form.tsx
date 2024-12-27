@@ -34,7 +34,11 @@ const formSchema = z.object({
   }),
 })
 
-export function ContactForm() {
+interface ContactFormProps {
+  onSuccessfulSubmit: () => void;
+}
+
+export function ContactForm({ onSuccessfulSubmit }: ContactFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { toast } = useToast()
   const form = useForm<z.infer<typeof formSchema>>({
@@ -57,6 +61,7 @@ export function ContactForm() {
           description: "Thank you for your message. We'll get back to you soon!",
         })
         form.reset()
+        onSuccessfulSubmit()
       } else {
         throw new Error(result.error || "Something went wrong")
       }
@@ -79,9 +84,9 @@ export function ContactForm() {
           name="name"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Name</FormLabel>
+              <FormLabel>Your Name</FormLabel>
               <FormControl>
-                <Input placeholder="John Doe" {...field} />
+                <Input placeholder="Your Name" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -92,9 +97,9 @@ export function ContactForm() {
           name="email"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Email</FormLabel>
+              <FormLabel>Your Email</FormLabel>
               <FormControl>
-                <Input type="email" placeholder="john@example.com" {...field} />
+                <Input type="email" placeholder="Your Email" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -105,9 +110,9 @@ export function ContactForm() {
           name="message"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Message</FormLabel>
+              <FormLabel>Your Message</FormLabel>
               <FormControl>
-                <Textarea placeholder="Your message here..." {...field} />
+                <Textarea placeholder="Your Message" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
