@@ -50,5 +50,14 @@ export const projectType = defineType({
       type: "url",
       placeholder:"Project live URL"
     }),
+    defineField({
+      name: "githubData",
+      type: "object",
+      fields: [
+        { name: "stars", type: "number" },
+        { name: "commits", type: "number" },
+        { name: "license", type: "string" },
+      ],
+    }),
   ],
 });
