@@ -1,5 +1,5 @@
 import { DocumentTextIcon } from "@sanity/icons";
-import { defineArrayMember, defineField, defineType } from "sanity";
+import { defineField, defineType } from "sanity";
 
 export const projectType = defineType({
   name: "project",
@@ -37,17 +37,18 @@ export const projectType = defineType({
       ],
     }),
     defineField({
-      name: "categories",
-      type: "array",
-      of: [defineArrayMember({ type: "reference", to: { type: "category" } })],
-    }),
-    defineField({
       name: "publishedAt",
       type: "datetime",
     }),
     defineField({
-      name: "body",
-      type: "blockContent",
+      name: "github",
+      type: "url",
+      placeholder:"Github URL"
+    }),
+    defineField({
+      name: "url",
+      type: "url",
+      placeholder:"Project live URL"
     }),
   ],
 });
