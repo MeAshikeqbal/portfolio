@@ -26,7 +26,6 @@ export default function RootLayout({
         className={`${roboto.variable} ${robotoMono.variable} font-sans antialiased`}
       >
         <ToastProvider>
-
           <ThemeProvider
             attribute="class"
             defaultTheme="system"
