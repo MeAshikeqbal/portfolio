@@ -81,7 +81,7 @@ export default async function PostSection() {
   return (
     <section id="blog" className="min-h-screen flex items-center bg-background">
       <div className="container mx-auto px-4 py-20">
-        <h2 className="text-4xl font-bold mb-12 text-center">Latest from Our Blog</h2>
+        <h2 className="text-4xl font-bold mb-12 text-center">Latest Blog Posts</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {posts.map((post) => (
             <Card key={post._id} className="flex flex-col hover:drop-shadow-md">
@@ -95,6 +95,9 @@ export default async function PostSection() {
                       style={{ objectFit: 'cover' }}
                       className="rounded-t-lg"
                       sizes='(min-width: 640px) 400px, (min-width: 768px) 300px, 100vw'
+                      priority={false}
+                      //placeholder='blur'
+                      //blurDataURL={post.mainImage.lqip}
                     />
                   </div>
                 ) : (
