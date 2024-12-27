@@ -9,6 +9,7 @@ import { CalendarIcon, TagIcon } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { BreadcrumbPost } from '@/components/post-breadcrumb'
 
 //export const revalidate = 60
 
@@ -134,8 +135,8 @@ export default async function PostPage({ params }: { params: Promise<{ slug?: st
             className="transition-transform duration-300"
             fill
             quality={50}
-            //placeholder='blur'
-            //blurDataURL={urlFor(post.mainIm).width(20).height(12).url() || undefined}
+          //placeholder='blur'
+          //blurDataURL={urlFor(post.mainIm).width(20).height(12).url() || undefined}
           />
         )}
         <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
@@ -146,6 +147,11 @@ export default async function PostPage({ params }: { params: Promise<{ slug?: st
       </div>
 
       <div className="max-w-4xl mx-auto px-4 md:px-8">
+        <div
+        className='mb-8'
+        >
+          <BreadcrumbPost postTitle={post.title} />
+        </div>
         <Card className="mb-12 overflow-hidden shadow-lg">
           <CardContent className="p-6 md:p-8">
             <div className="flex flex-col md:flex-row items-center justify-between gap-4">
