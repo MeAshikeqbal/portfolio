@@ -45,7 +45,7 @@ export default async function TechStack() {
                       src={urlFor(skill.icon).width(80).height(80).url()}
                       alt={skill.name}
                       fill
-                      className="object-contain p-4 group-hover:scale-110 transition-transform duration-300"
+                      className="object-contain bg-background/40 p-4 group-hover:scale-110 transition-transform duration-300"
                       sizes="(max-width: 640px) 80px, 160px"
                     />
                   </div>

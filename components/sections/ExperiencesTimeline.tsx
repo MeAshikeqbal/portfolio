@@ -51,7 +51,7 @@ export default async function ExperiencesTimeline() {
                     <div className="absolute left-1/2 transform -translate-x-1/2 w-0.5 h-full bg-primary/20 hidden md:block"></div>
 
                     {experiences.map((exp, index) => (
-                        <div key={exp.year} className="mb-12 md:mb-0 md:flex items-start">
+                        <div key={exp.year} className="mb-12 md:mb-8 md:flex items-start">
                             <div className={`hidden md:block md:w-1/2 ${index % 2 === 0 ? 'md:pr-8 text-right' : 'md:pl-8 md:order-last'}`}>
                                 <h3 className="text-3xl font-bold text-primary mb-4">{exp.year}</h3>
                             </div>
