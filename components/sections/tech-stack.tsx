@@ -29,7 +29,7 @@ export default async function TechStack() {
   }
 
   return (
-    <section id='Tech-Stack' className="min-h-screen flex items-center bg-background">
+    <section id='Tech-Stack' className="min-h-screen flex items-center bg-muted">
       <div className="container mx-auto px-4">
         <h2 className="text-4xl font-bold text-center mb-12 text-foreground">Tech Stack</h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">

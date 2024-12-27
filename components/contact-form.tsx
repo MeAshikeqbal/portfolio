@@ -133,7 +133,7 @@ export function ContactForm({ onSuccessfulSubmit }: ContactFormProps) {
             </FormItem>
           )}
         />
-        <Button type="submit" disabled={isSubmitting}>
+        <Button className='w-full' type="submit" disabled={isSubmitting}>
           {isSubmitting ? "Sending..." : "Send Message"}
         </Button>
       </form>
