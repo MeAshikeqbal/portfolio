@@ -43,7 +43,7 @@ export default async function ExperiencesTimeline() {
     }
 
     return (
-        <section id='Professional-Journey' className="min-h-screen flex items-center bg-muted">
+        <section id='Professional-Journey' className="min-h-screen flex items-center bg-muted py-8">
             <div className="container mx-auto px-4 py-16">
                 <h2 className="text-4xl font-bold text-center mb-16 text-foreground">Professional Journey</h2>
                 <div className="relative">

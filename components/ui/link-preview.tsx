@@ -48,12 +48,14 @@ export const LinkPreview: React.FC<LinkPreviewProps> = ({
     ? imageSrc
     : `https://api.microlink.io/?${encode({
         url,
-        screenshot: true,
+        screenshot: {
+          background:'linear-gradient(225deg, #FF057C 0%, #8D0B93 50%, #321575 100%)',
+          fullpage: true,
+        },
         meta: false,
         embed: "screenshot.url",
         colorScheme: "dark",
-        "viewport.isMobile": false,
-        "viewport.deviceScaleFactor": 1,
+        "viewport.deviceScaleFactor": 0.5,
         "viewport.width": width * 3,
         "viewport.height": height * 3,
       })}`;
