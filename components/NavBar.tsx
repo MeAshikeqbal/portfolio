@@ -10,8 +10,11 @@ import { AnimatedThemeSwitch } from './theme-toggle'
 
 const navItems = [
   { name: 'Home', path: '/#' },
+  { name: 'Blog', path: '/#blog' },
   { name: 'Professional Journey', path: '/#Professional-Journey' },
+  { name: 'Projects', path: '/#Project' },
   { name: 'Tech Stack', path: '/#Tech-Stack' },
+  { name: 'Contact', path: '/#Contact' },
 ]
 
 export function NavBar() {
