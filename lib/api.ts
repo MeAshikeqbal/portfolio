@@ -75,7 +75,7 @@ interface MainImage {
 
 export const fetchProjects = async (): Promise<Project[]> => {
     const projects: Project[] = await client.fetch(`
-    *[_type == "project"] | order(_createdAt desc) [0...3] {
+    *[_type == "project"] | order(_createdAt desc) {
     _id,
     title,
     slug,

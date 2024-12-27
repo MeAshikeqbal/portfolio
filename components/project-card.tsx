@@ -4,7 +4,6 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/componen
 import { LinkPreview } from "@/components/ui/link-preview"
 import { Button } from "@/components/ui/button"
 import { GitCommit, Github, Globe, Scale, Star } from 'lucide-react'
-import { urlFor } from '@/sanity/lib/image'
 import { motion } from 'framer-motion'
 
 export interface Project {
@@ -33,9 +32,9 @@ interface MainImage {
 }
 
 export function ProjectCard({ project }: { project: Project }) {
-  const imageSrc = project.mainImage?.asset?._ref
-    ? urlFor(project.mainImage).width(600).height(400).url()
-    : '/placeholder.svg?height=400&width=600'
+  if (!project) {
+    return null;
+  }
 
   return (
     <motion.div
@@ -43,13 +42,11 @@ export function ProjectCard({ project }: { project: Project }) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
     >
-      <Card className="flex flex-col h-full overflow-hidden group">
+      <Card className="flex flex-col h-full overflow-hidden group transition-shadow duration-300 hover:shadow-lg">
         <CardHeader>
           <CardTitle>
             <LinkPreview
-              url={project.url || '#'}
-              imageSrc={imageSrc}
-              isStatic
+              url={project.url || project.github}
               className="font-bold text-xl hover:underline transition-colors duration-200"
             >
               {project.title || 'Untitled Project'}
@@ -58,9 +55,9 @@ export function ProjectCard({ project }: { project: Project }) {
         </CardHeader>
         <CardContent className="flex-grow">
           <p className="text-muted-foreground mb-4 line-clamp-3">{project.description || 'No description available.'}</p>
-          {project.githubData && (
-            <motion.div 
-              className="flex space-x-4 text-sm text-muted-foreground"
+          {project.githubData && Object.keys(project.githubData).length > 0 && (
+            <motion.div
+              className="flex flex-wrap gap-4 text-sm text-muted-foreground"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.2 }}
@@ -89,9 +86,9 @@ export function ProjectCard({ project }: { project: Project }) {
         <CardFooter className="flex justify-between">
           {project.github && (
             <Button variant="outline" size="sm" asChild>
-              <motion.a 
-                href={project.github} 
-                target="_blank" 
+              <motion.a
+                href={project.github}
+                target="_blank"
                 rel="noopener noreferrer"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
@@ -101,11 +98,11 @@ export function ProjectCard({ project }: { project: Project }) {
               </motion.a>
             </Button>
           )}
-          {project.url && (
+          {project.url ? (
             <Button variant="outline" size="sm" asChild>
-              <motion.a 
-                href={project.url} 
-                target="_blank" 
+              <motion.a
+                href={project.url}
+                target="_blank"
                 rel="noopener noreferrer"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
@@ -113,6 +110,11 @@ export function ProjectCard({ project }: { project: Project }) {
                 <Globe className="w-4 h-4 mr-2" />
                 Live Demo
               </motion.a>
+            </Button>
+          ) : (
+            <Button variant="outline" size="sm" disabled>
+              <Globe className="w-4 h-4 mr-2" />
+              No Demo
             </Button>
           )}
         </CardFooter>
