@@ -1,67 +1,6 @@
-import { client } from "@/sanity/lib/client"
 import { Button } from "../ui/button"
-import { fetchGitHubData } from "@/lib/fetch-github-data"
 import { ProjectCardWrapper } from "../project-card-wrapper"
-
-// Interfaces
-export interface Project {
-    _id: string
-    title: string
-    slug: {
-      current: string
-    }
-    description: string
-    mainImage: MainImage
-    publishedAt: string
-    github: string
-    url: string
-    githubData?: {
-      stars: number
-      commits: number
-      license: string
-    }
-  }
-
-  interface MainImage {
-    asset: {
-      _ref: string
-    }
-    alt?: string
-  }
-  
-  
-// Sanity Query
-const fetchProjects = async (): Promise<Project[]> => {
-    const projects: Project[] = await client.fetch(`
-    *[_type == "project"] | order(_createdAt desc) [0...3] {
-    _id,
-    title,
-    slug,
-    description,
-    mainImage,
-    publishedAt,
-    github,
-    url,
-    githubData
-  }`)
-
-  //Fetching GitHub Data
-  const updatedProjects = await Promise.all(
-    projects.map(async (project: Project) => {
-      if (!project.githubData && project.github) {
-        const githubData = await fetchGitHubData(project.github)
-        if (githubData) {
-          // Update the project in Sanity
-          await client.patch(project._id).set({ githubData }).commit()
-          return { ...project, githubData }
-        }
-      }
-      return project
-    })
-  )
-
-  return updatedProjects
-}
+import { fetchProjects } from "@/lib/api"
 
 
 export async function ProjectsSection() {
