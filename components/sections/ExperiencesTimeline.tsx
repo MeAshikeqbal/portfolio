@@ -5,7 +5,6 @@ import { Separator } from "@/components/ui/separator"
 import { client } from '@/sanity/lib/client'
 import { urlFor } from '@/sanity/lib/image'
 
-
 interface Work {
     name: string
     company: string
@@ -40,19 +39,19 @@ export default async function ExperiencesTimeline() {
     const experiences = await getExperiences()
 
     if (!experiences || experiences.length === 0) {
-        return <div className="text-center text-muted-foreground">No experiences found.</div>
+        return <div className="min-h-screen flex items-center justify-center text-center text-muted-foreground">No experiences found.</div>
     }
 
     return (
-        <section className="py-16 bg-muted">
-            <div className="container mx-auto px-4">
+        <section id='Professional-Journey' className="min-h-screen flex items-center bg-muted">
+            <div className="container mx-auto px-4 py-16">
                 <h2 className="text-4xl font-bold text-center mb-16 text-foreground">Professional Journey</h2>
                 <div className="relative">
                     {/* Vertical line - hidden on mobile */}
                     <div className="absolute left-1/2 transform -translate-x-1/2 w-0.5 h-full bg-primary/20 hidden md:block"></div>
 
                     {experiences.map((exp, index) => (
-                        <div key={exp.year} className="mb-5 md:mb-0 md:flex items-start">
+                        <div key={exp.year} className="mb-12 md:mb-0 md:flex items-start">
                             <div className={`hidden md:block md:w-1/2 ${index % 2 === 0 ? 'md:pr-8 text-right' : 'md:pl-8 md:order-last'}`}>
                                 <h3 className="text-3xl font-bold text-primary mb-4">{exp.year}</h3>
                             </div>
@@ -92,4 +91,4 @@ export default async function ExperiencesTimeline() {
             </div>
         </section>
     )
-}  
+}
