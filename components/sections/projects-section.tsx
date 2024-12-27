@@ -33,7 +33,7 @@ export interface Project {
 // Sanity Query
 const fetchProjects = async (): Promise<Project[]> => {
     const projects: Project[] = await client.fetch(`
-    *[_type == "project"] | order(_createdAt desc) {
+    *[_type == "project"] | order(_createdAt desc) [0...3] {
     _id,
     title,
     slug,
@@ -68,7 +68,7 @@ export async function ProjectsSection() {
     const projects = await fetchProjects()
 
     return (
-      <section className="py-16 bg-background">
+      <section id="Project" className="min-h-screen flex items-center justify-center bg-background">
       <div className="container mx-auto px-4">
         <h2 className="text-4xl font-bold text-center mb-12 text-foreground">Featured Projects</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
