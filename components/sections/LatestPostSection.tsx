@@ -9,7 +9,6 @@ import { TypedObject } from '@portabletext/types'
 import { CalendarIcon, UserIcon } from 'lucide-react'
 import { Badge } from "@/components/ui/badge"
 
-
 // Interfaces
 interface Author {
   name: string
@@ -70,16 +69,18 @@ export default async function PostSection() {
 
   if (!posts || posts.length === 0) {
     return (
-      <section id="blog" className="py-20">
-        <h2 className="text-3xl font-bold mb-10 text-center">Latest Posts</h2>
-        <p className="text-center text-muted-foreground">No posts available at the moment. Check back soon!</p>
+      <section id="blog" className="min-h-screen flex items-center justify-center bg-background">
+        <div className="text-center">
+          <h2 className="text-3xl font-bold mb-6">Latest Posts</h2>
+          <p className="text-muted-foreground">No posts available at the moment. Check back soon!</p>
+        </div>
       </section>
     )
   }
 
   return (
-    <section id="blog" className="py-20 bg-background">
-      <div className="container mx-auto px-4">
+    <section id="blog" className="min-h-screen flex items-center bg-background">
+      <div className="container mx-auto px-4 py-20">
         <h2 className="text-4xl font-bold mb-12 text-center">Latest from Our Blog</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {posts.map((post) => (
@@ -148,9 +149,7 @@ export default async function PostSection() {
             </Card>
           ))}
         </div>
-        <div
-          className="flex justify-center"
-        >
+        <div className="flex justify-center">
           <Button asChild variant="outline" className="mt-8">
             <Link href="/post">
               View All Posts
