@@ -1,57 +1,93 @@
 import { client } from "@/sanity/lib/client"
-import { ProjectCard } from "../project-card"
 import { Button } from "../ui/button"
-import Link from "next/link"
+import { fetchGitHubData } from "@/lib/fetch-github-data"
+import { ProjectCardWrapper } from "../project-card-wrapper"
 
 // Interfaces
-interface Project {
+export interface Project {
     _id: string
     title: string
+    slug: {
+      current: string
+    }
     description: string
+    mainImage: MainImage
+    publishedAt: string
     github: string
     url: string
-    mainImage: {
-        asset: {
-            _ref: string
-        }
+    githubData?: {
+      stars: number
+      commits: number
+      license: string
     }
-}
+  }
 
+  interface MainImage {
+    asset: {
+      _ref: string
+    }
+    alt?: string
+  }
+  
+  
 // Sanity Query
 const fetchProjects = async (): Promise<Project[]> => {
-    return await client.fetch(`
+    const projects: Project[] = await client.fetch(`
     *[_type == "project"] | order(_createdAt desc) {
-        _id,
-      title,
-      description,
-      github,
-      url,
-      mainImage
-    }
-  `)
+    _id,
+    title,
+    slug,
+    description,
+    mainImage,
+    publishedAt,
+    github,
+    url,
+    githubData
+  }`)
+
+  //Fetching GitHub Data
+  const updatedProjects = await Promise.all(
+    projects.map(async (project: Project) => {
+      if (!project.githubData && project.github) {
+        const githubData = await fetchGitHubData(project.github)
+        if (githubData) {
+          // Update the project in Sanity
+          await client.patch(project._id).set({ githubData }).commit()
+          return { ...project, githubData }
+        }
+      }
+      return project
+    })
+  )
+
+  return updatedProjects
 }
+
 
 export async function ProjectsSection() {
     const projects = await fetchProjects()
 
     return (
-        <section className="min-h-screen flex items-center bg-background">
-            <div className="container mx-auto px-4">
-                <h2 className="text-4xl font-bold text-center mb-12 text-foreground">Featured Projects</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    {projects.slice(0, 3).map((project) => (
-                        <ProjectCard key={project._id} project={project} />
-                    ))}
-                </div>
-                <div className="flex justify-center">
-                    <Button asChild variant="outline" className="mt-8">
-                        <Link href="/post">
-                            View All Posts
-                        </Link>
-                    </Button>
-                </div>
-            </div>
-        </section>
+      <section className="py-16 bg-background">
+      <div className="container mx-auto px-4">
+        <h2 className="text-4xl font-bold text-center mb-12 text-foreground">Featured Projects</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {projects.slice(0, 3).map((project) => (
+            <ProjectCardWrapper 
+              key={project._id} 
+              project={project} 
+              isLoading={false} 
+              error={null} 
+            />
+          ))}
+        </div>
+        <div className="text-center mt-12">
+          <Button asChild>
+            <a href="/projects">View All Projects</a>
+          </Button>
+        </div>
+      </div>
+    </section>
     )
 }
 
