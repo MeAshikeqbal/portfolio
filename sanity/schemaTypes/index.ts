@@ -9,6 +9,7 @@ import { contactType } from "./contactType";
 import { experiencesType } from "./experiencesType";
 import { educationType } from "./educationType";
 import { skillType } from "./skillType";
+import { projectType } from "./projectType";
 
 export const schema: { types: SchemaTypeDefinition[] } = {
   types: [
@@ -20,6 +21,7 @@ export const schema: { types: SchemaTypeDefinition[] } = {
     contactType,
     experiencesType,
     educationType,
+    projectType,
     skillType,
   ],
 };
