@@ -62,7 +62,7 @@ export default function TechStack({ skills }: TechStackProps) {
           initial="hidden"
           animate={isInView ? "visible" : "hidden"}
         >
-          {skills.map((skill, _index) => (
+          {skills.map((skill) => (
             <motion.div key={skill.name} variants={itemVariants}>
               <Card className="flex flex-col items-center justify-center p-4 h-full hover:shadow-lg transition-all duration-300 group">
                 <CardContent className="flex flex-col items-center p-0">
