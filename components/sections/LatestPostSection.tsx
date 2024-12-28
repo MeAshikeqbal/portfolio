@@ -69,7 +69,7 @@ export default async function PostSection() {
 
   if (!posts || posts.length === 0) {
     return (
-      <section id="blog" className="min-h-screen flex items-center justify-center bg-background px-4">
+      <section id='Blog' className="min-h-screen flex items-center justify-center bg-background px-4">
         <div className="text-center">
           <h2 className="text-3xl font-bold mb-6">Latest Posts</h2>
           <p className="text-muted-foreground">No posts available at the moment. Check back soon!</p>
@@ -79,7 +79,7 @@ export default async function PostSection() {
   }
 
   return (
-    <section id="blog" className="min-h-screen flex items-center bg-background">
+    <section id='Blog' className="min-h-screen flex items-center bg-background">
       <div className="container mx-auto px-4 py-20">
         <h2 className="text-4xl font-bold mb-12 text-center">Latest Blog Posts</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
