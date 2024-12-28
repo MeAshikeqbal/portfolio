@@ -8,11 +8,11 @@ import TechStackSection from "@/components/sections/techStack-section";
 
 export default async function Home() {
   return (
-    <main>
+    <main className="flex-grow">
       <Hero />
       <PostSection />
       <EducationTimeline />
-     {/*<ExperiencesTimeline />*/}
+      {/*<ExperiencesTimeline />*/}
       <ProjectsSection />
       <TechStackSection />
       <ContactSection />

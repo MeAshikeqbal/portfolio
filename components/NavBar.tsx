@@ -2,14 +2,14 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
-//import { usePathname } from 'next/navigation'
-import { Moon, Sun, Menu, X } from 'lucide-react'
+import { usePathname } from 'next/navigation'
+import { Moon, Sun, Menu, X, ChevronLeft } from 'lucide-react'
 import { useTheme } from "next-themes"
 import { Button } from "@/components/ui/button"
 import { AnimatedThemeSwitch } from './theme-toggle'
 import { motion, AnimatePresence } from 'framer-motion'
 
-const navItems = [
+const homeNavItems = [
   { name: 'Home', path: '/#Home' },
   { name: 'Blog', path: '/#Blog' },
   { name: 'Educational Journey', path: '/#Education-Journey' },
@@ -19,7 +19,7 @@ const navItems = [
 ]
 
 export function NavBar() {
-  //const pathname = usePathname()
+  const pathname = usePathname()
   const [isOpen, setIsOpen] = useState(false)
   const { theme, setTheme } = useTheme()
   const [mounted, setMounted] = useState(false)
@@ -27,12 +27,14 @@ export function NavBar() {
 
   useEffect(() => {
     setMounted(true)
-    window.addEventListener('scroll', handleScroll)
-    return () => window.removeEventListener('scroll', handleScroll)
-  }, [])
+    if (pathname === '/') {
+      window.addEventListener('scroll', handleScroll)
+      return () => window.removeEventListener('scroll', handleScroll)
+    }
+  }, [pathname])
 
   const handleScroll = useCallback(() => {
-    const sections = navItems.map(item => item.path.substring(2))
+    const sections = homeNavItems.map(item => item.path.substring(2))
     let currentSection = ''
 
     for (const section of sections) {
@@ -53,10 +55,14 @@ export function NavBar() {
 
   const handleLinkClick = (e: React.MouseEvent<HTMLAnchorElement>, path: string) => {
     e.preventDefault()
-    const id = path.substring(2)
-    const element = document.getElementById(id)
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' })
+    if (pathname === '/') {
+      const id = path.substring(2)
+      const element = document.getElementById(id)
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' })
+      }
+    } else {
+      window.location.href = path
     }
     closeMenu()
   }
@@ -65,6 +71,18 @@ export function NavBar() {
     open: { opacity: 1, height: 'auto' },
     closed: { opacity: 0, height: 0 }
   }
+
+  const getNavItems = () => {
+    if (pathname === '/') return homeNavItems
+    if (pathname === '/post' || pathname === '/projects') return [{ name: 'Back to Home', path: '/' }]
+    if (pathname.startsWith('/post/')) return [
+      { name: 'Back to All Post', path: '/post' },
+      { name: 'Back to Home', path: '/' }
+    ]
+    return [{ name: 'Back to Home', path: '/' }]
+  }
+
+  const navItems = getNavItems()
 
   return (
     <motion.nav 
@@ -88,13 +106,15 @@ export function NavBar() {
                 href={item.path}
                 onClick={(e) => handleLinkClick(e, item.path)}
                 className={`px-3 py-2 rounded-md text-sm font-medium transition-colors relative ${
-                  activeSection === item.path.substring(2)
+                  (pathname === '/' && activeSection === item.path.substring(2)) || 
+                  (pathname !== '/' && item.path === pathname)
                     ? 'text-primary'
                     : 'text-foreground hover:text-primary'
                 }`}
               >
+                {item.name.startsWith('Back') && <ChevronLeft className="inline mr-1" />}
                 {item.name}
-                {activeSection === item.path.substring(2) && (
+                {pathname === '/' && activeSection === item.path.substring(2) && (
                   <motion.div
                     className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary"
                     layoutId="underline"
@@ -147,11 +167,13 @@ export function NavBar() {
                   href={item.path}
                   onClick={(e) => handleLinkClick(e, item.path)}
                   className={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${
-                    activeSection === item.path.substring(2)
+                    (pathname === '/' && activeSection === item.path.substring(2)) || 
+                    (pathname !== '/' && item.path === pathname)
                       ? 'bg-primary text-primary-foreground'
                       : 'text-foreground hover:bg-accent hover:text-accent-foreground'
                   }`}
                 >
+                  {item.name.startsWith('Back') && <ChevronLeft className="inline mr-1" />}
                   {item.name}
                 </Link>
               ))}
