@@ -4,7 +4,7 @@ import { ContactSection } from "@/components/sections/contact-section";
 import Hero from "@/components/sections/hero-section";
 import PostSection from "@/components/sections/LatestPostSection";
 import { ProjectsSection } from "@/components/sections/projects-section";
-import TechStack from "@/components/sections/tech-stack";
+import TechStackSection from "@/components/sections/techStack-section";
 
 export default async function Home() {
   return (
@@ -14,7 +14,7 @@ export default async function Home() {
       <EducationTimeline />
      {/*<ExperiencesTimeline />*/}
       <ProjectsSection />
-      <TechStack />
+      <TechStackSection />
       <ContactSection />
     </main>
   )
