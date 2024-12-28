@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/breadcrumb"
 
 interface BreadcrumbPostProps {
-    postTitle: string;
+    postTitle?: string;
 }
 
 export function BreadcrumbPost({ postTitle }: BreadcrumbPostProps) {
@@ -18,14 +18,18 @@ export function BreadcrumbPost({ postTitle }: BreadcrumbPostProps) {
                 <BreadcrumbItem>
                     <BreadcrumbLink href="/">Home</BreadcrumbLink>
                 </BreadcrumbItem>
-                <BreadcrumbSeparator />
-                <BreadcrumbItem>
-                    <BreadcrumbLink href="/post">All Post</BreadcrumbLink>
-                </BreadcrumbItem>
+                {postTitle && (
+                    <>
+                        <BreadcrumbSeparator />
+                        <BreadcrumbItem>
+                            <BreadcrumbLink href="/post">All Post</BreadcrumbLink>
+                        </BreadcrumbItem>
+                    </>
+                )}
                 <BreadcrumbSeparator />
                 <BreadcrumbItem>
                     <BreadcrumbPage>
-                        {postTitle}
+                        {postTitle || "All Posts"}
                     </BreadcrumbPage>
                 </BreadcrumbItem>
             </BreadcrumbList>

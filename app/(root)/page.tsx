@@ -1,6 +1,6 @@
-//import EducationTimeline from "@/components/sections/EducationTimeline";
+import EducationTimeline from "@/components/sections/EducationTimeline";
 import { ContactSection } from "@/components/sections/contact-section";
-import ExperiencesTimeline from "@/components/sections/ExperiencesTimeline";
+//import ExperiencesTimeline from "@/components/sections/ExperiencesTimeline";
 import Hero from "@/components/sections/hero-section";
 import PostSection from "@/components/sections/LatestPostSection";
 import { ProjectsSection } from "@/components/sections/projects-section";
@@ -11,8 +11,8 @@ export default async function Home() {
     <main>
       <Hero />
       <PostSection />
-      {/*<EducationTimeline />*/}
-      <ExperiencesTimeline />
+      <EducationTimeline />
+     {/*<ExperiencesTimeline />*/}
       <ProjectsSection />
       <TechStack />
       <ContactSection />

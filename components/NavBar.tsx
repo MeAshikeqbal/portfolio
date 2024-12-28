@@ -12,7 +12,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 const navItems = [
   { name: 'Home', path: '/#Home' },
   { name: 'Blog', path: '/#Blog' },
-  { name: 'Professional Journey', path: '/#Professional-Journey' },
+  { name: 'Educational Journey', path: '/#Education-Journey' },
   { name: 'Projects', path: '/#Project' },
   { name: 'Tech Stack', path: '/#Tech-Stack' },
   { name: 'Contact', path: '/#Contact' },
