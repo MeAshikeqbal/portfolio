@@ -78,7 +78,7 @@ export function NavBar() {
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center">
             <Link href="/" className="text-2xl font-bold text-primary hover:text-primary/80 transition-colors">
-              My Blog
+              Ashik Eqbal
             </Link>
           </div>
           <div className="hidden md:flex items-center space-x-4">
