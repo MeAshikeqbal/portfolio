@@ -80,10 +80,10 @@ export async function generateMetadata({ params }: { params: Promise<{ slug?: st
 
     return {
       title: post.title,
-      description: post.excerpt || `Read ${post.title} on my blog`,
+      description: post.excerpt || `Read ${post.title} by ${post.author} on my blog`,
       openGraph: {
         title: post.title,
-        description: post.excerpt || `Read ${post.title} on my blog`,
+        description: post.excerpt || `Read ${post.title} by ${post.author} on my blog`,
         type: 'article',
         url: `https://itsashik.info/post/${post.slug.current}`,
         images: post.mainImage
