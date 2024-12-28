@@ -40,9 +40,7 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
-            <main className="flex-grow">
               {children}
-            </main>
             <BackToTop />
           </ThemeProvider>
           <Toaster />
