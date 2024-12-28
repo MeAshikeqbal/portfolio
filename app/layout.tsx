@@ -22,7 +22,7 @@ const robotoMono = Roboto_Mono({
 
 export const metadata = {
   title: 'Ashik Eqbal - Portfolio',
-  description: 'Personal portfolio and blog of Your Name, a software engineer specializing in web development.',
+  description: 'Personal portfolio and blog of Ashik Eqbal, a software engineer specializing in web development.',
 };
 
 export default function RootLayout({
