@@ -9,6 +9,9 @@ import { TypedObject } from '@portabletext/types'
 import { CalendarIcon, UserIcon } from 'lucide-react'
 import { Badge } from "@/components/ui/badge"
 
+
+export const revalidate = 60 
+
 // Interfaces
 interface Author {
   name: string

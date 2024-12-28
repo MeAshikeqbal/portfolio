@@ -2,6 +2,7 @@ import { Button } from "../ui/button"
 import { ProjectCardWrapper } from "../project-card-wrapper"
 import { fetchProjects } from "@/lib/api"
 
+export const revalidate = 60
 
 export async function ProjectsSection() {
     const projects = await fetchProjects()
