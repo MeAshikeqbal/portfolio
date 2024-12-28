@@ -21,8 +21,47 @@ const robotoMono = Roboto_Mono({
 });
 
 export const metadata = {
-  title: 'Ashik Eqbal - Portfolio',
+  title: {
+    default: 'Ashik Eqbal - Portfolio',
+  },
   description: 'Personal portfolio and blog of Ashik Eqbal, a software engineer specializing in web development.',
+  keywords: ['Ashik Eqbal', 'Software Engineer', 'Web Development', 'Portfolio', 'Blog'],
+  authors: [{ name: 'Ashik Eqbal' }],
+  creator: 'Ashik Eqbal',
+  openGraph: {
+    type: 'website',
+    locale: 'en_US',
+    url: 'https://www.itsashik.info',
+    siteName: 'Ashik Eqbal Portfolio',
+    title: 'Ashik Eqbal - Software Engineer',
+    description: 'Personal portfolio and blog of Ashik Eqbal, a software engineer specializing in web development.',
+    images: [
+      {
+        url: 'https://www.itsashik.info/og-image.png',
+        width: 1200,
+        height: 630,
+        alt: 'Ashik Eqbal - Software Engineer',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Ashik Eqbal - Software Engineer',
+    description: 'Personal portfolio and blog of Ashik Eqbal, a software engineer specializing in web development.',
+    images: ['https://www.itsashik.info/og-image.png'],
+    creator: '@me_ashikeqbal',
+  },
+  icons: {
+    icon: [
+      { url: '/favicon.ico' },
+      { url: '/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
+      { url: '/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
+    ],
+    apple: [
+      { url: '/apple-touch-icon.png' },
+    ],
+  },
+  manifest: '/site.webmanifest',
 };
 
 export default function RootLayout({
@@ -40,7 +79,9 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
-              {children}
+            <div className="flex-grow">
+            {children}
+            </div>
             <BackToTop />
           </ThemeProvider>
           <Toaster />
