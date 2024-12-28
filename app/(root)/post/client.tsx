@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { CalendarIcon, UserIcon } from 'lucide-react'
 import { Post, Category } from '@/lib/api'
+import { BreadcrumbPost } from '@/components/post-breadcrumb'
 
 interface AllPostsClientProps {
   initialPosts: Post[]
@@ -39,10 +40,14 @@ export default function AllPostsClient({ initialPosts, categories }: AllPostsCli
   }, [posts, sortBy, selectedCategory])
 
   return (
-    <div className="min-h-screen bg-background py-12">
+    <div className="min-h-screen bg-background py-24">
       <div className="container mx-auto px-4">
         <h1 className="text-4xl font-bold mb-8 text-center">All Posts</h1>
-        
+        <div
+        className='mb-8'
+        >
+        <BreadcrumbPost />
+        </div>
         <div className="flex flex-wrap items-center justify-between mb-8">
           <div className="flex flex-wrap gap-2 mb-4 md:mb-0">
             <Button
@@ -80,11 +85,15 @@ export default function AllPostsClient({ initialPosts, categories }: AllPostsCli
                 {post.mainImage?.asset?._ref ? (
                   <div className="relative h-48 w-full">
                     <Image
-                      src={urlFor(post.mainImage.asset).width(400).height(300).url()}
-                      alt={post.mainImage.alt || post.title}
-                      fill
-                      style={{ objectFit: 'cover' }}
-                      className="transition-transform duration-300 hover:scale-105"
+                        src={urlFor(post.mainImage.asset._ref).width(400).height(300).url()}
+                        alt={post.mainImage.alt || post.title}
+                        fill
+                        style={{ objectFit: 'cover' }}
+                        className="rounded-t-lg"
+                        sizes='(min-width: 640px) 400px, (min-width: 768px) 300px, 100vw'
+                        priority={false}
+                        placeholder="blur"
+                        blurDataURL={urlFor(post.mainImage.asset._ref).width(100).height(100).blur(20).url()}
                     />
                   </div>
                 ) : (

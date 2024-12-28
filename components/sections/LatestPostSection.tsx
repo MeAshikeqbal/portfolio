@@ -89,15 +89,15 @@ export default async function PostSection() {
                 {post.mainImage?.asset?._ref ? (
                   <div className="relative h-48 w-full">
                     <Image
-                      src={urlFor(post.mainImage.asset._ref).width(400).height(300).url()}
-                      alt={post.mainImage.alt || post.title}
-                      fill
-                      style={{ objectFit: 'cover' }}
-                      className="rounded-t-lg"
-                      sizes='(min-width: 640px) 400px, (min-width: 768px) 300px, 100vw'
-                      priority={false}
-                      //placeholder='blur'
-                      //blurDataURL={post.mainImage.lqip}
+                        src={urlFor(post.mainImage.asset._ref).width(400).height(300).url()}
+                        alt={post.mainImage.alt || post.title}
+                        fill
+                        style={{ objectFit: 'cover' }}
+                        className="rounded-t-lg"
+                        sizes='(min-width: 640px) 400px, (min-width: 768px) 300px, 100vw'
+                        priority={false}
+                        placeholder="blur"
+                        blurDataURL={urlFor(post.mainImage.asset._ref).width(100).height(100).blur(20).url()}
                     />
                   </div>
                 ) : (
