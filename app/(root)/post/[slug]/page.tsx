@@ -80,10 +80,10 @@ export async function generateMetadata({ params }: { params: Promise<{ slug?: st
 
     return {
       title: post.title,
-      description: post.excerpt || `Read ${post.title} by ${post.author} on my blog`,
+      description: post.excerpt || `Read ${post.title} by ${post.author?.name} on my blog`,
       openGraph: {
         title: post.title,
-        description: post.excerpt || `Read ${post.title} by ${post.author} on my blog`,
+        description: post.excerpt || `Read ${post.title} by ${post.author?.name} on my blog`,
         type: 'article',
         url: `https://itsashik.info/post/${post.slug.current}`,
         images: post.mainImage
@@ -125,7 +125,7 @@ export default async function PostPage({ params }: { params: Promise<{ slug?: st
   }
 
   return (
-    <article className="max-w-full mx-auto">
+    <article className="max-w-full mx-auto pt-16">
       <div className="relative w-full h-[30vh] md:h-[40vh] lg:h-[70vh] mb-12">
         {post.mainImage?.asset?._ref && (
           <Image
