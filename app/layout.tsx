@@ -4,7 +4,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { ToastProvider } from '@/components/ui/toast';
 import { Toaster } from '@/components/ui/toaster';
 import { BackToTop } from "@/components/back-to-top";
-import { Analytics } from '@vercel/analytics/next';
+import { Analytics } from "@vercel/analytics/react"
 import { SpeedInsights } from "@vercel/speed-insights/next"
 
 const roboto = Roboto({
