@@ -5,6 +5,7 @@ import { ToastProvider } from '@/components/ui/toast';
 import { Toaster } from '@/components/ui/toaster';
 import { BackToTop } from "@/components/back-to-top";
 import { Analytics } from '@vercel/analytics/next';
+import { SpeedInsights } from "@vercel/speed-insights/next"
 
 const roboto = Roboto({
   variable: "--font-roboto",
@@ -47,6 +48,7 @@ export default function RootLayout({
           <Toaster />
         </ToastProvider>
         <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );
