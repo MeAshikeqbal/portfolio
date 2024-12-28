@@ -11,7 +11,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { BreadcrumbPost } from '@/components/post-breadcrumb'
 
-//export const revalidate = 60
+export const revalidate = 60
 
 interface Author {
   name: string

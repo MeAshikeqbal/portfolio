@@ -3,6 +3,8 @@ import { Card, CardContent } from "@/components/ui/card"
 import { client } from '@/sanity/lib/client'
 import { urlFor } from '@/sanity/lib/image'
 
+export const revalidate = 60
+
 interface Skill {
   name: string
   icon: {
