@@ -17,42 +17,49 @@ async function getBlogPosts(): Promise<BlogPost[]> {
 }
 
 export async function GET(): Promise<NextResponse> {
-  const blogPosts = await getBlogPosts()
+  try {
+    const blogPosts = await getBlogPosts()
 
-  const sitemap: MetadataRoute.Sitemap = [
-    {
-      url: 'https://www.itsashik.info',
-      lastModified: new Date(),
-    },
-    {
-      url: 'https://www.itsashik.info/post',
-      lastModified: new Date(),
-    },
-    {
+    const sitemap: MetadataRoute.Sitemap = [
+      {
+        url: 'https://www.itsashik.info',
+        lastModified: new Date(),
+      },
+      {
+        url: 'https://www.itsashik.info/post',
+        lastModified: new Date(),
+      },
+      {
         url: 'https://www.itsashik.info/projects',
         lastModified: new Date(),
-    },
-    ...blogPosts.map((post) => ({
-      url: `https://www.itsashik.info/post/${post.slug}`,
-      lastModified: new Date(post.publishedAt),
-    })),
-  ]
+      },
+      ...blogPosts.map((post) => ({
+        url: `https://www.itsashik.info/post/${encodeURIComponent(post.slug)}`,
+        lastModified: new Date(post.publishedAt),
+      })),
+    ]
 
-  // Convert the sitemap object to XML
-  const xml = `<?xml version="1.0" encoding="UTF-8"?>
+    // Convert the sitemap object to XML
+    const xml = `<?xml version="1.0" encoding="UTF-8"?>
     <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
       ${sitemap.map((item) => `
         <url>
           <loc>${item.url}</loc>
-          <lastmod>${(item.lastModified ?? new Date()).toString()}</lastmod>
+          <lastmod>${item.lastModified ? new Date(item.lastModified).toISOString() : new Date().toISOString()}</lastmod>
         </url>
       `).join('')}
     </urlset>`
 
-  // Return the XML as a NextResponse
-  return new NextResponse(xml, {
-    headers: {
-      'Content-Type': 'application/xml',
-    },
-  })
+    // Return the XML as a NextResponse with caching headers
+    return new NextResponse(xml, {
+      headers: {
+        'Content-Type': 'application/xml',
+        'Cache-Control': 'public, max-age=3600, s-maxage=3600, stale-while-revalidate=86400',
+      },
+    })
+  } catch (error) {
+    console.error('Error generating sitemap:', error)
+    return new NextResponse('Error generating sitemap', { status: 500 })
+  }
 }
+
