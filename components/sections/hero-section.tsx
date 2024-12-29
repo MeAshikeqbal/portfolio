@@ -2,7 +2,7 @@
 
 import Image from 'next/image'
 import { motion } from 'framer-motion'
-import { FileDown, Github, Linkedin, Twitter } from 'lucide-react'
+import { FileDown, Github, Linkedin, RssIcon, Twitter } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { client } from '@/sanity/lib/client'
 
@@ -24,6 +24,7 @@ const socialLinks = [
   { icon: Github, href: 'https://github.com/MeAshikEqbal' },
   { icon: Linkedin, href: 'https://linkedin.com/in/itsashik' },
   { icon: Twitter, href: 'https://x.com/me_ashikeqbal' },
+  { icon: RssIcon, href: 'https://www.itsashik.info/rss.xml' },
 ]
 
 export default function Hero() {
