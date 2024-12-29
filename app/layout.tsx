@@ -62,6 +62,13 @@ export const metadata = {
     ],
   },
   manifest: '/site.webmanifest',
+  feed: [
+    {
+      url: '/rss.xml',
+      type: 'application/rss+xml',
+      title: 'Ashik Eqbal - Blog RSS Feed',
+    },
+  ],
 };
 
 export default function RootLayout({
@@ -71,6 +78,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning className={`${roboto.variable} ${robotoMono.variable}`}>
+      <head>
+        <link rel="sitemap" type="application/xml" href="/sitemap.xml" />
+      </head>
       <body className="font-sans antialiased min-h-screen flex flex-col">
         <ToastProvider>
           <ThemeProvider
