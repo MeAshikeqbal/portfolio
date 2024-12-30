@@ -17,7 +17,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { useToast } from "@/hooks/use-toast"
-import { submitContact } from '@/app/actions/submit-contact'
+import { submitContact } from '@/actions/submit-contact'
 
 const formSchema = z.object({
   name: z.string().min(2, {
