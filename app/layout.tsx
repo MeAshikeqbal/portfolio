@@ -37,7 +37,7 @@ export const metadata = {
     description: 'Personal portfolio and blog of Ashik Eqbal, a software engineer specializing in web development.',
     images: [
       {
-        url: 'https://www.itsashik.info/og-image.png',
+        url: 'https://www.itsashik.info/og-image.jpg',
         width: 1200,
         height: 630,
         alt: 'Ashik Eqbal - Software Engineer',
