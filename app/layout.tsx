@@ -48,7 +48,7 @@ export const metadata = {
     card: 'summary_large_image',
     title: 'Ashik Eqbal - Software Engineer',
     description: 'Personal portfolio and blog of Ashik Eqbal, a software engineer specializing in web development.',
-    images: ['https://www.itsashik.info/og-image.png'],
+    images: ['https://www.itsashik.info/og-image.jpg'],
     creator: '@me_ashikeqbal',
   },
   icons: {
