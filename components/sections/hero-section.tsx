@@ -76,6 +76,7 @@ export default function Hero() {
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
                 className="text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors duration-300"
+                aria-label={link.icon.displayName}
               >
                 <link.icon className="h-6 w-6" />
               </motion.a>
@@ -110,6 +111,9 @@ export default function Hero() {
               style={{objectFit: 'cover'}}
               fill
               className="rounded-full shadow-2xl"
+              priority={true}
+              width={320}
+              height={320}
             />
           </motion.div>
         </motion.div>

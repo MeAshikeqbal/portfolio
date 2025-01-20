@@ -147,7 +147,7 @@ export default async function PostSection() {
               </CardContent>
               <CardFooter className="p-6 pt-0 mt-auto">
                 <Button asChild variant="outline" className="w-full">
-                  <Link href={post.slug?.current ? `/post/${post.slug.current}` : '#'}>
+                  <Link aria-label={post.title} href={post.slug?.current ? `/post/${post.slug.current}` : '#'}>
                     Read More
                   </Link>
                 </Button>
