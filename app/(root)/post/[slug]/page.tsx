@@ -46,7 +46,7 @@ interface Post {
 async function getPost(slug: string): Promise<Post | null> {
   return await client.fetch(
     `
-    *[_type == "post" && slug.current == $slug][0]{
+    *[_type == "post"  && !(_id in path("drafts.**")) && slug.current == $slug][0]{
       title,
       slug,
       author->{
@@ -158,7 +158,7 @@ export default async function PostPage({
         <div className="mb-8">
           <BreadcrumbPost postTitle={post.title} />
         </div>
-        <Card className="mb-12 overflow-hidden shadow-lg">
+        <Card className="mb-2 overflow-hidden shadow-lg">
           <CardContent className="p-6 md:p-8">
             <div className="flex flex-col md:flex-row items-center justify-between gap-4">
               <div className="flex items-center space-x-4">
