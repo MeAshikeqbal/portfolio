@@ -1,15 +1,16 @@
-import { Metadata } from 'next'
-import { notFound } from 'next/navigation'
-import { client } from '@/sanity/lib/client'
-import { urlFor } from '@/sanity/lib/image'
-import { PortableText } from '@portabletext/react'
-import Image from 'next/image'
-import { PortableTextBlock } from '@portabletext/types'
-import { CalendarIcon, TagIcon } from 'lucide-react'
+import type { Metadata } from "next"
+import { notFound } from "next/navigation"
+import { client } from "@/sanity/lib/client"
+import { urlFor } from "@/sanity/lib/image"
+import { PortableText } from "@portabletext/react"
+import Image from "next/image"
+import type { PortableTextBlock } from "@portabletext/types"
+import { CalendarIcon, TagIcon } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { BreadcrumbPost } from '@/components/post-breadcrumb'
+import { BreadcrumbPost } from "@/components/post-breadcrumb"
+import { TextToSpeech } from "@/components/TextToSpeech"
 
 export const revalidate = 60
 
@@ -43,7 +44,8 @@ interface Post {
 }
 
 async function getPost(slug: string): Promise<Post | null> {
-  return await client.fetch(`
+  return await client.fetch(
+    `
     *[_type == "post" && slug.current == $slug][0]{
       title,
       slug,
@@ -57,25 +59,29 @@ async function getPost(slug: string): Promise<Post | null> {
       body,
       excerpt
     }
-  `, { slug })
+  `,
+    { slug },
+  )
 }
 
-export async function generateMetadata({ params }: { params: Promise<{ slug?: string }> }): Promise<Metadata | undefined> {
-  const { slug } = await params;
+export async function generateMetadata({
+  params,
+}: { params: Promise<{ slug?: string }> }): Promise<Metadata | undefined> {
+  const { slug } = await params
 
   if (!slug) {
     return {
-      title: 'Post Not Found',
-    };
+      title: "Post Not Found",
+    }
   }
 
   try {
-    const post = await getPost(slug);
+    const post = await getPost(slug)
 
     if (!post) {
       return {
-        title: 'Post Not Found',
-      };
+        title: "Post Not Found",
+      }
     }
 
     return {
@@ -84,44 +90,46 @@ export async function generateMetadata({ params }: { params: Promise<{ slug?: st
       openGraph: {
         title: post.title,
         description: post.excerpt || `Read ${post.title} by ${post.author?.name} on my blog`,
-        type: 'article',
+        type: "article",
         url: `https://itsashik.info/post/${post.slug.current}`,
         images: post.mainImage
           ? [
-            {
-              url: urlFor(post.mainImage.asset._ref).width(1200).height(630).url(),
-              width: 1200,
-              height: 630,
-              alt: post.mainImage.alt || post.title,
-            },
-          ]
+              {
+                url: urlFor(post.mainImage.asset._ref).width(1200).height(630).url(),
+                width: 1200,
+                height: 630,
+                alt: post.mainImage.alt || post.title,
+              },
+            ]
           : [],
       },
-    };
+    }
   } catch (error) {
-    console.error('Failed to fetch post metadata:', error);
+    console.error("Failed to fetch post metadata:", error)
     return {
-      title: 'Error Loading Post',
-    };
+      title: "Error Loading Post",
+    }
   }
 }
 
-export default async function PostPage({ params }: { params: Promise<{ slug?: string }> }): Promise<JSX.Element | void> {
-  const { slug } = await params;
+export default async function PostPage({
+  params,
+}: { params: Promise<{ slug?: string }> }): Promise<JSX.Element | void> {
+  const { slug } = await params
 
   if (!slug) {
-    notFound();
+    notFound()
   }
 
-  let post: Post | null = null;
+  let post: Post | null = null
   try {
-    post = await getPost(slug);
+    post = await getPost(slug)
   } catch (error) {
-    console.error('Failed to fetch post:', error);
+    console.error("Failed to fetch post:", error)
   }
 
   if (!post) {
-    notFound();
+    notFound()
   }
 
   return (
@@ -129,14 +137,14 @@ export default async function PostPage({ params }: { params: Promise<{ slug?: st
       <div className="relative w-full h-[30vh] md:h-[40vh] lg:h-[70vh] mb-12">
         {post.mainImage?.asset?._ref && (
           <Image
-            src={urlFor(post.mainImage.asset._ref).width(1920).height(1080).url()}
+            src={urlFor(post.mainImage.asset._ref).width(1920).height(1080).url() || "/placeholder.svg"}
             alt={post.mainImage.alt || post.title}
-            style={{ objectFit: 'cover' }}
+            style={{ objectFit: "cover" }}
             className="transition-transform duration-300"
             fill
             quality={50}
-          //placeholder='blur'
-          //blurDataURL={urlFor(post.mainIm).width(20).height(12).url() || undefined}
+            //placeholder='blur'
+            //blurDataURL={urlFor(post.mainIm).width(20).height(12).url() || undefined}
           />
         )}
         <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
@@ -147,9 +155,7 @@ export default async function PostPage({ params }: { params: Promise<{ slug?: st
       </div>
 
       <div className="max-w-4xl mx-auto px-4 md:px-8">
-        <div
-        className='mb-8'
-        >
+        <div className="mb-8">
           <BreadcrumbPost postTitle={post.title} />
         </div>
         <Card className="mb-12 overflow-hidden shadow-lg">
@@ -157,18 +163,21 @@ export default async function PostPage({ params }: { params: Promise<{ slug?: st
             <div className="flex flex-col md:flex-row items-center justify-between gap-4">
               <div className="flex items-center space-x-4">
                 <Avatar className="h-12 w-12 border-2 border-primary">
-                  <AvatarImage src={post.author?.image ? urlFor(post.author.image).width(100).height(100).url() : undefined} alt={post.author?.name} />
+                  <AvatarImage
+                    src={post.author?.image ? urlFor(post.author.image).width(100).height(100).url() : undefined}
+                    alt={post.author?.name}
+                  />
                   <AvatarFallback>{post.author?.name?.slice(0, 2).toUpperCase()}</AvatarFallback>
                 </Avatar>
                 <div>
-                  <p className="text-lg font-semibold text-foreground">{post.author?.name || 'Unknown Author'}</p>
+                  <p className="text-lg font-semibold text-foreground">{post.author?.name || "Unknown Author"}</p>
                   {post.publishedAt && (
                     <p className="text-sm text-muted-foreground flex items-center">
                       <CalendarIcon className="w-4 h-4 mr-2" />
-                      {new Date(post.publishedAt).toLocaleDateString('en-US', {
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric',
+                      {new Date(post.publishedAt).toLocaleDateString("en-US", {
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
                       })}
                     </p>
                   )}
@@ -188,6 +197,10 @@ export default async function PostPage({ params }: { params: Promise<{ slug?: st
           </CardContent>
         </Card>
 
+        <TextToSpeech
+          text={post.body?.map((block) => block.children?.map((child) => child.text).join(" ")).join(" ") || ""}
+        />
+
         <div className="prose prose-lg max-w-none dark:prose-invert mx-auto">
           <PortableText
             value={post.body || []}
@@ -196,7 +209,9 @@ export default async function PostPage({ params }: { params: Promise<{ slug?: st
                 h1: ({ children }) => <h1 className="text-3xl font-bold mt-8 mb-4 text-primary">{children}</h1>,
                 h2: ({ children }) => <h2 className="text-2xl font-semibold mt-6 mb-3 text-primary">{children}</h2>,
                 h3: ({ children }) => <h3 className="text-xl font-medium mt-4 mb-2 text-primary">{children}</h3>,
-                normal: ({ children }) => <p className="mb-4 leading-relaxed text-foreground text-justify">{children}</p>,
+                normal: ({ children }) => (
+                  <p className="mb-4 leading-relaxed text-foreground text-justify">{children}</p>
+                ),
                 blockquote: ({ children }) => (
                   <blockquote className="border-l-4 border-primary pl-4 italic my-6 text-lg text-muted-foreground">
                     {children}
@@ -216,12 +231,12 @@ export default async function PostPage({ params }: { params: Promise<{ slug?: st
                 em: ({ children }) => <em className="italic">{children}</em>,
                 code: ({ children }) => <code className="bg-muted text-primary px-1 py-0.5 rounded">{children}</code>,
                 link: ({ value, children }) => {
-                  const target = (value?.href || '').startsWith('http') ? '_blank' : undefined
+                  const target = (value?.href || "").startsWith("http") ? "_blank" : undefined
                   return (
                     <a
                       href={value?.href}
                       target={target}
-                      rel={target === '_blank' ? 'noopener noreferrer' : undefined}
+                      rel={target === "_blank" ? "noopener noreferrer" : undefined}
                       className="text-blue-600 hover:underline"
                     >
                       {children}
@@ -234,5 +249,6 @@ export default async function PostPage({ params }: { params: Promise<{ slug?: st
         </div>
       </div>
     </article>
-  );
+  )
 }
+
