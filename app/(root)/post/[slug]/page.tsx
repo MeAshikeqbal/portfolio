@@ -143,6 +143,7 @@ export default async function PostPage({
             style={{ objectFit: "cover" }}
             className="transition-transform duration-300"
             fill
+            priority={true}
             quality={50}
           />
         )}
