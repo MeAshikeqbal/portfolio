@@ -11,7 +11,6 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { BreadcrumbPost } from "@/components/post-breadcrumb"
 import { TextToSpeech } from "@/components/TextToSpeech"
-import { generateToken } from "@/lib/auth"
 
 export const revalidate = 60
 
@@ -42,6 +41,7 @@ interface Post {
   publishedAt?: string
   body?: PortableTextBlock[]
   excerpt?: string
+  audioUrl?: string
 }
 
 async function getPost(slug: string): Promise<Post | null> {
@@ -58,7 +58,8 @@ async function getPost(slug: string): Promise<Post | null> {
       categories[]->{title},
       publishedAt,
       body,
-      excerpt
+      excerpt,
+      "audioUrl": audioFile.asset->url
     }
   `,
     { slug },
@@ -95,13 +96,13 @@ export async function generateMetadata({
         url: `https://itsashik.info/post/${post.slug.current}`,
         images: post.mainImage
           ? [
-              {
-                url: urlFor(post.mainImage.asset._ref).width(1200).height(630).url(),
-                width: 1200,
-                height: 630,
-                alt: post.mainImage.alt || post.title,
-              },
-            ]
+            {
+              url: urlFor(post.mainImage.asset._ref).width(1200).height(630).url(),
+              width: 1200,
+              height: 630,
+              alt: post.mainImage.alt || post.title,
+            },
+          ]
           : [],
       },
     }
@@ -113,9 +114,7 @@ export async function generateMetadata({
   }
 }
 
-export default async function PostPage({
-  params,
-}: { params: Promise<{ slug?: string }> }): Promise<JSX.Element | void> {
+export default async function PostPage({ params }: { params: { slug?: string } }): Promise<JSX.Element | void> {
   const { slug } = await params
 
   if (!slug) {
@@ -195,22 +194,7 @@ export default async function PostPage({
             </div>
           </CardContent>
         </Card>
-        <div className="mb-4">
-          <TextToSpeech
-            text={
-              post.body
-                ?.map((block) =>
-                  block.children
-                    ?.map((child) => (typeof child === "object" && "text" in child ? child.text : ""))
-                    .join(" "),
-                )
-                .join(" ") ||
-              post.excerpt ||
-              post.title
-            }
-            apiKey={generateToken(process.env.API_SECRET_KEY!)}
-          />
-        </div>
+        <div className="mb-4">{post.audioUrl && <TextToSpeech audioUrl={post.audioUrl} />}</div>
         <div className="prose prose-lg max-w-none dark:prose-invert mx-auto">
           <PortableText
             value={post.body || []}
