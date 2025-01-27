@@ -109,7 +109,6 @@ export default function Hero() {
               src="/me.jpeg"
               alt="Ashik Eqbal"
               style={{objectFit: 'cover'}}
-              fill
               className="rounded-full shadow-2xl"
               priority={true}
               width={320}
