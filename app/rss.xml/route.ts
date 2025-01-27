@@ -18,7 +18,7 @@ type BlogPost = {
 
 async function getBlogPosts(): Promise<BlogPost[]> {
   return client.fetch(`
-    *[_type == "post"] {
+    *[_type == "post"  && !(_id in path("drafts.**"))] {
       "slug": slug.current,
       title,
       publishedAt,

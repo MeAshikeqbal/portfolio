@@ -44,7 +44,7 @@ interface Post {
 // Sanity Query
 const fetchPosts = async (): Promise<Post[]> => {
   return await client.fetch(`
-    *[_type == "post"] | order(publishedAt desc) [0...3] {
+    *[_type == "post" && !(_id in path("drafts.**"))] | order(publishedAt desc) [0...3] {
       _id,
       title,
       slug,

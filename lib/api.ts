@@ -25,7 +25,7 @@ export interface Category {
 
 export async function getPosts(): Promise<Post[]> {
   return client.fetch(`
-    *[_type == "post"] | order(publishedAt desc) {
+    *[_type == "post" && !(_id in path("drafts.**"))] | order(publishedAt desc) {
       _id,
       title,
       slug,
@@ -75,7 +75,7 @@ interface MainImage {
 
 export const fetchProjects = async (): Promise<Project[]> => {
     const projects: Project[] = await client.fetch(`
-    *[_type == "project"] | order(_createdAt desc) {
+    *[_type == "project"  && !(_id in path("drafts.**"))] | order(_createdAt desc) {
     _id,
     title,
     slug,
