@@ -3,7 +3,8 @@ import type { PortableTextBlock } from "@portabletext/types"
 
 const ELEVENLABS_API_KEY = process.env.ELEVENLABS_API_KEY
 const ELEVENLABS_VOICE_ID = process.env.ELEVENLABS_VOICE_ID
-const MAX_CHUNK_LENGTH = 5000 // Approximately 5000 characters per chunk to stay under credit limit
+const MAX_CHUNK_LENGTH = 5000 // Approximately 5000 characters per chunk
+const DELAY_BETWEEN_REQUESTS = 1000 // 1 second delay between requests
 
 if (!ELEVENLABS_API_KEY || !ELEVENLABS_VOICE_ID) {
   throw new Error("Missing required environment variables")
@@ -17,8 +18,8 @@ interface SanityPost {
 function splitTextIntoChunks(text: string): string[] {
   const chunks: string[] = []
   let currentChunk = ""
-
-  // Split by sentences to avoid cutting in the middle of a sentence
+  
+    // Split by sentences to avoid cutting in the middle of a sentence
   const sentences = text.split(/(?<=[.!?])\s+/)
 
   for (const sentence of sentences) {
@@ -60,8 +61,11 @@ async function generateAudioChunk(text: string): Promise<ArrayBuffer> {
   return await response.arrayBuffer()
 }
 
+async function delay(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms))
+}
+
 async function concatenateAudioBuffers(buffers: ArrayBuffer[]): Promise<Blob> {
-  // Convert ArrayBuffers to Uint8Arrays and concatenate
   const totalLength = buffers.reduce((acc, buffer) => acc + buffer.byteLength, 0)
   const result = new Uint8Array(totalLength)
   let offset = 0
@@ -75,33 +79,40 @@ async function concatenateAudioBuffers(buffers: ArrayBuffer[]): Promise<Blob> {
 }
 
 export async function generateAudioForPost(post: SanityPost): Promise<string> {
-  // Extract text from the post body
   const text = post.body
     .map((block) => block.children?.map((child) => ("text" in child ? child.text : "")).join(" ") ?? "")
     .join("\n")
 
-  // Split text into chunks
   const chunks = splitTextIntoChunks(text)
   console.log(`Split text into ${chunks.length} chunks`)
 
-  // Generate audio for each chunk
   const audioBuffers: ArrayBuffer[] = []
   for (const [index, chunk] of chunks.entries()) {
     console.log(`Processing chunk ${index + 1}/${chunks.length}`)
-    const audioBuffer = await generateAudioChunk(chunk)
-    audioBuffers.push(audioBuffer)
+    try {
+      const audioBuffer = await generateAudioChunk(chunk)
+      audioBuffers.push(audioBuffer)
+    } catch (error) {
+      console.error(`Error processing chunk ${index + 1}:`, error)
+      // If there's an error, wait for a longer time before retrying
+      await delay(DELAY_BETWEEN_REQUESTS * 5)
+      // Retry the chunk
+      const retryBuffer = await generateAudioChunk(chunk)
+      audioBuffers.push(retryBuffer)
+    }
+    // Add delay between requests to avoid hitting the concurrent request limit
+    if (index < chunks.length - 1) {
+      await delay(DELAY_BETWEEN_REQUESTS)
+    }
   }
 
-  // Combine all audio chunks
   const combinedAudioBlob = await concatenateAudioBuffers(audioBuffers)
 
-  // Upload combined audio file to Sanity
   const audioFile = await client.assets.upload("file", combinedAudioBlob, {
     filename: `${post._id}-audio.mp3`,
     contentType: "audio/mpeg",
   })
 
-  // Update the post with the new audio file
   await client
     .patch(post._id)
     .set({
