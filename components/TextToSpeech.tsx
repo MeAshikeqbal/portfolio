@@ -23,10 +23,11 @@ export function TextToSpeech({ text, apiKey }: TextToSpeechProps) {
   const progressRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
+    const audioElement = audioRef.current
     return () => {
-      if (audioRef.current) {
-        audioRef.current.pause()
-        audioRef.current.currentTime = 0
+      if (audioElement) {
+        audioElement.pause()
+        audioElement.currentTime = 0
       }
     }
   }, [])
@@ -120,34 +121,43 @@ export function TextToSpeech({ text, apiKey }: TextToSpeechProps) {
   }
 
   return (
-    <div className="p-4 space-y-4">
+    <div className="p-2 sm:p-4 space-y-2 sm:space-y-4">
       {error && (
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       )}
-      <div className="flex items-center gap-4">
-        <button
-          onClick={togglePlay}
-          disabled={isLoading}
-          className={cn(
-            "w-12 h-12 rounded-full flex items-center justify-center transition-all duration-200 ease-in-out",
-            isLoading || error
-              ? "bg-muted text-muted-foreground"
-              : "bg-primary text-primary-foreground hover:bg-primary/90",
-          )}
-        >
-          {isLoading ? (
-            <Loader2 className="w-6 h-6 animate-spin" />
-          ) : isPlaying ? (
-            <Pause className="w-6 h-6" />
-          ) : (
-            <Play className="w-6 h-6 ml-1" />
-          )}
-        </button>
+      <div className="flex flex-col sm:flex-row items-center sm:items-center gap-2 sm:gap-4">
+        <div className="flex items-center gap-2">
+          <button
+            onClick={togglePlay}
+            disabled={isLoading}
+            className={cn(
+              "w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center transition-all duration-200 ease-in-out",
+              isLoading || error
+                ? "bg-muted text-muted-foreground"
+                : "bg-primary text-primary-foreground hover:bg-primary/90",
+            )}
+          >
+            {isLoading ? (
+              <Loader2 className="w-5 h-5 sm:w-6 sm:h-6 animate-spin" />
+            ) : isPlaying ? (
+              <Pause className="w-5 h-5 sm:w-6 sm:h-6" />
+            ) : (
+              <Play className="w-5 h-5 sm:w-6 sm:h-6 ml-0.5 sm:ml-1" />
+            )}
+          </button>
+          <button
+            onClick={restart}
+            className="w-8 h-8 sm:w-10 sm:h-10 p-1.5 sm:p-2 hover:bg-accent hover:text-accent-foreground rounded-full transition-colors"
+            aria-label="Restart"
+          >
+            <RotateCcw className="w-full h-full" />
+          </button>
+        </div>
 
-        <div className="flex-1 space-y-2">
+        <div className="w-full sm:flex-1 space-y-2">
           <div className="flex justify-between text-sm text-muted-foreground">
             <span>{formatTime(currentTime)}</span>
             <span>{formatTime(duration)}</span>
@@ -164,21 +174,13 @@ export function TextToSpeech({ text, apiKey }: TextToSpeechProps) {
           </div>
         </div>
 
-        <button
-          onClick={restart}
-          className="p-2 hover:bg-accent hover:text-accent-foreground rounded-full transition-colors"
-          aria-label="Restart"
-        >
-          <RotateCcw className="w-5 h-5" />
-        </button>
-
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1 mt-2 sm:mt-0">
           {speedOptions.map((option) => (
             <button
               key={option}
               onClick={() => setSpeed(option)}
               className={cn(
-                "px-2 py-1 text-sm rounded-full transition-colors",
+                "px-1 sm:px-2 py-1 text-xs sm:text-sm rounded-full transition-colors",
                 speed === option
                   ? "bg-primary text-primary-foreground"
                   : "text-foreground hover:bg-accent hover:text-accent-foreground",
