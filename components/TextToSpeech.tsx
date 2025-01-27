@@ -6,31 +6,46 @@ import { cn } from "@/lib/utils"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 
 interface TextToSpeechProps {
-  text: string
-  apiKey: string
+  audioUrl: string
 }
 
 const speedOptions = [0.5, 1, 1.5, 2, 3]
 
-export function TextToSpeech({ text, apiKey }: TextToSpeechProps) {
+export function TextToSpeech({ audioUrl }: TextToSpeechProps) {
   const [isPlaying, setIsPlaying] = useState(false)
   const [currentTime, setCurrentTime] = useState(0)
   const [duration, setDuration] = useState(0)
   const [speed, setSpeed] = useState(1)
-  const [isLoading, setIsLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const audioRef = useRef<HTMLAudioElement | null>(null)
   const progressRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    const audioElement = audioRef.current
+    const audioElement = new Audio(audioUrl)
+    audioRef.current = audioElement
+    audioElement.addEventListener("loadedmetadata", handleLoadedMetadata)
+    audioElement.addEventListener("timeupdate", handleTimeUpdate)
+    audioElement.addEventListener("ended", () => setIsPlaying(false))
+    audioElement.addEventListener("canplay", () => setIsLoading(false))
+    audioElement.addEventListener("error", () => {
+      setError("Failed to load audio")
+      setIsLoading(false)
+    })
+
     return () => {
-      if (audioElement) {
-        audioElement.pause()
-        audioElement.currentTime = 0
-      }
+      audioElement.pause()
+      audioElement.currentTime = 0
+      audioElement.removeEventListener("loadedmetadata", handleLoadedMetadata)
+      audioElement.removeEventListener("timeupdate", handleTimeUpdate)
+      audioElement.removeEventListener("ended", () => setIsPlaying(false))
+      audioElement.removeEventListener("canplay", () => setIsLoading(false))
+      audioElement.removeEventListener("error", () => {
+        setError("Failed to load audio")
+        setIsLoading(false)
+      })
     }
-  }, [])
+  }, [audioUrl])
 
   useEffect(() => {
     if (audioRef.current) {
@@ -38,49 +53,12 @@ export function TextToSpeech({ text, apiKey }: TextToSpeechProps) {
     }
   }, [speed])
 
-  const generateSpeech = async () => {
-    setIsLoading(true)
-    setError(null)
-    try {
-      const response = await fetch("/api/text-to-speech", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-api-key": apiKey,
-        },
-        body: JSON.stringify({ text }),
-      })
-
-      if (!response.ok) {
-        throw new Error(`Failed to generate speech: ${response.statusText}`)
-      }
-
-      const audioBlob = await response.blob()
-      const audioUrl = URL.createObjectURL(audioBlob)
-
-      if (audioRef.current) {
-        audioRef.current.src = audioUrl
-        audioRef.current.play()
-        setIsPlaying(true)
-      }
-    } catch (error) {
-      console.error("Error generating speech:", error)
-      setError(error instanceof Error ? error.message : "An unknown error occurred")
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
   const togglePlay = () => {
     if (audioRef.current) {
       if (isPlaying) {
         audioRef.current.pause()
       } else {
-        if (audioRef.current.src) {
-          audioRef.current.play()
-        } else {
-          generateSpeech()
-        }
+        audioRef.current.play()
       }
       setIsPlaying(!isPlaying)
     }
@@ -120,29 +98,35 @@ export function TextToSpeech({ text, apiKey }: TextToSpeechProps) {
     }
   }
 
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-12">
+        <Loader2 className="w-6 h-6 animate-spin" />
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <Alert variant="destructive">
+        <AlertCircle className="h-4 w-4" />
+        <AlertDescription>{error}</AlertDescription>
+      </Alert>
+    )
+  }
+
   return (
     <div className="p-2 sm:p-4 space-y-2 sm:space-y-4">
-      {error && (
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
-      )}
       <div className="flex flex-col sm:flex-row items-center sm:items-center gap-2 sm:gap-4">
         <div className="flex items-center gap-2">
           <button
             onClick={togglePlay}
-            disabled={isLoading}
             className={cn(
               "w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center transition-all duration-200 ease-in-out",
-              isLoading || error
-                ? "bg-muted text-muted-foreground"
-                : "bg-primary text-primary-foreground hover:bg-primary/90",
+              "bg-primary text-primary-foreground hover:bg-primary/90",
             )}
           >
-            {isLoading ? (
-              <Loader2 className="w-5 h-5 sm:w-6 sm:h-6 animate-spin" />
-            ) : isPlaying ? (
+            {isPlaying ? (
               <Pause className="w-5 h-5 sm:w-6 sm:h-6" />
             ) : (
               <Play className="w-5 h-5 sm:w-6 sm:h-6 ml-0.5 sm:ml-1" />
@@ -191,13 +175,6 @@ export function TextToSpeech({ text, apiKey }: TextToSpeechProps) {
           ))}
         </div>
       </div>
-      <audio
-        ref={audioRef}
-        onTimeUpdate={handleTimeUpdate}
-        onLoadedMetadata={handleLoadedMetadata}
-        onEnded={() => setIsPlaying(false)}
-        className="hidden"
-      />
     </div>
   )
 }
