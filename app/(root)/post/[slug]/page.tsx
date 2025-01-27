@@ -11,6 +11,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { BreadcrumbPost } from "@/components/post-breadcrumb"
 import { TextToSpeech } from "@/components/TextToSpeech"
+import { generateToken } from "@/lib/auth"
 
 export const revalidate = 60
 
@@ -143,8 +144,6 @@ export default async function PostPage({
             className="transition-transform duration-300"
             fill
             quality={50}
-            //placeholder='blur'
-            //blurDataURL={urlFor(post.mainIm).width(20).height(12).url() || undefined}
           />
         )}
         <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
@@ -196,11 +195,22 @@ export default async function PostPage({
             </div>
           </CardContent>
         </Card>
-
-        <TextToSpeech
-          text={post.body?.map((block) => block.children?.map((child) => child.text).join(" ")).join(" ") || ""}
-        />
-
+        <div className="mb-4">
+          <TextToSpeech
+            text={
+              post.body
+                ?.map((block) =>
+                  block.children
+                    ?.map((child) => (typeof child === "object" && "text" in child ? child.text : ""))
+                    .join(" "),
+                )
+                .join(" ") ||
+              post.excerpt ||
+              post.title
+            }
+            apiKey={generateToken(process.env.API_SECRET_KEY!)}
+          />
+        </div>
         <div className="prose prose-lg max-w-none dark:prose-invert mx-auto">
           <PortableText
             value={post.body || []}
