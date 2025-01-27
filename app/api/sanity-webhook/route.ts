@@ -9,32 +9,34 @@ if (!SANITY_WEBHOOK_SECRET) {
 }
 
 export async function POST(req: NextRequest) {
-  const body = await req.json()
+  try {
+    const body = await req.json()
 
-  // Verify the webhook secret
-  const secret = req.headers.get("authorization")
-  if (secret !== `Bearer ${SANITY_WEBHOOK_SECRET}`) {
-    return NextResponse.json({ message: "Invalid secret" }, { status: 401 })
-  }
+    // Verify the webhook secret
+    const authHeader = req.headers.get("authorization")
+    if (!authHeader || authHeader !== `Bearer ${SANITY_WEBHOOK_SECRET}`) {
+      console.error("Invalid or missing authorization header")
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
 
-  // Check if this is a new publication or an update to an existing post
-  if (body._type === "post" && (body.publishedAt || body.audioFile === null)) {
-    try {
+    // Check if this is a new publication or an update to an existing post
+    if (body._type === "post" && (body.publishedAt || body.audioFile === null)) {
       const post = await client.fetch(`*[_id == $id][0]`, { id: body._id })
 
       if (!post) {
-        return NextResponse.json({ message: "Post not found" }, { status: 404 })
+        console.error(`Post not found: ${body._id}`)
+        return NextResponse.json({ error: "Post not found" }, { status: 404 })
       }
 
       // Generate audio for the post
       await generateAudioForPost(post)
 
       return NextResponse.json({ message: "Audio generation initiated" })
-    } catch (error) {
-      console.error("Error generating audio:", error)
-      return NextResponse.json({ message: "Error generating audio" }, { status: 500 })
     }
-  }
 
-  return NextResponse.json({ message: "No action taken" })
+    return NextResponse.json({ message: "No action taken" })
+  } catch (error) {
+    console.error("Error in webhook handler:", error)
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+  }
 }
