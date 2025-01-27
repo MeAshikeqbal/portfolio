@@ -3,6 +3,7 @@ import type { PortableTextBlock } from "@portabletext/types"
 
 const ELEVENLABS_API_KEY = process.env.ELEVENLABS_API_KEY
 const ELEVENLABS_VOICE_ID = process.env.ELEVENLABS_VOICE_ID
+const MAX_CHUNK_LENGTH = 5000 // Approximately 5000 characters per chunk to stay under credit limit
 
 if (!ELEVENLABS_API_KEY || !ELEVENLABS_VOICE_ID) {
   throw new Error("Missing required environment variables")
@@ -11,28 +12,29 @@ if (!ELEVENLABS_API_KEY || !ELEVENLABS_VOICE_ID) {
 interface SanityPost {
   _id: string
   body: PortableTextBlock[]
-  audioFile?: {
-    _type: string
-    asset: {
-      _type: string
-      _ref: string
+}
+
+function splitTextIntoChunks(text: string): string[] {
+  const chunks: string[] = []
+  let currentChunk = ""
+
+  // Split by sentences to avoid cutting in the middle of a sentence
+  const sentences = text.split(/(?<=[.!?])\s+/)
+
+  for (const sentence of sentences) {
+    if ((currentChunk + sentence).length <= MAX_CHUNK_LENGTH) {
+      currentChunk += (currentChunk ? " " : "") + sentence
+    } else {
+      if (currentChunk) chunks.push(currentChunk)
+      currentChunk = sentence
     }
   }
+
+  if (currentChunk) chunks.push(currentChunk)
+  return chunks
 }
 
-interface ElevenLabsResponse {
-  detail?: {
-    message?: string
-  }
-}
-
-export async function generateAudioForPost(post: SanityPost): Promise<string> {
-  // Extract text from the post body
-  const text = post.body
-    .map((block) => block.children?.map((child) => ("text" in child ? child.text : "")).join(" ") ?? "")
-    .join("\n")
-
-  // Generate audio using ElevenLabs API
+async function generateAudioChunk(text: string): Promise<ArrayBuffer> {
   const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${ELEVENLABS_VOICE_ID}`, {
     method: "POST",
     headers: {
@@ -51,15 +53,50 @@ export async function generateAudioForPost(post: SanityPost): Promise<string> {
   })
 
   if (!response.ok) {
-    const errorData: ElevenLabsResponse = await response.json()
+    const errorData = await response.json()
     throw new Error(`ElevenLabs API error: ${errorData.detail?.message || "Unknown error"}`)
   }
 
-  const audioBuffer = await response.arrayBuffer()
-  const audioBlob = new Blob([audioBuffer], { type: "audio/mpeg" })
+  return await response.arrayBuffer()
+}
 
-  // Upload audio file to Sanity
-  const audioFile = await client.assets.upload("file", audioBlob, {
+async function concatenateAudioBuffers(buffers: ArrayBuffer[]): Promise<Blob> {
+  // Convert ArrayBuffers to Uint8Arrays and concatenate
+  const totalLength = buffers.reduce((acc, buffer) => acc + buffer.byteLength, 0)
+  const result = new Uint8Array(totalLength)
+  let offset = 0
+
+  for (const buffer of buffers) {
+    result.set(new Uint8Array(buffer), offset)
+    offset += buffer.byteLength
+  }
+
+  return new Blob([result], { type: "audio/mpeg" })
+}
+
+export async function generateAudioForPost(post: SanityPost): Promise<string> {
+  // Extract text from the post body
+  const text = post.body
+    .map((block) => block.children?.map((child) => ("text" in child ? child.text : "")).join(" ") ?? "")
+    .join("\n")
+
+  // Split text into chunks
+  const chunks = splitTextIntoChunks(text)
+  console.log(`Split text into ${chunks.length} chunks`)
+
+  // Generate audio for each chunk
+  const audioBuffers: ArrayBuffer[] = []
+  for (const [index, chunk] of chunks.entries()) {
+    console.log(`Processing chunk ${index + 1}/${chunks.length}`)
+    const audioBuffer = await generateAudioChunk(chunk)
+    audioBuffers.push(audioBuffer)
+  }
+
+  // Combine all audio chunks
+  const combinedAudioBlob = await concatenateAudioBuffers(audioBuffers)
+
+  // Upload combined audio file to Sanity
+  const audioFile = await client.assets.upload("file", combinedAudioBlob, {
     filename: `${post._id}-audio.mp3`,
     contentType: "audio/mpeg",
   })
@@ -80,4 +117,3 @@ export async function generateAudioForPost(post: SanityPost): Promise<string> {
 
   return audioFile._id
 }
-
