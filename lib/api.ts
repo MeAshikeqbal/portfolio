@@ -1,5 +1,5 @@
 import { client } from '@/sanity/lib/client'
-import { fetchGitHubData } from './fetch-github-data'
+//import { fetchGitHubData } from './fetch-github-data'
 
 export interface Post {
   _id: string
@@ -87,6 +87,7 @@ export const fetchProjects = async (): Promise<Project[]> => {
     githubData
   }`)
 
+  /*
   //Fetching GitHub Data
   const updatedProjects = await Promise.all(
     projects.map(async (project: Project) => {
@@ -101,6 +102,8 @@ export const fetchProjects = async (): Promise<Project[]> => {
       return project
     })
   )
+  */
+  const updatedProjects = projects
 
   return updatedProjects
 }
