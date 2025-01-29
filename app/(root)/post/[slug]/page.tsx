@@ -5,14 +5,15 @@ import { urlFor } from "@/sanity/lib/image"
 import { PortableText } from "@portabletext/react"
 import Image from "next/image"
 import type { PortableTextBlock } from "@portabletext/types"
-import { CalendarIcon, TagIcon } from "lucide-react"
+import { AlertCircle, CalendarIcon, TagIcon } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { BreadcrumbPost } from "@/components/post-breadcrumb"
 import { TextToSpeech } from "@/components/TextToSpeech"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 
-export const revalidate = 60
+export const revalidate = 60;
 
 interface Author {
   name: string
@@ -116,7 +117,8 @@ export async function generateMetadata({
 
 export default async function PostPage({
   params,
-}: { params: Promise<{ slug?: string }> }): Promise<JSX.Element | void> {  const { slug } = await params
+}: { params: Promise<{ slug?: string }> }): Promise<JSX.Element | void> {
+  const { slug } = await params
 
   if (!slug) {
     notFound()
@@ -196,7 +198,16 @@ export default async function PostPage({
             </div>
           </CardContent>
         </Card>
-        <div className="mb-4">{post.audioUrl && <TextToSpeech audioUrl={post.audioUrl} />}</div>
+        {post.audioUrl ? (
+          <div className="my-8">
+            <TextToSpeech audioUrl={post.audioUrl || ""} />
+          </div>
+        ) : (
+          <Alert variant="default" className="my-8">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>Audio content for this post is not available at this moment.</AlertDescription>
+          </Alert>
+        )}
         <div className="prose prose-lg max-w-none dark:prose-invert mx-auto">
           <PortableText
             value={post.body || []}
