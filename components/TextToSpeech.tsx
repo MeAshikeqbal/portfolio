@@ -1,86 +1,99 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
-import { Play, Pause, RotateCcw, Loader2, AlertCircle } from "lucide-react"
-import { cn } from "@/lib/utils"
+import { Howl } from "howler"
+import { Play, Pause, RotateCcw, Volume2, VolumeX, Loader2, AlertCircle } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Button } from "@/components/ui/button"
+import { Slider } from "@/components/ui/slider"
+import { useMediaQuery } from "@/hooks/use-media-query"
 
 interface TextToSpeechProps {
   audioUrl: string
 }
 
-const speedOptions = [0.5, 1, 1.5, 2, 3]
+const speedOptions = [0.5, 1, 1.5, 2]
 
 export function TextToSpeech({ audioUrl }: TextToSpeechProps) {
   const [isPlaying, setIsPlaying] = useState(false)
   const [currentTime, setCurrentTime] = useState(0)
   const [duration, setDuration] = useState(0)
   const [speed, setSpeed] = useState(1)
+  const [volume, setVolume] = useState(1)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const audioRef = useRef<HTMLAudioElement | null>(null)
-  const progressRef = useRef<HTMLDivElement>(null)
+  const soundRef = useRef<Howl | null>(null)
+  const isMobile = useMediaQuery("(max-width: 640px)")
 
   useEffect(() => {
-    const audioElement = new Audio(audioUrl)
-    audioRef.current = audioElement
-    audioElement.addEventListener("loadedmetadata", handleLoadedMetadata)
-    audioElement.addEventListener("timeupdate", handleTimeUpdate)
-    audioElement.addEventListener("ended", () => setIsPlaying(false))
-    audioElement.addEventListener("canplay", () => setIsLoading(false))
-    audioElement.addEventListener("error", () => {
-      setError("Failed to load audio")
-      setIsLoading(false)
-    })
-
-    return () => {
-      audioElement.pause()
-      audioElement.currentTime = 0
-      audioElement.removeEventListener("loadedmetadata", handleLoadedMetadata)
-      audioElement.removeEventListener("timeupdate", handleTimeUpdate)
-      audioElement.removeEventListener("ended", () => setIsPlaying(false))
-      audioElement.removeEventListener("canplay", () => setIsLoading(false))
-      audioElement.removeEventListener("error", () => {
+    const sound = new Howl({
+      src: [audioUrl],
+      html5: true,
+      format: ["mp3"],
+      onload: () => {
+        setIsLoading(false)
+        setDuration(sound.duration())
+      },
+      onplay: () => setIsPlaying(true),
+      onpause: () => setIsPlaying(false),
+      onstop: () => setIsPlaying(false),
+      onend: () => setIsPlaying(false),
+      onloaderror: () => {
         setError("Failed to load audio")
         setIsLoading(false)
-      })
+      },
+      onplayerror: () => {
+        setError("Failed to play audio")
+        setIsPlaying(false)
+      },
+    })
+
+    soundRef.current = sound
+
+    return () => {
+      sound.unload()
     }
   }, [audioUrl])
 
   useEffect(() => {
-    if (audioRef.current) {
-      audioRef.current.playbackRate = speed
+    const updateTime = () => {
+      if (soundRef.current && soundRef.current.playing()) {
+        setCurrentTime(soundRef.current.seek() as number)
+        requestAnimationFrame(updateTime)
+      }
+    }
+
+    if (isPlaying) {
+      updateTime()
+    }
+  }, [isPlaying])
+
+  useEffect(() => {
+    if (soundRef.current) {
+      soundRef.current.rate(speed)
     }
   }, [speed])
 
+  useEffect(() => {
+    if (soundRef.current) {
+      soundRef.current.volume(volume)
+    }
+  }, [volume])
+
   const togglePlay = () => {
-    if (audioRef.current) {
+    if (soundRef.current) {
       if (isPlaying) {
-        audioRef.current.pause()
+        soundRef.current.pause()
       } else {
-        audioRef.current.play()
+        soundRef.current.play()
       }
-      setIsPlaying(!isPlaying)
     }
   }
 
-  const handleTimeUpdate = () => {
-    if (audioRef.current) {
-      setCurrentTime(audioRef.current.currentTime)
-    }
-  }
-
-  const handleLoadedMetadata = () => {
-    if (audioRef.current) {
-      setDuration(audioRef.current.duration)
-    }
-  }
-
-  const handleProgressClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (progressRef.current && audioRef.current) {
-      const rect = progressRef.current.getBoundingClientRect()
-      const pos = (e.clientX - rect.left) / rect.width
-      audioRef.current.currentTime = pos * duration
+  const handleSliderChange = (value: number[]) => {
+    if (soundRef.current) {
+      soundRef.current.seek(value[0])
+      setCurrentTime(value[0])
     }
   }
 
@@ -91,10 +104,17 @@ export function TextToSpeech({ audioUrl }: TextToSpeechProps) {
   }
 
   const restart = () => {
-    if (audioRef.current) {
-      audioRef.current.currentTime = 0
-      audioRef.current.play()
-      setIsPlaying(true)
+    if (soundRef.current) {
+      soundRef.current.stop()
+      soundRef.current.play()
+    }
+  }
+
+  const toggleMute = () => {
+    if (volume > 0) {
+      setVolume(0)
+    } else {
+      setVolume(1)
     }
   }
 
@@ -116,64 +136,64 @@ export function TextToSpeech({ audioUrl }: TextToSpeechProps) {
   }
 
   return (
-    <div className="p-2 sm:p-4 space-y-2 sm:space-y-4">
-      <div className="flex flex-col sm:flex-row items-center sm:items-center gap-2 sm:gap-4">
-        <div className="flex items-center gap-2">
-          <button
-            onClick={togglePlay}
-            className={cn(
-              "w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center transition-all duration-200 ease-in-out",
-              "bg-primary text-primary-foreground hover:bg-primary/90",
-            )}
-          >
-            {isPlaying ? (
-              <Pause className="w-5 h-5 sm:w-6 sm:h-6" />
-            ) : (
-              <Play className="w-5 h-5 sm:w-6 sm:h-6 ml-0.5 sm:ml-1" />
-            )}
-          </button>
-          <button
+    <div className="space-y-4 pt-2">
+      <div className={`flex items-center ${isMobile ? "justify-center" : "justify-between"}`}>
+        <div className="flex items-center space-x-2">
+          <Button onClick={togglePlay} variant="outline" size="icon" className="w-12 h-12 rounded-full">
+            {isPlaying ? <Pause className="w-6 h-6" /> : <Play className="w-6 h-6 ml-0.5" />}
+          </Button>
+          <Button
             onClick={restart}
-            className="w-8 h-8 sm:w-10 sm:h-10 p-1.5 sm:p-2 hover:bg-accent hover:text-accent-foreground rounded-full transition-colors"
+            variant="outline"
+            size="icon"
+            className="w-10 h-10 rounded-full"
             aria-label="Restart"
           >
-            <RotateCcw className="w-full h-full" />
-          </button>
+            <RotateCcw className="w-5 h-5" />
+          </Button>
         </div>
-
-        <div className="w-full sm:flex-1 space-y-2">
-          <div className="flex justify-between text-sm text-muted-foreground">
-            <span>{formatTime(currentTime)}</span>
-            <span>{formatTime(duration)}</span>
-          </div>
-          <div
-            ref={progressRef}
-            onClick={handleProgressClick}
-            className="h-2 bg-secondary rounded-full cursor-pointer overflow-hidden"
-          >
-            <div
-              className="h-full bg-primary transition-all duration-200 ease-in-out"
-              style={{ width: `${(currentTime / duration) * 100 || 0}%` }}
+        {!isMobile && (
+          <div className="flex items-center space-x-2">
+            <Button
+              onClick={toggleMute}
+              variant="outline"
+              size="icon"
+              className="w-10 h-10 rounded-full"
+              aria-label={volume > 0 ? "Mute" : "Unmute"}
+            >
+              {volume > 0 ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}
+            </Button>
+            <Slider
+              value={[volume]}
+              max={1}
+              step={0.1}
+              onValueChange={(value) => setVolume(value[0])}
+              className="w-24"
             />
           </div>
-        </div>
+        )}
+      </div>
 
-        <div className="flex items-center gap-1 mt-2 sm:mt-0">
-          {speedOptions.map((option) => (
-            <button
-              key={option}
-              onClick={() => setSpeed(option)}
-              className={cn(
-                "px-1 sm:px-2 py-1 text-xs sm:text-sm rounded-full transition-colors",
-                speed === option
-                  ? "bg-primary text-primary-foreground"
-                  : "text-foreground hover:bg-accent hover:text-accent-foreground",
-              )}
-            >
-              {option}x
-            </button>
-          ))}
+      <div className="space-y-2">
+        <Slider value={[currentTime]} max={duration} step={0.1} onValueChange={handleSliderChange} className="w-full" />
+        <div className="flex justify-between text-sm text-muted-foreground">
+          <span>{formatTime(currentTime)}</span>
+          <span>{formatTime(duration)}</span>
         </div>
+      </div>
+
+      <div className="flex justify-center space-x-2">
+        {speedOptions.map((option) => (
+          <Button
+            key={option}
+            onClick={() => setSpeed(option)}
+            variant={speed === option ? "default" : "outline"}
+            size="sm"
+            className="rounded-full"
+          >
+            {option}x
+          </Button>
+        ))}
       </div>
     </div>
   )
