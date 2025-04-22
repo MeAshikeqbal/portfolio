@@ -115,9 +115,7 @@ export async function generateMetadata({
   }
 }
 
-export default async function PostPage({
-  params,
-}: { params: Promise<{ slug?: string }> }): Promise<JSX.Element | void> {
+export default async function PostPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
 
   if (!slug) {
