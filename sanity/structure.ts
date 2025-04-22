@@ -40,7 +40,7 @@ export const structure: StructureResolver = (S) =>
           S.list()
             .title("Personal Info")
             .items([
-              S.documentTypeListItem("about").title("About Me").icon(FiInfo),
+              S.documentTypeListItem("abouts").title("About Me").icon(FiInfo),
               S.documentTypeListItem("contact").title("Contact").icon(FiMail),
               S.documentTypeListItem("experiences").title("Work Experience").icon(FiBriefcase),
               S.documentTypeListItem("education").title("Education").icon(FiBook),
@@ -68,12 +68,13 @@ export const structure: StructureResolver = (S) =>
             "category",
             "author",
             "project",
-            "skill",
-            "about",
+            "skills",
+            "abouts",
             "contact",
             "experiences",
             "education",
             "cv",
+            "media.tag"
           ].includes(item.getId()!),
       ),
     ])
