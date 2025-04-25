@@ -94,7 +94,7 @@ export async function generateMetadata({
         title: post.title,
         description: post.excerpt || `Read ${post.title} by ${post.author?.name} on my blog`,
         type: "article",
-        url: `https://itsashik.info/post/${post.slug.current}`,
+        url: `https://itsashik.dev/post/${post.slug.current}`,
         images: post.mainImage
           ? [
             {

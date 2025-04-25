@@ -31,13 +31,13 @@ export const metadata = {
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    url: 'https://www.itsashik.info',
+    url: 'https://www.itsashik.dev',
     siteName: 'Ashik Eqbal Portfolio',
     title: 'Ashik Eqbal - Software Engineer',
     description: 'Personal portfolio and blog of Ashik Eqbal, a software engineer specializing in web development.',
     images: [
       {
-        url: 'https://www.itsashik.info/og-image.jpg',
+        url: 'https://www.itsashik.dev/og-image.jpg',
         width: 1200,
         height: 630,
         alt: 'Ashik Eqbal - Software Engineer',
@@ -48,7 +48,7 @@ export const metadata = {
     card: 'summary_large_image',
     title: 'Ashik Eqbal - Software Engineer',
     description: 'Personal portfolio and blog of Ashik Eqbal, a software engineer specializing in web development.',
-    images: ['https://www.itsashik.info/og-image.jpg'],
+    images: ['https://www.itsashik.dev/og-image.jpg'],
     creator: '@me_ashikeqbal',
   },
   icons: {

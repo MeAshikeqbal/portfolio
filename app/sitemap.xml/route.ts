@@ -22,19 +22,19 @@ export async function GET(): Promise<NextResponse> {
 
     const sitemap: MetadataRoute.Sitemap = [
       {
-        url: "https://www.itsashik.info",
+        url: "https://www.itsashik.dev",
         lastModified: new Date(),
       },
       {
-        url: "https://www.itsashik.info/post",
+        url: "https://www.itsashik.dev/post",
         lastModified: new Date(),
       },
       {
-        url: "https://www.itsashik.info/projects",
+        url: "https://www.itsashik.dev/projects",
         lastModified: new Date(),
       },
       ...blogPosts.map((post) => ({
-        url: `https://www.itsashik.info/post/${encodeURIComponent(post.slug)}`,
+        url: `https://www.itsashik.dev/post/${encodeURIComponent(post.slug)}`,
         lastModified: new Date(post.publishedAt),
       })),
     ];
