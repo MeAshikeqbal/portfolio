@@ -42,7 +42,7 @@ export async function fetchGitHubData(repoUrl: string) {
 export async function fetchAllRepositories() {
   try {
     const { data: repos } = await octokit.repos.listForAuthenticatedUser({
-      visibility: "public",
+      visibility: "all",
       sort: "updated",
       per_page: 100, // Adjust this number based on how many repos you want to fetch
     })

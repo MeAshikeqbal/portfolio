@@ -38,8 +38,8 @@ export async function GET() {
   const feed = new RSS({
     title: 'Ashik Eqbal - Blog RSS Feed',
     description: 'Personal blog of Ashik Eqbal, a software engineer specializing in web development.',
-    site_url: 'https://www.itsashik.info',
-    feed_url: 'https://www.itsashik.info/rss.xml',
+    site_url: 'https://www.itsashik.dev',
+    feed_url: 'https://www.itsashik.dev/rss.xml',
     language: 'en',
   })
 
@@ -47,7 +47,7 @@ export async function GET() {
     feed.item({
       title: post.title,
       description: post.author ? `By ${post.author.name}` : '',
-      url: `https://www.itsashik.info/post/${post.slug}`,
+      url: `https://www.itsashik.dev/post/${post.slug}`,
       date: post.publishedAt,
       enclosure: post.mainImage ? {
         url: post.mainImage.asset.url,

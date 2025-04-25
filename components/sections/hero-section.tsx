@@ -24,7 +24,7 @@ const socialLinks = [
   { icon: Github, href: 'https://github.com/MeAshikEqbal' },
   { icon: Linkedin, href: 'https://linkedin.com/in/itsashik' },
   { icon: Twitter, href: 'https://x.com/me_ashikeqbal' },
-  { icon: RssIcon, href: 'https://www.itsashik.info/rss.xml' },
+  { icon: RssIcon, href: 'https://www.itsashik.dev/rss.xml' },
 ]
 
 export default function Hero() {
