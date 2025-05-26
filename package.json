@@ -52,7 +52,7 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@types/howler": "^2.2.12",
-    "@types/node": "^20",
+    "@types/node": "^22",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@types/rss": "^0.0.32",
