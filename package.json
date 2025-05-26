@@ -11,7 +11,7 @@
   "dependencies": {
     "@hookform/resolvers": "^5.0.1",
     "@marsidev/react-turnstile": "^1.1.0",
-    "@octokit/rest": "^21.0.2",
+    "@octokit/rest": "^22.0.0",
     "@portabletext/to-html": "^2.0.14",
     "@radix-ui/react-avatar": "^1.1.7",
     "@radix-ui/react-hover-card": "^1.1.13",
