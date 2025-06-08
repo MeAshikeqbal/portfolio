@@ -244,17 +244,20 @@ export default function PostClientPage({ post }: { post: Post }) {
                   )
                 },
                 link: ({ value, children }) => {
-                  const target = (value?.href || "").startsWith("http") ? "_blank" : undefined
-                  return (
-                    <a
-                      href={value?.href || "#"}
-                      target={target}
-                      rel={target === "_blank" ? "noopener noreferrer" : undefined}
-                      className="text-blue-600 hover:underline"
-                    >
-                      {children}
-                    </a>
-                  )
+                  if (value?.href) {
+                    const target = value.href.startsWith("http") ? "_blank" : undefined
+                    return (
+                      <a
+                        href={value.href}
+                        target={target}
+                        rel={target === "_blank" ? "noopener noreferrer" : undefined}
+                        className="text-blue-600 hover:underline"
+                      >
+                        {children}
+                      </a>
+                    )
+                  }
+                  return <span>{children}</span>
                 },
               },
               // If you also use the Sanity 'code' type as a BLOCK element (not just a mark),
