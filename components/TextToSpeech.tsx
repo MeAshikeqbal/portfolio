@@ -1,201 +1,257 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
-import { Howl } from "howler"
-import { Play, Pause, RotateCcw, Volume2, VolumeX, Loader2, AlertCircle } from "lucide-react"
-import { Alert, AlertDescription } from "@/components/ui/alert"
+import { useState, useRef, useEffect } from "react"
+import { Play, Pause, Download, Volume2, VolumeX, RotateCcw } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Slider } from "@/components/ui/slider"
-import { useMediaQuery } from "@/hooks/use-media-query"
+import { Card, CardContent } from "@/components/ui/card"
+import { cn } from "@/lib/utils"
 
 interface TextToSpeechProps {
   audioUrl: string
+  title?: string
+  subtitle?: string
+  showDownload?: boolean
+  showVolumeControl?: boolean
+  className?: string
+  autoPlay?: boolean
 }
 
-const speedOptions = [0.5, 1, 1.5, 2]
-
-export function TextToSpeech({ audioUrl }: TextToSpeechProps) {
+export function TextToSpeech({
+  audioUrl,
+  title = "Audio Player",
+  subtitle,
+  showDownload = true,
+  showVolumeControl = true,
+  className,
+  autoPlay = false,
+}: TextToSpeechProps) {
+  const audioRef = useRef<HTMLAudioElement>(null)
   const [isPlaying, setIsPlaying] = useState(false)
   const [currentTime, setCurrentTime] = useState(0)
   const [duration, setDuration] = useState(0)
-  const [speed, setSpeed] = useState(1)
   const [volume, setVolume] = useState(1)
+  const [isMuted, setIsMuted] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const soundRef = useRef<Howl | null>(null)
-  const isMobile = useMediaQuery("(max-width: 640px)")
 
   useEffect(() => {
-    const sound = new Howl({
-      src: [audioUrl],
-      html5: true,
-      format: ["mp3"],
-      onload: () => {
-        setIsLoading(false)
-        setDuration(sound.duration())
-      },
-      onplay: () => setIsPlaying(true),
-      onpause: () => setIsPlaying(false),
-      onstop: () => setIsPlaying(false),
-      onend: () => setIsPlaying(false),
-      onloaderror: () => {
-        setError("Failed to load audio")
-        setIsLoading(false)
-      },
-      onplayerror: () => {
-        setError("Failed to play audio")
-        setIsPlaying(false)
-      },
-    })
+    const audio = audioRef.current
+    if (!audio) return
 
-    soundRef.current = sound
+    const handleLoadedMetadata = () => {
+      setDuration(audio.duration)
+      setIsLoading(false)
+    }
+
+    const handleTimeUpdate = () => {
+      setCurrentTime(audio.currentTime)
+    }
+
+    const handleEnded = () => {
+      setIsPlaying(false)
+      setCurrentTime(0)
+    }
+
+    const handleError = () => {
+      setError("Failed to load audio file")
+      setIsLoading(false)
+    }
+
+    const handleCanPlay = () => {
+      setError(null)
+      if (autoPlay) {
+        audio.play()
+        setIsPlaying(true)
+      }
+    }
+
+    audio.addEventListener("loadedmetadata", handleLoadedMetadata)
+    audio.addEventListener("timeupdate", handleTimeUpdate)
+    audio.addEventListener("ended", handleEnded)
+    audio.addEventListener("error", handleError)
+    audio.addEventListener("canplay", handleCanPlay)
 
     return () => {
-      sound.unload()
+      audio.removeEventListener("loadedmetadata", handleLoadedMetadata)
+      audio.removeEventListener("timeupdate", handleTimeUpdate)
+      audio.removeEventListener("ended", handleEnded)
+      audio.removeEventListener("error", handleError)
+      audio.removeEventListener("canplay", handleCanPlay)
     }
-  }, [audioUrl])
+  }, [audioUrl, autoPlay])
 
-  useEffect(() => {
-    const updateTime = () => {
-      if (soundRef.current && soundRef.current.playing()) {
-        setCurrentTime(soundRef.current.seek() as number)
-        requestAnimationFrame(updateTime)
-      }
-    }
+  const togglePlayPause = () => {
+    const audio = audioRef.current
+    if (!audio) return
 
     if (isPlaying) {
-      updateTime()
-    }
-  }, [isPlaying])
-
-  useEffect(() => {
-    if (soundRef.current) {
-      soundRef.current.rate(speed)
-    }
-  }, [speed])
-
-  useEffect(() => {
-    if (soundRef.current) {
-      soundRef.current.volume(volume)
-    }
-  }, [volume])
-
-  const togglePlay = () => {
-    if (soundRef.current) {
-      if (isPlaying) {
-        soundRef.current.pause()
-      } else {
-        soundRef.current.play()
-      }
+      audio.pause()
+      setIsPlaying(false)
+    } else {
+      audio.play()
+      setIsPlaying(true)
     }
   }
 
-  const handleSliderChange = (value: number[]) => {
-    if (soundRef.current) {
-      soundRef.current.seek(value[0])
-      setCurrentTime(value[0])
+  const handleSeek = (value: number[]) => {
+    const audio = audioRef.current
+    if (!audio) return
+
+    const newTime = (value[0] / 100) * duration
+    audio.currentTime = newTime
+    setCurrentTime(newTime)
+  }
+
+  const handleVolumeChange = (value: number[]) => {
+    const audio = audioRef.current
+    if (!audio) return
+
+    const newVolume = value[0] / 100
+    audio.volume = newVolume
+    setVolume(newVolume)
+    setIsMuted(newVolume === 0)
+  }
+
+  const toggleMute = () => {
+    const audio = audioRef.current
+    if (!audio) return
+
+    if (isMuted) {
+      audio.volume = volume
+      setIsMuted(false)
+    } else {
+      audio.volume = 0
+      setIsMuted(true)
     }
+  }
+
+  const handleRestart = () => {
+    const audio = audioRef.current
+    if (!audio) return
+
+    audio.currentTime = 0
+    setCurrentTime(0)
+  }
+
+  const handleDownload = () => {
+    const link = document.createElement("a")
+    link.href = audioUrl
+    link.download = title || "audio"
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
   }
 
   const formatTime = (time: number) => {
     const minutes = Math.floor(time / 60)
     const seconds = Math.floor(time % 60)
-    return `${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`
+    return `${minutes}:${seconds.toString().padStart(2, "0")}`
   }
 
-  const restart = () => {
-    if (soundRef.current) {
-      soundRef.current.stop()
-      soundRef.current.play()
-    }
-  }
-
-  const toggleMute = () => {
-    if (volume > 0) {
-      setVolume(0)
-    } else {
-      setVolume(1)
-    }
-  }
-
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center h-12">
-        <Loader2 className="w-6 h-6 animate-spin" />
-      </div>
-    )
-  }
+  const progress = duration > 0 ? (currentTime / duration) * 100 : 0
 
   if (error) {
     return (
-      <Alert variant="destructive">
-        <AlertCircle className="h-4 w-4" />
-        <AlertDescription>{error}</AlertDescription>
-      </Alert>
+      <Card className={cn("w-full max-w-md", className)}>
+        <CardContent className="p-6">
+          <div className="text-center text-red-500">
+            <p className="font-medium">Error loading audio</p>
+            <p className="text-sm text-muted-foreground mt-1">{error}</p>
+          </div>
+        </CardContent>
+      </Card>
     )
   }
 
   return (
-    <div className="space-y-4 pt-2">
-      <div className={`flex items-center ${isMobile ? "justify-center" : "justify-between"}`}>
-        <div className="flex items-center space-x-2">
-          <Button onClick={togglePlay} variant="outline" size="icon" className="w-12 h-12 rounded-full">
-            {isPlaying ? <Pause className="w-6 h-6" /> : <Play className="w-6 h-6 ml-0.5" />}
-          </Button>
-          <Button
-            onClick={restart}
-            variant="outline"
-            size="icon"
-            className="w-10 h-10 rounded-full"
-            aria-label="Restart"
-          >
-            <RotateCcw className="w-5 h-5" />
-          </Button>
+    <Card className={cn("w-full max-w-md", className)}>
+      <CardContent className="p-6">
+        <audio ref={audioRef} src={audioUrl} preload="metadata" />
+
+        {/* Title and Subtitle */}
+        <div className="mb-4">
+          <h3 className="font-semibold text-lg">{title}</h3>
+          {subtitle && <p className="text-sm text-muted-foreground">{subtitle}</p>}
         </div>
-        {!isMobile && (
-          <div className="flex items-center space-x-2">
+
+        {/* Progress Bar */}
+        <div className="mb-4">
+          <Slider
+            value={[progress]}
+            onValueChange={handleSeek}
+            max={100}
+            step={0.1}
+            className="w-full"
+            disabled={isLoading}
+          />
+          <div className="flex justify-between text-xs text-muted-foreground mt-1">
+            <span>{formatTime(currentTime)}</span>
+            <span>{formatTime(duration)}</span>
+          </div>
+        </div>
+
+        {/* Controls */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
             <Button
-              onClick={toggleMute}
               variant="outline"
               size="icon"
-              className="w-10 h-10 rounded-full"
-              aria-label={volume > 0 ? "Mute" : "Unmute"}
+              onClick={handleRestart}
+              disabled={isLoading}
+              aria-label="Restart audio"
             >
-              {volume > 0 ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}
+              <RotateCcw className="h-4 w-4" />
             </Button>
-            <Slider
-              value={[volume]}
-              max={1}
-              step={0.1}
-              onValueChange={(value) => setVolume(value[0])}
-              className="w-24"
-            />
+
+            <Button
+              variant="default"
+              size="icon"
+              onClick={togglePlayPause}
+              disabled={isLoading}
+              aria-label={isPlaying ? "Pause audio" : "Play audio"}
+            >
+              {isLoading ? (
+                <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+              ) : isPlaying ? (
+                <Pause className="h-4 w-4" />
+              ) : (
+                <Play className="h-4 w-4" />
+              )}
+            </Button>
           </div>
-        )}
-      </div>
 
-      <div className="space-y-2">
-        <Slider value={[currentTime]} max={duration} step={0.1} onValueChange={handleSliderChange} className="w-full" />
-        <div className="flex justify-between text-sm text-muted-foreground">
-          <span>{formatTime(currentTime)}</span>
-          <span>{formatTime(duration)}</span>
+          {/* Volume Control */}
+          {showVolumeControl && (
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={toggleMute}
+                aria-label={isMuted ? "Unmute audio" : "Mute audio"}
+              >
+                {isMuted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
+              </Button>
+              <div className="w-16">
+                <Slider
+                  value={[isMuted ? 0 : volume * 100]}
+                  onValueChange={handleVolumeChange}
+                  max={100}
+                  step={1}
+                  className="w-full"
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Download Button */}
+          {showDownload && (
+            <Button variant="outline" size="icon" onClick={handleDownload} aria-label="Download audio">
+              <Download className="h-4 w-4" />
+            </Button>
+          )}
         </div>
-      </div>
-
-      <div className="flex justify-center space-x-2">
-        {speedOptions.map((option) => (
-          <Button
-            key={option}
-            onClick={() => setSpeed(option)}
-            variant={speed === option ? "default" : "outline"}
-            size="sm"
-            className="rounded-full"
-          >
-            {option}x
-          </Button>
-        ))}
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   )
 }
-
