@@ -31,7 +31,7 @@ export const blockContentType = defineType({
         {title: 'H4', value: 'h4'},
         {title: 'Quote', value: 'blockquote'},
       ],
-      lists: [{title: 'Bullet', value: 'bullet'}],
+      lists: [{title: 'Bullet', value: 'bullet'}],      
       // Marks let you mark up inline text in the Portable Text Editor
       marks: {
         // Decorators usually describe a single property – e.g. a typographic
@@ -53,6 +53,21 @@ export const blockContentType = defineType({
                 type: 'url',
               },
             ],
+          },
+          // This is for code blocks, which can be used to display code snippets
+          {
+            title: "Code",
+            name: "code",
+            type: "code",
+            options: {
+              language: "javascript",
+              languageAlternatives: [
+                { title: "Javascript", value: "javascript" },
+                { title: "yaml", value: "yaml" },
+                { title: "json", value: "json" },
+              ],
+              withFilename: true,
+            },
           },
         ],
       },
