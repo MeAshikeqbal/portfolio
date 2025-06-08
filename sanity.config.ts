@@ -14,6 +14,7 @@ import {schema} from './sanity/schemaTypes'
 import {structure} from './sanity/structure'
 import { RssIcon } from 'lucide-react'
 import {media} from 'sanity-plugin-media'
+import { codeInput } from '@sanity/code-input'
 
 
 export default defineConfig({
@@ -32,5 +33,6 @@ export default defineConfig({
     visionTool({defaultApiVersion: apiVersion}),
 
     media(),
+    codeInput(),
   ],
 })
