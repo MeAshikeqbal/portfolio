@@ -138,7 +138,6 @@ export default function PostClientPage({ post }: { post: Post }) {
 
       <div className="max-w-4xl mx-auto px-4 md:px-8">
         <div className="mb-8">
-          {/* Ensure BreadcrumbPost component is correctly implemented and imported */}
           <BreadcrumbPost postTitle={post.title} />
         </div>
         <Card className="mb-2 overflow-hidden shadow-lg">
@@ -183,7 +182,6 @@ export default function PostClientPage({ post }: { post: Post }) {
         </Card>
         {post.audioUrl ? (
           <div className="my-8">
-            {/* Ensure TextToSpeech component is correctly implemented and imported */}
             <TextToSpeech audioUrl={post.audioUrl || ""} />
           </div>
         ) : (
