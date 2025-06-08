@@ -182,7 +182,12 @@ export default function PostClientPage({ post }: { post: Post }) {
         </Card>
         {post.audioUrl ? (
           <div className="my-8">
-            <TextToSpeech audioUrl={post.audioUrl || ""} />
+            <TextToSpeech
+              title={post.title}
+              subtitle={post.excerpt || "Listen to this post"}
+              audioUrl={post.audioUrl}
+              className="max-w-3xl mx-auto"
+            />
           </div>
         ) : (
           <Alert variant="default" className="my-8">
