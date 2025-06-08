@@ -64,7 +64,7 @@ export const blockContentType = defineType({
               languageAlternatives: [
                 { title: "JavaScript", value: "javascript" },
                 { title: "YAML", value: "yaml" },
-                { title: "json", value: "json" },
+                { title: "JSON", value: "json" },
               ],
               withFilename: true,
             },
