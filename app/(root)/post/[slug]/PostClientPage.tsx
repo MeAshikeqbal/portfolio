@@ -117,9 +117,7 @@ export default function PostClientPage({ post }: { post: Post }) {
         {post.mainImage?.asset?._ref && (
           <Image
             src={
-              urlFor(post.mainImage.asset._ref).width(1920).height(1080).url() ||
-              "/placeholder.svg?width=1920&height=1080&query=blog+post+image" ||
-              "/placeholder.svg"
+              urlFor(post.mainImage.asset._ref).width(1920).height(1080).url() || "/placeholder.svg"
             }
             alt={post.mainImage.alt || post.title}
             style={{ objectFit: "cover" }}
