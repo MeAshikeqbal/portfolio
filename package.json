@@ -22,7 +22,7 @@
     "@radix-ui/react-slot": "^1.2.0",
     "@radix-ui/react-toast": "^1.2.11",
     "@sanity/code-input": "^5.1.2",
-    "@sanity/icons": "^3.5.5",
+    "@sanity/icons": "^3.7.4",
     "@sanity/image-url": "^1.1.0",
     "@sanity/vision": "^3.88.3",
     "@vercel/analytics": "^1.4.1",
