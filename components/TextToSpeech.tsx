@@ -17,6 +17,23 @@ interface TextToSpeechProps {
   autoPlay?: boolean
 }
 
+/**
+ * A client-side React audio player for a single audio URL with controls for play/pause,
+ * restart, seek, volume/mute, and optional download.
+ *
+ * Renders an HTMLAudioElement and synchronizes UI state (playback, progress, duration,
+ * volume, loading, and error) with native audio events. If `autoPlay` is true the player
+ * will attempt to start playback when the audio can play.
+ *
+ * @param audioUrl - Source URL of the audio to play.
+ * @param title - Optional heading shown above the controls. Defaults to `"Audio Player"`.
+ * @param subtitle - Optional subheading shown under the title.
+ * @param showDownload - If true, shows a download button for the audio file. Defaults to `true`.
+ * @param showVolumeControl - If true, shows mute toggle and volume slider. Defaults to `true`.
+ * @param className - Optional additional CSS classes applied to the outer Card container.
+ * @param autoPlay - If true, attempts to autoplay when the audio is ready. Defaults to `false`.
+ * @returns A JSX element containing the audio player UI or an error card if the audio fails to load.
+ */
 export function TextToSpeech({
   audioUrl,
   title = "Audio Player",
