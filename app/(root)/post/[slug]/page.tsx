@@ -59,6 +59,22 @@ async function getPost(slug: string): Promise<Post | null> {
   )
 }
 
+/**
+ * Generates page metadata for a post route based on the post's slug.
+ *
+ * Retrieves the post data for the provided slug and returns a Metadata object
+ * containing the page title, description (falls back to a brief author-based
+ * description if no excerpt is present), and Open Graph data (type "article",
+ * canonical URL, and an images array when a main image exists).
+ *
+ * If `slug` is missing or the post is not found, returns metadata with title
+ * "Post Not Found". On fetch errors, returns metadata with title
+ * "Error Loading Post".
+ *
+ * @param params - A promise resolving to an object with an optional `slug` string.
+ * @returns The generated Metadata for the post page, or a minimal metadata object
+ *          indicating not found / error states.
+ */
 export async function generateMetadata({
   params,
 }: { params: Promise<{ slug?: string }> }): Promise<Metadata | undefined> {
@@ -107,6 +123,16 @@ export async function generateMetadata({
   }
 }
 
+/**
+ * Server component for the dynamic post page — loads a post by slug and renders the client page.
+ *
+ * Fetches the post with `getPost(slug)`. If `slug` is missing or the post cannot be found, this
+ * triggers Next.js's `notFound()` to render a 404. Any fetch error is logged and treated as a
+ * not-found condition. On success, the fetched post is passed to `PostClientPage` for client-side rendering.
+ *
+ * @param params - Route parameters; expects an object with a `slug` string.
+ * @returns A Promise that resolves to the JSX element for the post page.
+ */
 export default async function PostPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
 
