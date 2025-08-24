@@ -110,6 +110,14 @@ const CodeBlock = ({
   )
 }
 
+/**
+ * Renders a client-side blog post page including hero image, author meta, categories, optional audio playback, and the post body.
+ *
+ * The component displays a fullscreen hero image when `post.mainImage.asset._ref` is present, an author card with avatar and published date, a list of category badges, and a Portable Text-rendered body that supports headings, lists, blockquotes, links, emphasis, and both inline and block code (rendered via an internal `CodeBlock` component). If `post.audioUrl` is provided, a text-to-speech player is shown; otherwise an alert indicates audio is unavailable.
+ *
+ * @param post - The post object to render. Expected to contain fields used by this component such as `title`, optional `mainImage` (with `asset._ref`), optional `author` (with `name` and optional `image`), optional `categories`, optional `publishedAt`, optional `body` (Portable Text), optional `excerpt`, and optional `audioUrl`.
+ * @returns A JSX element representing the full post page.
+ */
 export default function PostClientPage({ post }: { post: Post }) {
   return (
     <article className="max-w-full mx-auto pt-16">
