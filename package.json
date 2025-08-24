@@ -47,7 +47,7 @@
     "sanity": "^3.93.0",
     "sanity-plugin-media": "^3.0.2",
     "styled-components": "^6.1.19",
-    "tailwind-merge": "^3.3.0",
+    "tailwind-merge": "^3.3.1",
     "tailwindcss-animate": "^1.0.7",
     "zod": "^3.24.1"
   },
