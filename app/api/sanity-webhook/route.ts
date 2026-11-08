@@ -27,26 +27,25 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 
-  let body: { _type?: string; slug?: { current?: string } | string } = {}
+  let body: { _type?: string } = {}
   try {
     body = await req.json()
   } catch {
     // An empty or non-JSON body still triggers a full revalidation below.
   }
 
-  const slug = typeof body.slug === "string" ? body.slug : body.slug?.current
-
   switch (body._type) {
     case "post":
       revalidatePath("/post")
-      if (slug) revalidatePath(`/post/${slug}`)
+      // Every post page, so renamed or unpublished slugs stop serving stale copies.
+      revalidatePath("/post/[slug]", "page")
       revalidatePath("/rss.xml")
       revalidatePath("/sitemap.xml")
       revalidatePath("/")
       break
     case "project":
       revalidatePath("/projects")
-      if (slug) revalidatePath(`/projects/${slug}`)
+      revalidatePath("/projects/[slug]", "page")
       revalidatePath("/sitemap.xml")
       revalidatePath("/")
       break

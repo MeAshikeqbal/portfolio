@@ -1,8 +1,8 @@
 "use client"
 
 import { Search } from "lucide-react"
-import { usePathname, useRouter, useSearchParams } from "next/navigation"
-import { useMemo } from "react"
+import { usePathname, useSearchParams } from "next/navigation"
+import { useMemo, useState } from "react"
 import { Input } from "@/components/ui/input"
 import type { Project } from "@/lib/api"
 import { projectTags } from "@/lib/projects"
@@ -15,12 +15,20 @@ import { ProjectPanel } from "./project-panel"
  * so a filtered view can be shared or bookmarked.
  */
 export function ProjectsBrowser({ projects }: { projects: Project[] }) {
-  const router = useRouter()
   const pathname = usePathname()
   const params = useSearchParams()
-  const query = params.get("q") ?? ""
+  const urlQuery = params.get("q") ?? ""
   const status = params.get("status")
   const tag = params.get("tag")
+
+  // The input is controlled locally so filtering is instant. When the URL changes from outside
+  // (Back, or the nav link to a clean /projects), adopt its value during render.
+  const [query, setQuery] = useState(urlQuery)
+  const [syncedQuery, setSyncedQuery] = useState(urlQuery)
+  if (urlQuery !== syncedQuery) {
+    setSyncedQuery(urlQuery)
+    setQuery(urlQuery)
+  }
 
   const statuses = useMemo(
     () => [
@@ -34,18 +42,24 @@ export function ProjectsBrowser({ projects }: { projects: Project[] }) {
 
   const visible = projects.filter((project) => {
     const text = `${project.title ?? ""} ${project.description ?? ""}`.toLowerCase()
-    if (query && !text.includes(query.toLowerCase())) return false
+    const needle = query.trim().toLowerCase()
+    if (needle && !text.includes(needle)) return false
     if (status && projectStatus(project.status)?.label !== status) return false
     if (tag && !projectTags(project).includes(tag)) return false
     return true
   })
 
+  /**
+   * Shallow URL update: `history.replaceState` keeps the filters shareable without a server
+   * round trip per keystroke (Next.js syncs it into `useSearchParams`). Reads the live URL so
+   * quick successive updates don't drop each other's params.
+   */
   function update(key: string, value: string | null) {
-    const next = new URLSearchParams(params)
+    const next = new URLSearchParams(window.location.search)
     if (value) next.set(key, value)
     else next.delete(key)
     const search = next.toString()
-    router.replace(search ? `${pathname}?${search}` : pathname, { scroll: false })
+    window.history.replaceState(null, "", search ? `${pathname}?${search}` : pathname)
   }
 
   return (
@@ -60,8 +74,12 @@ export function ProjectsBrowser({ projects }: { projects: Project[] }) {
             type="search"
             placeholder="Filter projects…"
             aria-label="Filter projects"
-            defaultValue={query}
-            onChange={(event) => update("q", event.target.value.trim() || null)}
+            value={query}
+            onChange={(event) => {
+              setQuery(event.target.value)
+              setSyncedQuery(event.target.value.trim())
+              update("q", event.target.value.trim() || null)
+            }}
             className="pl-9"
           />
         </div>

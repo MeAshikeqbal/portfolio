@@ -41,7 +41,7 @@ export function formatCompact(value: number): string {
  */
 export function isCurrentPeriod(period: string | null | undefined, now = new Date()): boolean {
   if (!period) return false
-  if (/present|now|current/i.test(period)) return true
+  if (/\b(present|now|current)\b/i.test(period)) return true
   const years = period.match(/\d{4}/g)
   return years ? Number(years[years.length - 1]) >= now.getUTCFullYear() : false
 }

@@ -6,7 +6,7 @@ import { Sparkline } from "@/components/dashboard/sparkline"
 import { StatusPill } from "@/components/dashboard/status-pill"
 import { LinkPreview } from "@/components/ui/link-preview"
 import type { Project } from "@/lib/api"
-import { projectMeta } from "@/lib/projects"
+import { projectHref, projectMeta } from "@/lib/projects"
 import { projectStatus } from "@/lib/status"
 
 /** A project as a dashboard panel: status, title, description, metrics and links. */
@@ -14,6 +14,7 @@ export function ProjectPanel({ project }: { project: Project }) {
   const status = projectStatus(project.status)
   const weekly = project.githubData?.weeklyCommits ?? []
   const title = project.title ?? "Untitled project"
+  const detailsHref = project.slug ? projectHref(project) : undefined
 
   return (
     <Panel className="flex h-full flex-col transition-colors hover:border-border-strong">
@@ -27,8 +28,8 @@ export function ProjectPanel({ project }: { project: Project }) {
       />
       <div className="flex flex-1 flex-col gap-3 p-4">
         <h2 className="text-lg font-semibold tracking-tight">
-          {project.slug ? (
-            <Link href={`/projects/${project.slug}`} className="hover:underline">
+          {detailsHref ? (
+            <Link href={detailsHref} className="hover:underline">
               {title}
             </Link>
           ) : (
@@ -66,9 +67,9 @@ export function ProjectPanel({ project }: { project: Project }) {
             Live <ArrowUpRight className="size-3.5" aria-hidden />
           </LinkPreview>
         )}
-        {project.slug && (
+        {detailsHref && (
           <Link
-            href={`/projects/${project.slug}`}
+            href={detailsHref}
             className="ml-auto text-muted-foreground transition-colors hover:text-foreground"
           >
             Details →

@@ -84,26 +84,28 @@ export function ContactForm() {
       {/* Honeypot: hidden from people and assistive tech; bots tend to fill it. */}
       <div aria-hidden className="hidden">
         <label>
-          Company
+          Leave this field empty
           <input name={HONEYPOT_FIELD} tabIndex={-1} autoComplete="off" />
         </label>
       </div>
 
       {siteKey ? (
-        <div>
-          <Turnstile
-            ref={turnstile}
-            siteKey={siteKey}
-            options={{ theme: "auto", size: "flexible" }}
-          />
-          {errors.turnstileToken && (
-            <p className="mt-1.5 text-sm text-status-down-fg">{errors.turnstileToken}</p>
-          )}
-        </div>
+        <Turnstile
+          ref={turnstile}
+          siteKey={siteKey}
+          options={{ theme: "auto", size: "flexible" }}
+        />
       ) : (
-        <p className="text-sm text-muted-foreground">
-          The anti-spam check isn&apos;t available right now.
+        <p
+          role="note"
+          className="rounded-md bg-status-warn-soft px-3 py-2 text-sm text-status-warn-fg"
+        >
+          The contact form is unavailable right now. Please reach me through one of the other
+          channels instead.
         </p>
+      )}
+      {errors.turnstileToken && (
+        <p className="text-sm text-status-down-fg">{errors.turnstileToken}</p>
       )}
 
       {state.status === "error" && state.message && (
@@ -115,7 +117,7 @@ export function ContactForm() {
         </p>
       )}
 
-      <Button type="submit" disabled={pending} className="w-full sm:w-auto">
+      <Button type="submit" disabled={pending || !siteKey} className="w-full sm:w-auto">
         {pending ? "Sending…" : "Submit ticket"}
       </Button>
     </form>

@@ -2,6 +2,12 @@
  * Single source of truth for site-wide constants (URLs, identity, socials).
  * Import from here instead of hardcoding values in pages, feeds or metadata.
  */
+const socials = {
+  github: "https://github.com/MeAshikEqbal",
+  linkedin: "https://linkedin.com/in/itsashik",
+  twitter: "https://x.com/me_ashikeqbal",
+} as const
+
 export const siteConfig = {
   url: "https://www.itsashik.dev",
   name: "Ashik Eqbal",
@@ -19,11 +25,13 @@ export const siteConfig = {
    */
   availability: null as { status: "up" | "warn" | "idle"; label: string } | null,
   repo: "https://github.com/MeAshikeqbal/portfolio",
-  socials: {
-    github: "https://github.com/MeAshikEqbal",
-    linkedin: "https://linkedin.com/in/itsashik",
-    twitter: "https://x.com/me_ashikeqbal",
-  },
+  socials,
+  /** Social profiles, in display order (hero, contact, footer). */
+  socialLinks: [
+    { id: "github", label: "GitHub", href: socials.github },
+    { id: "linkedin", label: "LinkedIn", href: socials.linkedin },
+    { id: "twitter", label: "X (Twitter)", href: socials.twitter },
+  ],
   /** Primary navigation. Hash links point at home-page sections and work from any page. */
   nav: [
     { label: "Work", href: "/#services" },
