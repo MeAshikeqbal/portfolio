@@ -123,12 +123,13 @@
   --color-status-idle-fg: var(--status-idle-fg);
   --color-status-idle-soft: var(--status-idle-soft);
 
-  /* Data viz: status hues first, so charts share the site's colour meaning */
-  --color-chart-1: var(--status-up);
-  --color-chart-2: var(--status-info);
-  --color-chart-3: var(--status-warn);
-  --color-chart-4: var(--status-down);
-  --color-chart-5: var(--status-idle);
+  /*
+   * Data viz: neutral steps only. Status colours are reserved for state and are never
+   * reused as series colours. Trends are muted ink; the current value is foreground.
+   */
+  --color-chart-1: var(--foreground);
+  --color-chart-2: var(--muted-foreground);
+  --color-chart-3: var(--border-strong);
 
   /* Type */
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
