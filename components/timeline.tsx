@@ -45,7 +45,7 @@ export function TimelineItem({ year, index, children }: { year: string | null; i
 export function TimelineEntryHeader({ logo, title, badge }: { logo?: ReactNode; title: string | null; badge: string | null }) {
   return (
     <div className="flex items-center mb-4">
-      {logo && <div className="w-16 h-16 mr-4 relative flex-shrink-0">{logo}</div>}
+      {logo && <div className="w-16 h-16 mr-4 relative shrink-0">{logo}</div>}
       <div>
         <h4 className="font-semibold text-xl text-foreground my-2">{title}</h4>
         {badge && (

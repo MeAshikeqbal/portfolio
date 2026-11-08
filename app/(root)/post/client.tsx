@@ -135,7 +135,7 @@ export default function AllPostsClient({ initialPosts, categories }: AllPostsCli
                       </div>
                     )}
                   </CardHeader>
-                  <CardContent className="flex-grow p-6">
+                  <CardContent className="grow p-6">
                     <CardTitle className="text-xl font-semibold mb-2 line-clamp-2">
                       <Link href={`/post/${post.slug}`} className="hover:underline">
                         {post.title}

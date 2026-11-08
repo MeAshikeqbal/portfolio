@@ -36,7 +36,7 @@ export function ProjectCard({ project }: { project: Project }) {
             )}
           </CardTitle>
         </CardHeader>
-        <CardContent className="flex-grow">
+        <CardContent className="grow">
           <p className="text-muted-foreground mb-4 line-clamp-3">{project.description || 'No description available.'}</p>
           {project.githubData && (
             <motion.div

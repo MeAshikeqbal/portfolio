@@ -59,7 +59,7 @@ export default async function PostSection() {
                   </div>
                 )}
               </CardHeader>
-              <CardContent className="flex-grow p-6">
+              <CardContent className="grow p-6">
                 <CardTitle className="text-xl font-semibold mb-2 line-clamp-2">
                   {post.title || 'Untitled Post'}
                 </CardTitle>
