@@ -49,13 +49,18 @@ test.describe("smoke", () => {
   })
 
   test("Sanity Studio boots", async ({ page }) => {
+    // The Studio bundle is large; the first cold load on the mobile profile can take a while.
+    test.slow()
     const errors: string[] = []
     page.on("pageerror", (error) => errors.push(error.message))
     await page.goto("/studio")
-    // Signed out, the Studio shows its login screen; either way it must render without crashing.
-    await expect(page.locator("#sanity")).toBeAttached({ timeout: 30_000 })
-    await expect(page.getByText(/sign in|log in|choose login provider/i).first()).toBeVisible({
-      timeout: 30_000,
+    // Signed out, the Studio shows its login screen, or (when this origin isn't in the project's
+    // CORS list, as on localhost) its "connect this Studio" screen. Either means it booted.
+    await expect(page.locator("#sanity")).toBeAttached({ timeout: 60_000 })
+    await expect(
+      page.getByText(/sign in|log in|choose login provider|connect this studio/i).first(),
+    ).toBeVisible({
+      timeout: 60_000,
     })
     expect(errors).toEqual([])
   })
