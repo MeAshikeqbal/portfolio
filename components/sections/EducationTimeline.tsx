@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { client } from '@/sanity/lib/client'
 import { urlFor } from '@/sanity/lib/image'
-import { motion, useAnimation, Variants } from 'framer-motion'
+import { motion, useAnimation, Variants } from 'motion/react'
 import { useInView } from 'react-intersection-observer'
 
 interface Education {

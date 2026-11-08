@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import * as z from 'zod'
 import { Turnstile } from '@marsidev/react-turnstile'
 import { Button } from "@/components/ui/button"
 import {
@@ -18,21 +17,8 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { useToast } from "@/hooks/use-toast"
 import { submitContact } from '@/actions/submit-contact'
+import { contactSchema, type ContactInput } from '@/lib/contact-schema'
 
-const formSchema = z.object({
-  name: z.string().min(2, {
-    message: "Name must be at least 2 characters.",
-  }),
-  email: z.string().email({
-    message: "Please enter a valid email address.",
-  }),
-  message: z.string().min(10, {
-    message: "Message must be at least 10 characters.",
-  }),
-  turnstileToken: z.string().min(1, {
-    message: "Please complete the Cloudflare Turnstile challenge.",
-  }),
-})
 
 interface ContactFormProps {
   onSuccessfulSubmit: () => void;
@@ -41,8 +27,8 @@ interface ContactFormProps {
 export function ContactForm({ onSuccessfulSubmit }: ContactFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { toast } = useToast()
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<ContactInput>({
+    resolver: zodResolver(contactSchema),
     defaultValues: {
       name: "",
       email: "",
@@ -51,7 +37,7 @@ export function ContactForm({ onSuccessfulSubmit }: ContactFormProps) {
     },
   })
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(values: ContactInput) {
     setIsSubmitting(true)
     try {
       const result = await submitContact(values)

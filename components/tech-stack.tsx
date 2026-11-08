@@ -2,7 +2,7 @@
 
 import { useRef } from 'react'
 import { Card, CardContent } from "@/components/ui/card"
-import { motion, useInView } from 'framer-motion'
+import { motion, useInView } from 'motion/react'
 import { SkillIcon } from '@/components/skill-icon'
 
 interface Skill {

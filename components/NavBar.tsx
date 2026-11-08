@@ -7,7 +7,7 @@ import { Moon, Sun, Menu, X, ChevronLeft } from "lucide-react"
 import { useTheme } from "next-themes"
 import { Button } from "@/components/ui/button"
 import { AnimatedThemeSwitch } from "./theme-toggle"
-import { motion, AnimatePresence } from "framer-motion"
+import { motion, AnimatePresence } from "motion/react"
 
 const homeNavItems = [
   { name: "Home", path: "/#Home" },
