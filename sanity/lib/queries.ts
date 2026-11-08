@@ -8,7 +8,8 @@ import { defineQuery } from "next-sanity"
 const published = `!(_id in path("drafts.**"))`
 
 /** First 200 characters of the post body as plain text, unless an explicit excerpt is set. */
-const excerpt = `coalesce(excerpt, array::join(string::split(pt::text(body), "")[0...200], ""))`
+// Paragraphs only, so headings like "Introduction" don't lead the excerpt.
+const excerpt = `coalesce(excerpt, array::join(string::split(pt::text(body[_type == "block" && style == "normal"]), "")[0...200], ""))`
 
 const postCard = `
   _id,

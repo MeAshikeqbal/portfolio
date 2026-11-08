@@ -46,6 +46,8 @@
   --status-idle-fg: oklch(0.48 0.016 286);
   --status-idle-soft: oklch(0.955 0.003 286);
 
+  --icon-plate: oklch(1 0 0);
+
   --radius: 0.375rem;
 }
 
@@ -78,6 +80,9 @@
   --status-idle: oklch(0.6 0.01 286);
   --status-idle-fg: oklch(0.71 0.012 286);
   --status-idle-soft: oklch(0.25 0.006 286);
+
+  /* Brand logos are drawn for light backgrounds; give them a light tile in dark mode. */
+  --icon-plate: oklch(0.93 0.004 286);
 }
 
 @theme inline {
@@ -89,6 +94,7 @@
   --color-border: var(--border);
   --color-border-strong: var(--border-strong);
   --color-grid: var(--grid);
+  --color-icon-plate: var(--icon-plate);
   --color-ring: var(--ring);
 
   /* shadcn/ui compatibility: stock components map onto the monochrome palette */
@@ -254,4 +260,10 @@
 .prose :where(code):not(:where(pre *))::before,
 .prose :where(code):not(:where(pre *))::after {
   content: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
 }

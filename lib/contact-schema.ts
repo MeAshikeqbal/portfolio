@@ -19,3 +19,6 @@ export const contactSchema = z.object({
 })
 
 export type ContactInput = z.infer<typeof contactSchema>
+
+/** Name of the hidden honeypot field. Real visitors never see or fill it. */
+export const HONEYPOT_FIELD = "company"
