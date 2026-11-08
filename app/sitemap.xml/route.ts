@@ -1,6 +1,7 @@
 import { MetadataRoute } from "next";
 import { NextResponse } from "next/server";
 import { client } from "@/sanity/lib/client";
+import { absoluteUrl } from "@/lib/site";
 
 type BlogPost = {
   slug: string;
@@ -22,19 +23,19 @@ export async function GET(): Promise<NextResponse> {
 
     const sitemap: MetadataRoute.Sitemap = [
       {
-        url: "https://www.itsashik.dev",
+        url: absoluteUrl("/"),
         lastModified: new Date(),
       },
       {
-        url: "https://www.itsashik.dev/post",
+        url: absoluteUrl("/post"),
         lastModified: new Date(),
       },
       {
-        url: "https://www.itsashik.dev/projects",
+        url: absoluteUrl("/projects"),
         lastModified: new Date(),
       },
       ...blogPosts.map((post) => ({
-        url: `https://www.itsashik.dev/post/${encodeURIComponent(post.slug)}`,
+        url: absoluteUrl(`/post/${encodeURIComponent(post.slug)}`),
         lastModified: new Date(post.publishedAt),
       })),
     ];

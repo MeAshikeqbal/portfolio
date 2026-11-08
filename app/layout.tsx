@@ -1,5 +1,7 @@
 import { Roboto, Roboto_Mono } from 'next/font/google';
+import type { Metadata } from 'next';
 import "./globals.css";
+import { siteConfig } from '@/lib/site';
 import { ThemeProvider } from "@/components/theme-provider";
 import { ToastProvider } from '@/components/ui/toast';
 import { Toaster } from '@/components/ui/toaster';
@@ -20,36 +22,38 @@ const robotoMono = Roboto_Mono({
   display: 'swap',
 });
 
-export const metadata = {
+export const metadata: Metadata = {
+  metadataBase: new URL(siteConfig.url),
   title: {
-    default: 'Ashik Eqbal - Portfolio',
+    default: `${siteConfig.name} - Portfolio`,
+    template: `%s | ${siteConfig.name}`,
   },
-  description: 'Personal portfolio and blog of Ashik Eqbal, a software engineer specializing in web development.',
+  description: siteConfig.description,
   keywords: ['Ashik Eqbal', 'Software Engineer', 'Web Development', 'Portfolio', 'Blog'],
-  authors: [{ name: 'Ashik Eqbal' }],
-  creator: 'Ashik Eqbal',
+  authors: [{ name: siteConfig.name, url: siteConfig.url }],
+  creator: siteConfig.name,
   openGraph: {
     type: 'website',
-    locale: 'en_US',
-    url: 'https://www.itsashik.dev',
-    siteName: 'Ashik Eqbal Portfolio',
-    title: 'Ashik Eqbal - Software Engineer',
-    description: 'Personal portfolio and blog of Ashik Eqbal, a software engineer specializing in web development.',
+    locale: siteConfig.locale,
+    url: siteConfig.url,
+    siteName: `${siteConfig.name} Portfolio`,
+    title: siteConfig.title,
+    description: siteConfig.description,
     images: [
       {
-        url: 'https://www.itsashik.dev/og-image.jpg',
+        url: siteConfig.ogImage,
         width: 1200,
         height: 630,
-        alt: 'Ashik Eqbal - Software Engineer',
+        alt: siteConfig.title,
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Ashik Eqbal - Software Engineer',
-    description: 'Personal portfolio and blog of Ashik Eqbal, a software engineer specializing in web development.',
-    images: ['https://www.itsashik.dev/og-image.jpg'],
-    creator: '@me_ashikeqbal',
+    title: siteConfig.title,
+    description: siteConfig.description,
+    images: [siteConfig.ogImage],
+    creator: siteConfig.twitterHandle,
   },
   icons: {
     icon: [
@@ -61,13 +65,6 @@ export const metadata = {
     ],
   },
   manifest: '/site.webmanifest',
-  feed: [
-    {
-      url: '/rss.xml',
-      type: 'application/rss+xml',
-      title: 'Ashik Eqbal - Blog RSS Feed',
-    },
-  ],
 };
 
 export default function RootLayout({
@@ -79,6 +76,8 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning className={`${roboto.variable} ${robotoMono.variable}`}>
       <head>
         <link rel="sitemap" type="application/xml" href="/sitemap.xml" />
+        {/* In <head> rather than metadata.alternates, which child pages' canonicals would override. */}
+        <link rel="alternate" type="application/rss+xml" title={`${siteConfig.name} - Blog RSS Feed`} href="/rss.xml" />
       </head>
       <body className="font-sans antialiased min-h-screen flex flex-col">
         <ToastProvider>

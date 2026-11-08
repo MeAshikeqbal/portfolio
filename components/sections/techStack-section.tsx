@@ -1,7 +1,6 @@
 import { client } from '@/sanity/lib/client'
 import TechStack from '@/components/tech-stack'
 
-export const revalidate = 60
 
 interface Skill {
   name: string

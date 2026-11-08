@@ -5,6 +5,7 @@ import { motion } from 'framer-motion'
 import { FileDown, Github, Linkedin, RssIcon, Twitter } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { client } from '@/sanity/lib/client'
+import { siteConfig } from '@/lib/site'
 
 const useCvUrl = () => {
   const [cvUrl, setCvUrl] = useState<string | null>(null)
@@ -21,10 +22,10 @@ const useCvUrl = () => {
 }
 
 const socialLinks = [
-  { icon: Github, href: 'https://github.com/MeAshikEqbal' },
-  { icon: Linkedin, href: 'https://linkedin.com/in/itsashik' },
-  { icon: Twitter, href: 'https://x.com/me_ashikeqbal' },
-  { icon: RssIcon, href: 'https://www.itsashik.dev/rss.xml' },
+  { icon: Github, href: siteConfig.socials.github },
+  { icon: Linkedin, href: siteConfig.socials.linkedin },
+  { icon: Twitter, href: siteConfig.socials.twitter },
+  { icon: RssIcon, href: '/rss.xml' },
 ]
 
 export default function Hero() {

@@ -4,6 +4,7 @@ import { client } from "@/sanity/lib/client"
 import { urlFor } from "@/sanity/lib/image"
 import type { PortableTextBlock } from "@portabletext/types"
 import PostClientPage from "./PostClientPage"
+import { absoluteUrl } from "@/lib/site"
 
 export const revalidate = 60
 
@@ -34,7 +35,6 @@ interface Post {
   publishedAt?: string
   body?: PortableTextBlock[]
   excerpt?: string
-  audioUrl?: string
 }
 
 async function getPost(slug: string): Promise<Post | null> {
@@ -51,8 +51,7 @@ async function getPost(slug: string): Promise<Post | null> {
       categories[]->{title},
       publishedAt,
       body,
-      excerpt,
-      "audioUrl": audioFile.asset->url
+      excerpt
     }
   `,
     { slug },
@@ -98,11 +97,12 @@ export async function generateMetadata({
     return {
       title: post.title,
       description: post.excerpt || `Read ${post.title} by ${post.author?.name} on my blog`,
+      alternates: { canonical: `/post/${post.slug.current}` },
       openGraph: {
         title: post.title,
         description: post.excerpt || `Read ${post.title} by ${post.author?.name} on my blog`,
         type: "article",
-        url: `https://itsashik.dev/post/${post.slug.current}`,
+        url: absoluteUrl(`/post/${post.slug.current}`),
         images: post.mainImage
           ? [
               {

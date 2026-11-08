@@ -2,14 +2,12 @@
 
 import type { PortableTextBlock } from "@portabletext/types"
 import Image from "next/image"
-import { AlertCircle, CalendarIcon, TagIcon, Copy, Check } from "lucide-react"
+import { CalendarIcon, TagIcon, Copy, Check } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { BreadcrumbPost } from "@/components/post-breadcrumb"
-import { TextToSpeech } from "@/components/TextToSpeech"
-import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter"
 import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism"
 import { useState } from "react"
@@ -43,7 +41,6 @@ interface Post {
   publishedAt?: string
   body?: PortableTextBlock[]
   excerpt?: string
-  audioUrl?: string
 }
 
 
@@ -111,11 +108,11 @@ const CodeBlock = ({
 }
 
 /**
- * Renders a client-side blog post page including hero image, author meta, categories, optional audio playback, and the post body.
+ * Renders a client-side blog post page including hero image, author meta, categories and the post body.
  *
- * The component displays a fullscreen hero image when `post.mainImage.asset._ref` is present, an author card with avatar and published date, a list of category badges, and a Portable Text-rendered body that supports headings, lists, blockquotes, links, emphasis, and both inline and block code (rendered via an internal `CodeBlock` component). If `post.audioUrl` is provided, a text-to-speech player is shown; otherwise an alert indicates audio is unavailable.
+ * The component displays a fullscreen hero image when `post.mainImage.asset._ref` is present, an author card with avatar and published date, a list of category badges, and a Portable Text-rendered body that supports headings, lists, blockquotes, links, emphasis, and both inline and block code (rendered via an internal `CodeBlock` component).
  *
- * @param post - The post object to render. Expected to contain fields used by this component such as `title`, optional `mainImage` (with `asset._ref`), optional `author` (with `name` and optional `image`), optional `categories`, optional `publishedAt`, optional `body` (Portable Text), optional `excerpt`, and optional `audioUrl`.
+ * @param post - The post object to render. Expected to contain fields used by this component such as `title`, optional `mainImage` (with `asset._ref`), optional `author` (with `name` and optional `image`), optional `categories`, optional `publishedAt`, optional `body` (Portable Text), and optional `excerpt`.
  * @returns A JSX element representing the full post page.
  */
 export default function PostClientPage({ post }: { post: Post }) {
@@ -186,21 +183,6 @@ export default function PostClientPage({ post }: { post: Post }) {
             </div>
           </CardContent>
         </Card>
-        {post.audioUrl ? (
-          <div className="my-8">
-            <TextToSpeech
-              title={post.title}
-              subtitle={post.excerpt || "Listen to this post"}
-              audioUrl={post.audioUrl}
-              className="max-w-3xl mx-auto"
-            />
-          </div>
-        ) : (
-          <Alert variant="default" className="my-8">
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription>Audio content for this post is not available at this moment.</AlertDescription>
-          </Alert>
-        )}
         <div className="prose prose-lg max-w-none dark:prose-invert mx-auto">
           <PortableText
             value={post.body || []}

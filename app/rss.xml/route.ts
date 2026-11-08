@@ -1,6 +1,7 @@
 import RSS from 'rss'
 import { NextResponse } from 'next/server'
 import { client } from '@/sanity/lib/client'
+import { absoluteUrl, siteConfig } from '@/lib/site'
 
 type BlogPost = {
   slug: string
@@ -36,10 +37,10 @@ export async function GET() {
   const blogPosts = await getBlogPosts()
 
   const feed = new RSS({
-    title: 'Ashik Eqbal - Blog RSS Feed',
-    description: 'Personal blog of Ashik Eqbal, a software engineer specializing in web development.',
-    site_url: 'https://www.itsashik.dev',
-    feed_url: 'https://www.itsashik.dev/rss.xml',
+    title: `${siteConfig.name} - Blog RSS Feed`,
+    description: siteConfig.description,
+    site_url: siteConfig.url,
+    feed_url: absoluteUrl('/rss.xml'),
     language: 'en',
   })
 
@@ -47,7 +48,7 @@ export async function GET() {
     feed.item({
       title: post.title,
       description: post.author ? `By ${post.author.name}` : '',
-      url: `https://www.itsashik.dev/post/${post.slug}`,
+      url: absoluteUrl(`/post/${post.slug}`),
       date: post.publishedAt,
       enclosure: post.mainImage ? {
         url: post.mainImage.asset.url,

@@ -1,11 +1,13 @@
+import type { Metadata } from 'next'
 import { getPosts, getCategories } from '@/lib/api'
 import AllPostsClient from './client'
 
 export const revalidate = 60
 
-export const metadata = {
-  title: 'Ashik Eqbal - All Blog Posts',
+export const metadata: Metadata = {
+  title: 'All Blog Posts',
   description: 'All posts from Ashik Eqbal\'s blog.',
+  alternates: { canonical: '/post' },
 };
 
 
