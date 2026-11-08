@@ -1,7 +1,14 @@
+import type { Metadata } from "next"
 import { fetchProjects } from "@/lib/api"
 import { ProjectCard } from "@/components/project-card"
 
 export const revalidate = 60
+
+export const metadata: Metadata = {
+  title: "Projects",
+  description: "Open-source and personal projects by Ashik Eqbal.",
+  alternates: { canonical: "/projects" },
+}
 
 export default async function ProjectsPage() {
   const projects = await fetchProjects()

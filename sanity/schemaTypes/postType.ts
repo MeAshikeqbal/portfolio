@@ -50,15 +50,6 @@ export const postType = defineType({
       name: "body",
       type: "blockContent",
     }),
-    defineField({
-      name: "audioFile",
-      title: "Audio File",
-      type: "file",
-      options: {
-        accept: "audio/*",
-      },
-      description: "Upload the generated audio file for text-to-speech",
-    }),
   ],
   preview: {
     select: {
