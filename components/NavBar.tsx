@@ -1,13 +1,11 @@
 "use client"
 
-import { useHydrated } from "@/hooks/use-hydrated"
 import { useState, useEffect, useCallback } from "react"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
-import { Moon, Sun, Menu, X, ChevronLeft } from "lucide-react"
-import { useTheme } from "next-themes"
+import { Menu, X, ChevronLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { AnimatedThemeSwitch } from "./theme-toggle"
+import { ThemeToggle } from "./theme-toggle"
 import { motion, AnimatePresence } from "motion/react"
 
 const homeNavItems = [
@@ -23,8 +21,6 @@ export function NavBar() {
   const pathname = usePathname()
   const router = useRouter()
   const [isOpen, setIsOpen] = useState(false)
-  const { theme, setTheme } = useTheme()
-  const mounted = useHydrated()
   const [activeSection, setActiveSection] = useState("")
 
   const handleScroll = useCallback(() => {
@@ -128,7 +124,7 @@ export function NavBar() {
                 )}
               </Link>
             ))}
-            {mounted && <AnimatedThemeSwitch />}
+            <ThemeToggle className="ml-2" />
           </div>
           <div className="md:hidden">
             <Button
@@ -183,18 +179,10 @@ export function NavBar() {
                   {item.name}
                 </Link>
               ))}
-              {mounted && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-                  className="w-full justify-start"
-                >
-                  <Sun className="h-[1.2rem] w-[1.2rem] scale-100 rotate-0 transition-all dark:scale-0 dark:-rotate-90" />
-                  <Moon className="absolute h-[1.2rem] w-[1.2rem] scale-0 rotate-90 transition-all dark:scale-100 dark:rotate-0" />
-                  <span className="ml-2">Toggle theme</span>
-                </Button>
-              )}
+              <div className="flex items-center justify-between px-3 py-2">
+                <span className="label-caps">Theme</span>
+                <ThemeToggle />
+              </div>
             </div>
           </motion.div>
         )}
