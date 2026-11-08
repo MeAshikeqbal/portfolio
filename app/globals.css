@@ -3,7 +3,8 @@
 
 @plugin "@tailwindcss/typography";
 
-@custom-variant dark (&:where(.dark, .dark *));
+/* `.light` re-scopes light tokens inside a dark page (used by /styleguide side-by-side previews). */
+@custom-variant dark (&:where(.dark, .dark *):not(:where(.light, .light *)));
 
 /*
  * Design tokens — "homelab dashboard".
@@ -14,7 +15,8 @@
  * `-soft` background and on surface) and a `-soft` tint. tests/unit/tokens.test.ts enforces
  * these ratios — run it after changing any value here.
  */
-:root {
+:root,
+.light {
   color-scheme: light;
 
   --background: oklch(0.985 0.002 247);
@@ -235,4 +237,17 @@
   --tw-prose-pre-bg: var(--surface-2);
   --tw-prose-th-borders: var(--border-strong);
   --tw-prose-td-borders: var(--border);
+}
+
+/* Inline code: a muted chip instead of the plugin's literal backticks. */
+.prose :where(code):not(:where(pre *)) {
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  padding: 0.125rem 0.375rem;
+  font-weight: 500;
+}
+
+.prose :where(code):not(:where(pre *))::before,
+.prose :where(code):not(:where(pre *))::after {
+  content: none;
 }
