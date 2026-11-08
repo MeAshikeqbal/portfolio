@@ -1,8 +1,9 @@
 "use client"
 
+import { useHydrated } from "@/hooks/use-hydrated"
 import { useState, useEffect, useCallback } from "react"
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { Moon, Sun, Menu, X, ChevronLeft } from "lucide-react"
 import { useTheme } from "next-themes"
 import { Button } from "@/components/ui/button"
@@ -20,9 +21,10 @@ const homeNavItems = [
 
 export function NavBar() {
   const pathname = usePathname()
+  const router = useRouter()
   const [isOpen, setIsOpen] = useState(false)
   const { theme, setTheme } = useTheme()
-  const [mounted, setMounted] = useState(false)
+  const mounted = useHydrated()
   const [activeSection, setActiveSection] = useState("")
 
   const handleScroll = useCallback(() => {
@@ -42,7 +44,6 @@ export function NavBar() {
   }, [])
 
   useEffect(() => {
-    setMounted(true)
     if (pathname === "/") {
       window.addEventListener("scroll", handleScroll)
       return () => window.removeEventListener("scroll", handleScroll)
@@ -62,7 +63,7 @@ export function NavBar() {
         element.scrollIntoView({ behavior: "smooth" })
       }
     } else {
-      window.location.href = path
+      router.push(path)
     }
     closeMenu()
   }

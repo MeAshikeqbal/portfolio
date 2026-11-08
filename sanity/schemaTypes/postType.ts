@@ -1,4 +1,4 @@
-import { DocumentTextIcon } from "@sanity/icons"
+import { DocumentTextIcon } from "@sanity/icons/DocumentText"
 import { defineArrayMember, defineField, defineType } from "sanity"
 
 export const postType = defineType({
@@ -10,6 +10,7 @@ export const postType = defineType({
     defineField({
       name: "title",
       type: "string",
+      validation: (rule) => rule.required(),
     }),
     defineField({
       name: "slug",
@@ -17,6 +18,14 @@ export const postType = defineType({
       options: {
         source: "title",
       },
+      validation: (rule) => rule.required(),
+    }),
+    defineField({
+      name: "excerpt",
+      type: "text",
+      rows: 3,
+      description: "Short summary for cards, feeds and search results. Defaults to the start of the post.",
+      validation: (rule) => rule.max(200),
     }),
     defineField({
       name: "author",
@@ -30,11 +39,16 @@ export const postType = defineType({
         hotspot: true,
       },
       fields: [
-        {
+        defineField({
           name: "alt",
           type: "string",
           title: "Alternative text",
-        },
+          validation: (rule) =>
+            rule.custom((alt, context) => {
+              const image = context.parent as { asset?: unknown } | undefined
+              return image?.asset && !alt ? "Alt text is required when an image is set" : true
+            }),
+        }),
       ],
     }),
     defineField({
@@ -45,10 +59,21 @@ export const postType = defineType({
     defineField({
       name: "publishedAt",
       type: "datetime",
+      initialValue: () => new Date().toISOString(),
+      validation: (rule) => rule.required(),
+    }),
+    defineField({
+      name: "featured",
+      type: "boolean",
+      initialValue: false,
     }),
     defineField({
       name: "body",
       type: "blockContent",
+    }),
+    defineField({
+      name: "seo",
+      type: "seo",
     }),
   ],
   preview: {

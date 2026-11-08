@@ -50,3 +50,6 @@ public/Thumbs.db
 /playwright-report/
 /test-results/
 /blob-report/
+
+# sanity typegen intermediate
+/schema.json

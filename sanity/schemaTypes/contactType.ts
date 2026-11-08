@@ -1,4 +1,4 @@
-import { AddCommentIcon } from "@sanity/icons";
+import { AddCommentIcon } from "@sanity/icons/AddComment"
 import { defineField, defineType } from "sanity";
 
 export const contactType = defineType({

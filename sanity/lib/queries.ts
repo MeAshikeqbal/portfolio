@@ -1,0 +1,106 @@
+import { defineQuery } from "next-sanity"
+
+/**
+ * All GROQ queries live here. `npm run typegen` turns each `defineQuery` into a
+ * typed result in `sanity.types.ts`, which `sanityFetch` picks up automatically.
+ */
+
+const published = `!(_id in path("drafts.**"))`
+
+/** First 200 characters of the post body as plain text, unless an explicit excerpt is set. */
+const excerpt = `coalesce(excerpt, array::join(string::split(pt::text(body), "")[0...200], ""))`
+
+const postCard = `
+  _id,
+  title,
+  "slug": slug.current,
+  mainImage,
+  publishedAt,
+  "excerpt": ${excerpt},
+  categories[]->{ _id, title },
+  author->{ name }
+`
+
+export const POSTS_QUERY = defineQuery(`
+  *[_type == "post" && ${published} && defined(slug.current)] | order(publishedAt desc) { ${postCard} }
+`)
+
+export const LATEST_POSTS_QUERY = defineQuery(`
+  *[_type == "post" && ${published} && defined(slug.current)] | order(publishedAt desc) [0...3] { ${postCard} }
+`)
+
+export const CATEGORIES_QUERY = defineQuery(`
+  *[_type == "category"] | order(title asc) { _id, title }
+`)
+
+export const POST_QUERY = defineQuery(`
+  *[_type == "post" && ${published} && slug.current == $slug][0] {
+    title,
+    "slug": slug.current,
+    author->{ name, image },
+    mainImage,
+    categories[]->{ _id, title },
+    publishedAt,
+    body,
+    excerpt
+  }
+`)
+
+export const POST_SLUGS_QUERY = defineQuery(`
+  *[_type == "post" && ${published} && defined(slug.current)].slug.current
+`)
+
+export const PROJECTS_QUERY = defineQuery(`
+  *[_type == "project" && ${published}] | order(coalesce(order, 999) asc, _createdAt desc) {
+    _id,
+    title,
+    "slug": slug.current,
+    description,
+    mainImage,
+    publishedAt,
+    github,
+    url,
+    featured,
+    status,
+    tech,
+    githubData
+  }
+`)
+
+export const SKILLS_QUERY = defineQuery(`
+  *[_type == "skills"] | order(name asc) { _id, name, icon }
+`)
+
+export const EDUCATION_QUERY = defineQuery(`
+  *[_type == "education"] | order(year desc) { _id, year, degree, school, schoolLogo, desc }
+`)
+
+export const EXPERIENCES_QUERY = defineQuery(`
+  *[_type == "experiences"] | order(year desc) {
+    _id,
+    year,
+    works[]{ _key, name, company, copmanyLogo, desc }
+  }
+`)
+
+export const CV_URL_QUERY = defineQuery(`
+  *[_type == "cv"][0].cvFile.asset->url
+`)
+
+export const FEED_POSTS_QUERY = defineQuery(`
+  *[_type == "post" && ${published} && defined(slug.current)] | order(publishedAt desc) {
+    title,
+    "slug": slug.current,
+    publishedAt,
+    _updatedAt,
+    "excerpt": ${excerpt},
+    author->{ name },
+    "categories": categories[]->title,
+    "image": mainImage.asset->{ url, "mimeType": mimeType }
+  }
+`)
+
+/** Includes drafts on purpose: the GitHub sync updates every project with a repo. */
+export const GITHUB_PROJECTS_QUERY = defineQuery(`
+  *[_type == "project" && defined(github)] { _id, title, github }
+`)

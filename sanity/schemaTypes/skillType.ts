@@ -1,5 +1,5 @@
 import { defineType } from "sanity";
-import { BarChartIcon } from "@sanity/icons";
+import { BarChartIcon } from "@sanity/icons/BarChart"
 
 export const skillType = defineType({
   name: "skills",

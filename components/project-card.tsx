@@ -6,36 +6,14 @@ import { Button } from "@/components/ui/button"
 import { GitCommit, Globe, Scale, Star } from 'lucide-react'
 import { FaGithub as Github } from 'react-icons/fa6'
 import { motion } from 'motion/react'
-
-export interface Project {
-  _id: string
-  title: string
-  slug: {
-    current: string
-  }
-  description: string
-  mainImage: MainImage
-  publishedAt: string
-  github: string
-  url: string
-  githubData?: {
-    stars: number
-    commits: number
-    license: string
-  }
-}
-
-interface MainImage {
-  asset: {
-    _ref: string
-  }
-  alt?: string
-}
+import type { Project } from '@/lib/api'
 
 export function ProjectCard({ project }: { project: Project }) {
   if (!project) {
     return null;
   }
+
+  const previewUrl = project.url || project.github
 
   return (
     <motion.div
@@ -46,30 +24,34 @@ export function ProjectCard({ project }: { project: Project }) {
       <Card className="flex flex-col h-full overflow-hidden group transition-shadow duration-300 hover:shadow-lg">
         <CardHeader>
           <CardTitle>
-            <LinkPreview
-              url={project.url || project.github}
-              className="font-bold text-xl hover:underline transition-colors duration-200"
-            >
-              {project.title || 'Untitled Project'}
-            </LinkPreview>
+            {previewUrl ? (
+              <LinkPreview
+                url={previewUrl}
+                className="font-bold text-xl hover:underline transition-colors duration-200"
+              >
+                {project.title || 'Untitled Project'}
+              </LinkPreview>
+            ) : (
+              <span className="font-bold text-xl">{project.title || 'Untitled Project'}</span>
+            )}
           </CardTitle>
         </CardHeader>
         <CardContent className="flex-grow">
           <p className="text-muted-foreground mb-4 line-clamp-3">{project.description || 'No description available.'}</p>
-          {project.githubData && Object.keys(project.githubData).length > 0 && (
+          {project.githubData && (
             <motion.div
               className="flex flex-wrap gap-4 text-sm text-muted-foreground"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.2 }}
             >
-              {project.githubData.stars !== undefined && (
+              {project.githubData.stars != null && (
                 <div className="flex items-center">
                   <Star className="w-4 h-4 mr-1" />
                   {project.githubData.stars} stars
                 </div>
               )}
-              {project.githubData.commits !== undefined && (
+              {project.githubData.commits != null && (
                 <div className="flex items-center">
                   <GitCommit className="w-4 h-4 mr-1" />
                   {project.githubData.commits} commits

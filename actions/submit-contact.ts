@@ -1,6 +1,6 @@
 'use server'
 
-import { client } from '@/sanity/lib/client'
+import { writeClient } from '@/sanity/lib/write-client'
 import { contactSchema, type ContactInput } from '@/lib/contact-schema'
 
 export async function submitContact(formData: ContactInput) {
@@ -34,7 +34,7 @@ export async function submitContact(formData: ContactInput) {
   }
 
   try {
-    await client.create({
+    await writeClient.create({
       _type: 'contact',
       name,
       email,

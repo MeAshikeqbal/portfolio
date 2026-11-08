@@ -1,6 +1,6 @@
 "use client"
 
-import type { PortableTextBlock } from "@portabletext/types"
+import type { Post } from "@/lib/api"
 import Image from "next/image"
 import { CalendarIcon, TagIcon, Copy, Check } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -13,36 +13,6 @@ import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism"
 import { useState } from "react"
 import { urlFor } from "@/sanity/lib/image"
 import { PortableText } from "@portabletext/react"
-
-interface Author {
-  name: string
-  image?: {
-    asset: {
-      _ref: string
-    }
-  }
-}
-
-interface Post {
-  title: string
-  slug: {
-    current: string
-  }
-  author?: Author
-  mainImage?: {
-    asset: {
-      _ref: string
-    }
-    alt?: string
-  }
-  categories?: {
-    title: string
-  }[]
-  publishedAt?: string
-  body?: PortableTextBlock[]
-  excerpt?: string
-}
-
 
 // Code Block Component
 const CodeBlock = ({
@@ -110,7 +80,7 @@ const CodeBlock = ({
 /**
  * Renders a client-side blog post page including hero image, author meta, categories and the post body.
  *
- * The component displays a fullscreen hero image when `post.mainImage.asset._ref` is present, an author card with avatar and published date, a list of category badges, and a Portable Text-rendered body that supports headings, lists, blockquotes, links, emphasis, and both inline and block code (rendered via an internal `CodeBlock` component).
+ * The component displays a fullscreen hero image when `post.mainImage.asset` is present, an author card with avatar and published date, a list of category badges, and a Portable Text-rendered body that supports headings, lists, blockquotes, links, emphasis, and both inline and block code (rendered via an internal `CodeBlock` component).
  *
  * @param post - The post object to render. Expected to contain fields used by this component such as `title`, optional `mainImage` (with `asset._ref`), optional `author` (with `name` and optional `image`), optional `categories`, optional `publishedAt`, optional `body` (Portable Text), and optional `excerpt`.
  * @returns A JSX element representing the full post page.
@@ -119,12 +89,12 @@ export default function PostClientPage({ post }: { post: Post }) {
   return (
     <article className="max-w-full mx-auto pt-16">
       <div className="relative w-full h-[30vh] md:h-[40vh] lg:h-[70vh] mb-12">
-        {post.mainImage?.asset?._ref && (
+        {post.mainImage?.asset && (
           <Image
             src={
-              urlFor(post.mainImage.asset._ref).width(1920).height(1080).url() || "/placeholder.svg"
+              urlFor(post.mainImage).width(1920).height(1080).url()
             }
-            alt={post.mainImage.alt || post.title}
+            alt={post.mainImage.alt || post.title || ""}
             style={{ objectFit: "cover" }}
             className="transition-transform duration-300"
             fill
@@ -141,7 +111,7 @@ export default function PostClientPage({ post }: { post: Post }) {
 
       <div className="max-w-4xl mx-auto px-4 md:px-8">
         <div className="mb-8">
-          <BreadcrumbPost postTitle={post.title} />
+          <BreadcrumbPost postTitle={post.title ?? undefined} />
         </div>
         <Card className="mb-2 overflow-hidden shadow-lg">
           <CardContent className="p-6 md:p-8">
