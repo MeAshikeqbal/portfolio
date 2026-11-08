@@ -1,6 +1,10 @@
 import type { Metadata } from "next"
+import { Suspense } from "react"
+import { Container, Section } from "@/components/dashboard/layout"
+import { SectionHeader } from "@/components/dashboard/section-header"
+import { ProjectPanel } from "@/components/projects/project-panel"
+import { ProjectsBrowser } from "@/components/projects/projects-browser"
 import { getProjects } from "@/lib/api"
-import { ProjectCard } from "@/components/project-card"
 
 export const metadata: Metadata = {
   title: "Projects",
@@ -12,15 +16,31 @@ export default async function ProjectsPage() {
   const projects = await getProjects()
 
   return (
-    <div className="min-h-screen bg-background py-16">
-      <div className="container mx-auto px-4">
-        <h1 className="mb-12 text-center text-4xl font-bold text-foreground">All Projects</h1>
-        <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
-          {projects.map((project) => (
-            <ProjectCard key={project._id} project={project} />
-          ))}
-        </div>
-      </div>
-    </div>
+    <main>
+      <Section className="pt-12 sm:pt-16">
+        <Container>
+          <SectionHeader
+            as="h1"
+            eyebrow="services"
+            title="Projects"
+            description="Everything I've built and run. GitHub stats sync daily."
+          />
+          {/* The browser reads filters from the URL; the static fallback lists everything. */}
+          <Suspense
+            fallback={
+              <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {projects.map((project) => (
+                  <li key={project._id}>
+                    <ProjectPanel project={project} />
+                  </li>
+                ))}
+              </ul>
+            }
+          >
+            <ProjectsBrowser projects={projects} />
+          </Suspense>
+        </Container>
+      </Section>
+    </main>
   )
 }

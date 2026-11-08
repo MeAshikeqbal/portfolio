@@ -3,25 +3,9 @@ import { Container, Section } from "@/components/dashboard/layout"
 import { Panel, PanelHeader } from "@/components/dashboard/panel"
 import { SectionHeader } from "@/components/dashboard/section-header"
 import { Sparkline } from "@/components/dashboard/sparkline"
-import { getProjects, type Project } from "@/lib/api"
-import { formatMonth } from "@/lib/format"
+import { getProjects } from "@/lib/api"
+import { projectHref, projectMeta } from "@/lib/projects"
 import { projectStatus } from "@/lib/status"
-
-/** Facts shown beside a project, skipping anything empty or zero. */
-export function projectMeta(project: Project): string[] {
-  const gh = project.githubData
-  return [
-    gh?.language,
-    gh?.stars ? `★ ${gh.stars}` : null,
-    gh?.commits ? `${gh.commits} commits` : null,
-    gh?.pushedAt ? `pushed ${formatMonth(gh.pushedAt)}` : null,
-  ].filter((item): item is string => Boolean(item))
-}
-
-export function projectHref(project: Project): string | undefined {
-  if (project.slug) return `/projects/${project.slug}`
-  return project.url || project.github || undefined
-}
 
 export async function ServicesSection() {
   const projects = await getProjects()
