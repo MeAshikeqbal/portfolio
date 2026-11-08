@@ -6,14 +6,20 @@ describe("parseRepoUrl", () => {
     ["https://github.com/MeAshikeqbal/portfolio", { owner: "MeAshikeqbal", repo: "portfolio" }],
     ["https://github.com/MeAshikeqbal/portfolio/", { owner: "MeAshikeqbal", repo: "portfolio" }],
     ["https://github.com/MeAshikeqbal/portfolio.git", { owner: "MeAshikeqbal", repo: "portfolio" }],
-    ["https://www.github.com/MeAshikeqbal/portfolio/tree/master", { owner: "MeAshikeqbal", repo: "portfolio" }],
+    [
+      "https://www.github.com/MeAshikeqbal/portfolio/tree/master",
+      { owner: "MeAshikeqbal", repo: "portfolio" },
+    ],
   ])("parses %s", (url, expected) => {
     expect(parseRepoUrl(url)).toEqual(expected)
   })
 
-  it.each(["https://gitlab.com/a/b", "https://github.com/only-owner", "not a url", ""])("rejects %j", (url) => {
-    expect(parseRepoUrl(url)).toBeNull()
-  })
+  it.each(["https://gitlab.com/a/b", "https://github.com/only-owner", "not a url", ""])(
+    "rejects %j",
+    (url) => {
+      expect(parseRepoUrl(url)).toBeNull()
+    },
+  )
 })
 
 describe("normalizeRepoUrl", () => {

@@ -1,9 +1,9 @@
-'use client'
+"use client"
 
-import { motion, type Variants } from 'motion/react'
-import type { ReactNode } from 'react'
+import { motion, type Variants } from "motion/react"
+import type { ReactNode } from "react"
 
-const spring = { type: 'spring', bounce: 0.4, duration: 0.8 } as const
+const spring = { type: "spring", bounce: 0.4, duration: 0.8 } as const
 
 const presets = {
   /** Slide up and fade in. */
@@ -33,7 +33,7 @@ interface RevealProps {
  * Animates its children into view once, the first time they scroll on screen.
  * A thin client island so the surrounding markup can stay a server component.
  */
-export function Reveal({ preset = 'rise', className, children }: RevealProps) {
+export function Reveal({ preset = "rise", className, children }: RevealProps) {
   return (
     <motion.div
       className={className}

@@ -1,15 +1,15 @@
-import type { Metadata } from "next";
-import EducationTimeline from "@/components/sections/EducationTimeline";
-import { ContactSection } from "@/components/sections/contact-section";
+import type { Metadata } from "next"
+import EducationTimeline from "@/components/sections/EducationTimeline"
+import { ContactSection } from "@/components/sections/contact-section"
 //import ExperiencesTimeline from "@/components/sections/ExperiencesTimeline";
-import Hero from "@/components/sections/hero-section";
-import PostSection from "@/components/sections/LatestPostSection";
-import { ProjectsSection } from "@/components/sections/projects-section";
-import TechStackSection from "@/components/sections/techStack-section";
+import Hero from "@/components/sections/hero-section"
+import PostSection from "@/components/sections/LatestPostSection"
+import { ProjectsSection } from "@/components/sections/projects-section"
+import TechStackSection from "@/components/sections/techStack-section"
 
 export const metadata: Metadata = {
   alternates: { canonical: "/" },
-};
+}
 
 export default async function Home() {
   return (

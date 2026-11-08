@@ -1,6 +1,6 @@
-import 'server-only'
+import "server-only"
 
-import { sanityFetch } from '@/sanity/lib/live'
+import { sanityFetch } from "@/sanity/lib/live"
 import {
   CATEGORIES_QUERY,
   CV_URL_QUERY,
@@ -12,7 +12,7 @@ import {
   POSTS_QUERY,
   PROJECTS_QUERY,
   SKILLS_QUERY,
-} from '@/sanity/lib/queries'
+} from "@/sanity/lib/queries"
 import type {
   CATEGORIES_QUERY_RESULT,
   EDUCATION_QUERY_RESULT,
@@ -21,7 +21,7 @@ import type {
   POSTS_QUERY_RESULT,
   PROJECTS_QUERY_RESULT,
   SKILLS_QUERY_RESULT,
-} from '@/sanity.types'
+} from "@/sanity.types"
 
 /**
  * Server-side data access. Every read goes through `sanityFetch`, so results are

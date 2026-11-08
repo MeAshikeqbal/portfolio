@@ -1,5 +1,5 @@
 import { DocumentTextIcon } from "@sanity/icons/DocumentText"
-import { defineArrayMember, defineField, defineType } from "sanity";
+import { defineArrayMember, defineField, defineType } from "sanity"
 
 export const projectType = defineType({
   name: "project",
@@ -82,12 +82,12 @@ export const projectType = defineType({
     defineField({
       name: "github",
       type: "url",
-      placeholder:"Github URL"
+      placeholder: "Github URL",
     }),
     defineField({
       name: "url",
       type: "url",
-      placeholder:"Project live URL"
+      placeholder: "Project live URL",
     }),
     defineField({
       name: "githubData",
@@ -112,4 +112,4 @@ export const projectType = defineType({
   orderings: [
     { title: "Manual order", name: "manual", by: [{ field: "order", direction: "asc" }] },
   ],
-});
+})

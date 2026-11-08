@@ -1,10 +1,10 @@
-'use client'
+"use client"
 
-import { useEffect } from 'react'
-import Link from 'next/link'
-import { motion } from 'motion/react'
+import { useEffect } from "react"
+import Link from "next/link"
+import { motion } from "motion/react"
 import { Button } from "@/components/ui/button"
-import { ArrowLeft, RefreshCcw } from 'lucide-react'
+import { ArrowLeft, RefreshCcw } from "lucide-react"
 
 export default function Error({
   error,
@@ -18,10 +18,10 @@ export default function Error({
   }, [error])
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center px-4">
+    <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="text-center">
         <motion.h1
-          className="text-6xl font-bold text-primary mb-4"
+          className="mb-4 text-6xl font-bold text-primary"
           initial={{ opacity: 0, y: -50 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
@@ -29,7 +29,7 @@ export default function Error({
           500
         </motion.h1>
         <motion.h2
-          className="text-3xl font-semibold mb-4"
+          className="mb-4 text-3xl font-semibold"
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.2 }}
@@ -37,7 +37,7 @@ export default function Error({
           Internal Server Error
         </motion.h2>
         <motion.p
-          className="text-muted-foreground mb-8"
+          className="mb-8 text-muted-foreground"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5, delay: 0.4 }}

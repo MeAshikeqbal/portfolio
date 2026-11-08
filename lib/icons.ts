@@ -5,7 +5,8 @@ import { getIconData, iconToHTML, iconToSVG } from "@iconify/utils"
 const ICON_SETS: Record<string, () => Promise<IconifyJSON>> = {
   logos: () => import("@iconify-json/logos/icons.json").then((m) => m.default as IconifyJSON),
   mdi: () => import("@iconify-json/mdi/icons.json").then((m) => m.default as IconifyJSON),
-  "simple-icons": () => import("@iconify-json/simple-icons/icons.json").then((m) => m.default as IconifyJSON),
+  "simple-icons": () =>
+    import("@iconify-json/simple-icons/icons.json").then((m) => m.default as IconifyJSON),
   ri: () => import("@iconify-json/ri/icons.json").then((m) => m.default as IconifyJSON),
 }
 

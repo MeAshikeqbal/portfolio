@@ -1,7 +1,7 @@
-'use client'
+"use client"
 
-import { useState, useEffect } from 'react'
-import { ArrowUp } from 'lucide-react'
+import { useState, useEffect } from "react"
+import { ArrowUp } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
 export function BackToTop() {
@@ -16,15 +16,15 @@ export function BackToTop() {
       }
     }
 
-    window.addEventListener('scroll', toggleVisibility)
+    window.addEventListener("scroll", toggleVisibility)
 
-    return () => window.removeEventListener('scroll', toggleVisibility)
+    return () => window.removeEventListener("scroll", toggleVisibility)
   }, [])
 
   const scrollToTop = () => {
     window.scrollTo({
       top: 0,
-      behavior: 'smooth'
+      behavior: "smooth",
     })
   }
 
@@ -34,7 +34,7 @@ export function BackToTop() {
 
   return (
     <Button
-      className="fixed bottom-4 right-4 p-2 rounded-full shadow-lg transition-opacity duration-300 hover:opacity-80 focus:outline-hidden focus:ring-2 focus:ring-offset-2 focus:ring-primary"
+      className="fixed right-4 bottom-4 rounded-full p-2 shadow-lg transition-opacity duration-300 hover:opacity-80 focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:outline-hidden"
       onClick={scrollToTop}
       aria-label="Back to top"
     >

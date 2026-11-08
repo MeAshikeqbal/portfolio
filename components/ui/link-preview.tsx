@@ -1,31 +1,23 @@
-"use client";
+"use client"
 
-import * as HoverCardPrimitive from "@radix-ui/react-hover-card";
-import Image from "next/image";
-import { encode } from "qss";
-import React, { useState } from "react";
-import { useHydrated } from "@/hooks/use-hydrated";
-import {
-  AnimatePresence,
-  motion,
-  useMotionValue,
-  useSpring,
-} from "motion/react";
-import Link from "next/link";
-import { cn } from "@/lib/utils";
+import * as HoverCardPrimitive from "@radix-ui/react-hover-card"
+import Image from "next/image"
+import { encode } from "qss"
+import React, { useState } from "react"
+import { useHydrated } from "@/hooks/use-hydrated"
+import { AnimatePresence, motion, useMotionValue, useSpring } from "motion/react"
+import Link from "next/link"
+import { cn } from "@/lib/utils"
 
 type LinkPreviewProps = {
-  children: React.ReactNode;
-  url: string;
-  className?: string;
-  width?: number;
-  height?: number;
-  quality?: number;
-  style?: React.CSSProperties;
-} & (
-  | { isStatic: true; imageSrc: string }
-  | { isStatic?: false; imageSrc?: never }
-);
+  children: React.ReactNode
+  url: string
+  className?: string
+  width?: number
+  height?: number
+  quality?: number
+  style?: React.CSSProperties
+} & ({ isStatic: true; imageSrc: string } | { isStatic?: false; imageSrc?: never })
 
 export const LinkPreview: React.FC<LinkPreviewProps> = ({
   children,
@@ -38,8 +30,8 @@ export const LinkPreview: React.FC<LinkPreviewProps> = ({
   isStatic = false,
   imageSrc = "",
 }) => {
-  const [isOpen, setOpen] = useState(false);
-  const isMounted = useHydrated();
+  const [isOpen, setOpen] = useState(false)
+  const isMounted = useHydrated()
 
   const src = isStatic
     ? imageSrc
@@ -53,18 +45,18 @@ export const LinkPreview: React.FC<LinkPreviewProps> = ({
         "viewport.deviceScaleFactor": 0.5,
         "viewport.width": width * 3,
         "viewport.height": height * 3,
-      })}`;
+      })}`
 
-  const springConfig = { stiffness: 100, damping: 15 };
-  const x = useMotionValue(0);
-  const translateX = useSpring(x, springConfig);
+  const springConfig = { stiffness: 100, damping: 15 }
+  const x = useMotionValue(0)
+  const translateX = useSpring(x, springConfig)
 
   const handleMouseMove = (event: React.MouseEvent<HTMLAnchorElement>) => {
-    const targetRect = event.currentTarget.getBoundingClientRect();
-    const eventOffsetX = event.clientX - targetRect.left;
-    const offsetFromCenter = (eventOffsetX - targetRect.width / 2) / 2;
-    x.set(offsetFromCenter);
-  };
+    const targetRect = event.currentTarget.getBoundingClientRect()
+    const eventOffsetX = event.clientX - targetRect.left
+    const offsetFromCenter = (eventOffsetX - targetRect.width / 2) / 2
+    x.set(offsetFromCenter)
+  }
 
   return (
     <>
@@ -82,14 +74,8 @@ export const LinkPreview: React.FC<LinkPreviewProps> = ({
         </div>
       )}
 
-      <HoverCardPrimitive.Root
-        openDelay={50}
-        closeDelay={100}
-        onOpenChange={setOpen}
-      >
-        <HoverCardPrimitive.Trigger
-          asChild
-        >
+      <HoverCardPrimitive.Root openDelay={50} closeDelay={100} onOpenChange={setOpen}>
+        <HoverCardPrimitive.Trigger asChild>
           <Link
             href={url}
             className={cn("text-black dark:text-white", className)}
@@ -100,7 +86,7 @@ export const LinkPreview: React.FC<LinkPreviewProps> = ({
         </HoverCardPrimitive.Trigger>
 
         <HoverCardPrimitive.Content
-          className="origin-(--radix-hover-card-content-transform-origin) z-50"
+          className="z-50 origin-(--radix-hover-card-content-transform-origin)"
           side="top"
           align="center"
           sideOffset={10}
@@ -120,12 +106,12 @@ export const LinkPreview: React.FC<LinkPreviewProps> = ({
                   },
                 }}
                 exit={{ opacity: 0, y: 20, scale: 0.6 }}
-                className="shadow-xl rounded-xl"
+                className="rounded-xl shadow-xl"
                 style={{ x: translateX }}
               >
                 <Link
                   href={url}
-                  className="block p-1 bg-white border-2 border-transparent shadow-sm rounded-xl hover:border-neutral-200 dark:hover:border-neutral-800 dark:bg-neutral-900"
+                  className="block rounded-xl border-2 border-transparent bg-white p-1 shadow-sm hover:border-neutral-200 dark:bg-neutral-900 dark:hover:border-neutral-800"
                 >
                   <Image
                     src={src}
@@ -144,5 +130,5 @@ export const LinkPreview: React.FC<LinkPreviewProps> = ({
         </HoverCardPrimitive.Content>
       </HoverCardPrimitive.Root>
     </>
-  );
-};
+  )
+}
