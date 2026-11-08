@@ -79,6 +79,7 @@ async function sync(req: NextRequest) {
           language: repo.language ?? null,
           topics: repo.topics,
           pushedAt: repo.pushedAt ?? null,
+          weeklyCommits: [],
         },
       })
       results.push(`Draft for new repository ${repo.name}`)

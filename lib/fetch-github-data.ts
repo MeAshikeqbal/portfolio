@@ -13,6 +13,8 @@ export interface GitHubData {
   language: string | null
   topics: string[]
   pushedAt: string | null
+  /** Commits per week for the last 12 weeks, oldest first (empty while GitHub computes stats). */
+  weeklyCommits: number[]
 }
 
 /** Parses `https://github.com/owner/repo(.git)(/...)` into its parts, or null if it isn't a GitHub repo URL. */
@@ -52,7 +54,9 @@ export async function fetchGitHubData(repoUrl: string): Promise<GitHubData | nul
 
     // Commit activity covers the last year; GitHub returns 202 (empty) while it computes stats.
     let totalCommits = 0
+    let weeklyCommits: number[] = []
     if (commitsData && Array.isArray(commitsData.data)) {
+      weeklyCommits = commitsData.data.slice(-12).map((week) => week.total || 0)
       totalCommits = commitsData.data.reduce((sum, week) => sum + (week.total || 0), 0)
     } else {
       const { data: contributors } = await octokit.rest.repos.getContributorsStats({ owner, repo })
@@ -68,6 +72,7 @@ export async function fetchGitHubData(repoUrl: string): Promise<GitHubData | nul
       language: repoData.data.language ?? null,
       topics: repoData.data.topics ?? [],
       pushedAt: repoData.data.pushed_at ?? null,
+      weeklyCommits,
     }
   } catch (error) {
     console.error(`Error fetching GitHub data for ${owner}/${repo}:`, error)
