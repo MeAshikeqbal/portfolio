@@ -2,6 +2,7 @@ import "server-only"
 
 import { sanityFetch } from "@/sanity/lib/live"
 import {
+  COMMAND_INDEX_QUERY,
   CV_URL_QUERY,
   EDUCATION_QUERY,
   EXPERIENCES_QUERY,
@@ -23,6 +24,7 @@ import type {
   PROJECT_QUERY_RESULT,
   PROJECTS_QUERY_RESULT,
   SKILLS_QUERY_RESULT,
+  COMMAND_INDEX_QUERY_RESULT,
 } from "@/sanity.types"
 
 /**
@@ -98,5 +100,12 @@ export async function getProjectSlugs() {
 
 export async function getHomeStats() {
   const { data } = await sanityFetch({ query: HOME_STATS_QUERY, stega: false })
+  return data
+}
+
+export type CommandIndex = COMMAND_INDEX_QUERY_RESULT
+
+export async function getCommandIndex() {
+  const { data } = await sanityFetch({ query: COMMAND_INDEX_QUERY, stega: false })
   return data
 }
