@@ -2,6 +2,7 @@ import { Roboto, Roboto_Mono } from 'next/font/google';
 import type { Metadata } from 'next';
 import "./globals.css";
 import { siteConfig } from '@/lib/site';
+import { SanityLive } from '@/sanity/lib/live';
 import { ThemeProvider } from "@/components/theme-provider";
 import { ToastProvider } from '@/components/ui/toast';
 import { Toaster } from '@/components/ui/toaster';
@@ -75,7 +76,6 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning className={`${roboto.variable} ${robotoMono.variable}`}>
       <head>
-        <link rel="sitemap" type="application/xml" href="/sitemap.xml" />
         {/* In <head> rather than metadata.alternates, which child pages' canonicals would override. */}
         <link rel="alternate" type="application/rss+xml" title={`${siteConfig.name} - Blog RSS Feed`} href="/rss.xml" />
       </head>
@@ -94,6 +94,7 @@ export default function RootLayout({
           </ThemeProvider>
           <Toaster />
         </ToastProvider>
+        <SanityLive />
         <Analytics />
         <SpeedInsights />
       </body>

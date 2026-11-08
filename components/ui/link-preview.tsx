@@ -3,7 +3,8 @@
 import * as HoverCardPrimitive from "@radix-ui/react-hover-card";
 import Image from "next/image";
 import { encode } from "qss";
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
+import { useHydrated } from "@/hooks/use-hydrated";
 import {
   AnimatePresence,
   motion,
@@ -38,11 +39,7 @@ export const LinkPreview: React.FC<LinkPreviewProps> = ({
   imageSrc = "",
 }) => {
   const [isOpen, setOpen] = useState(false);
-  const [isMounted, setIsMounted] = useState(false);
-
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
+  const isMounted = useHydrated();
 
   const src = isStatic
     ? imageSrc

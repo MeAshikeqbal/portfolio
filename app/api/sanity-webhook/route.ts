@@ -5,8 +5,9 @@ import { type NextRequest, NextResponse } from "next/server"
 /**
  * Sanity webhook: revalidates cached pages when content is published.
  *
- * Expects `Authorization: Bearer <SANITY_WEBHOOK_SECRET>`. Phase 2 of the
- * modernization plan replaces this with signed, tag-based revalidation.
+ * `<SanityLive />` already revalidates content while visitors are on the site;
+ * this webhook is the backstop for changes published while nobody is browsing.
+ * Expects `Authorization: Bearer <SANITY_WEBHOOK_SECRET>`.
  */
 function isAuthorized(header: string | null, secret: string): boolean {
   if (!header) return false

@@ -4,14 +4,11 @@ import * as React from 'react'
 import { useTheme } from 'next-themes'
 import { motion } from 'motion/react'
 import { Moon, Sun } from 'lucide-react'
+import { useHydrated } from '@/hooks/use-hydrated'
 
 export function AnimatedThemeSwitch() {
   const { theme, setTheme } = useTheme()
-  const [mounted, setMounted] = React.useState(false)
-
-  React.useEffect(() => {
-    setMounted(true)
-  }, [])
+  const mounted = useHydrated()
 
   if (!mounted) {
     return null

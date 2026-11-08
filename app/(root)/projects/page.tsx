@@ -1,8 +1,6 @@
 import type { Metadata } from "next"
-import { fetchProjects } from "@/lib/api"
+import { getProjects } from "@/lib/api"
 import { ProjectCard } from "@/components/project-card"
-
-export const revalidate = 60
 
 export const metadata: Metadata = {
   title: "Projects",
@@ -11,7 +9,7 @@ export const metadata: Metadata = {
 }
 
 export default async function ProjectsPage() {
-  const projects = await fetchProjects()
+  const projects = await getProjects()
 
   return (
     <div className="min-h-screen py-16 bg-background">

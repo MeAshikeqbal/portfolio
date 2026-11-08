@@ -10,11 +10,11 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { CalendarIcon, UserIcon, FilterIcon } from 'lucide-react'
-import { Post, Category } from '@/lib/api'
+import type { PostCard, Category } from '@/lib/api'
 import { BreadcrumbPost } from '@/components/post-breadcrumb'
 
 interface AllPostsClientProps {
-  initialPosts: Post[]
+  initialPosts: PostCard[]
   categories: Category[]
 }
 
@@ -115,18 +115,18 @@ export default function AllPostsClient({ initialPosts, categories }: AllPostsCli
               >
                 <Card className="flex flex-col overflow-hidden hover:shadow-lg transition-shadow duration-300">
                   <CardHeader className="p-0">
-                    {post.mainImage?.asset?._ref ? (
+                    {post.mainImage?.asset ? (
                       <div className="relative h-48 w-full">
                         <Image
-                          src={urlFor(post.mainImage.asset._ref).width(400).height(300).url()}
-                          alt={post.mainImage.alt || post.title}
+                          src={urlFor(post.mainImage).width(400).height(300).url()}
+                          alt={post.mainImage.alt || post.title || ''}
                           fill
                           style={{ objectFit: 'cover' }}
                           className="rounded-t-lg"
                           sizes='(min-width: 640px) 400px, (min-width: 768px) 300px, 100vw'
                           priority={false}
                           placeholder="blur"
-                          blurDataURL={urlFor(post.mainImage.asset._ref).width(100).height(100).blur(20).url()}
+                          blurDataURL={urlFor(post.mainImage).width(100).height(100).blur(20).url()}
                         />
                       </div>
                     ) : (
@@ -137,7 +137,7 @@ export default function AllPostsClient({ initialPosts, categories }: AllPostsCli
                   </CardHeader>
                   <CardContent className="flex-grow p-6">
                     <CardTitle className="text-xl font-semibold mb-2 line-clamp-2">
-                      <Link href={`/post/${post.slug.current}`} className="hover:underline">
+                      <Link href={`/post/${post.slug}`} className="hover:underline">
                         {post.title}
                       </Link>
                     </CardTitle>

@@ -1,60 +1,11 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { urlFor } from '@/sanity/lib/image'
-import { PortableText } from '@portabletext/react'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { client } from '@/sanity/lib/client'
-import { TypedObject } from '@portabletext/types'
 import { CalendarIcon, UserIcon } from 'lucide-react'
 import { Badge } from "@/components/ui/badge"
-
-
-
-// Interfaces
-interface Author {
-  name: string
-}
-
-interface Category {
-  title: string
-}
-
-interface MainImage {
-  asset: {
-    _ref: string
-  }
-  alt?: string
-}
-
-interface Post {
-  _id: string
-  title: string
-  slug: {
-    current: string
-  }
-  author?: Author
-  mainImage?: MainImage
-  categories?: Category[]
-  body?: TypedObject[]
-  publishedAt?: string
-}
-
-// Sanity Query
-const fetchPosts = async (): Promise<Post[]> => {
-  return await client.fetch(`
-    *[_type == "post" && !(_id in path("drafts.**"))] | order(publishedAt desc) [0...3] {
-      _id,
-      title,
-      slug,
-      author->{name},
-      mainImage,
-      categories[]->{title},
-      body,
-      publishedAt
-    }
-  `)
-}
+import { getLatestPosts } from '@/lib/api'
 
 // Helper function to format date
 const formatDate = (dateString: string): string => {
@@ -67,7 +18,7 @@ const formatDate = (dateString: string): string => {
 
 // Component
 export default async function PostSection() {
-  const posts = await fetchPosts()
+  const posts = await getLatestPosts()
 
   if (!posts || posts.length === 0) {
     return (
@@ -88,18 +39,18 @@ export default async function PostSection() {
           {posts.map((post) => (
             <Card key={post._id} className="flex flex-col hover:drop-shadow-md">
               <CardHeader className="p-0">
-                {post.mainImage?.asset?._ref ? (
+                {post.mainImage?.asset ? (
                   <div className="relative h-48 w-full">
                     <Image
-                        src={urlFor(post.mainImage.asset._ref).width(400).height(300).url()}
-                        alt={post.mainImage.alt || post.title}
+                        src={urlFor(post.mainImage).width(400).height(300).url()}
+                        alt={post.mainImage.alt || post.title || ''}
                         fill
                         style={{ objectFit: 'cover' }}
                         className="rounded-t-lg"
                         sizes='(min-width: 640px) 400px, (min-width: 768px) 300px, 100vw'
                         priority={false}
                         placeholder="blur"
-                        blurDataURL={urlFor(post.mainImage.asset._ref).width(100).height(100).blur(20).url()}
+                        blurDataURL={urlFor(post.mainImage).width(100).height(100).blur(20).url()}
                     />
                   </div>
                 ) : (
@@ -127,26 +78,22 @@ export default async function PostSection() {
                   )}
                 </CardDescription>
                 <div className="flex flex-wrap gap-2 mb-4">
-                  {post.categories?.map((category, index) => (
+                  {post.categories?.map((category) => (
                     <Badge
-                      key={index}
+                      key={category._id}
                       variant="secondary"
                     >
                       {category.title}
                     </Badge>
                   ))}
                 </div>
-                <div className="text-muted-foreground line-clamp-3">
-                  {post.body ? (
-                    <PortableText value={post.body} />
-                  ) : (
-                    <p>No content available</p>
-                  )}
-                </div>
+                <p className="text-muted-foreground line-clamp-3">
+                  {post.excerpt || 'No content available'}
+                </p>
               </CardContent>
               <CardFooter className="p-6 pt-0 mt-auto">
                 <Button asChild variant="outline" className="w-full">
-                  <Link aria-label={post.title} href={post.slug?.current ? `/post/${post.slug.current}` : '#'}>
+                  <Link aria-label={`Read ${post.title ?? 'post'}`} href={`/post/${post.slug}`}>
                     Read More
                   </Link>
                 </Button>

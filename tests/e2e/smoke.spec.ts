@@ -37,5 +37,18 @@ test.describe("smoke", () => {
     const sitemap = await request.get("/sitemap.xml")
     expect(sitemap.ok()).toBe(true)
     expect(await sitemap.text()).toContain("https://www.itsashik.dev/post/")
+
+    const robots = await request.get("/robots.txt")
+    expect(await robots.text()).toContain("Sitemap: https://www.itsashik.dev/sitemap.xml")
+  })
+
+  test("Sanity Studio boots", async ({ page }) => {
+    const errors: string[] = []
+    page.on("pageerror", (error) => errors.push(error.message))
+    await page.goto("/studio")
+    // Signed out, the Studio shows its login screen; either way it must render without crashing.
+    await expect(page.locator("#sanity")).toBeAttached({ timeout: 30_000 })
+    await expect(page.getByText(/sign in|log in|choose login provider/i).first()).toBeVisible({ timeout: 30_000 })
+    expect(errors).toEqual([])
   })
 })

@@ -1,106 +1,90 @@
-import { client } from '@/sanity/lib/client'
-import { fetchGitHubData } from './fetch-github-data'
+import 'server-only'
 
-export interface Post {
-  _id: string
-  title: string
-  slug: { current: string }
-  mainImage?: {
-    asset: {
-      _ref: string
-    }
-    alt?: string
-  }
-  publishedAt?: string
-  categories?: { title: string }[]
-  author?: {
-    name: string
-  }
+import { sanityFetch } from '@/sanity/lib/live'
+import {
+  CATEGORIES_QUERY,
+  CV_URL_QUERY,
+  EDUCATION_QUERY,
+  EXPERIENCES_QUERY,
+  LATEST_POSTS_QUERY,
+  POST_QUERY,
+  POST_SLUGS_QUERY,
+  POSTS_QUERY,
+  PROJECTS_QUERY,
+  SKILLS_QUERY,
+} from '@/sanity/lib/queries'
+import type {
+  CATEGORIES_QUERY_RESULT,
+  EDUCATION_QUERY_RESULT,
+  EXPERIENCES_QUERY_RESULT,
+  POST_QUERY_RESULT,
+  POSTS_QUERY_RESULT,
+  PROJECTS_QUERY_RESULT,
+  SKILLS_QUERY_RESULT,
+} from '@/sanity.types'
+
+/**
+ * Server-side data access. Every read goes through `sanityFetch`, so results are
+ * cached and revalidated by `<SanityLive />` when content is published.
+ * `stega: false` keeps strings clean until visual editing is enabled.
+ */
+
+export type PostCard = POSTS_QUERY_RESULT[number]
+export type Category = CATEGORIES_QUERY_RESULT[number]
+export type Post = NonNullable<POST_QUERY_RESULT>
+export type Project = PROJECTS_QUERY_RESULT[number]
+export type Skill = SKILLS_QUERY_RESULT[number]
+export type Education = EDUCATION_QUERY_RESULT[number]
+export type Experience = EXPERIENCES_QUERY_RESULT[number]
+
+export async function getPosts() {
+  const { data } = await sanityFetch({ query: POSTS_QUERY, stega: false })
+  return data
 }
 
-export interface Category {
-  _id: string
-  title: string
+export async function getLatestPosts() {
+  const { data } = await sanityFetch({ query: LATEST_POSTS_QUERY, stega: false })
+  return data
 }
 
-export async function getPosts(): Promise<Post[]> {
-  return client.fetch(`
-    *[_type == "post" && !(_id in path("drafts.**"))] | order(publishedAt desc) {
-      _id,
-      title,
-      slug,
-      mainImage,
-      publishedAt,
-      categories[]->{title},
-      author->{name}
-    }
-  `)
+export async function getCategories() {
+  const { data } = await sanityFetch({ query: CATEGORIES_QUERY, stega: false })
+  return data
 }
 
-export async function getCategories(): Promise<Category[]> {
-  return client.fetch(`
-    *[_type == "category"] {
-      _id,
-      title
-    }
-  `)
+export async function getPost(slug: string) {
+  const { data } = await sanityFetch({ query: POST_QUERY, params: { slug }, stega: false })
+  return data
 }
 
-//get projects
-
-export interface Project {
-  _id: string
-  title: string
-  slug: {
-    current: string
-  }
-  description: string
-  mainImage: MainImage
-  publishedAt: string
-  github: string
-  url: string
-  githubData?: {
-    stars: number
-    commits: number
-    license: string
-  }
+/** Slugs for `generateStaticParams`. */
+export async function getPostSlugs() {
+  const { data } = await sanityFetch({ query: POST_SLUGS_QUERY, stega: false })
+  return data.filter((slug): slug is string => Boolean(slug))
 }
 
-interface MainImage {
-  asset: {
-    _ref: string
-  }
-  alt?: string
+/** Read-only: GitHub stats are written by the `/api/sync-github-data` cron, never during render. */
+export async function getProjects() {
+  const { data } = await sanityFetch({ query: PROJECTS_QUERY, stega: false })
+  return data
 }
 
-export const fetchProjects = async (): Promise<Project[]> => {
-    const projects: Project[] = await client.fetch(`
-    *[_type == "project"  && !(_id in path("drafts.**"))] | order(_createdAt desc) {
-    _id,
-    title,
-    slug,
-    description,
-    mainImage,
-    publishedAt,
-    github,
-    url,
-    githubData
-  }`)
+export async function getSkills() {
+  const { data } = await sanityFetch({ query: SKILLS_QUERY, stega: false })
+  return data
+}
 
-  //Fetching GitHub Data
-  const updatedProjects = await Promise.all(
-    projects.map(async (project: Project) => {
-      if (!project.githubData && project.github) {
-        const githubData = await fetchGitHubData(project.github)
-        if (githubData) {
-          // Update the project in Sanity
-          await client.patch(project._id).set({ githubData }).commit()
-          return { ...project, githubData }
-        }
-      }
-      return project
-    })
-  )
+export async function getEducation() {
+  const { data } = await sanityFetch({ query: EDUCATION_QUERY, stega: false })
+  return data
+}
 
-  return updatedProjects
+export async function getExperiences() {
+  const { data } = await sanityFetch({ query: EXPERIENCES_QUERY, stega: false })
+  return data
+}
+
+export async function getCvUrl() {
+  const { data } = await sanityFetch({ query: CV_URL_QUERY, stega: false })
+  return data
 }

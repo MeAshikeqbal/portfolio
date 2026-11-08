@@ -1,4 +1,4 @@
-import { DocumentTextIcon } from "@sanity/icons";
+import { DocumentTextIcon } from "@sanity/icons/DocumentText"
 import { defineType, defineField } from "sanity";
 
 export const educationType = defineType({

@@ -1,40 +1,13 @@
 import RSS from 'rss'
-import { NextResponse } from 'next/server'
-import { client } from '@/sanity/lib/client'
 import { absoluteUrl, siteConfig } from '@/lib/site'
+import { sanityFetch } from '@/sanity/lib/live'
+import { FEED_POSTS_QUERY } from '@/sanity/lib/queries'
 
-type BlogPost = {
-  slug: string
-  title: string
-  publishedAt: string
-  author: {
-    name: string
-  }
-  mainImage: {
-    asset: {
-      url: string
-    }
-  }
-}
-
-async function getBlogPosts(): Promise<BlogPost[]> {
-  return client.fetch(`
-    *[_type == "post"  && !(_id in path("drafts.**"))] {
-      "slug": slug.current,
-      title,
-      publishedAt,
-      author->{name},
-      mainImage{
-        asset->{
-          url
-        }
-      }
-    }
-  `)
-}
+// Prerendered; refreshed by `<SanityLive />` tag revalidation and the Sanity webhook.
+export const dynamic = 'force-static'
 
 export async function GET() {
-  const blogPosts = await getBlogPosts()
+  const { data: posts } = await sanityFetch({ query: FEED_POSTS_QUERY, stega: false })
 
   const feed = new RSS({
     title: `${siteConfig.name} - Blog RSS Feed`,
@@ -42,24 +15,25 @@ export async function GET() {
     site_url: siteConfig.url,
     feed_url: absoluteUrl('/rss.xml'),
     language: 'en',
+    pubDate: posts[0]?.publishedAt ?? undefined,
   })
 
-  blogPosts.forEach((post) => {
+  for (const post of posts) {
     feed.item({
-      title: post.title,
-      description: post.author ? `By ${post.author.name}` : '',
+      title: post.title ?? 'Untitled',
+      description: post.excerpt ?? '',
       url: absoluteUrl(`/post/${post.slug}`),
-      date: post.publishedAt,
-      enclosure: post.mainImage ? {
-        url: post.mainImage.asset.url,
-        type: 'image/jpeg'
-      } : undefined
+      guid: absoluteUrl(`/post/${post.slug}`),
+      date: post.publishedAt ?? post._updatedAt,
+      author: post.author?.name ?? siteConfig.name,
+      categories: (post.categories ?? []).filter((c): c is string => Boolean(c)),
+      enclosure: post.image?.url
+        ? { url: post.image.url, type: post.image.mimeType ?? 'image/jpeg' }
+        : undefined,
     })
-  })
+  }
 
-  return new NextResponse(feed.xml({ indent: true }), {
-    headers: {
-      'Content-Type': 'application/xml',
-    },
+  return new Response(feed.xml({ indent: true }), {
+    headers: { 'Content-Type': 'application/rss+xml; charset=utf-8' },
   })
 }

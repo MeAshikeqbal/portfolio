@@ -4,13 +4,7 @@ import { useRef } from 'react'
 import { Card, CardContent } from "@/components/ui/card"
 import { motion, useInView } from 'motion/react'
 import { SkillIcon } from '@/components/skill-icon'
-
-interface Skill {
-  _id: string
-  name: string
-  /** Iconify icon name, e.g. `logos:aws`. */
-  icon?: string
-}
+import type { Skill } from '@/lib/api'
 
 interface TechStackProps {
   skills: Skill[]
@@ -63,7 +57,7 @@ export default function TechStack({ skills }: TechStackProps) {
             <motion.div key={skill._id} variants={itemVariants}>
               <Card className="flex flex-col items-center justify-center p-4 h-full hover:shadow-lg transition-all duration-300 group">
                 <CardContent className="flex flex-col items-center p-0">
-                  {skill.icon && (
+                  {skill.icon && skill.name && (
                     <motion.div 
                       className="w-20 h-20 relative mb-4 rounded-full bg-background/40 overflow-hidden group-hover:bg-primary/10 transition-colors duration-300"
                       whileHover={{ scale: 1.1 }}
