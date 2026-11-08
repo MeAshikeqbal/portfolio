@@ -78,7 +78,7 @@ export const LinkPreview: React.FC<LinkPreviewProps> = ({
         <HoverCardPrimitive.Trigger asChild>
           <Link
             href={url}
-            className={cn("text-black dark:text-white", className)}
+            className={cn("text-foreground", className)}
             onMouseMove={handleMouseMove}
           >
             {children}
@@ -111,7 +111,7 @@ export const LinkPreview: React.FC<LinkPreviewProps> = ({
               >
                 <Link
                   href={url}
-                  className="block rounded-xl border-2 border-transparent bg-white p-1 shadow-sm hover:border-neutral-200 dark:bg-neutral-900 dark:hover:border-neutral-800"
+                  className="block rounded-lg border bg-surface p-1 shadow-md hover:border-border-strong"
                 >
                   <Image
                     src={src}

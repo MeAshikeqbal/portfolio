@@ -108,6 +108,10 @@
   --color-destructive-foreground: oklch(1 0 0);
   --color-input: var(--border-strong);
 
+  /* Overlays on photos and modals: identical in both themes by design */
+  --color-scrim: oklch(0 0 0 / 0.55);
+  --color-on-scrim: oklch(1 0 0);
+
   /* Status palette */
   --color-status-up: var(--status-up);
   --color-status-up-fg: var(--status-up-fg);

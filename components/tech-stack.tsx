@@ -12,7 +12,12 @@ interface TechStackProps {
 
 export default function TechStack({ skills }: TechStackProps) {
   const ref = useRef(null)
-  const isInView = useInView(ref, { once: true, amount: 0.2 })
+  const isInView = useInView(ref, {
+    once: true,
+    // Trigger on the section's top edge: with ~130 skills the section is several viewports
+    // tall, so an `amount` threshold (e.g. 20% visible) would never be reached.
+    margin: "0px 0px -15% 0px",
+  })
 
   if (!skills || skills.length === 0) {
     return <div className="text-center text-muted-foreground">No skills found.</div>
@@ -23,7 +28,8 @@ export default function TechStack({ skills }: TechStackProps) {
     visible: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.1,
+        // Cap the whole cascade at ~1.2s regardless of how many skills there are.
+        staggerChildren: Math.min(0.1, 1.2 / skills.length),
       },
     },
   }

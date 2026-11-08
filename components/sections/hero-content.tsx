@@ -4,6 +4,8 @@ import Image from "next/image"
 import { motion } from "motion/react"
 import { FileDown, RssIcon } from "lucide-react"
 import { FaGithub as Github, FaLinkedin as Linkedin, FaXTwitter as Twitter } from "react-icons/fa6"
+import { GridBackdrop } from "@/components/dashboard/layout"
+import { buttonVariants } from "@/components/ui/button"
 import { siteConfig } from "@/lib/site"
 
 const socialLinks = [
@@ -32,24 +34,24 @@ export function HeroContent({ cvUrl }: { cvUrl: string | null }) {
   return (
     <section
       id="Home"
-      className="relative flex min-h-screen items-center justify-center overflow-hidden bg-linear-to-br from-blue-100 to-indigo-100 px-4 sm:px-6 lg:px-8 dark:from-gray-900 dark:to-indigo-900"
+      className="relative flex min-h-screen items-center justify-center overflow-hidden bg-background px-4 sm:px-6 lg:px-8"
     >
+      <GridBackdrop />
       <motion.div
-        className="container mx-auto flex flex-col items-center justify-between gap-12 py-16 lg:flex-row lg:py-0"
+        className="relative container mx-auto flex flex-col items-center justify-between gap-12 py-16 lg:flex-row lg:py-0"
         variants={containerVariants}
         initial="hidden"
         animate="visible"
       >
         <div className="text-center lg:w-1/2 lg:text-left">
           <motion.h1
-            className="mb-4 text-3xl font-bold text-gray-800 sm:text-4xl md:text-5xl lg:text-6xl dark:text-white"
+            className="mb-4 text-display font-semibold text-foreground"
             variants={itemVariants}
           >
-            Hello, I&apos;m{" "}
-            <span className="text-indigo-600 dark:text-indigo-400">Ashik Eqbal</span>
+            <span className="text-muted-foreground">Hello, I&apos;m</span> Ashik Eqbal
           </motion.h1>
           <motion.p
-            className="mb-8 text-lg text-gray-600 sm:text-xl md:text-2xl dark:text-gray-300"
+            className="mb-8 text-lg text-muted-foreground sm:text-xl"
             variants={itemVariants}
           >
             A passionate software engineer who loves to build web applications.
@@ -66,7 +68,7 @@ export function HeroContent({ cvUrl }: { cvUrl: string | null }) {
                 rel="noopener noreferrer"
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
-                className="text-gray-600 transition-colors duration-300 hover:text-indigo-600 dark:text-gray-300 dark:hover:text-indigo-400"
+                className="text-muted-foreground transition-colors duration-200 hover:text-foreground"
                 aria-label={link.label}
               >
                 <link.icon className="h-6 w-6" />
@@ -79,10 +81,10 @@ export function HeroContent({ cvUrl }: { cvUrl: string | null }) {
               download="Ashik Eqbal CV.pdf"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className="inline-flex items-center rounded-full bg-indigo-600 px-6 py-3 text-sm text-white transition duration-300 hover:bg-indigo-700 sm:text-base"
+              className={buttonVariants({ size: "lg" })}
               variants={itemVariants}
             >
-              <FileDown className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
+              <FileDown />
               Download CV
             </motion.a>
           )}
@@ -97,7 +99,7 @@ export function HeroContent({ cvUrl }: { cvUrl: string | null }) {
               src="/me.jpeg"
               alt="Ashik Eqbal"
               style={{ objectFit: "cover" }}
-              className="rounded-full shadow-2xl"
+              className="rounded-full ring-1 ring-border"
               priority={true}
               width={320}
               height={320}
@@ -117,7 +119,7 @@ export function HeroContent({ cvUrl }: { cvUrl: string | null }) {
         className="absolute bottom-8 left-1/2 hidden -translate-x-1/2 transform sm:flex"
       >
         <motion.div
-          className="flex h-10 w-6 justify-center rounded-full border-2 border-gray-400"
+          className="flex h-10 w-6 justify-center rounded-full border-2 border-border-strong"
           whileHover={{ scale: 1.1 }}
         >
           <motion.div
@@ -129,7 +131,7 @@ export function HeroContent({ cvUrl }: { cvUrl: string | null }) {
               repeat: Infinity,
               repeatType: "loop",
             }}
-            className="mt-2 h-3 w-1 rounded-full bg-gray-400"
+            className="mt-2 h-3 w-1 rounded-full bg-muted-foreground"
           />
         </motion.div>
       </motion.div>
