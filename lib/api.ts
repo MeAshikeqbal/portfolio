@@ -6,10 +6,13 @@ import {
   CV_URL_QUERY,
   EDUCATION_QUERY,
   EXPERIENCES_QUERY,
+  HOME_STATS_QUERY,
   LATEST_POSTS_QUERY,
   POST_QUERY,
   POST_SLUGS_QUERY,
   POSTS_QUERY,
+  PROJECT_QUERY,
+  PROJECT_SLUGS_QUERY,
   PROJECTS_QUERY,
   SKILLS_QUERY,
 } from "@/sanity/lib/queries"
@@ -19,6 +22,7 @@ import type {
   EXPERIENCES_QUERY_RESULT,
   POST_QUERY_RESULT,
   POSTS_QUERY_RESULT,
+  PROJECT_QUERY_RESULT,
   PROJECTS_QUERY_RESULT,
   SKILLS_QUERY_RESULT,
 } from "@/sanity.types"
@@ -33,6 +37,7 @@ export type PostCard = POSTS_QUERY_RESULT[number]
 export type Category = CATEGORIES_QUERY_RESULT[number]
 export type Post = NonNullable<POST_QUERY_RESULT>
 export type Project = PROJECTS_QUERY_RESULT[number]
+export type ProjectDetail = NonNullable<PROJECT_QUERY_RESULT>
 export type Skill = SKILLS_QUERY_RESULT[number]
 export type Education = EDUCATION_QUERY_RESULT[number]
 export type Experience = EXPERIENCES_QUERY_RESULT[number]
@@ -86,5 +91,20 @@ export async function getExperiences() {
 
 export async function getCvUrl() {
   const { data } = await sanityFetch({ query: CV_URL_QUERY, stega: false })
+  return data
+}
+
+export async function getProject(slug: string) {
+  const { data } = await sanityFetch({ query: PROJECT_QUERY, params: { slug }, stega: false })
+  return data
+}
+
+export async function getProjectSlugs() {
+  const { data } = await sanityFetch({ query: PROJECT_SLUGS_QUERY, stega: false })
+  return data.filter((slug): slug is string => Boolean(slug))
+}
+
+export async function getHomeStats() {
+  const { data } = await sanityFetch({ query: HOME_STATS_QUERY, stega: false })
   return data
 }

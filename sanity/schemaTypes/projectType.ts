@@ -102,6 +102,12 @@ export const projectType = defineType({
         { name: "language", type: "string" },
         { name: "topics", type: "array", of: [{ type: "string" }] },
         { name: "pushedAt", type: "datetime" },
+        {
+          name: "weeklyCommits",
+          title: "Weekly commits (last 12 weeks)",
+          type: "array",
+          of: [{ type: "number" }],
+        },
       ],
     }),
     defineField({

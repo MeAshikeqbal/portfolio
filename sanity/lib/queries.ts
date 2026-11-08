@@ -26,7 +26,7 @@ export const POSTS_QUERY = defineQuery(`
 `)
 
 export const LATEST_POSTS_QUERY = defineQuery(`
-  *[_type == "post" && ${published} && defined(slug.current)] | order(publishedAt desc) [0...3] { ${postCard} }
+  *[_type == "post" && ${published} && defined(slug.current)] | order(publishedAt desc) [0...5] { ${postCard} }
 `)
 
 export const CATEGORIES_QUERY = defineQuery(`
@@ -50,22 +50,41 @@ export const POST_SLUGS_QUERY = defineQuery(`
   *[_type == "post" && ${published} && defined(slug.current)].slug.current
 `)
 
+const projectFields = `
+  _id,
+  title,
+  "slug": slug.current,
+  description,
+  mainImage,
+  publishedAt,
+  github,
+  url,
+  featured,
+  status,
+  tech,
+  githubData
+`
+
 export const PROJECTS_QUERY = defineQuery(`
-  *[_type == "project" && ${published}] | order(coalesce(order, 999) asc, _createdAt desc) {
-    _id,
-    title,
-    "slug": slug.current,
-    description,
-    mainImage,
-    publishedAt,
-    github,
-    url,
-    featured,
-    status,
-    tech,
-    githubData
-  }
+  *[_type == "project" && ${published}] | order(coalesce(order, 999) asc, _createdAt desc) { ${projectFields} }
 `)
+
+export const PROJECT_QUERY = defineQuery(`
+  *[_type == "project" && ${published} && slug.current == $slug][0] { ${projectFields}, body, seo }
+`)
+
+export const PROJECT_SLUGS_QUERY = defineQuery(`
+  *[_type == "project" && ${published} && defined(slug.current)].slug.current
+`)
+
+/** Headline numbers for the home page status panel. */
+export const HOME_STATS_QUERY = defineQuery(`{
+  "posts": count(*[_type == "post" && ${published} && defined(slug.current)]),
+  "projects": count(*[_type == "project" && ${published}]),
+  "commits": math::sum(*[_type == "project" && ${published}].githubData.commits),
+  "skills": count(*[_type == "skills"]),
+  "latestPost": *[_type == "post" && ${published}] | order(publishedAt desc)[0].publishedAt
+}`)
 
 export const SKILLS_QUERY = defineQuery(`
   *[_type == "skills"] | order(name asc) { _id, name, icon }
