@@ -1,22 +1,21 @@
 "use client"
 
-import { MotionConfig } from "motion/react"
 import { ThemeProvider } from "next-themes"
 import type { ReactNode } from "react"
 import { Toaster } from "@/components/ui/sonner"
 import { TooltipProvider } from "@/components/ui/tooltip"
 
-/** All client-side context for the app, in one place. */
+/**
+ * All client-side context for the app, in one place.
+ * (Animations are CSS and gated with `motion-safe:`, so reduced motion needs no provider.)
+ */
 export function Providers({ children }: { children: ReactNode }) {
   return (
     <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-      {/* Honour the OS "reduce motion" setting for every motion component. */}
-      <MotionConfig reducedMotion="user">
-        <TooltipProvider delayDuration={200}>
-          {children}
-          <Toaster />
-        </TooltipProvider>
-      </MotionConfig>
+      <TooltipProvider delayDuration={200}>
+        {children}
+        <Toaster />
+      </TooltipProvider>
     </ThemeProvider>
   )
 }
