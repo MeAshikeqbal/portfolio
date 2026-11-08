@@ -3,23 +3,23 @@
 import { motion, type Variants } from "motion/react"
 import type { ReactNode } from "react"
 
-const spring = { type: "spring", bounce: 0.4, duration: 0.8 } as const
+const ease = { duration: 0.3, ease: "easeOut" } as const
 
 const presets = {
   /** Slide up and fade in. */
   rise: {
-    offscreen: { y: 50, opacity: 0 },
-    onscreen: { y: 0, opacity: 1, transition: spring },
+    offscreen: { y: 12, opacity: 0 },
+    onscreen: { y: 0, opacity: 1, transition: ease },
   },
   /** Scale up and fade in. */
   pop: {
-    offscreen: { scale: 0.8, opacity: 0 },
-    onscreen: { scale: 1, opacity: 1, transition: spring },
+    offscreen: { scale: 0.96, opacity: 0 },
+    onscreen: { scale: 1, opacity: 1, transition: ease },
   },
   /** Drop down and fade in. */
   drop: {
-    offscreen: { y: -20, opacity: 0 },
-    onscreen: { y: 0, opacity: 1, transition: { duration: 0.8 } },
+    offscreen: { y: -8, opacity: 0 },
+    onscreen: { y: 0, opacity: 1, transition: ease },
   },
 } satisfies Record<string, Variants>
 
