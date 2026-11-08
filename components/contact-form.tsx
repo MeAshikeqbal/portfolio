@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { useToast } from "@/hooks/use-toast"
+import { toast } from "sonner"
 import { submitContact } from "@/actions/submit-contact"
 import { contactSchema, type ContactInput } from "@/lib/contact-schema"
 
@@ -25,7 +25,6 @@ interface ContactFormProps {
 
 export function ContactForm({ onSuccessfulSubmit }: ContactFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const { toast } = useToast()
   const form = useForm<ContactInput>({
     resolver: zodResolver(contactSchema),
     defaultValues: {
@@ -41,9 +40,8 @@ export function ContactForm({ onSuccessfulSubmit }: ContactFormProps) {
     try {
       const result = await submitContact(values)
       if (result.success) {
-        toast({
-          title: "Message sent",
-          description: "Thank you for your message. We'll get back to you soon!",
+        toast.success("Message sent", {
+          description: "Thanks for reaching out. I'll get back to you soon!",
         })
         form.reset()
         onSuccessfulSubmit()
@@ -51,10 +49,8 @@ export function ContactForm({ onSuccessfulSubmit }: ContactFormProps) {
         throw new Error(result.error || "Something went wrong")
       }
     } catch (error) {
-      toast({
-        title: "Error",
+      toast.error("Couldn't send your message", {
         description: error instanceof Error ? error.message : "An unexpected error occurred",
-        variant: "destructive",
       })
     } finally {
       setIsSubmitting(false)

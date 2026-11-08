@@ -4,8 +4,6 @@ import "./globals.css"
 import { siteConfig } from "@/lib/site"
 import { SanityLive } from "@/sanity/lib/live"
 import { Providers } from "@/components/providers"
-import { ToastProvider } from "@/components/ui/toast"
-import { Toaster } from "@/components/ui/toaster"
 import { BackToTop } from "@/components/back-to-top"
 import { Analytics } from "@vercel/analytics/react"
 import { SpeedInsights } from "@vercel/speed-insights/next"
@@ -94,13 +92,10 @@ export default function RootLayout({
         />
       </head>
       <body className="flex min-h-screen flex-col">
-        <ToastProvider>
-          <Providers>
-            <div className="grow">{children}</div>
-            <BackToTop />
-          </Providers>
-          <Toaster />
-        </ToastProvider>
+        <Providers>
+          <div className="grow">{children}</div>
+          <BackToTop />
+        </Providers>
         <SanityLive />
         <Analytics />
         <SpeedInsights />
