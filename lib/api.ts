@@ -2,7 +2,6 @@ import "server-only"
 
 import { sanityFetch } from "@/sanity/lib/live"
 import {
-  CATEGORIES_QUERY,
   CV_URL_QUERY,
   EDUCATION_QUERY,
   EXPERIENCES_QUERY,
@@ -17,7 +16,6 @@ import {
   SKILLS_QUERY,
 } from "@/sanity/lib/queries"
 import type {
-  CATEGORIES_QUERY_RESULT,
   EDUCATION_QUERY_RESULT,
   EXPERIENCES_QUERY_RESULT,
   POST_QUERY_RESULT,
@@ -34,7 +32,6 @@ import type {
  */
 
 export type PostCard = POSTS_QUERY_RESULT[number]
-export type Category = CATEGORIES_QUERY_RESULT[number]
 export type Post = NonNullable<POST_QUERY_RESULT>
 export type Project = PROJECTS_QUERY_RESULT[number]
 export type ProjectDetail = NonNullable<PROJECT_QUERY_RESULT>
@@ -49,11 +46,6 @@ export async function getPosts() {
 
 export async function getLatestPosts() {
   const { data } = await sanityFetch({ query: LATEST_POSTS_QUERY, stega: false })
-  return data
-}
-
-export async function getCategories() {
-  const { data } = await sanityFetch({ query: CATEGORIES_QUERY, stega: false })
   return data
 }
 

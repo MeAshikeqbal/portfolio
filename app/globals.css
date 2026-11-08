@@ -267,3 +267,20 @@
     scroll-behavior: smooth;
   }
 }
+
+/* Shiki: both themes are emitted as CSS variables; pick one per theme. */
+.code-block pre {
+  background: transparent !important;
+}
+
+.code-block span {
+  color: var(--shiki-light);
+}
+
+.dark .code-block span {
+  color: var(--shiki-dark);
+}
+
+.light .code-block span {
+  color: var(--shiki-light);
+}

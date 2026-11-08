@@ -16,6 +16,7 @@ const postCard = `
   title,
   "slug": slug.current,
   mainImage,
+  "lqip": mainImage.asset->metadata.lqip,
   publishedAt,
   "excerpt": ${excerpt},
   categories[]->{ _id, title },
@@ -30,20 +31,28 @@ export const LATEST_POSTS_QUERY = defineQuery(`
   *[_type == "post" && ${published} && defined(slug.current)] | order(publishedAt desc) [0...5] { ${postCard} }
 `)
 
-export const CATEGORIES_QUERY = defineQuery(`
-  *[_type == "category"] | order(title asc) { _id, title }
-`)
+const indexablePost = `_type == "post" && ${published} && defined(slug.current)`
 
 export const POST_QUERY = defineQuery(`
   *[_type == "post" && ${published} && slug.current == $slug][0] {
+    _id,
     title,
     "slug": slug.current,
     author->{ name, image },
     mainImage,
+    "cover": mainImage.asset->metadata{ lqip, "width": dimensions.width, "height": dimensions.height },
     categories[]->{ _id, title },
     publishedAt,
+    _updatedAt,
     body,
-    excerpt
+    excerpt,
+    seo,
+    "previous": *[${indexablePost} && publishedAt < ^.publishedAt]
+      | order(publishedAt desc)[0] { title, "slug": slug.current },
+    "next": *[${indexablePost} && publishedAt > ^.publishedAt]
+      | order(publishedAt asc)[0] { title, "slug": slug.current },
+    "related": *[${indexablePost} && _id != ^._id && count(categories[@._ref in ^.^.categories[]._ref]) > 0]
+      | order(publishedAt desc)[0...3] { ${postCard} }
   }
 `)
 

@@ -484,7 +484,7 @@ export type AllSanitySchemaTypes =
 
 // Source: sanity/lib/queries.ts
 // Variable: POSTS_QUERY
-// Query: *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current)] | order(publishedAt desc) {   _id,  title,  "slug": slug.current,  mainImage,  publishedAt,  "excerpt": coalesce(excerpt, array::join(string::split(pt::text(body[_type == "block" && style == "normal"]), "")[0...200], "")),  categories[]->{ _id, title },  author->{ name } }
+// Query: *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current)] | order(publishedAt desc) {   _id,  title,  "slug": slug.current,  mainImage,  "lqip": mainImage.asset->metadata.lqip,  publishedAt,  "excerpt": coalesce(excerpt, array::join(string::split(pt::text(body[_type == "block" && style == "normal"]), "")[0...200], "")),  categories[]->{ _id, title },  author->{ name } }
 export type POSTS_QUERY_RESULT = Array<{
   _id: string
   title: string | null
@@ -497,6 +497,7 @@ export type POSTS_QUERY_RESULT = Array<{
     alt?: string
     _type: "image"
   } | null
+  lqip: string | null
   publishedAt: string | null
   excerpt: string
   categories: Array<{
@@ -510,7 +511,7 @@ export type POSTS_QUERY_RESULT = Array<{
 
 // Source: sanity/lib/queries.ts
 // Variable: LATEST_POSTS_QUERY
-// Query: *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current)] | order(publishedAt desc) [0...5] {   _id,  title,  "slug": slug.current,  mainImage,  publishedAt,  "excerpt": coalesce(excerpt, array::join(string::split(pt::text(body[_type == "block" && style == "normal"]), "")[0...200], "")),  categories[]->{ _id, title },  author->{ name } }
+// Query: *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current)] | order(publishedAt desc) [0...5] {   _id,  title,  "slug": slug.current,  mainImage,  "lqip": mainImage.asset->metadata.lqip,  publishedAt,  "excerpt": coalesce(excerpt, array::join(string::split(pt::text(body[_type == "block" && style == "normal"]), "")[0...200], "")),  categories[]->{ _id, title },  author->{ name } }
 export type LATEST_POSTS_QUERY_RESULT = Array<{
   _id: string
   title: string | null
@@ -523,6 +524,7 @@ export type LATEST_POSTS_QUERY_RESULT = Array<{
     alt?: string
     _type: "image"
   } | null
+  lqip: string | null
   publishedAt: string | null
   excerpt: string
   categories: Array<{
@@ -535,17 +537,10 @@ export type LATEST_POSTS_QUERY_RESULT = Array<{
 }>
 
 // Source: sanity/lib/queries.ts
-// Variable: CATEGORIES_QUERY
-// Query: *[_type == "category"] | order(title asc) { _id, title }
-export type CATEGORIES_QUERY_RESULT = Array<{
-  _id: string
-  title: string | null
-}>
-
-// Source: sanity/lib/queries.ts
 // Variable: POST_QUERY
-// Query: *[_type == "post" && !(_id in path("drafts.**")) && slug.current == $slug][0] {    title,    "slug": slug.current,    author->{ name, image },    mainImage,    categories[]->{ _id, title },    publishedAt,    body,    excerpt  }
+// Query: *[_type == "post" && !(_id in path("drafts.**")) && slug.current == $slug][0] {    _id,    title,    "slug": slug.current,    author->{ name, image },    mainImage,    "cover": mainImage.asset->metadata{ lqip, "width": dimensions.width, "height": dimensions.height },    categories[]->{ _id, title },    publishedAt,    _updatedAt,    body,    excerpt,    seo,    "previous": *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && publishedAt < ^.publishedAt]      | order(publishedAt desc)[0] { title, "slug": slug.current },    "next": *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && publishedAt > ^.publishedAt]      | order(publishedAt asc)[0] { title, "slug": slug.current },    "related": *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && _id != ^._id && count(categories[@._ref in ^.^.categories[]._ref]) > 0]      | order(publishedAt desc)[0...3] {   _id,  title,  "slug": slug.current,  mainImage,  "lqip": mainImage.asset->metadata.lqip,  publishedAt,  "excerpt": coalesce(excerpt, array::join(string::split(pt::text(body[_type == "block" && style == "normal"]), "")[0...200], "")),  categories[]->{ _id, title },  author->{ name } }  }
 export type POST_QUERY_RESULT = {
+  _id: string
   title: string | null
   slug: string | null
   author: {
@@ -566,13 +561,51 @@ export type POST_QUERY_RESULT = {
     alt?: string
     _type: "image"
   } | null
+  cover: {
+    lqip: string | null
+    width: number | null
+    height: number | null
+  } | null
   categories: Array<{
     _id: string
     title: string | null
   }> | null
   publishedAt: string | null
+  _updatedAt: string
   body: BlockContent | null
   excerpt: string | null
+  seo: Seo | null
+  previous: {
+    title: string | null
+    slug: string | null
+  } | null
+  next: {
+    title: string | null
+    slug: string | null
+  } | null
+  related: Array<{
+    _id: string
+    title: string | null
+    slug: string | null
+    mainImage: {
+      asset?: SanityImageAssetReference
+      media?: unknown
+      hotspot?: SanityImageHotspot
+      crop?: SanityImageCrop
+      alt?: string
+      _type: "image"
+    } | null
+    lqip: string | null
+    publishedAt: string | null
+    excerpt: string
+    categories: Array<{
+      _id: string
+      title: string | null
+    }> | null
+    author: {
+      name: string | null
+    } | null
+  }>
 } | null
 
 // Source: sanity/lib/queries.ts
@@ -762,10 +795,9 @@ export type SITEMAP_QUERY_RESULT = {
 // Query TypeMap
 declare global {
   interface SanityQueries {
-    '\n  *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current)] | order(publishedAt desc) { \n  _id,\n  title,\n  "slug": slug.current,\n  mainImage,\n  publishedAt,\n  "excerpt": coalesce(excerpt, array::join(string::split(pt::text(body[_type == "block" && style == "normal"]), "")[0...200], "")),\n  categories[]->{ _id, title },\n  author->{ name }\n }\n': POSTS_QUERY_RESULT
-    '\n  *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current)] | order(publishedAt desc) [0...5] { \n  _id,\n  title,\n  "slug": slug.current,\n  mainImage,\n  publishedAt,\n  "excerpt": coalesce(excerpt, array::join(string::split(pt::text(body[_type == "block" && style == "normal"]), "")[0...200], "")),\n  categories[]->{ _id, title },\n  author->{ name }\n }\n': LATEST_POSTS_QUERY_RESULT
-    '\n  *[_type == "category"] | order(title asc) { _id, title }\n': CATEGORIES_QUERY_RESULT
-    '\n  *[_type == "post" && !(_id in path("drafts.**")) && slug.current == $slug][0] {\n    title,\n    "slug": slug.current,\n    author->{ name, image },\n    mainImage,\n    categories[]->{ _id, title },\n    publishedAt,\n    body,\n    excerpt\n  }\n': POST_QUERY_RESULT
+    '\n  *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current)] | order(publishedAt desc) { \n  _id,\n  title,\n  "slug": slug.current,\n  mainImage,\n  "lqip": mainImage.asset->metadata.lqip,\n  publishedAt,\n  "excerpt": coalesce(excerpt, array::join(string::split(pt::text(body[_type == "block" && style == "normal"]), "")[0...200], "")),\n  categories[]->{ _id, title },\n  author->{ name }\n }\n': POSTS_QUERY_RESULT
+    '\n  *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current)] | order(publishedAt desc) [0...5] { \n  _id,\n  title,\n  "slug": slug.current,\n  mainImage,\n  "lqip": mainImage.asset->metadata.lqip,\n  publishedAt,\n  "excerpt": coalesce(excerpt, array::join(string::split(pt::text(body[_type == "block" && style == "normal"]), "")[0...200], "")),\n  categories[]->{ _id, title },\n  author->{ name }\n }\n': LATEST_POSTS_QUERY_RESULT
+    '\n  *[_type == "post" && !(_id in path("drafts.**")) && slug.current == $slug][0] {\n    _id,\n    title,\n    "slug": slug.current,\n    author->{ name, image },\n    mainImage,\n    "cover": mainImage.asset->metadata{ lqip, "width": dimensions.width, "height": dimensions.height },\n    categories[]->{ _id, title },\n    publishedAt,\n    _updatedAt,\n    body,\n    excerpt,\n    seo,\n    "previous": *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && publishedAt < ^.publishedAt]\n      | order(publishedAt desc)[0] { title, "slug": slug.current },\n    "next": *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && publishedAt > ^.publishedAt]\n      | order(publishedAt asc)[0] { title, "slug": slug.current },\n    "related": *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && _id != ^._id && count(categories[@._ref in ^.^.categories[]._ref]) > 0]\n      | order(publishedAt desc)[0...3] { \n  _id,\n  title,\n  "slug": slug.current,\n  mainImage,\n  "lqip": mainImage.asset->metadata.lqip,\n  publishedAt,\n  "excerpt": coalesce(excerpt, array::join(string::split(pt::text(body[_type == "block" && style == "normal"]), "")[0...200], "")),\n  categories[]->{ _id, title },\n  author->{ name }\n }\n  }\n': POST_QUERY_RESULT
     '\n  *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current)].slug.current\n': POST_SLUGS_QUERY_RESULT
     '\n  *[_type == "project" && !(_id in path("drafts.**"))] | order(coalesce(order, 999) asc, _createdAt desc) { \n  _id,\n  title,\n  "slug": slug.current,\n  description,\n  mainImage,\n  publishedAt,\n  github,\n  url,\n  featured,\n  status,\n  tech,\n  githubData\n }\n': PROJECTS_QUERY_RESULT
     '\n  *[_type == "project" && !(_id in path("drafts.**")) && slug.current == $slug][0] { \n  _id,\n  title,\n  "slug": slug.current,\n  description,\n  mainImage,\n  publishedAt,\n  github,\n  url,\n  featured,\n  status,\n  tech,\n  githubData\n, body, seo }\n': PROJECT_QUERY_RESULT
