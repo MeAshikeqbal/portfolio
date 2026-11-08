@@ -3,17 +3,16 @@ import TechStack from '@/components/tech-stack'
 
 
 interface Skill {
+  _id: string
   name: string
-  icon: {
-    asset: {
-      _ref: string
-    }
-  }
+  /** Iconify icon name, e.g. `logos:aws`. */
+  icon?: string
 }
 
 const getSkills = async (): Promise<Skill[]> => {
   return client.fetch(`
-    *[_type == "skills"] {
+    *[_type == "skills"] | order(name asc) {
+      _id,
       name,
       icon
     }

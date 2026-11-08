@@ -1,18 +1,15 @@
 'use client'
 
 import { useRef } from 'react'
-import Image from 'next/image'
 import { Card, CardContent } from "@/components/ui/card"
 import { motion, useInView } from 'framer-motion'
-import { urlFor } from '@/sanity/lib/image'
+import { SkillIcon } from '@/components/skill-icon'
 
 interface Skill {
+  _id: string
   name: string
-  icon: {
-    asset: {
-      _ref: string
-    }
-  }
+  /** Iconify icon name, e.g. `logos:aws`. */
+  icon?: string
 }
 
 interface TechStackProps {
@@ -63,7 +60,7 @@ export default function TechStack({ skills }: TechStackProps) {
           animate={isInView ? "visible" : "hidden"}
         >
           {skills.map((skill) => (
-            <motion.div key={skill.name} variants={itemVariants}>
+            <motion.div key={skill._id} variants={itemVariants}>
               <Card className="flex flex-col items-center justify-center p-4 h-full hover:shadow-lg transition-all duration-300 group">
                 <CardContent className="flex flex-col items-center p-0">
                   {skill.icon && (
@@ -72,13 +69,7 @@ export default function TechStack({ skills }: TechStackProps) {
                       whileHover={{ scale: 1.1 }}
                       whileTap={{ scale: 0.95 }}
                     >
-                      <Image
-                        src={urlFor(skill.icon).url()}
-                        alt={skill.name}
-                        className="object-contain p-3"
-                        fill
-                        sizes="(max-width: 80px) 100vw, 80px"
-                      />
+                      <SkillIcon name={skill.icon} label={skill.name} className="absolute inset-0 m-auto size-14 text-foreground" />
                     </motion.div>
                   )}
                   <h3 className="text-lg font-semibold text-center text-foreground group-hover:text-primary transition-colors duration-300">{skill.name}</h3>
