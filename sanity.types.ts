@@ -484,7 +484,7 @@ export type AllSanitySchemaTypes =
 
 // Source: sanity/lib/queries.ts
 // Variable: POSTS_QUERY
-// Query: *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current)] | order(publishedAt desc) {   _id,  title,  "slug": slug.current,  mainImage,  publishedAt,  "excerpt": coalesce(excerpt, array::join(string::split(pt::text(body), "")[0...200], "")),  categories[]->{ _id, title },  author->{ name } }
+// Query: *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current)] | order(publishedAt desc) {   _id,  title,  "slug": slug.current,  mainImage,  publishedAt,  "excerpt": coalesce(excerpt, array::join(string::split(pt::text(body[_type == "block" && style == "normal"]), "")[0...200], "")),  categories[]->{ _id, title },  author->{ name } }
 export type POSTS_QUERY_RESULT = Array<{
   _id: string
   title: string | null
@@ -510,7 +510,7 @@ export type POSTS_QUERY_RESULT = Array<{
 
 // Source: sanity/lib/queries.ts
 // Variable: LATEST_POSTS_QUERY
-// Query: *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current)] | order(publishedAt desc) [0...5] {   _id,  title,  "slug": slug.current,  mainImage,  publishedAt,  "excerpt": coalesce(excerpt, array::join(string::split(pt::text(body), "")[0...200], "")),  categories[]->{ _id, title },  author->{ name } }
+// Query: *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current)] | order(publishedAt desc) [0...5] {   _id,  title,  "slug": slug.current,  mainImage,  publishedAt,  "excerpt": coalesce(excerpt, array::join(string::split(pt::text(body[_type == "block" && style == "normal"]), "")[0...200], "")),  categories[]->{ _id, title },  author->{ name } }
 export type LATEST_POSTS_QUERY_RESULT = Array<{
   _id: string
   title: string | null
@@ -719,7 +719,7 @@ export type CV_URL_QUERY_RESULT = string | null
 
 // Source: sanity/lib/queries.ts
 // Variable: FEED_POSTS_QUERY
-// Query: *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current)] | order(publishedAt desc) {    title,    "slug": slug.current,    publishedAt,    _updatedAt,    "excerpt": coalesce(excerpt, array::join(string::split(pt::text(body), "")[0...200], "")),    author->{ name },    "categories": categories[]->title,    "image": mainImage.asset->{ url, "mimeType": mimeType }  }
+// Query: *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current)] | order(publishedAt desc) {    title,    "slug": slug.current,    publishedAt,    _updatedAt,    "excerpt": coalesce(excerpt, array::join(string::split(pt::text(body[_type == "block" && style == "normal"]), "")[0...200], "")),    author->{ name },    "categories": categories[]->title,    "image": mainImage.asset->{ url, "mimeType": mimeType }  }
 export type FEED_POSTS_QUERY_RESULT = Array<{
   title: string | null
   slug: string | null
@@ -748,8 +748,8 @@ export type GITHUB_PROJECTS_QUERY_RESULT = Array<{
 // Query TypeMap
 declare global {
   interface SanityQueries {
-    '\n  *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current)] | order(publishedAt desc) { \n  _id,\n  title,\n  "slug": slug.current,\n  mainImage,\n  publishedAt,\n  "excerpt": coalesce(excerpt, array::join(string::split(pt::text(body), "")[0...200], "")),\n  categories[]->{ _id, title },\n  author->{ name }\n }\n': POSTS_QUERY_RESULT
-    '\n  *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current)] | order(publishedAt desc) [0...5] { \n  _id,\n  title,\n  "slug": slug.current,\n  mainImage,\n  publishedAt,\n  "excerpt": coalesce(excerpt, array::join(string::split(pt::text(body), "")[0...200], "")),\n  categories[]->{ _id, title },\n  author->{ name }\n }\n': LATEST_POSTS_QUERY_RESULT
+    '\n  *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current)] | order(publishedAt desc) { \n  _id,\n  title,\n  "slug": slug.current,\n  mainImage,\n  publishedAt,\n  "excerpt": coalesce(excerpt, array::join(string::split(pt::text(body[_type == "block" && style == "normal"]), "")[0...200], "")),\n  categories[]->{ _id, title },\n  author->{ name }\n }\n': POSTS_QUERY_RESULT
+    '\n  *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current)] | order(publishedAt desc) [0...5] { \n  _id,\n  title,\n  "slug": slug.current,\n  mainImage,\n  publishedAt,\n  "excerpt": coalesce(excerpt, array::join(string::split(pt::text(body[_type == "block" && style == "normal"]), "")[0...200], "")),\n  categories[]->{ _id, title },\n  author->{ name }\n }\n': LATEST_POSTS_QUERY_RESULT
     '\n  *[_type == "category"] | order(title asc) { _id, title }\n': CATEGORIES_QUERY_RESULT
     '\n  *[_type == "post" && !(_id in path("drafts.**")) && slug.current == $slug][0] {\n    title,\n    "slug": slug.current,\n    author->{ name, image },\n    mainImage,\n    categories[]->{ _id, title },\n    publishedAt,\n    body,\n    excerpt\n  }\n': POST_QUERY_RESULT
     '\n  *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current)].slug.current\n': POST_SLUGS_QUERY_RESULT
@@ -761,7 +761,7 @@ declare global {
     '\n  *[_type == "education"] | order(year desc) { _id, year, degree, school, schoolLogo, desc }\n': EDUCATION_QUERY_RESULT
     '\n  *[_type == "experiences"] | order(year desc) {\n    _id,\n    year,\n    works[]{ _key, name, company, copmanyLogo, desc }\n  }\n': EXPERIENCES_QUERY_RESULT
     '\n  *[_type == "cv"][0].cvFile.asset->url\n': CV_URL_QUERY_RESULT
-    '\n  *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current)] | order(publishedAt desc) {\n    title,\n    "slug": slug.current,\n    publishedAt,\n    _updatedAt,\n    "excerpt": coalesce(excerpt, array::join(string::split(pt::text(body), "")[0...200], "")),\n    author->{ name },\n    "categories": categories[]->title,\n    "image": mainImage.asset->{ url, "mimeType": mimeType }\n  }\n': FEED_POSTS_QUERY_RESULT
+    '\n  *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current)] | order(publishedAt desc) {\n    title,\n    "slug": slug.current,\n    publishedAt,\n    _updatedAt,\n    "excerpt": coalesce(excerpt, array::join(string::split(pt::text(body[_type == "block" && style == "normal"]), "")[0...200], "")),\n    author->{ name },\n    "categories": categories[]->title,\n    "image": mainImage.asset->{ url, "mimeType": mimeType }\n  }\n': FEED_POSTS_QUERY_RESULT
     '\n  *[_type == "project" && defined(github)] { _id, title, github }\n': GITHUB_PROJECTS_QUERY_RESULT
   }
 }

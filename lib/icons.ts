@@ -13,6 +13,11 @@ const ICON_SETS: Record<string, () => Promise<IconifyJSON>> = {
 /** Single-colour sets: rendered with `currentColor` so they follow the theme. */
 export const MONOCHROME_SETS = new Set(["mdi", "simple-icons", "ri"])
 
+/** True for icons drawn in `currentColor` (no brand colours of their own). */
+export function isMonochromeIcon(name: string): boolean {
+  return MONOCHROME_SETS.has(name.split(":")[0])
+}
+
 const ICON_NAME = /^[a-z0-9-]+:[a-z0-9-]+$/
 
 function isIconName(name: string): boolean {
