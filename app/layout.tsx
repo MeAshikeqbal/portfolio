@@ -2,9 +2,7 @@ import { Geist, Geist_Mono } from "next/font/google"
 import type { Metadata, Viewport } from "next"
 import "./globals.css"
 import { siteConfig } from "@/lib/site"
-import { SanityLive } from "@/sanity/lib/live"
 import { Providers } from "@/components/providers"
-import { BackToTop } from "@/components/back-to-top"
 import { Analytics } from "@vercel/analytics/react"
 import { SpeedInsights } from "@vercel/speed-insights/next"
 
@@ -94,9 +92,7 @@ export default function RootLayout({
       <body className="flex min-h-screen flex-col">
         <Providers>
           <div className="grow">{children}</div>
-          <BackToTop />
         </Providers>
-        <SanityLive />
         <Analytics />
         <SpeedInsights />
       </body>
