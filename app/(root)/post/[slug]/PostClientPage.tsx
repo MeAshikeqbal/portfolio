@@ -39,7 +39,7 @@ const CodeBlock = ({
   return (
     <div className="group relative my-6">
       {filename && (
-        <div className="rounded-t-lg border-b border-gray-700 bg-gray-800 px-4 py-2 font-mono text-sm text-gray-200">
+        <div className="rounded-t-lg border border-b-0 bg-surface-2 px-4 py-2 font-mono text-xs text-muted-foreground">
           {filename}
         </div>
       )}
@@ -53,8 +53,7 @@ const CodeBlock = ({
             fontSize: "0.875rem", // 14px
             padding: "1rem",
             lineHeight: "1.6", // Adjusted for better readability
-            fontFamily:
-              'ui-monospace, SFMono-Regular, "SF Mono", Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
+            fontFamily: "var(--font-mono)",
           }}
           showLineNumbers={true}
           wrapLongLines={true} // Kept as true, can be set to false for horizontal scrolling
@@ -67,8 +66,9 @@ const CodeBlock = ({
           onClick={handleCopy}
           size="icon" // Changed for consistency if using Lucide icons
           variant="ghost"
-          className="absolute top-3 right-3 h-8 w-8 bg-gray-700 p-1.5 text-white opacity-0 transition-opacity group-hover:opacity-100 hover:bg-gray-600" // Adjusted padding and position slightly
+          className="absolute top-3 right-3 h-8 w-8 border bg-surface/90 p-1.5 text-foreground opacity-0 transition-opacity group-hover:opacity-100 hover:bg-surface focus-visible:opacity-100"
           title="Copy code"
+          aria-label={copied ? "Copied" : "Copy code"}
         >
           {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
         </Button>
@@ -100,8 +100,8 @@ export default function PostClientPage({ post }: { post: Post }) {
             quality={50}
           />
         )}
-        <div className="bg-opacity-50 absolute inset-0 flex items-center justify-center bg-black">
-          <h1 className="max-w-4xl px-4 text-center text-3xl font-bold text-white md:px-8 md:text-4xl lg:px-16 lg:text-5xl">
+        <div className="absolute inset-0 flex items-center justify-center bg-scrim">
+          <h1 className="max-w-4xl px-4 text-center text-3xl font-semibold tracking-tight text-balance text-on-scrim md:px-8 md:text-4xl lg:px-16 lg:text-5xl">
             {post.title}
           </h1>
         </div>
@@ -111,7 +111,7 @@ export default function PostClientPage({ post }: { post: Post }) {
         <div className="mb-8">
           <BreadcrumbPost postTitle={post.title ?? undefined} />
         </div>
-        <Card className="mb-2 overflow-hidden shadow-lg">
+        <Card className="mb-8 overflow-hidden">
           <CardContent className="p-6 md:p-8">
             <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
               <div className="flex items-center space-x-4">
@@ -157,44 +157,23 @@ export default function PostClientPage({ post }: { post: Post }) {
             </div>
           </CardContent>
         </Card>
-        <div className="mx-auto prose prose-lg max-w-none dark:prose-invert">
+        <div className="mx-auto prose prose-lg max-w-none">
           <PortableText
             value={post.body || []}
             components={{
               block: {
-                h1: ({ children }) => (
-                  <h1 className="mt-8 mb-4 text-3xl font-bold text-primary">{children}</h1>
-                ),
-                h2: ({ children }) => (
-                  <h2 className="mt-6 mb-3 text-2xl font-semibold text-primary">{children}</h2>
-                ),
-                h3: ({ children }) => (
-                  <h3 className="mt-4 mb-2 text-xl font-medium text-primary">{children}</h3>
-                ),
-                normal: ({ children }) => (
-                  <p className="mb-4 text-justify leading-relaxed text-foreground">{children}</p>
-                ),
-                blockquote: ({ children }) => (
-                  <blockquote className="my-6 border-l-4 border-primary pl-4 text-lg text-muted-foreground italic">
-                    {children}
-                  </blockquote>
-                ),
-              },
-              list: {
-                bullet: ({ children }) => (
-                  <ul className="mb-4 list-disc pl-6 text-foreground">{children}</ul>
-                ),
-                number: ({ children }) => (
-                  <ol className="mb-4 list-decimal pl-6 text-foreground">{children}</ol>
-                ),
-              },
-              listItem: {
-                bullet: ({ children }) => <li className="mb-2 text-justify">{children}</li>,
-                number: ({ children }) => <li className="mb-2 text-justify">{children}</li>,
+                // A code-block annotation renders a <div>, which can't live inside a <p>
+                // (invalid HTML → hydration error), so those paragraphs render as <div>.
+                normal: ({ value, children }) =>
+                  value.markDefs?.some(
+                    (def) => def._type === "code" && typeof def.code === "string",
+                  ) ? (
+                    <div className="my-5">{children}</div>
+                  ) : (
+                    <p>{children}</p>
+                  ),
               },
               marks: {
-                strong: ({ children }) => <strong className="font-bold">{children}</strong>,
-                em: ({ children }) => <em className="italic">{children}</em>,
                 code: ({ value, children }) => {
                   // 'value' is the annotation object from Sanity.
                   // It should contain 'code', 'language', 'filename' because the annotation's 'type' is 'code'.
@@ -208,12 +187,8 @@ export default function PostClientPage({ post }: { post: Post }) {
                       />
                     )
                   }
-                  // Fallback for inline code if value.code is not available (renders simple inline style)
-                  return (
-                    <code className="rounded-md bg-gray-100 px-1.5 py-0.5 font-mono text-sm text-red-600 dark:bg-gray-700 dark:text-red-400">
-                      {children}
-                    </code>
-                  )
+                  // Inline code: styled by the prose tokens in app/globals.css.
+                  return <code>{children}</code>
                 },
                 link: ({ value, children }) => {
                   if (value?.href) {
@@ -223,7 +198,6 @@ export default function PostClientPage({ post }: { post: Post }) {
                         href={value.href}
                         target={target}
                         rel={target === "_blank" ? "noopener noreferrer" : undefined}
-                        className="text-blue-600 hover:underline"
                       >
                         {children}
                       </a>

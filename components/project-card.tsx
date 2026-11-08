@@ -6,7 +6,9 @@ import { Button } from "@/components/ui/button"
 import { GitCommit, Globe, Scale, Star } from "lucide-react"
 import { FaGithub as Github } from "react-icons/fa6"
 import { motion } from "motion/react"
+import { StatusPill } from "@/components/dashboard/status-pill"
 import type { Project } from "@/lib/api"
+import { projectStatus } from "@/lib/status"
 
 export function ProjectCard({ project }: { project: Project }) {
   if (!project) {
@@ -14,6 +16,7 @@ export function ProjectCard({ project }: { project: Project }) {
   }
 
   const previewUrl = project.url || project.github
+  const status = projectStatus(project.status)
 
   return (
     <motion.div
@@ -21,18 +24,25 @@ export function ProjectCard({ project }: { project: Project }) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
     >
-      <Card className="group flex h-full flex-col overflow-hidden transition-shadow duration-300 hover:shadow-lg">
-        <CardHeader>
+      <Card className="group flex h-full flex-col overflow-hidden transition-colors duration-200 hover:border-border-strong">
+        <CardHeader className="gap-3">
+          {status && (
+            <StatusPill status={status.status} className="w-fit">
+              {status.label}
+            </StatusPill>
+          )}
           <CardTitle>
             {previewUrl ? (
               <LinkPreview
                 url={previewUrl}
-                className="text-xl font-bold transition-colors duration-200 hover:underline"
+                className="text-xl font-semibold tracking-tight transition-colors duration-200 hover:underline"
               >
                 {project.title || "Untitled Project"}
               </LinkPreview>
             ) : (
-              <span className="text-xl font-bold">{project.title || "Untitled Project"}</span>
+              <span className="text-xl font-semibold tracking-tight">
+                {project.title || "Untitled Project"}
+              </span>
             )}
           </CardTitle>
         </CardHeader>
