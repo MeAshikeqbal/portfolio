@@ -15,7 +15,6 @@ export const siteConfig = {
   description:
     "Personal portfolio and blog of Ashik Eqbal, a software engineer specializing in web development.",
   locale: "en_US",
-  ogImage: "/og-image.jpg",
   twitterHandle: "@me_ashikeqbal",
   role: "Software engineer",
   tagline: "A passionate software engineer who loves to build web applications.",
