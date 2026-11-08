@@ -14,7 +14,7 @@ export function projectMeta(project: Project): string[] {
 
 /** The project's own page when it has a slug, otherwise its live site or repo. */
 export function projectHref(project: Pick<Project, "slug" | "url" | "github">): string | undefined {
-  if (project.slug) return `/projects/${project.slug}`
+  if (project.slug) return `/projects/${encodeURIComponent(project.slug)}`
   return project.url || project.github || undefined
 }
 

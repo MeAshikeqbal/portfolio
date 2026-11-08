@@ -27,3 +27,9 @@ describe("isCurrentPeriod", () => {
     expect(isCurrentPeriod(period, now)).toBe(expected)
   })
 })
+
+describe("isCurrentPeriod word matching", () => {
+  it("doesn't treat words that merely contain 'now' as current", () => {
+    expect(isCurrentPeriod("unknown", new Date("2026-11-09T00:00:00Z"))).toBe(false)
+  })
+})

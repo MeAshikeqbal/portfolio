@@ -4,12 +4,6 @@ import { SectionHeader } from "@/components/dashboard/section-header"
 import { siteConfig } from "@/lib/site"
 import { ContactForm } from "./contact-form"
 
-const channels = [
-  { label: "GitHub", href: siteConfig.socials.github },
-  { label: "LinkedIn", href: siteConfig.socials.linkedin },
-  { label: "X (Twitter)", href: siteConfig.socials.twitter },
-]
-
 export function ContactSection() {
   return (
     <Section id="contact" className="border-t">
@@ -22,7 +16,7 @@ export function ContactSection() {
           />
           <p className="label-caps">other channels</p>
           <ul className="mt-3 space-y-2 text-sm">
-            {channels.map((channel) => (
+            {siteConfig.socialLinks.map((channel) => (
               <li key={channel.href}>
                 <a
                   href={channel.href}

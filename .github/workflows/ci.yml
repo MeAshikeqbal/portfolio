@@ -50,6 +50,10 @@ jobs:
           key: nextjs-${{ hashFiles('package-lock.json') }}-${{ hashFiles('app/**', 'components/**', 'lib/**', 'sanity/**') }}
           restore-keys: nextjs-${{ hashFiles('package-lock.json') }}-
       - run: npm run build
+        env:
+          # Cloudflare's documented always-pass test key, so the contact form is testable.
+          # This build is only used for tests, never deployed.
+          NEXT_PUBLIC_CLOUDFLARE_TURNSTILE_SITE_KEY: 1x00000000000000000000AA
       - run: npx playwright install --with-deps chromium
       - run: npx playwright test --project=chromium --project=mobile
       - uses: actions/upload-artifact@v4

@@ -11,11 +11,7 @@ import { getCvUrl, getHomeStats } from "@/lib/api"
 import { formatCompact, formatDate } from "@/lib/format"
 import { siteConfig } from "@/lib/site"
 
-const socials = [
-  { icon: FaGithub, href: siteConfig.socials.github, label: "GitHub" },
-  { icon: FaLinkedin, href: siteConfig.socials.linkedin, label: "LinkedIn" },
-  { icon: FaXTwitter, href: siteConfig.socials.twitter, label: "X (Twitter)" },
-]
+const SOCIAL_ICONS = { github: FaGithub, linkedin: FaLinkedin, twitter: FaXTwitter } as const
 
 export async function Hero() {
   const [cvUrl, stats] = await Promise.all([getCvUrl(), getHomeStats()])
@@ -58,19 +54,22 @@ export async function Hero() {
               <Link href="/#contact">Open a ticket</Link>
             </Button>
             <div className="ml-1 flex items-center gap-1">
-              {socials.map(({ icon: Icon, href, label }) => (
-                <Button
-                  key={href}
-                  asChild
-                  variant="ghost"
-                  size="icon"
-                  className="text-muted-foreground"
-                >
-                  <a href={href} target="_blank" rel="noopener noreferrer" aria-label={label}>
-                    <Icon />
-                  </a>
-                </Button>
-              ))}
+              {siteConfig.socialLinks.map(({ id, href, label }) => {
+                const Icon = SOCIAL_ICONS[id]
+                return (
+                  <Button
+                    key={href}
+                    asChild
+                    variant="ghost"
+                    size="icon"
+                    className="text-muted-foreground"
+                  >
+                    <a href={href} target="_blank" rel="noopener noreferrer" aria-label={label}>
+                      <Icon />
+                    </a>
+                  </Button>
+                )
+              })}
               <Button asChild variant="ghost" size="icon" className="text-muted-foreground">
                 <a href="/rss.xml" aria-label="RSS feed">
                   <Rss />

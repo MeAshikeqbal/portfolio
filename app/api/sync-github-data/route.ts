@@ -4,6 +4,7 @@ import { type NextRequest, NextResponse } from "next/server"
 import {
   fetchGitHubData,
   fetchOwnedPublicRepositories,
+  githubPatchFields,
   normalizeRepoUrl,
 } from "@/lib/fetch-github-data"
 import { GITHUB_PROJECTS_QUERY } from "@/sanity/lib/queries"
@@ -53,9 +54,12 @@ async function sync(req: NextRequest) {
       errors.push(`No GitHub data for ${project.title ?? project._id}`)
       continue
     }
+    const fields = githubPatchFields(githubData)
     try {
-      await writeClient.patch(project._id).set({ githubData }).commit()
-      results.push(`Updated ${project.title ?? project._id}`)
+      await writeClient.patch(project._id).setIfMissing({ githubData: {} }).set(fields).commit()
+      results.push(
+        `Updated ${project.title ?? project._id}${githubData.activity ? "" : " (commit stats pending)"}`,
+      )
     } catch (error) {
       errors.push(`Failed to update ${project.title ?? project._id}: ${String(error)}`)
     }
@@ -89,6 +93,7 @@ async function sync(req: NextRequest) {
   }
 
   revalidatePath("/projects")
+  revalidatePath("/projects/[slug]", "page")
   revalidatePath("/")
 
   return NextResponse.json(

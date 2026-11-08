@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { normalizeRepoUrl, parseRepoUrl } from "@/lib/fetch-github-data"
+import { githubPatchFields, normalizeRepoUrl, parseRepoUrl } from "@/lib/fetch-github-data"
 
 describe("parseRepoUrl", () => {
   it.each([
@@ -27,5 +27,34 @@ describe("normalizeRepoUrl", () => {
     const canonical = normalizeRepoUrl("https://github.com/meashikeqbal/portfolio")
     expect(normalizeRepoUrl("https://github.com/MeAshikeqbal/Portfolio/")).toBe(canonical)
     expect(normalizeRepoUrl("https://github.com/MeAshikeqbal/portfolio.git")).toBe(canonical)
+  })
+})
+
+describe("githubPatchFields", () => {
+  const base = {
+    stars: 3,
+    license: "MIT License",
+    language: "Go",
+    topics: [],
+    pushedAt: "2026-11-01T00:00:00Z",
+  }
+
+  it("writes commit activity when GitHub returned it", () => {
+    const fields = githubPatchFields({
+      ...base,
+      activity: { commits: 40, weeklyCommits: [1, 2, 3] },
+    })
+    expect(fields).toMatchObject({
+      "githubData.stars": 3,
+      "githubData.commits": 40,
+      "githubData.weeklyCommits": [1, 2, 3],
+    })
+  })
+
+  it("leaves stored commits alone while GitHub is still computing stats", () => {
+    const fields = githubPatchFields({ ...base, activity: null })
+    expect(fields).toHaveProperty("githubData.stars", 3)
+    expect(fields).not.toHaveProperty("githubData.commits")
+    expect(fields).not.toHaveProperty("githubData.weeklyCommits")
   })
 })

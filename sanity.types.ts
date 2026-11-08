@@ -745,6 +745,20 @@ export type GITHUB_PROJECTS_QUERY_RESULT = Array<{
   github: string
 }>
 
+// Source: sanity/lib/queries.ts
+// Variable: SITEMAP_QUERY
+// Query: {  "posts": *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && seo.noIndex != true]    | order(publishedAt desc) { "slug": slug.current, _updatedAt },  "projects": *[_type == "project" && !(_id in path("drafts.**")) && defined(slug.current) && seo.noIndex != true]    { "slug": slug.current, _updatedAt }}
+export type SITEMAP_QUERY_RESULT = {
+  posts: Array<{
+    slug: string | null
+    _updatedAt: string
+  }>
+  projects: Array<{
+    slug: string | null
+    _updatedAt: string
+  }>
+}
+
 // Query TypeMap
 declare global {
   interface SanityQueries {
@@ -763,6 +777,7 @@ declare global {
     '\n  *[_type == "cv"][0].cvFile.asset->url\n': CV_URL_QUERY_RESULT
     '\n  *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current)] | order(publishedAt desc) {\n    title,\n    "slug": slug.current,\n    publishedAt,\n    _updatedAt,\n    "excerpt": coalesce(excerpt, array::join(string::split(pt::text(body[_type == "block" && style == "normal"]), "")[0...200], "")),\n    author->{ name },\n    "categories": categories[]->title,\n    "image": mainImage.asset->{ url, "mimeType": mimeType }\n  }\n': FEED_POSTS_QUERY_RESULT
     '\n  *[_type == "project" && defined(github)] { _id, title, github }\n': GITHUB_PROJECTS_QUERY_RESULT
+    '{\n  "posts": *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && seo.noIndex != true]\n    | order(publishedAt desc) { "slug": slug.current, _updatedAt },\n  "projects": *[_type == "project" && !(_id in path("drafts.**")) && defined(slug.current) && seo.noIndex != true]\n    { "slug": slug.current, _updatedAt }\n}': SITEMAP_QUERY_RESULT
   }
 }
 // Lets @sanity/client releases that predate the global registry read it too

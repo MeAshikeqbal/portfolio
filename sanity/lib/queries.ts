@@ -124,3 +124,11 @@ export const FEED_POSTS_QUERY = defineQuery(`
 export const GITHUB_PROJECTS_QUERY = defineQuery(`
   *[_type == "project" && defined(github)] { _id, title, github }
 `)
+
+/** Indexable posts and projects for the sitemap (documents marked `seo.noIndex` are left out). */
+export const SITEMAP_QUERY = defineQuery(`{
+  "posts": *[_type == "post" && ${published} && defined(slug.current) && seo.noIndex != true]
+    | order(publishedAt desc) { "slug": slug.current, _updatedAt },
+  "projects": *[_type == "project" && ${published} && defined(slug.current) && seo.noIndex != true]
+    { "slug": slug.current, _updatedAt }
+}`)

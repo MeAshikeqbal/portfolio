@@ -11,12 +11,7 @@ const siteLinks = [
   { label: "Sitemap", href: "/sitemap.xml" },
 ]
 
-const elsewhere = [
-  { label: "GitHub", href: siteConfig.socials.github },
-  { label: "LinkedIn", href: siteConfig.socials.linkedin },
-  { label: "X (Twitter)", href: siteConfig.socials.twitter },
-  { label: "Source code", href: siteConfig.repo },
-]
+const elsewhere = [...siteConfig.socialLinks, { label: "Source code", href: siteConfig.repo }]
 
 export function SiteFooter() {
   const sha = process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 7)

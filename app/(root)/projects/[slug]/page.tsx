@@ -7,6 +7,7 @@ import { notFound } from "next/navigation"
 import { FaGithub } from "react-icons/fa6"
 import { Container, Section } from "@/components/dashboard/layout"
 import { MetricGrid, MetricTile } from "@/components/dashboard/metric-tile"
+import { portableTextComponents } from "@/components/portable-text/components"
 import { Sparkline } from "@/components/dashboard/sparkline"
 import { StatusPill } from "@/components/dashboard/status-pill"
 import { Button } from "@/components/ui/button"
@@ -106,7 +107,7 @@ export default async function ProjectPage({ params }: Props) {
               <MetricTile
                 label="commits"
                 value={gh.commits ?? "—"}
-                hint={weekly.length > 1 ? `last ${weekly.length} weeks` : "past year"}
+                hint="past year"
                 trend={
                   weekly.length > 1 ? (
                     <Sparkline values={weekly} label={`${title} commits per week`} />
@@ -153,7 +154,7 @@ export default async function ProjectPage({ params }: Props) {
           <div className="mt-12">
             {project.body && project.body.length > 0 ? (
               <article className="prose max-w-none">
-                <PortableText value={project.body} />
+                <PortableText value={project.body} components={portableTextComponents} />
               </article>
             ) : (
               <p className="rounded-lg border border-dashed p-8 text-center text-muted-foreground">

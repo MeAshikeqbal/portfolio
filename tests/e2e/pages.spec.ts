@@ -60,7 +60,7 @@ test.describe("contact", () => {
     const form = page.locator("#contact form")
     await form.evaluate((el) => {
       el.setAttribute("novalidate", "")
-      const trap = el.querySelector<HTMLInputElement>('input[name="company"]')
+      const trap = el.querySelector<HTMLInputElement>('input[name="hp_field_7c1"]')
       if (trap) trap.value = "Spam Inc"
     })
     await page.getByRole("button", { name: "Submit ticket" }).click()
@@ -80,6 +80,19 @@ test.describe("projects", () => {
     await page.reload()
     await expect(page.getByLabel("Filter projects")).toHaveValue("portfolio")
     await expect(count).toHaveText(/^1 of \d+ shown$/)
+  })
+
+  test("the search box follows navigation back to an unfiltered list", async ({ page }) => {
+    await page.goto("/projects?q=portfolio")
+    await expect(page.getByLabel("Filter projects")).toHaveValue("portfolio")
+    await page.goto("/")
+    await page.goBack()
+    await expect(page.getByLabel("Filter projects")).toHaveValue("portfolio")
+    // Clicking the nav link lands on a clean /projects and the input clears with it.
+    await page.locator('a[href="/projects"]').last().click()
+    await expect(page).toHaveURL(/\/projects$/)
+    await expect(page.getByLabel("Filter projects")).toHaveValue("")
+    await expect(page.getByText(/^(\d+) of \1 shown$/)).toBeVisible()
   })
 
   test("a case study page renders its metrics and links", async ({ page }) => {
