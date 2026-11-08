@@ -100,7 +100,7 @@ export const LinkPreview: React.FC<LinkPreviewProps> = ({
         </HoverCardPrimitive.Trigger>
 
         <HoverCardPrimitive.Content
-          className="[transform-origin:var(--radix-hover-card-content-transform-origin)] z-50"
+          className="origin-(--radix-hover-card-content-transform-origin) z-50"
           side="top"
           align="center"
           sideOffset={10}
@@ -125,7 +125,7 @@ export const LinkPreview: React.FC<LinkPreviewProps> = ({
               >
                 <Link
                   href={url}
-                  className="block p-1 bg-white border-2 border-transparent shadow rounded-xl hover:border-neutral-200 dark:hover:border-neutral-800 dark:bg-neutral-900"
+                  className="block p-1 bg-white border-2 border-transparent shadow-sm rounded-xl hover:border-neutral-200 dark:hover:border-neutral-800 dark:bg-neutral-900"
                 >
                   <Image
                     src={src}

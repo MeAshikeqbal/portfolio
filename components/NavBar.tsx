@@ -88,7 +88,7 @@ export function NavBar() {
 
   return (
     <motion.nav
-      className="bg-background/90 shadow-sm fixed top-0 left-0 right-0 z-50 backdrop-blur-sm w-full"
+      className="bg-background/90 shadow-xs fixed top-0 left-0 right-0 z-50 backdrop-blur-xs w-full"
       initial={{ y: -100 }}
       animate={{ y: 0 }}
       transition={{ type: "spring", stiffness: 120, damping: 20 }}

@@ -31,7 +31,7 @@ export function HeroContent({ cvUrl }: { cvUrl: string | null }) {
   }
 
   return (
-    <section id='Home' className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-gray-900 dark:to-indigo-900 px-4 sm:px-6 lg:px-8">
+    <section id='Home' className="relative min-h-screen flex items-center justify-center overflow-hidden bg-linear-to-br from-blue-100 to-indigo-100 dark:from-gray-900 dark:to-indigo-900 px-4 sm:px-6 lg:px-8">
       <motion.div 
         className="container mx-auto flex flex-col lg:flex-row items-center justify-between gap-12 py-16 lg:py-0"
         variants={containerVariants}

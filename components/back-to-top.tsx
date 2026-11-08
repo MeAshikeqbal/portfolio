@@ -34,7 +34,7 @@ export function BackToTop() {
 
   return (
     <Button
-      className="fixed bottom-4 right-4 p-2 rounded-full shadow-lg transition-opacity duration-300 hover:opacity-80 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
+      className="fixed bottom-4 right-4 p-2 rounded-full shadow-lg transition-opacity duration-300 hover:opacity-80 focus:outline-hidden focus:ring-2 focus:ring-offset-2 focus:ring-primary"
       onClick={scrollToTop}
       aria-label="Back to top"
     >
