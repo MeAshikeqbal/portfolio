@@ -37,9 +37,9 @@ const CodeBlock = ({
   }
 
   return (
-    <div className="relative group my-6">
+    <div className="group relative my-6">
       {filename && (
-        <div className="bg-gray-800 text-gray-200 px-4 py-2 text-sm font-mono rounded-t-lg border-b border-gray-700">
+        <div className="rounded-t-lg border-b border-gray-700 bg-gray-800 px-4 py-2 font-mono text-sm text-gray-200">
           {filename}
         </div>
       )}
@@ -67,7 +67,7 @@ const CodeBlock = ({
           onClick={handleCopy}
           size="icon" // Changed for consistency if using Lucide icons
           variant="ghost"
-          className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity bg-gray-700 hover:bg-gray-600 text-white h-8 w-8 p-1.5" // Adjusted padding and position slightly
+          className="absolute top-3 right-3 h-8 w-8 bg-gray-700 p-1.5 text-white opacity-0 transition-opacity group-hover:opacity-100 hover:bg-gray-600" // Adjusted padding and position slightly
           title="Copy code"
         >
           {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
@@ -87,13 +87,11 @@ const CodeBlock = ({
  */
 export default function PostClientPage({ post }: { post: Post }) {
   return (
-    <article className="max-w-full mx-auto pt-16">
-      <div className="relative w-full h-[30vh] md:h-[40vh] lg:h-[70vh] mb-12">
+    <article className="mx-auto max-w-full pt-16">
+      <div className="relative mb-12 h-[30vh] w-full md:h-[40vh] lg:h-[70vh]">
         {post.mainImage?.asset && (
           <Image
-            src={
-              urlFor(post.mainImage).width(1920).height(1080).url()
-            }
+            src={urlFor(post.mainImage).width(1920).height(1080).url()}
             alt={post.mainImage.alt || post.title || ""}
             style={{ objectFit: "cover" }}
             className="transition-transform duration-300"
@@ -102,24 +100,28 @@ export default function PostClientPage({ post }: { post: Post }) {
             quality={50}
           />
         )}
-        <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-          <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white text-center px-4 md:px-8 lg:px-16 max-w-4xl">
+        <div className="bg-opacity-50 absolute inset-0 flex items-center justify-center bg-black">
+          <h1 className="max-w-4xl px-4 text-center text-3xl font-bold text-white md:px-8 md:text-4xl lg:px-16 lg:text-5xl">
             {post.title}
           </h1>
         </div>
       </div>
 
-      <div className="max-w-4xl mx-auto px-4 md:px-8">
+      <div className="mx-auto max-w-4xl px-4 md:px-8">
         <div className="mb-8">
           <BreadcrumbPost postTitle={post.title ?? undefined} />
         </div>
         <Card className="mb-2 overflow-hidden shadow-lg">
           <CardContent className="p-6 md:p-8">
-            <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+            <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
               <div className="flex items-center space-x-4">
                 <Avatar className="h-12 w-12 border-2 border-primary">
                   <AvatarImage
-                    src={post.author?.image ? urlFor(post.author.image).width(100).height(100).url() : undefined}
+                    src={
+                      post.author?.image
+                        ? urlFor(post.author.image).width(100).height(100).url()
+                        : undefined
+                    }
                     alt={post.author?.name || "Author"}
                   />
                   <AvatarFallback>
@@ -127,10 +129,12 @@ export default function PostClientPage({ post }: { post: Post }) {
                   </AvatarFallback>
                 </Avatar>
                 <div>
-                  <p className="text-lg font-semibold text-foreground">{post.author?.name || "Unknown Author"}</p>
+                  <p className="text-lg font-semibold text-foreground">
+                    {post.author?.name || "Unknown Author"}
+                  </p>
                   {post.publishedAt && (
-                    <p className="text-sm text-muted-foreground flex items-center">
-                      <CalendarIcon className="w-4 h-4 mr-2" />
+                    <p className="flex items-center text-sm text-muted-foreground">
+                      <CalendarIcon className="mr-2 h-4 w-4" />
                       {new Date(post.publishedAt).toLocaleDateString("en-US", {
                         year: "numeric",
                         month: "long",
@@ -141,10 +145,10 @@ export default function PostClientPage({ post }: { post: Post }) {
                 </div>
               </div>
               {post.categories && post.categories.length > 0 && (
-                <div className="flex flex-wrap gap-2 items-center">
-                  <TagIcon className="w-4 h-4 text-muted-foreground" />
+                <div className="flex flex-wrap items-center gap-2">
+                  <TagIcon className="h-4 w-4 text-muted-foreground" />
                   {post.categories.map((category, index) => (
-                    <Badge key={index} variant="secondary" className="text-sm px-3 py-1">
+                    <Badge key={index} variant="secondary" className="px-3 py-1 text-sm">
                       {category.title}
                     </Badge>
                   ))}
@@ -153,26 +157,36 @@ export default function PostClientPage({ post }: { post: Post }) {
             </div>
           </CardContent>
         </Card>
-        <div className="prose prose-lg max-w-none dark:prose-invert mx-auto">
+        <div className="mx-auto prose prose-lg max-w-none dark:prose-invert">
           <PortableText
             value={post.body || []}
             components={{
               block: {
-                h1: ({ children }) => <h1 className="text-3xl font-bold mt-8 mb-4 text-primary">{children}</h1>,
-                h2: ({ children }) => <h2 className="text-2xl font-semibold mt-6 mb-3 text-primary">{children}</h2>,
-                h3: ({ children }) => <h3 className="text-xl font-medium mt-4 mb-2 text-primary">{children}</h3>,
+                h1: ({ children }) => (
+                  <h1 className="mt-8 mb-4 text-3xl font-bold text-primary">{children}</h1>
+                ),
+                h2: ({ children }) => (
+                  <h2 className="mt-6 mb-3 text-2xl font-semibold text-primary">{children}</h2>
+                ),
+                h3: ({ children }) => (
+                  <h3 className="mt-4 mb-2 text-xl font-medium text-primary">{children}</h3>
+                ),
                 normal: ({ children }) => (
-                  <p className="mb-4 leading-relaxed text-foreground text-justify">{children}</p>
+                  <p className="mb-4 text-justify leading-relaxed text-foreground">{children}</p>
                 ),
                 blockquote: ({ children }) => (
-                  <blockquote className="border-l-4 border-primary pl-4 italic my-6 text-lg text-muted-foreground">
+                  <blockquote className="my-6 border-l-4 border-primary pl-4 text-lg text-muted-foreground italic">
                     {children}
                   </blockquote>
                 ),
               },
               list: {
-                bullet: ({ children }) => <ul className="list-disc pl-6 mb-4 text-foreground">{children}</ul>,
-                number: ({ children }) => <ol className="list-decimal pl-6 mb-4 text-foreground">{children}</ol>,
+                bullet: ({ children }) => (
+                  <ul className="mb-4 list-disc pl-6 text-foreground">{children}</ul>
+                ),
+                number: ({ children }) => (
+                  <ol className="mb-4 list-decimal pl-6 text-foreground">{children}</ol>
+                ),
               },
               listItem: {
                 bullet: ({ children }) => <li className="mb-2 text-justify">{children}</li>,
@@ -196,7 +210,7 @@ export default function PostClientPage({ post }: { post: Post }) {
                   }
                   // Fallback for inline code if value.code is not available (renders simple inline style)
                   return (
-                    <code className="bg-gray-100 dark:bg-gray-700 text-red-600 dark:text-red-400 px-1.5 py-0.5 rounded-md text-sm font-mono">
+                    <code className="rounded-md bg-gray-100 px-1.5 py-0.5 font-mono text-sm text-red-600 dark:bg-gray-700 dark:text-red-400">
                       {children}
                     </code>
                   )

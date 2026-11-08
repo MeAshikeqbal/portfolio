@@ -1,8 +1,8 @@
-import Image from 'next/image'
-import { Separator } from '@/components/ui/separator'
-import { Timeline, TimelineEntryHeader, TimelineItem } from '@/components/timeline'
-import { getExperiences } from '@/lib/api'
-import { urlFor } from '@/sanity/lib/image'
+import Image from "next/image"
+import { Separator } from "@/components/ui/separator"
+import { Timeline, TimelineEntryHeader, TimelineItem } from "@/components/timeline"
+import { getExperiences } from "@/lib/api"
+import { urlFor } from "@/sanity/lib/image"
 
 export default async function ExperiencesTimeline() {
   const experiences = await getExperiences()
@@ -24,15 +24,15 @@ export default async function ExperiencesTimeline() {
                     work.copmanyLogo?.asset && (
                       <Image
                         src={urlFor(work.copmanyLogo).width(128).height(128).url()}
-                        alt={work.company ?? ''}
+                        alt={work.company ?? ""}
                         width={64}
                         height={64}
-                        className="rounded-full object-contain bg-background p-1 border border-border"
+                        className="rounded-full border border-border bg-background object-contain p-1"
                       />
                     )
                   }
                 />
-                {work.desc && <p className="text-muted-foreground leading-relaxed">{work.desc}</p>}
+                {work.desc && <p className="leading-relaxed text-muted-foreground">{work.desc}</p>}
                 {workIndex < works.length - 1 && <Separator className="my-6" />}
               </div>
             ))}

@@ -1,6 +1,6 @@
-import { defineLive } from 'next-sanity/live'
+import { defineLive } from "next-sanity/live"
 
-import { client } from './client'
+import { client } from "./client"
 
 /**
  * `sanityFetch` tags every query with Sanity sync tags; `<SanityLive />` (rendered

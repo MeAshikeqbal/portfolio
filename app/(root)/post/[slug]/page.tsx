@@ -21,7 +21,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     return { title: "Post Not Found" }
   }
 
-  const description = post.excerpt || `Read ${post.title}${post.author?.name ? ` by ${post.author.name}` : ""}.`
+  const description =
+    post.excerpt || `Read ${post.title}${post.author?.name ? ` by ${post.author.name}` : ""}.`
   const image = post.mainImage?.asset
     ? {
         url: urlFor(post.mainImage).width(1200).height(630).url(),

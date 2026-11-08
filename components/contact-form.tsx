@@ -1,9 +1,9 @@
-'use client'
+"use client"
 
-import { useState } from 'react'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { Turnstile } from '@marsidev/react-turnstile'
+import { useState } from "react"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { Turnstile } from "@marsidev/react-turnstile"
 import { Button } from "@/components/ui/button"
 import {
   Form,
@@ -16,12 +16,11 @@ import {
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { useToast } from "@/hooks/use-toast"
-import { submitContact } from '@/actions/submit-contact'
-import { contactSchema, type ContactInput } from '@/lib/contact-schema'
-
+import { submitContact } from "@/actions/submit-contact"
+import { contactSchema, type ContactInput } from "@/lib/contact-schema"
 
 interface ContactFormProps {
-  onSuccessfulSubmit: () => void;
+  onSuccessfulSubmit: () => void
 }
 
 export function ContactForm({ onSuccessfulSubmit }: ContactFormProps) {
@@ -119,7 +118,7 @@ export function ContactForm({ onSuccessfulSubmit }: ContactFormProps) {
             </FormItem>
           )}
         />
-        <Button className='w-full' type="submit" disabled={isSubmitting}>
+        <Button className="w-full" type="submit" disabled={isSubmitting}>
           {isSubmitting ? "Sending..." : "Send Message"}
         </Button>
       </form>

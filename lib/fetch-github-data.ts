@@ -31,7 +31,9 @@ export function parseRepoUrl(repoUrl: string): { owner: string; repo: string } |
 /** Canonical form for comparing repo URLs (case-insensitive, no trailing slash or `.git`). */
 export function normalizeRepoUrl(repoUrl: string): string {
   const parsed = parseRepoUrl(repoUrl)
-  return parsed ? `https://github.com/${parsed.owner}/${parsed.repo}`.toLowerCase() : repoUrl.toLowerCase()
+  return parsed
+    ? `https://github.com/${parsed.owner}/${parsed.repo}`.toLowerCase()
+    : repoUrl.toLowerCase()
 }
 
 export async function fetchGitHubData(repoUrl: string): Promise<GitHubData | null> {

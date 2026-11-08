@@ -1,16 +1,16 @@
-'use client'
+"use client"
 
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { LinkPreview } from "@/components/ui/link-preview"
 import { Button } from "@/components/ui/button"
-import { GitCommit, Globe, Scale, Star } from 'lucide-react'
-import { FaGithub as Github } from 'react-icons/fa6'
-import { motion } from 'motion/react'
-import type { Project } from '@/lib/api'
+import { GitCommit, Globe, Scale, Star } from "lucide-react"
+import { FaGithub as Github } from "react-icons/fa6"
+import { motion } from "motion/react"
+import type { Project } from "@/lib/api"
 
 export function ProjectCard({ project }: { project: Project }) {
   if (!project) {
-    return null;
+    return null
   }
 
   const previewUrl = project.url || project.github
@@ -21,23 +21,25 @@ export function ProjectCard({ project }: { project: Project }) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
     >
-      <Card className="flex flex-col h-full overflow-hidden group transition-shadow duration-300 hover:shadow-lg">
+      <Card className="group flex h-full flex-col overflow-hidden transition-shadow duration-300 hover:shadow-lg">
         <CardHeader>
           <CardTitle>
             {previewUrl ? (
               <LinkPreview
                 url={previewUrl}
-                className="font-bold text-xl hover:underline transition-colors duration-200"
+                className="text-xl font-bold transition-colors duration-200 hover:underline"
               >
-                {project.title || 'Untitled Project'}
+                {project.title || "Untitled Project"}
               </LinkPreview>
             ) : (
-              <span className="font-bold text-xl">{project.title || 'Untitled Project'}</span>
+              <span className="text-xl font-bold">{project.title || "Untitled Project"}</span>
             )}
           </CardTitle>
         </CardHeader>
         <CardContent className="grow">
-          <p className="text-muted-foreground mb-4 line-clamp-3">{project.description || 'No description available.'}</p>
+          <p className="mb-4 line-clamp-3 text-muted-foreground">
+            {project.description || "No description available."}
+          </p>
           {project.githubData && (
             <motion.div
               className="flex flex-wrap gap-4 text-sm text-muted-foreground"
@@ -47,19 +49,19 @@ export function ProjectCard({ project }: { project: Project }) {
             >
               {project.githubData.stars != null && (
                 <div className="flex items-center">
-                  <Star className="w-4 h-4 mr-1" />
+                  <Star className="mr-1 h-4 w-4" />
                   {project.githubData.stars} stars
                 </div>
               )}
               {project.githubData.commits != null && (
                 <div className="flex items-center">
-                  <GitCommit className="w-4 h-4 mr-1" />
+                  <GitCommit className="mr-1 h-4 w-4" />
                   {project.githubData.commits} commits
                 </div>
               )}
               {project.githubData.license && (
                 <div className="flex items-center">
-                  <Scale className="w-4 h-4 mr-1" />
+                  <Scale className="mr-1 h-4 w-4" />
                   {project.githubData.license}
                 </div>
               )}
@@ -76,7 +78,7 @@ export function ProjectCard({ project }: { project: Project }) {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
-                <Github className="w-4 h-4 mr-2" />
+                <Github className="mr-2 h-4 w-4" />
                 GitHub
               </motion.a>
             </Button>
@@ -90,13 +92,13 @@ export function ProjectCard({ project }: { project: Project }) {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
-                <Globe className="w-4 h-4 mr-2" />
+                <Globe className="mr-2 h-4 w-4" />
                 Live Demo
               </motion.a>
             </Button>
           ) : (
             <Button variant="outline" size="sm" disabled>
-              <Globe className="w-4 h-4 mr-2" />
+              <Globe className="mr-2 h-4 w-4" />
               No Demo
             </Button>
           )}

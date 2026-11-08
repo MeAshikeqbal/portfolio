@@ -1,7 +1,7 @@
-import Image from 'next/image'
-import { Timeline, TimelineEntryHeader, TimelineItem } from '@/components/timeline'
-import { getEducation } from '@/lib/api'
-import { urlFor } from '@/sanity/lib/image'
+import Image from "next/image"
+import { Timeline, TimelineEntryHeader, TimelineItem } from "@/components/timeline"
+import { getEducation } from "@/lib/api"
+import { urlFor } from "@/sanity/lib/image"
 
 export default async function EducationTimeline() {
   const education = await getEducation()
@@ -18,15 +18,15 @@ export default async function EducationTimeline() {
               edu.schoolLogo?.asset && (
                 <Image
                   src={urlFor(edu.schoolLogo).width(128).height(128).url()}
-                  alt={edu.school ?? ''}
+                  alt={edu.school ?? ""}
                   width={64}
                   height={64}
-                  className="rounded-full object-contain bg-background p-1 border border-border"
+                  className="rounded-full border border-border bg-background object-contain p-1"
                 />
               )
             }
           />
-          {edu.desc && <p className="text-muted-foreground leading-relaxed">{edu.desc}</p>}
+          {edu.desc && <p className="leading-relaxed text-muted-foreground">{edu.desc}</p>}
         </TimelineItem>
       ))}
     </Timeline>

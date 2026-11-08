@@ -1,6 +1,6 @@
-import { createClient } from 'next-sanity'
+import { createClient } from "next-sanity"
 
-import { apiVersion, dataset, projectId } from '../env'
+import { apiVersion, dataset, projectId } from "../env"
 
 /**
  * Public, read-only client for published content. Safe to use anywhere.
@@ -11,5 +11,5 @@ export const client = createClient({
   dataset,
   apiVersion,
   useCdn: true,
-  perspective: 'published',
+  perspective: "published",
 })

@@ -6,7 +6,10 @@ test.describe("smoke", () => {
     await expect(page).toHaveTitle(/Ashik Eqbal/)
     await expect(page.locator("#Home")).toBeVisible()
     await expect(page.locator("#Tech-Stack")).toBeAttached()
-    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute("href", "https://www.itsashik.dev")
+    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
+      "href",
+      "https://www.itsashik.dev",
+    )
   })
 
   test("blog index links through to a post", async ({ page }) => {
@@ -16,7 +19,10 @@ test.describe("smoke", () => {
     const href = await firstPost.getAttribute("href")
     await page.goto(href!)
     await expect(page.locator("article h1").first()).toBeVisible()
-    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute("href", `https://www.itsashik.dev${href}`)
+    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
+      "href",
+      `https://www.itsashik.dev${href}`,
+    )
   })
 
   test("projects page lists projects", async ({ page }) => {
@@ -48,7 +54,9 @@ test.describe("smoke", () => {
     await page.goto("/studio")
     // Signed out, the Studio shows its login screen; either way it must render without crashing.
     await expect(page.locator("#sanity")).toBeAttached({ timeout: 30_000 })
-    await expect(page.getByText(/sign in|log in|choose login provider/i).first()).toBeVisible({ timeout: 30_000 })
+    await expect(page.getByText(/sign in|log in|choose login provider/i).first()).toBeVisible({
+      timeout: 30_000,
+    })
     expect(errors).toEqual([])
   })
 })

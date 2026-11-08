@@ -32,6 +32,12 @@ export function SkillIcon({ name, label, className }: SkillIconProps) {
   return (
     // next/image would need `dangerouslyAllowSVG`; these are small, immutable, same-origin SVGs.
     // eslint-disable-next-line @next/next/no-img-element
-    <img src={url} alt={label} loading="lazy" decoding="async" className={cn("object-contain", className)} />
+    <img
+      src={url}
+      alt={label}
+      loading="lazy"
+      decoding="async"
+      className={cn("object-contain", className)}
+    />
   )
 }

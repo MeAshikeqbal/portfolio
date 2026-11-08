@@ -1,10 +1,10 @@
-'use client'
+"use client"
 
-import * as React from 'react'
-import { useTheme } from 'next-themes'
-import { motion } from 'motion/react'
-import { Moon, Sun } from 'lucide-react'
-import { useHydrated } from '@/hooks/use-hydrated'
+import * as React from "react"
+import { useTheme } from "next-themes"
+import { motion } from "motion/react"
+import { Moon, Sun } from "lucide-react"
+import { useHydrated } from "@/hooks/use-hydrated"
 
 export function AnimatedThemeSwitch() {
   const { theme, setTheme } = useTheme()
@@ -15,7 +15,7 @@ export function AnimatedThemeSwitch() {
   }
 
   const toggleTheme = () => {
-    setTheme(theme === 'light' ? 'dark' : 'light')
+    setTheme(theme === "light" ? "dark" : "light")
   }
 
   return (
@@ -27,19 +27,23 @@ export function AnimatedThemeSwitch() {
     >
       <motion.div
         className="flex h-4 w-4 items-center justify-center rounded-full bg-white shadow-md dark:bg-gray-700"
-        initial={{ x: theme === 'dark' ? 20 : 0 }}
-        animate={{ x: theme === 'dark' ? 20 : 0 }}
+        initial={{ x: theme === "dark" ? 20 : 0 }}
+        animate={{ x: theme === "dark" ? 20 : 0 }}
         transition={{
           type: "spring",
           stiffness: 700,
-          damping: 30
+          damping: 30,
         }}
       >
-        <Sun className={`h-2 w-2 text-yellow-500 absolute ${theme === 'dark' ? 'opacity-0' : 'opacity-100'} transition-opacity`} />
-        <Moon className={`h-2 w-2 text-blue-500 absolute ${theme === 'light' ? 'opacity-0' : 'opacity-100'} transition-opacity`} />
+        <Sun
+          className={`absolute h-2 w-2 text-yellow-500 ${theme === "dark" ? "opacity-0" : "opacity-100"} transition-opacity`}
+        />
+        <Moon
+          className={`absolute h-2 w-2 text-blue-500 ${theme === "light" ? "opacity-0" : "opacity-100"} transition-opacity`}
+        />
       </motion.div>
       <span className="sr-only">
-        {theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
+        {theme === "light" ? "Switch to dark mode" : "Switch to light mode"}
       </span>
     </motion.button>
   )

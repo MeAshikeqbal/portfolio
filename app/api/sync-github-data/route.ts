@@ -42,7 +42,9 @@ async function sync(req: NextRequest) {
 
   // `raw` includes drafts, so draft-only projects are updated and not re-created.
   const projects = await writeClient.fetch(GITHUB_PROJECTS_QUERY, {}, { perspective: "raw" })
-  const knownRepos = new Set(projects.flatMap((p) => (p.github ? [normalizeRepoUrl(p.github)] : [])))
+  const knownRepos = new Set(
+    projects.flatMap((p) => (p.github ? [normalizeRepoUrl(p.github)] : [])),
+  )
 
   for (const project of projects) {
     if (!project.github) continue
