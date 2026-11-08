@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { client } from '@/sanity/lib/client'
 import { urlFor } from '@/sanity/lib/image'
-import { motion, useAnimation, Variants } from 'framer-motion'
+import { motion, useAnimation, Variants } from 'motion/react'
 import { useInView } from 'react-intersection-observer'
 
 interface Work {

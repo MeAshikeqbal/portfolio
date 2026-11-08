@@ -1,8 +1,9 @@
 'use client'
 
 import Image from 'next/image'
-import { motion } from 'framer-motion'
-import { FileDown, Github, Linkedin, RssIcon, Twitter } from 'lucide-react'
+import { motion } from 'motion/react'
+import { FileDown, RssIcon } from 'lucide-react'
+import { FaGithub as Github, FaLinkedin as Linkedin, FaXTwitter as Twitter } from 'react-icons/fa6'
 import { useState, useEffect } from 'react'
 import { client } from '@/sanity/lib/client'
 import { siteConfig } from '@/lib/site'
@@ -22,10 +23,10 @@ const useCvUrl = () => {
 }
 
 const socialLinks = [
-  { icon: Github, href: siteConfig.socials.github },
-  { icon: Linkedin, href: siteConfig.socials.linkedin },
-  { icon: Twitter, href: siteConfig.socials.twitter },
-  { icon: RssIcon, href: '/rss.xml' },
+  { icon: Github, href: siteConfig.socials.github, label: 'GitHub' },
+  { icon: Linkedin, href: siteConfig.socials.linkedin, label: 'LinkedIn' },
+  { icon: Twitter, href: siteConfig.socials.twitter, label: 'X (Twitter)' },
+  { icon: RssIcon, href: '/rss.xml', label: 'RSS feed' },
 ]
 
 export default function Hero() {
@@ -68,16 +69,16 @@ export default function Hero() {
             A passionate software engineer who loves to build web applications.
           </motion.p>
           <motion.div className="flex justify-center lg:justify-start space-x-4 mb-8" variants={itemVariants}>
-            {socialLinks.map((link, index) => (
+            {socialLinks.map((link) => (
               <motion.a
-                key={index}
+                key={link.href}
                 href={link.href}
                 target="_blank"
                 rel="noopener noreferrer"
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
                 className="text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors duration-300"
-                aria-label={link.icon.displayName}
+                aria-label={link.label}
               >
                 <link.icon className="h-6 w-6" />
               </motion.a>

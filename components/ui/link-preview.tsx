@@ -9,7 +9,7 @@ import {
   motion,
   useMotionValue,
   useSpring,
-} from "framer-motion";
+} from "motion/react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 
@@ -48,10 +48,8 @@ export const LinkPreview: React.FC<LinkPreviewProps> = ({
     ? imageSrc
     : `https://api.microlink.io/?${encode({
         url,
-        screenshot: {
-          background:'linear-gradient(225deg, #FF057C 0%, #8D0B93 50%, #321575 100%)',
-          fullpage: true,
-        },
+        // qss can't encode nested objects; a nested value was sent as "[object Object]".
+        screenshot: true,
         meta: false,
         embed: "screenshot.url",
         colorScheme: "dark",

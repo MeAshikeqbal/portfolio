@@ -2,7 +2,7 @@
 
 import * as React from 'react'
 import { useTheme } from 'next-themes'
-import { motion } from 'framer-motion'
+import { motion } from 'motion/react'
 import { Moon, Sun } from 'lucide-react'
 
 export function AnimatedThemeSwitch() {

@@ -3,8 +3,9 @@
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { LinkPreview } from "@/components/ui/link-preview"
 import { Button } from "@/components/ui/button"
-import { GitCommit, Github, Globe, Scale, Star } from 'lucide-react'
-import { motion } from 'framer-motion'
+import { GitCommit, Globe, Scale, Star } from 'lucide-react'
+import { FaGithub as Github } from 'react-icons/fa6'
+import { motion } from 'motion/react'
 
 export interface Project {
   _id: string

@@ -1,17 +1,10 @@
 'use server'
 
-import { z } from 'zod'
 import { client } from '@/sanity/lib/client'
+import { contactSchema, type ContactInput } from '@/lib/contact-schema'
 
-const formSchema = z.object({
-  name: z.string().min(2),
-  email: z.string().email(),
-  message: z.string().min(10),
-  turnstileToken: z.string().min(1),
-})
-
-export async function submitContact(formData: z.infer<typeof formSchema>) {
-  const validatedFields = formSchema.safeParse(formData)
+export async function submitContact(formData: ContactInput) {
+  const validatedFields = contactSchema.safeParse(formData)
 
   if (!validatedFields.success) {
     return { success: false, error: 'Invalid form data' }
