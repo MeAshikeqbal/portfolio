@@ -141,3 +141,14 @@ export const SITEMAP_QUERY = defineQuery(`{
   "projects": *[_type == "project" && ${published} && defined(slug.current) && seo.noIndex != true]
     { "slug": slug.current, _updatedAt }
 }`)
+
+/** Small index of everything navigable, for the ⌘K command palette. */
+export const COMMAND_INDEX_QUERY = defineQuery(`{
+  "posts": *[_type == "post" && ${published} && defined(slug.current)] | order(publishedAt desc) {
+    _id, title, "slug": slug.current, "topics": categories[]->title
+  },
+  "projects": *[_type == "project" && ${published}] | order(coalesce(order, 999) asc, _createdAt desc) {
+    _id, title, "slug": slug.current, url, github
+  },
+  "cvUrl": *[_type == "cv"][0].cvFile.asset->url
+}`)

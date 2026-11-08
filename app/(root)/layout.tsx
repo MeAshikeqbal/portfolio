@@ -2,9 +2,12 @@ import { BackToTop } from "@/components/back-to-top"
 import { SystemBar } from "@/components/dashboard/system-bar"
 import { SiteFooter } from "@/components/site/site-footer"
 import { SiteNav } from "@/components/site/site-nav"
+import { getCommandIndex } from "@/lib/api"
 import { SanityLive } from "@/sanity/lib/live"
 
-export default function SiteLayout({ children }: { children: React.ReactNode }) {
+export default async function SiteLayout({ children }: { children: React.ReactNode }) {
+  const commandIndex = await getCommandIndex()
+
   return (
     <div className="flex min-h-screen flex-col">
       <a
@@ -14,7 +17,7 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
         Skip to content
       </a>
       <SystemBar />
-      <SiteNav />
+      <SiteNav commandIndex={commandIndex} />
       <div id="main" className="flex-1">
         {children}
       </div>
