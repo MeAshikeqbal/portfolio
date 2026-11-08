@@ -15,7 +15,7 @@ export const MONOCHROME_SETS = new Set(["mdi", "simple-icons", "ri"])
 
 const ICON_NAME = /^[a-z0-9-]+:[a-z0-9-]+$/
 
-export function isIconName(name: string): boolean {
+function isIconName(name: string): boolean {
   return ICON_NAME.test(name)
 }
 
