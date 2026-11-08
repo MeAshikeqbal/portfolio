@@ -46,6 +46,8 @@ export async function POST(req: NextRequest) {
       break
     case "project":
       revalidatePath("/projects")
+      if (slug) revalidatePath(`/projects/${slug}`)
+      revalidatePath("/sitemap.xml")
       revalidatePath("/")
       break
     default:
