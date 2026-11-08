@@ -87,7 +87,7 @@ const CodeBlock = ({
  */
 export default function PostClientPage({ post }: { post: Post }) {
   return (
-    <article className="mx-auto max-w-full pt-16">
+    <article className="mx-auto max-w-full">
       <div className="relative mb-12 h-[30vh] w-full md:h-[40vh] lg:h-[70vh]">
         {post.mainImage?.asset && (
           <Image
