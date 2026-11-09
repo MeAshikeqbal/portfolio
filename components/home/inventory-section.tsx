@@ -90,6 +90,7 @@ export async function InventorySection() {
                       key={skill._id}
                       skill={skill}
                       overflow={!group.collapsed && i >= VISIBLE}
+                      order={group.collapsed ? i : i - VISIBLE}
                     />
                   ))}
                 </ul>
@@ -118,10 +119,13 @@ export async function InventorySection() {
   )
 }
 
-function SkillChip({ skill, overflow }: { skill: Skill; overflow: boolean }) {
+function SkillChip({ skill, overflow, order }: { skill: Skill; overflow: boolean; order: number }) {
   return (
     <li
+      // Revealed chips fade up in order (`.chip-reveal`, app/globals.css).
+      style={{ "--i": Math.max(0, order) } as React.CSSProperties}
       className={cn(
+        "chip-reveal",
         "inline-flex items-center gap-1.5 rounded-md border bg-surface py-1 pr-2.5 pl-1 text-sm",
         !skill.icon && "pl-2.5",
         overflow && "hidden group-has-[#inventory-show-all:checked]/inventory:inline-flex",

@@ -259,7 +259,7 @@ The hero's instrument. Header "node · itsashik", with the availability pill as 
 A `label-caps` label above a 1.5rem semibold tabular value, with an optional sparkline at the right and a 12px muted hint. It is built as a description list (`dl` / `dt` / `dd`).
 
 ### Sparkline
-A 96 × 24 server-rendered SVG in muted ink, with the latest point in ink. It carries a text summary (range and peak) as its accessible name and has no hover layer.
+A 96 × 24 server-rendered SVG in muted ink, with the latest point in ink. It carries a text summary (range and peak) as its accessible name and has no hover layer. On the home page the lines trace in once when the projects panel scrolls into view (700ms, rows 60ms apart, capped at 300ms), then the latest point lands.
 
 ### Inventory chips
 Skills render as wrapping chips (6px corners, a hairline border, a 24px icon plate, the full name) grouped into four rows: languages & frontend, backend & data, infrastructure & homelab, tools & AI. Eight per group are visible; a checkbox-driven "Show all" reveals the rest through `:has()`, without JavaScript.
@@ -276,6 +276,24 @@ The wordmark `itsashik.dev` in mono, with ".dev" in muted ink. Desktop links are
 ### Section header
 A plain-language headline ("Writing", "Get in touch") with no label above it, an optional description up to about 65ch, and optional actions on the right: 14px medium links with an icon (an arrow, or RSS), padded to 44px tall.
 
+### Motion
+Motion explains continuity, state or feedback; nothing animates just because it scrolled into view.
+- **Feedback:** the mobile menu drops in (200ms) and closes instantly; revealed skill chips fade up in a capped cascade; the contact button spins while sending and the confirmation rises in; a theme switch crossfades (240ms); a re-judged status dot shifts colour over 500ms.
+- **Navigation is instant.** Pages swap without transitions; continuity comes from consistent layout, not motion.
+- **Reduced motion:** movement goes (no trace, no slides); crossfades shorten and colour changes stay.
+
+### Post sign-off
+Every post ends with an author card (a panel with portrait, "Written by …", the tagline, then **Follow via RSS** as the primary button, **Get in touch** outlined and **GitHub** ghost), then the older/newer link and **related entries**, ranked by rare shared topics. An archived post shows an idle-tinted note under its meta row ("Archived: kept for reference…") and is noindex.
+
+### Project cover fallback
+A project without a cover image shows a thum.io screenshot of its live site in the same frame, captioned in mono ("live site · host").
+
+### Skeletons
+Only where the visitor actually waits: a link preview screenshot from thum.io (a second or two on first capture), the Turnstile check in the contact form, and large images without a blur placeholder (tinted `surface-2` until they arrive). A skeleton is `surface-2` with a pulse under `motion-safe`, always paired with text for status ("capturing screenshot…", "Loading spam check…") and a failure message. No route-level `loading.tsx` on detail pages: streaming turns `notFound()` into a 200.
+
+### Index pages
+`/post` and `/projects` share one frame: full-width container, an H1 with a one-line description, a "Search posts / Search projects" field with an "N of M posts / projects" count, chip filter rows, then the content (a log panel of rows for posts, a grid of project panels for projects). Empty results use the same panel message.
+
 ## Do's and Don'ts
 
 ### Do:
@@ -286,7 +304,7 @@ A plain-language headline ("Writing", "Get in touch") with no label above it, an
 - **Do** hide a status, count or sparkline when its data is missing rather than showing a placeholder value.
 - **Do** separate sections and panels with 1px hairlines and tonal steps, not shadows.
 - **Do** run `tests/unit/tokens.test.ts` after changing any token. Every text/background pair must stay at WCAG AA in both themes.
-- **Do** gate any motion behind `motion-safe` / `prefers-reduced-motion`.
+- **Do** gate any motion behind `motion-safe` / `prefers-reduced-motion`, and keep content visible by default: animations arm only after hydration.
 
 ### Don't:
 - **Don't** introduce a brand or accent colour, gradients, or coloured series in charts.
@@ -296,4 +314,5 @@ A plain-language headline ("Writing", "Get in touch") with no label above it, an
 - **Don't** add shadows to panels, tiles, cards or rows. Only dialogs float.
 - **Don't** use mono for sentences people read. It is for labels, metadata, identifiers and numbers.
 - **Don't** invent metrics, uptime figures or service states. If the CMS has no status for a project, show none.
+- **Don't** add scroll reveals, entrance staggers on sections, parallax or count-up numbers.
 - **Don't** let the metaphor rename an action into something obscure. "Get in touch" beats "Open a ticket".

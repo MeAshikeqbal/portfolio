@@ -16,7 +16,8 @@ export function StatusDot({ status, label, pulse = false, className }: StatusDot
       <span
         aria-hidden
         className={cn(
-          "inline-flex size-full rounded-full",
+          // A re-judged status (e.g. the sync going stale) shifts colour rather than flipping.
+          "inline-flex size-full rounded-full transition-colors duration-500",
           STATUS_DOT_CLASS[status],
           pulse && "motion-safe:animate-pulse-dot",
         )}

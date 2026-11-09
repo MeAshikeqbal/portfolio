@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 import type { Project } from "@/lib/api"
-import { projectHref, projectMeta, projectTags } from "@/lib/projects"
+import { projectHref, projectMeta, projectTags, shortLicense } from "@/lib/projects"
 
 function project(overrides: Partial<Project> = {}): Project {
   return {
@@ -71,5 +71,15 @@ describe("projectTags", () => {
       }),
     )
     expect(tags).toEqual(["TypeScript", "Sanity"])
+  })
+})
+
+describe("shortLicense", () => {
+  it("shortens GitHub's license names and hides missing ones", () => {
+    expect(shortLicense("GNU General Public License v3.0")).toBe("GPL-3.0")
+    expect(shortLicense("MIT License")).toBe("MIT")
+    expect(shortLicense("Some Custom License")).toBe("Some Custom License")
+    expect(shortLicense("Not specified")).toBeNull()
+    expect(shortLicense(null)).toBeNull()
   })
 })

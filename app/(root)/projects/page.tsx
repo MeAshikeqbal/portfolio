@@ -22,7 +22,7 @@ export default async function ProjectsPage() {
           <SectionHeader
             as="h1"
             title="Projects"
-            description="Everything I've built and run. GitHub stats sync daily."
+            description="Everything I've built and run, with stats from GitHub."
           />
           {/* The browser reads filters from the URL; the static fallback lists everything. */}
           <Suspense

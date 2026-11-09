@@ -7,7 +7,7 @@ const TOC_POST = "/post/why-i-started-self-hosting-ai-at-home"
 test.describe("blog index", () => {
   test("search and topic filters narrow the list and live in the URL", async ({ page }) => {
     await page.goto("/post")
-    const count = page.getByText(/\d+ of \d+ entries/)
+    const count = page.getByText(/\d+ of \d+ posts/)
     await expect(count).toBeVisible()
     const total = Number((await count.textContent())?.match(/of (\d+)/)?.[1])
 
