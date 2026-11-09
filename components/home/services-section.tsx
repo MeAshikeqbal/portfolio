@@ -4,30 +4,47 @@ import { Panel, PanelHeader } from "@/components/dashboard/panel"
 import { SectionHeader } from "@/components/dashboard/section-header"
 import { Sparkline } from "@/components/dashboard/sparkline"
 import { getProjects } from "@/lib/api"
+import { formatDate } from "@/lib/format"
 import { projectHref, projectMeta } from "@/lib/projects"
 import { projectStatus } from "@/lib/status"
 
 export async function ServicesSection() {
   const projects = await getProjects()
+  if (projects.length === 0) return null
+
   const selected = [
     ...projects.filter((p) => p.featured),
     ...projects.filter((p) => !p.featured),
   ].slice(0, 6)
   const hasTrends = selected.some((p) => (p.githubData?.weeklyCommits?.length ?? 0) > 1)
+  // Newest GitHub sync across all projects; absent until the sync has run.
+  const syncedAt = projects
+    .map((p) => p.githubData?.syncedAt)
+    .filter((value): value is string => Boolean(value))
+    .sort()
+    .at(-1)
 
   return (
-    <Section id="services">
+    <Section id="services" className="border-t">
       <Container>
         <SectionHeader
-          eyebrow="services"
           title="Projects"
-          description="Things I've built and run. Stats sync from GitHub daily."
-          action={{ href: "/projects", label: `all ${projects.length} projects` }}
+          description="Things I've built and run."
+          actions={[{ href: "/projects", label: `All ${projects.length} projects` }]}
         />
         <Panel>
           <PanelHeader
-            title={`${selected.length} of ${projects.length} services`}
-            meta={hasTrends ? <span>commits / wk</span> : undefined}
+            title={`services · ${selected.length} of ${projects.length}`}
+            meta={
+              <>
+                {hasTrends && <span className="hidden sm:inline">commits / wk</span>}
+                {syncedAt && (
+                  <span>
+                    synced <time dateTime={syncedAt}>{formatDate(syncedAt)}</time>
+                  </span>
+                )}
+              </>
+            }
           />
           <DataList>
             {selected.map((project) => {

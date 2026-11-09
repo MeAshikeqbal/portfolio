@@ -172,7 +172,7 @@
   }
 }
 
-/* Mono, uppercase, tracked-out label: section eyebrows ("SERVICES") and metadata. */
+/* Mono, uppercase, tracked-out label: panel headers ("SERVICES · 6 OF 7"), metadata, dates. Never above a heading. */
 @utility label-caps {
   font-family: var(--font-mono);
   font-size: 0.6875rem;

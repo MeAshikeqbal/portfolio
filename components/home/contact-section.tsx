@@ -10,7 +10,6 @@ export function ContactSection() {
       <Container className="grid gap-10 lg:grid-cols-[1fr_1.3fr]">
         <div>
           <SectionHeader
-            eyebrow="support"
             title="Get in touch"
             description="Questions, collaboration ideas, or just saying hello. Send a message and I'll reply by email."
           />
@@ -31,7 +30,7 @@ export function ContactSection() {
           </ul>
         </div>
         <Panel>
-          <PanelHeader title="new ticket" meta={<span>secure · turnstile</span>} />
+          <PanelHeader title="new message" meta={<span>spam-checked by turnstile</span>} />
           <PanelBody>
             <ContactForm />
           </PanelBody>

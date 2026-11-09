@@ -19,8 +19,7 @@ export default async function Image() {
       footer={[
         `${stats.posts} posts`,
         `${stats.projects} projects`,
-        `${formatCompact(stats.commits)} commits`,
-        `${stats.skills} skills`,
+        ...(stats.commits > 0 ? [`${formatCompact(stats.commits)} commits, 12 mo`] : []),
       ]}
     />,
     { ...size, fonts: await ogFonts() },

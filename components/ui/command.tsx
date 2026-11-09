@@ -32,18 +32,22 @@ function CommandDialog({
   children,
   className,
   showCloseButton = true,
+  onCloseAutoFocus,
   ...props
 }: React.ComponentProps<typeof Dialog> & {
   title?: string
   description?: string
   className?: string
   showCloseButton?: boolean
+  /** Where focus goes on close; needed when the dialog is opened without a DialogTrigger. */
+  onCloseAutoFocus?: React.ComponentProps<typeof DialogContent>["onCloseAutoFocus"]
 }) {
   return (
     <Dialog {...props}>
       <DialogContent
         className={cn("overflow-hidden p-0", className)}
         showCloseButton={showCloseButton}
+        onCloseAutoFocus={onCloseAutoFocus}
       >
         {/* Inside DialogContent so Radix wires up aria-labelledby/-describedby. */}
         <DialogHeader className="sr-only">

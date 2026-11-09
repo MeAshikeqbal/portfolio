@@ -36,7 +36,6 @@ export const siteConfig = {
   ],
   /** Primary navigation. Hash links point at home-page sections and work from any page. */
   nav: [
-    { label: "Work", href: "/#services" },
     { label: "Writing", href: "/post" },
     { label: "Projects", href: "/projects" },
     { label: "Contact", href: "/#contact" },

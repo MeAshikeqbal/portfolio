@@ -27,7 +27,7 @@ export function ContactForm() {
   if (state.status === "success") {
     return (
       <div role="status" className="flex flex-col items-start gap-3 py-6">
-        <StatusPill status="up">ticket received</StatusPill>
+        <StatusPill status="up">message sent</StatusPill>
         <p className="flex items-center gap-2 text-lg font-medium">
           <CircleCheck className="size-5 text-status-up-fg" aria-hidden /> Thanks, your message is
           in.
@@ -114,11 +114,13 @@ export function ContactForm() {
           className="rounded-md bg-status-down-soft px-3 py-2 text-sm text-status-down-fg"
         >
           {state.message}
+          {/* The challenge has no field to point at, so its error is read out with the banner. */}
+          {errors.turnstileToken && <span className="sr-only"> {errors.turnstileToken}</span>}
         </p>
       )}
 
       <Button type="submit" disabled={pending || !siteKey} className="w-full sm:w-auto">
-        {pending ? "Sending…" : "Submit ticket"}
+        {pending ? "Sending…" : "Send message"}
       </Button>
     </form>
   )

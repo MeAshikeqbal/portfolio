@@ -82,6 +82,7 @@ export const postType = defineType({
       name: "featured",
       type: "boolean",
       group: "meta",
+      description: "Show on the home page. Featured posts come first; the rest fill in by date.",
       initialValue: false,
     }),
     defineField({
