@@ -86,6 +86,14 @@ export const postType = defineType({
       initialValue: false,
     }),
     defineField({
+      name: "archived",
+      type: "boolean",
+      group: "meta",
+      description:
+        "Keep the page (marked noindex, with an 'archived' note) but take it out of the writing index, home page, RSS, sitemap, search palette and related posts.",
+      initialValue: false,
+    }),
+    defineField({
       name: "seo",
       type: "seo",
       group: "seo",
@@ -114,10 +122,12 @@ export const postType = defineType({
       category0: "categories.0.title",
       category1: "categories.1.title",
       media: "mainImage",
+      archived: "archived",
     },
-    prepare: ({ title, publishedAt, category0, category1, media }) => ({
+    prepare: ({ title, publishedAt, category0, category1, media, archived }) => ({
       title,
       subtitle: [
+        archived ? "Archived" : null,
         publishedAt ? dateFormat.format(new Date(publishedAt)) : "No date",
         [category0, category1].filter(Boolean).join(", "),
       ]

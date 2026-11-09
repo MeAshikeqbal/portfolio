@@ -7,6 +7,12 @@ import { defineQuery } from "next-sanity"
 
 const published = `!(_id in path("drafts.**"))`
 
+/**
+ * Posts that appear in lists: published and not archived. An archived post keeps its page
+ * (marked noindex) but leaves the index, home page, feed, sitemap, palette and related posts.
+ */
+const listedPost = `_type == "post" && ${published} && defined(slug.current) && archived != true`
+
 /** First 200 characters of the post body as plain text, unless an explicit excerpt is set. */
 // Paragraphs only, so headings like "Introduction" don't lead the excerpt.
 const excerpt = `coalesce(excerpt, array::join(string::split(pt::text(body[_type == "block" && style == "normal"]), "")[0...200], ""))`
@@ -24,16 +30,14 @@ const postCard = `
 `
 
 export const POSTS_QUERY = defineQuery(`
-  *[_type == "post" && ${published} && defined(slug.current)] | order(publishedAt desc) { ${postCard} }
+  *[${listedPost}] | order(publishedAt desc) { ${postCard} }
 `)
 
 /** Home page writing: featured posts first, then the newest, three in all. */
 export const LATEST_POSTS_QUERY = defineQuery(`
-  *[_type == "post" && ${published} && defined(slug.current)]
+  *[${listedPost}]
     | order(coalesce(featured, false) desc, publishedAt desc) [0...3] { ${postCard} }
 `)
-
-const indexablePost = `_type == "post" && ${published} && defined(slug.current)`
 
 export const POST_QUERY = defineQuery(`
   *[_type == "post" && ${published} && slug.current == $slug][0] {
@@ -43,18 +47,23 @@ export const POST_QUERY = defineQuery(`
     author->{ name, image },
     mainImage,
     "cover": mainImage.asset->metadata{ lqip, "width": dimensions.width, "height": dimensions.height },
-    categories[]->{ _id, title },
+    // posts: how many listed posts share the category, so rare ones weigh more in "related".
+    categories[]->{ _id, title, "posts": count(*[${listedPost} && references(^._id)]) },
     publishedAt,
     _updatedAt,
     body,
     excerpt,
     seo,
-    "previous": *[${indexablePost} && publishedAt < ^.publishedAt]
+    archived,
+    "previous": *[${listedPost} && publishedAt < ^.publishedAt]
       | order(publishedAt desc)[0] { title, "slug": slug.current },
-    "next": *[${indexablePost} && publishedAt > ^.publishedAt]
+    "next": *[${listedPost} && publishedAt > ^.publishedAt]
       | order(publishedAt asc)[0] { title, "slug": slug.current },
-    "related": *[${indexablePost} && _id != ^._id && count(categories[@._ref in ^.^.categories[]._ref]) > 0]
-      | order(publishedAt desc)[0...3] { ${postCard} }
+    // Every candidate sharing a category, ranked in lib/related.ts (rare shared topics first).
+    // The cap is only a payload guard, far above the site's post count: limiting by date
+    // first would drop an older rare-topic match before it could be ranked.
+    "related": *[${listedPost} && _id != ^._id && count(categories[@._ref in ^.^.categories[]._ref]) > 0]
+      | order(publishedAt desc)[0...200] { ${postCard}, "categoryIds": categories[]._ref }
   }
 `)
 
@@ -91,11 +100,11 @@ export const PROJECT_SLUGS_QUERY = defineQuery(`
 
 /** Facts for the hero's node panel. Every value is measured or written in the CMS. */
 export const HOME_STATS_QUERY = defineQuery(`{
-  "posts": count(*[_type == "post" && ${published} && defined(slug.current)]),
+  "posts": count(*[${listedPost}]),
   "projects": count(*[_type == "project" && ${published}]),
   // Past-52-week commits per repo, summed (see lib/fetch-github-data.ts).
   "commits": math::sum(*[_type == "project" && ${published}].githubData.commits),
-  "latestPost": *[_type == "post" && ${published} && defined(slug.current)]
+  "latestPost": *[${listedPost}]
     | order(publishedAt desc)[0] { title, "slug": slug.current, publishedAt },
   // The "Homelab" section of /uses, if there is one.
   "homelab": *[_type == "uses" && _id == "uses"][0]
@@ -110,8 +119,7 @@ export const HOME_STATS_QUERY = defineQuery(`{
 export const SITE_STATUS_QUERY = defineQuery(`{
   "syncedAt": *[_type == "project" && ${published} && defined(githubData.syncedAt)]
     | order(githubData.syncedAt desc)[0].githubData.syncedAt,
-  "latestPostAt": *[_type == "post" && ${published} && defined(slug.current)]
-    | order(publishedAt desc)[0].publishedAt
+  "latestPostAt": *[${listedPost}] | order(publishedAt desc)[0].publishedAt
 }`)
 
 export const SKILLS_QUERY = defineQuery(`
@@ -135,8 +143,9 @@ export const CV_URL_QUERY = defineQuery(`
 `)
 
 export const FEED_POSTS_QUERY = defineQuery(`
-  *[_type == "post" && ${published} && defined(slug.current)] | order(publishedAt desc) {
+  *[${listedPost}] | order(publishedAt desc) {
     title,
+    body,
     "slug": slug.current,
     publishedAt,
     _updatedAt,
@@ -159,7 +168,7 @@ export const GITHUB_SYNC_REQUESTS_QUERY = defineQuery(`
 
 /** Indexable posts and projects for the sitemap (documents marked `seo.noIndex` are left out). */
 export const SITEMAP_QUERY = defineQuery(`{
-  "posts": *[_type == "post" && ${published} && defined(slug.current) && seo.noIndex != true]
+  "posts": *[${listedPost} && seo.noIndex != true]
     | order(publishedAt desc) { "slug": slug.current, _updatedAt },
   "projects": *[_type == "project" && ${published} && defined(slug.current) && seo.noIndex != true]
     { "slug": slug.current, _updatedAt },
@@ -169,7 +178,7 @@ export const SITEMAP_QUERY = defineQuery(`{
 
 /** Small index of everything navigable, for the ⌘K command palette. */
 export const COMMAND_INDEX_QUERY = defineQuery(`{
-  "posts": *[_type == "post" && ${published} && defined(slug.current)] | order(publishedAt desc) {
+  "posts": *[${listedPost}] | order(publishedAt desc) {
     _id, title, "slug": slug.current, "topics": categories[]->title
   },
   "projects": *[_type == "project" && ${published}] | order(orderRank asc, _createdAt desc) {

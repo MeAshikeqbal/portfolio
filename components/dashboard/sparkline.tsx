@@ -50,7 +50,8 @@ export function Sparkline({ values, label, width = 96, height = 24, className }:
       <path
         d={d}
         fill="none"
-        className="stroke-chart-2"
+        pathLength={1}
+        className="sparkline-trace stroke-chart-2"
         strokeWidth={1.5}
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -60,7 +61,7 @@ export function Sparkline({ values, label, width = 96, height = 24, className }:
         cx={last.x}
         cy={last.y}
         r={2.5}
-        className="fill-chart-1 stroke-surface"
+        className="sparkline-head fill-chart-1 stroke-surface"
         strokeWidth={1}
       />
     </svg>

@@ -3,6 +3,7 @@ import { Container, Section } from "@/components/dashboard/layout"
 import { Panel, PanelHeader } from "@/components/dashboard/panel"
 import { SectionHeader } from "@/components/dashboard/section-header"
 import { Sparkline } from "@/components/dashboard/sparkline"
+import { TraceOnView } from "@/components/dashboard/trace-on-view"
 import { getProjects } from "@/lib/api"
 import { formatDate } from "@/lib/format"
 import { projectHref, projectMeta } from "@/lib/projects"
@@ -46,29 +47,31 @@ export async function ServicesSection() {
               </>
             }
           />
-          <DataList>
-            {selected.map((project) => {
-              const weekly = project.githubData?.weeklyCommits ?? []
-              return (
-                <DataRow
-                  key={project._id}
-                  href={projectHref(project)}
-                  title={project.title ?? "Untitled project"}
-                  status={projectStatus(project.status) ?? undefined}
-                  description={project.description}
-                  meta={projectMeta(project)}
-                  value={
-                    weekly.length > 1 ? (
-                      <Sparkline
-                        values={weekly}
-                        label={`${project.title} commits per week, last ${weekly.length} weeks`}
-                      />
-                    ) : undefined
-                  }
-                />
-              )
-            })}
-          </DataList>
+          <TraceOnView>
+            <DataList>
+              {selected.map((project) => {
+                const weekly = project.githubData?.weeklyCommits ?? []
+                return (
+                  <DataRow
+                    key={project._id}
+                    href={projectHref(project)}
+                    title={project.title ?? "Untitled project"}
+                    status={projectStatus(project.status) ?? undefined}
+                    description={project.description}
+                    meta={projectMeta(project)}
+                    value={
+                      weekly.length > 1 ? (
+                        <Sparkline
+                          values={weekly}
+                          label={`${project.title} commits per week, last ${weekly.length} weeks`}
+                        />
+                      ) : undefined
+                    }
+                  />
+                )
+              })}
+            </DataList>
+          </TraceOnView>
         </Panel>
       </Container>
     </Section>

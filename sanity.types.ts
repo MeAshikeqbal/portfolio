@@ -301,6 +301,7 @@ export type Post = {
     } & CategoryReference
   >
   featured?: boolean
+  archived?: boolean
   seo?: Seo
 }
 
@@ -516,7 +517,7 @@ export type AllSanitySchemaTypes =
 
 // Source: sanity/lib/queries.ts
 // Variable: POSTS_QUERY
-// Query: *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current)] | order(publishedAt desc) {   _id,  title,  "slug": slug.current,  mainImage,  "lqip": mainImage.asset->metadata.lqip,  publishedAt,  "excerpt": coalesce(excerpt, array::join(string::split(pt::text(body[_type == "block" && style == "normal"]), "")[0...200], "")),  categories[]->{ _id, title },  author->{ name } }
+// Query: *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && archived != true] | order(publishedAt desc) {   _id,  title,  "slug": slug.current,  mainImage,  "lqip": mainImage.asset->metadata.lqip,  publishedAt,  "excerpt": coalesce(excerpt, array::join(string::split(pt::text(body[_type == "block" && style == "normal"]), "")[0...200], "")),  categories[]->{ _id, title },  author->{ name } }
 export type POSTS_QUERY_RESULT = Array<{
   _id: string
   title: string | null
@@ -543,7 +544,7 @@ export type POSTS_QUERY_RESULT = Array<{
 
 // Source: sanity/lib/queries.ts
 // Variable: LATEST_POSTS_QUERY
-// Query: *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current)]    | order(coalesce(featured, false) desc, publishedAt desc) [0...3] {   _id,  title,  "slug": slug.current,  mainImage,  "lqip": mainImage.asset->metadata.lqip,  publishedAt,  "excerpt": coalesce(excerpt, array::join(string::split(pt::text(body[_type == "block" && style == "normal"]), "")[0...200], "")),  categories[]->{ _id, title },  author->{ name } }
+// Query: *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && archived != true]    | order(coalesce(featured, false) desc, publishedAt desc) [0...3] {   _id,  title,  "slug": slug.current,  mainImage,  "lqip": mainImage.asset->metadata.lqip,  publishedAt,  "excerpt": coalesce(excerpt, array::join(string::split(pt::text(body[_type == "block" && style == "normal"]), "")[0...200], "")),  categories[]->{ _id, title },  author->{ name } }
 export type LATEST_POSTS_QUERY_RESULT = Array<{
   _id: string
   title: string | null
@@ -570,7 +571,7 @@ export type LATEST_POSTS_QUERY_RESULT = Array<{
 
 // Source: sanity/lib/queries.ts
 // Variable: POST_QUERY
-// Query: *[_type == "post" && !(_id in path("drafts.**")) && slug.current == $slug][0] {    _id,    title,    "slug": slug.current,    author->{ name, image },    mainImage,    "cover": mainImage.asset->metadata{ lqip, "width": dimensions.width, "height": dimensions.height },    categories[]->{ _id, title },    publishedAt,    _updatedAt,    body,    excerpt,    seo,    "previous": *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && publishedAt < ^.publishedAt]      | order(publishedAt desc)[0] { title, "slug": slug.current },    "next": *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && publishedAt > ^.publishedAt]      | order(publishedAt asc)[0] { title, "slug": slug.current },    "related": *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && _id != ^._id && count(categories[@._ref in ^.^.categories[]._ref]) > 0]      | order(publishedAt desc)[0...3] {   _id,  title,  "slug": slug.current,  mainImage,  "lqip": mainImage.asset->metadata.lqip,  publishedAt,  "excerpt": coalesce(excerpt, array::join(string::split(pt::text(body[_type == "block" && style == "normal"]), "")[0...200], "")),  categories[]->{ _id, title },  author->{ name } }  }
+// Query: *[_type == "post" && !(_id in path("drafts.**")) && slug.current == $slug][0] {    _id,    title,    "slug": slug.current,    author->{ name, image },    mainImage,    "cover": mainImage.asset->metadata{ lqip, "width": dimensions.width, "height": dimensions.height },    // posts: how many listed posts share the category, so rare ones weigh more in "related".    categories[]->{ _id, title, "posts": count(*[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && archived != true && references(^._id)]) },    publishedAt,    _updatedAt,    body,    excerpt,    seo,    archived,    "previous": *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && archived != true && publishedAt < ^.publishedAt]      | order(publishedAt desc)[0] { title, "slug": slug.current },    "next": *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && archived != true && publishedAt > ^.publishedAt]      | order(publishedAt asc)[0] { title, "slug": slug.current },    // Every candidate sharing a category, ranked in lib/related.ts (rare shared topics first).    // The cap is only a payload guard, far above the site's post count: limiting by date    // first would drop an older rare-topic match before it could be ranked.    "related": *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && archived != true && _id != ^._id && count(categories[@._ref in ^.^.categories[]._ref]) > 0]      | order(publishedAt desc)[0...200] {   _id,  title,  "slug": slug.current,  mainImage,  "lqip": mainImage.asset->metadata.lqip,  publishedAt,  "excerpt": coalesce(excerpt, array::join(string::split(pt::text(body[_type == "block" && style == "normal"]), "")[0...200], "")),  categories[]->{ _id, title },  author->{ name }, "categoryIds": categories[]._ref }  }
 export type POST_QUERY_RESULT = {
   _id: string
   title: string | null
@@ -601,12 +602,14 @@ export type POST_QUERY_RESULT = {
   categories: Array<{
     _id: string
     title: string | null
+    posts: number
   }> | null
   publishedAt: string | null
   _updatedAt: string
   body: BlockContent | null
   excerpt: string | null
   seo: Seo | null
+  archived: boolean | null
   previous: {
     title: string | null
     slug: string | null
@@ -637,6 +640,7 @@ export type POST_QUERY_RESULT = {
     author: {
       name: string | null
     } | null
+    categoryIds: Array<string> | null
   }>
 } | null
 
@@ -722,7 +726,7 @@ export type PROJECT_SLUGS_QUERY_RESULT = Array<string | null>
 
 // Source: sanity/lib/queries.ts
 // Variable: HOME_STATS_QUERY
-// Query: {  "posts": count(*[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current)]),  "projects": count(*[_type == "project" && !(_id in path("drafts.**"))]),  // Past-52-week commits per repo, summed (see lib/fetch-github-data.ts).  "commits": math::sum(*[_type == "project" && !(_id in path("drafts.**"))].githubData.commits),  "latestPost": *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current)]    | order(publishedAt desc)[0] { title, "slug": slug.current, publishedAt },  // The "Homelab" section of /uses, if there is one.  "homelab": *[_type == "uses" && _id == "uses"][0]    .sections[string::startsWith(lower(title), "homelab")][0]    .items[0...5] { _key, name, description, url, icon }}
+// Query: {  "posts": count(*[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && archived != true]),  "projects": count(*[_type == "project" && !(_id in path("drafts.**"))]),  // Past-52-week commits per repo, summed (see lib/fetch-github-data.ts).  "commits": math::sum(*[_type == "project" && !(_id in path("drafts.**"))].githubData.commits),  "latestPost": *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && archived != true]    | order(publishedAt desc)[0] { title, "slug": slug.current, publishedAt },  // The "Homelab" section of /uses, if there is one.  "homelab": *[_type == "uses" && _id == "uses"][0]    .sections[string::startsWith(lower(title), "homelab")][0]    .items[0...5] { _key, name, description, url, icon }}
 export type HOME_STATS_QUERY_RESULT = {
   posts: number
   projects: number
@@ -743,7 +747,7 @@ export type HOME_STATS_QUERY_RESULT = {
 
 // Source: sanity/lib/queries.ts
 // Variable: SITE_STATUS_QUERY
-// Query: {  "syncedAt": *[_type == "project" && !(_id in path("drafts.**")) && defined(githubData.syncedAt)]    | order(githubData.syncedAt desc)[0].githubData.syncedAt,  "latestPostAt": *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current)]    | order(publishedAt desc)[0].publishedAt}
+// Query: {  "syncedAt": *[_type == "project" && !(_id in path("drafts.**")) && defined(githubData.syncedAt)]    | order(githubData.syncedAt desc)[0].githubData.syncedAt,  "latestPostAt": *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && archived != true] | order(publishedAt desc)[0].publishedAt}
 export type SITE_STATUS_QUERY_RESULT = {
   syncedAt: string | null
   latestPostAt: string | null
@@ -823,9 +827,10 @@ export type CV_URL_QUERY_RESULT = string | null
 
 // Source: sanity/lib/queries.ts
 // Variable: FEED_POSTS_QUERY
-// Query: *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current)] | order(publishedAt desc) {    title,    "slug": slug.current,    publishedAt,    _updatedAt,    "excerpt": coalesce(excerpt, array::join(string::split(pt::text(body[_type == "block" && style == "normal"]), "")[0...200], "")),    author->{ name },    "categories": categories[]->title,    "image": mainImage.asset->{ url, "mimeType": mimeType }  }
+// Query: *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && archived != true] | order(publishedAt desc) {    title,    body,    "slug": slug.current,    publishedAt,    _updatedAt,    "excerpt": coalesce(excerpt, array::join(string::split(pt::text(body[_type == "block" && style == "normal"]), "")[0...200], "")),    author->{ name },    "categories": categories[]->title,    "image": mainImage.asset->{ url, "mimeType": mimeType }  }
 export type FEED_POSTS_QUERY_RESULT = Array<{
   title: string | null
+  body: BlockContent | null
   slug: string | null
   publishedAt: string | null
   _updatedAt: string
@@ -861,7 +866,7 @@ export type GITHUB_SYNC_REQUESTS_QUERY_RESULT = Array<{
 
 // Source: sanity/lib/queries.ts
 // Variable: SITEMAP_QUERY
-// Query: {  "posts": *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && seo.noIndex != true]    | order(publishedAt desc) { "slug": slug.current, _updatedAt },  "projects": *[_type == "project" && !(_id in path("drafts.**")) && defined(slug.current) && seo.noIndex != true]    { "slug": slug.current, _updatedAt },  "uses": *[_type == "uses" && _id == "uses" && count(sections[count(items[defined(name) && name != ""]) > 0]) > 0][0]._updatedAt,  "now": *[_type == "now" && _id == "now" && count(body) > 0][0]._updatedAt}
+// Query: {  "posts": *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && archived != true && seo.noIndex != true]    | order(publishedAt desc) { "slug": slug.current, _updatedAt },  "projects": *[_type == "project" && !(_id in path("drafts.**")) && defined(slug.current) && seo.noIndex != true]    { "slug": slug.current, _updatedAt },  "uses": *[_type == "uses" && _id == "uses" && count(sections[count(items[defined(name) && name != ""]) > 0]) > 0][0]._updatedAt,  "now": *[_type == "now" && _id == "now" && count(body) > 0][0]._updatedAt}
 export type SITEMAP_QUERY_RESULT = {
   posts: Array<{
     slug: string | null
@@ -877,7 +882,7 @@ export type SITEMAP_QUERY_RESULT = {
 
 // Source: sanity/lib/queries.ts
 // Variable: COMMAND_INDEX_QUERY
-// Query: {  "posts": *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current)] | order(publishedAt desc) {    _id, title, "slug": slug.current, "topics": categories[]->title  },  "projects": *[_type == "project" && !(_id in path("drafts.**"))] | order(orderRank asc, _createdAt desc) {    _id, title, "slug": slug.current, url, github  },  // Only whether a CV exists: the file itself is served from /resume.pdf.  "hasCv": defined(*[_type == "cv"][0].cvFile.asset),  // /uses and /now are only linked once they have published content.  // Same rule as the /uses page: at least one section with a named item. (GROQ can't trim,  // and the schema requires a name, so whitespace-only names aren't checked here.)  "hasUses": count(*[_type == "uses" && _id == "uses"][0].sections[count(items[defined(name) && name != ""]) > 0]) > 0,  "hasNow": count(*[_type == "now" && _id == "now"][0].body) > 0}
+// Query: {  "posts": *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && archived != true] | order(publishedAt desc) {    _id, title, "slug": slug.current, "topics": categories[]->title  },  "projects": *[_type == "project" && !(_id in path("drafts.**"))] | order(orderRank asc, _createdAt desc) {    _id, title, "slug": slug.current, url, github  },  // Only whether a CV exists: the file itself is served from /resume.pdf.  "hasCv": defined(*[_type == "cv"][0].cvFile.asset),  // /uses and /now are only linked once they have published content.  // Same rule as the /uses page: at least one section with a named item. (GROQ can't trim,  // and the schema requires a name, so whitespace-only names aren't checked here.)  "hasUses": count(*[_type == "uses" && _id == "uses"][0].sections[count(items[defined(name) && name != ""]) > 0]) > 0,  "hasNow": count(*[_type == "now" && _id == "now"][0].body) > 0}
 export type COMMAND_INDEX_QUERY_RESULT = {
   posts: Array<{
     _id: string
@@ -928,24 +933,24 @@ export type NOW_QUERY_RESULT = {
 // Query TypeMap
 declare global {
   interface SanityQueries {
-    '\n  *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current)] | order(publishedAt desc) { \n  _id,\n  title,\n  "slug": slug.current,\n  mainImage,\n  "lqip": mainImage.asset->metadata.lqip,\n  publishedAt,\n  "excerpt": coalesce(excerpt, array::join(string::split(pt::text(body[_type == "block" && style == "normal"]), "")[0...200], "")),\n  categories[]->{ _id, title },\n  author->{ name }\n }\n': POSTS_QUERY_RESULT
-    '\n  *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current)]\n    | order(coalesce(featured, false) desc, publishedAt desc) [0...3] { \n  _id,\n  title,\n  "slug": slug.current,\n  mainImage,\n  "lqip": mainImage.asset->metadata.lqip,\n  publishedAt,\n  "excerpt": coalesce(excerpt, array::join(string::split(pt::text(body[_type == "block" && style == "normal"]), "")[0...200], "")),\n  categories[]->{ _id, title },\n  author->{ name }\n }\n': LATEST_POSTS_QUERY_RESULT
-    '\n  *[_type == "post" && !(_id in path("drafts.**")) && slug.current == $slug][0] {\n    _id,\n    title,\n    "slug": slug.current,\n    author->{ name, image },\n    mainImage,\n    "cover": mainImage.asset->metadata{ lqip, "width": dimensions.width, "height": dimensions.height },\n    categories[]->{ _id, title },\n    publishedAt,\n    _updatedAt,\n    body,\n    excerpt,\n    seo,\n    "previous": *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && publishedAt < ^.publishedAt]\n      | order(publishedAt desc)[0] { title, "slug": slug.current },\n    "next": *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && publishedAt > ^.publishedAt]\n      | order(publishedAt asc)[0] { title, "slug": slug.current },\n    "related": *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && _id != ^._id && count(categories[@._ref in ^.^.categories[]._ref]) > 0]\n      | order(publishedAt desc)[0...3] { \n  _id,\n  title,\n  "slug": slug.current,\n  mainImage,\n  "lqip": mainImage.asset->metadata.lqip,\n  publishedAt,\n  "excerpt": coalesce(excerpt, array::join(string::split(pt::text(body[_type == "block" && style == "normal"]), "")[0...200], "")),\n  categories[]->{ _id, title },\n  author->{ name }\n }\n  }\n': POST_QUERY_RESULT
+    '\n  *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && archived != true] | order(publishedAt desc) { \n  _id,\n  title,\n  "slug": slug.current,\n  mainImage,\n  "lqip": mainImage.asset->metadata.lqip,\n  publishedAt,\n  "excerpt": coalesce(excerpt, array::join(string::split(pt::text(body[_type == "block" && style == "normal"]), "")[0...200], "")),\n  categories[]->{ _id, title },\n  author->{ name }\n }\n': POSTS_QUERY_RESULT
+    '\n  *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && archived != true]\n    | order(coalesce(featured, false) desc, publishedAt desc) [0...3] { \n  _id,\n  title,\n  "slug": slug.current,\n  mainImage,\n  "lqip": mainImage.asset->metadata.lqip,\n  publishedAt,\n  "excerpt": coalesce(excerpt, array::join(string::split(pt::text(body[_type == "block" && style == "normal"]), "")[0...200], "")),\n  categories[]->{ _id, title },\n  author->{ name }\n }\n': LATEST_POSTS_QUERY_RESULT
+    '\n  *[_type == "post" && !(_id in path("drafts.**")) && slug.current == $slug][0] {\n    _id,\n    title,\n    "slug": slug.current,\n    author->{ name, image },\n    mainImage,\n    "cover": mainImage.asset->metadata{ lqip, "width": dimensions.width, "height": dimensions.height },\n    // posts: how many listed posts share the category, so rare ones weigh more in "related".\n    categories[]->{ _id, title, "posts": count(*[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && archived != true && references(^._id)]) },\n    publishedAt,\n    _updatedAt,\n    body,\n    excerpt,\n    seo,\n    archived,\n    "previous": *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && archived != true && publishedAt < ^.publishedAt]\n      | order(publishedAt desc)[0] { title, "slug": slug.current },\n    "next": *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && archived != true && publishedAt > ^.publishedAt]\n      | order(publishedAt asc)[0] { title, "slug": slug.current },\n    // Every candidate sharing a category, ranked in lib/related.ts (rare shared topics first).\n    // The cap is only a payload guard, far above the site\'s post count: limiting by date\n    // first would drop an older rare-topic match before it could be ranked.\n    "related": *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && archived != true && _id != ^._id && count(categories[@._ref in ^.^.categories[]._ref]) > 0]\n      | order(publishedAt desc)[0...200] { \n  _id,\n  title,\n  "slug": slug.current,\n  mainImage,\n  "lqip": mainImage.asset->metadata.lqip,\n  publishedAt,\n  "excerpt": coalesce(excerpt, array::join(string::split(pt::text(body[_type == "block" && style == "normal"]), "")[0...200], "")),\n  categories[]->{ _id, title },\n  author->{ name }\n, "categoryIds": categories[]._ref }\n  }\n': POST_QUERY_RESULT
     '\n  *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current)].slug.current\n': POST_SLUGS_QUERY_RESULT
     '\n  *[_type == "project" && !(_id in path("drafts.**"))] | order(orderRank asc, _createdAt desc) { \n  _id,\n  title,\n  "slug": slug.current,\n  description,\n  mainImage,\n  publishedAt,\n  github,\n  url,\n  featured,\n  status,\n  tech,\n  githubData\n }\n': PROJECTS_QUERY_RESULT
     '\n  *[_type == "project" && !(_id in path("drafts.**")) && slug.current == $slug][0] { \n  _id,\n  title,\n  "slug": slug.current,\n  description,\n  mainImage,\n  publishedAt,\n  github,\n  url,\n  featured,\n  status,\n  tech,\n  githubData\n, body, seo }\n': PROJECT_QUERY_RESULT
     '\n  *[_type == "project" && !(_id in path("drafts.**")) && defined(slug.current)].slug.current\n': PROJECT_SLUGS_QUERY_RESULT
-    '{\n  "posts": count(*[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current)]),\n  "projects": count(*[_type == "project" && !(_id in path("drafts.**"))]),\n  // Past-52-week commits per repo, summed (see lib/fetch-github-data.ts).\n  "commits": math::sum(*[_type == "project" && !(_id in path("drafts.**"))].githubData.commits),\n  "latestPost": *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current)]\n    | order(publishedAt desc)[0] { title, "slug": slug.current, publishedAt },\n  // The "Homelab" section of /uses, if there is one.\n  "homelab": *[_type == "uses" && _id == "uses"][0]\n    .sections[string::startsWith(lower(title), "homelab")][0]\n    .items[0...5] { _key, name, description, url, icon }\n}': HOME_STATS_QUERY_RESULT
-    '{\n  "syncedAt": *[_type == "project" && !(_id in path("drafts.**")) && defined(githubData.syncedAt)]\n    | order(githubData.syncedAt desc)[0].githubData.syncedAt,\n  "latestPostAt": *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current)]\n    | order(publishedAt desc)[0].publishedAt\n}': SITE_STATUS_QUERY_RESULT
+    '{\n  "posts": count(*[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && archived != true]),\n  "projects": count(*[_type == "project" && !(_id in path("drafts.**"))]),\n  // Past-52-week commits per repo, summed (see lib/fetch-github-data.ts).\n  "commits": math::sum(*[_type == "project" && !(_id in path("drafts.**"))].githubData.commits),\n  "latestPost": *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && archived != true]\n    | order(publishedAt desc)[0] { title, "slug": slug.current, publishedAt },\n  // The "Homelab" section of /uses, if there is one.\n  "homelab": *[_type == "uses" && _id == "uses"][0]\n    .sections[string::startsWith(lower(title), "homelab")][0]\n    .items[0...5] { _key, name, description, url, icon }\n}': HOME_STATS_QUERY_RESULT
+    '{\n  "syncedAt": *[_type == "project" && !(_id in path("drafts.**")) && defined(githubData.syncedAt)]\n    | order(githubData.syncedAt desc)[0].githubData.syncedAt,\n  "latestPostAt": *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && archived != true] | order(publishedAt desc)[0].publishedAt\n}': SITE_STATUS_QUERY_RESULT
     '\n  *[_type == "skills"] | order(orderRank asc, name asc) { _id, name, icon, category }\n': SKILLS_QUERY_RESULT
     '\n  *[_type == "education"] | order(year desc) { _id, year, degree, school, schoolLogo, desc }\n': EDUCATION_QUERY_RESULT
     '\n  *[_type == "experiences"] | order(year desc) {\n    _id,\n    year,\n    works[]{ _key, name, company, copmanyLogo, desc }\n  }\n': EXPERIENCES_QUERY_RESULT
     '\n  *[_type == "cv"][0].cvFile.asset->url\n': CV_URL_QUERY_RESULT
-    '\n  *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current)] | order(publishedAt desc) {\n    title,\n    "slug": slug.current,\n    publishedAt,\n    _updatedAt,\n    "excerpt": coalesce(excerpt, array::join(string::split(pt::text(body[_type == "block" && style == "normal"]), "")[0...200], "")),\n    author->{ name },\n    "categories": categories[]->title,\n    "image": mainImage.asset->{ url, "mimeType": mimeType }\n  }\n': FEED_POSTS_QUERY_RESULT
+    '\n  *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && archived != true] | order(publishedAt desc) {\n    title,\n    body,\n    "slug": slug.current,\n    publishedAt,\n    _updatedAt,\n    "excerpt": coalesce(excerpt, array::join(string::split(pt::text(body[_type == "block" && style == "normal"]), "")[0...200], "")),\n    author->{ name },\n    "categories": categories[]->title,\n    "image": mainImage.asset->{ url, "mimeType": mimeType }\n  }\n': FEED_POSTS_QUERY_RESULT
     '\n  *[_type == "project" && defined(github)] { _id, title, github }\n': GITHUB_PROJECTS_QUERY_RESULT
     '\n  *[_type == "project" && _id in $ids] { _id, title, github, githubSyncRequestedAt }\n': GITHUB_SYNC_REQUESTS_QUERY_RESULT
-    '{\n  "posts": *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && seo.noIndex != true]\n    | order(publishedAt desc) { "slug": slug.current, _updatedAt },\n  "projects": *[_type == "project" && !(_id in path("drafts.**")) && defined(slug.current) && seo.noIndex != true]\n    { "slug": slug.current, _updatedAt },\n  "uses": *[_type == "uses" && _id == "uses" && count(sections[count(items[defined(name) && name != ""]) > 0]) > 0][0]._updatedAt,\n  "now": *[_type == "now" && _id == "now" && count(body) > 0][0]._updatedAt\n}': SITEMAP_QUERY_RESULT
-    '{\n  "posts": *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current)] | order(publishedAt desc) {\n    _id, title, "slug": slug.current, "topics": categories[]->title\n  },\n  "projects": *[_type == "project" && !(_id in path("drafts.**"))] | order(orderRank asc, _createdAt desc) {\n    _id, title, "slug": slug.current, url, github\n  },\n  // Only whether a CV exists: the file itself is served from /resume.pdf.\n  "hasCv": defined(*[_type == "cv"][0].cvFile.asset),\n  // /uses and /now are only linked once they have published content.\n  // Same rule as the /uses page: at least one section with a named item. (GROQ can\'t trim,\n  // and the schema requires a name, so whitespace-only names aren\'t checked here.)\n  "hasUses": count(*[_type == "uses" && _id == "uses"][0].sections[count(items[defined(name) && name != ""]) > 0]) > 0,\n  "hasNow": count(*[_type == "now" && _id == "now"][0].body) > 0\n}': COMMAND_INDEX_QUERY_RESULT
+    '{\n  "posts": *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && archived != true && seo.noIndex != true]\n    | order(publishedAt desc) { "slug": slug.current, _updatedAt },\n  "projects": *[_type == "project" && !(_id in path("drafts.**")) && defined(slug.current) && seo.noIndex != true]\n    { "slug": slug.current, _updatedAt },\n  "uses": *[_type == "uses" && _id == "uses" && count(sections[count(items[defined(name) && name != ""]) > 0]) > 0][0]._updatedAt,\n  "now": *[_type == "now" && _id == "now" && count(body) > 0][0]._updatedAt\n}': SITEMAP_QUERY_RESULT
+    '{\n  "posts": *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && archived != true] | order(publishedAt desc) {\n    _id, title, "slug": slug.current, "topics": categories[]->title\n  },\n  "projects": *[_type == "project" && !(_id in path("drafts.**"))] | order(orderRank asc, _createdAt desc) {\n    _id, title, "slug": slug.current, url, github\n  },\n  // Only whether a CV exists: the file itself is served from /resume.pdf.\n  "hasCv": defined(*[_type == "cv"][0].cvFile.asset),\n  // /uses and /now are only linked once they have published content.\n  // Same rule as the /uses page: at least one section with a named item. (GROQ can\'t trim,\n  // and the schema requires a name, so whitespace-only names aren\'t checked here.)\n  "hasUses": count(*[_type == "uses" && _id == "uses"][0].sections[count(items[defined(name) && name != ""]) > 0]) > 0,\n  "hasNow": count(*[_type == "now" && _id == "now"][0].body) > 0\n}': COMMAND_INDEX_QUERY_RESULT
     '\n  *[_type == "uses" && _id == "uses"][0] {\n    _updatedAt,\n    intro,\n    sections[]{ _key, title, items[]{ _key, name, description, url, icon } }\n  }\n': USES_QUERY_RESULT
     '\n  *[_type == "now" && _id == "now"][0] { _updatedAt, location, body }\n': NOW_QUERY_RESULT
   }

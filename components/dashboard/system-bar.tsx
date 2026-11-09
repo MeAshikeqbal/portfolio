@@ -26,7 +26,8 @@ export function SystemBar({ syncedAt, latestPostAt, notice, className }: SystemB
   const lastPost = formatDate(latestPostAt)
 
   return (
-    <div className={cn("border-b bg-surface", className)}>
+    // A labelled region, so the strip sits inside a landmark like the rest of the page.
+    <section aria-label="Site status" className={cn("border-b bg-surface", className)}>
       <Container className="flex h-8 items-center justify-between gap-4 label-caps">
         <span className="flex min-w-0 items-center gap-3">
           {notice && (
@@ -49,6 +50,6 @@ export function SystemBar({ syncedAt, latestPostAt, notice, className }: SystemB
           {builtOn && ` · ${builtOn}`}
         </span>
       </Container>
-    </div>
+    </section>
   )
 }

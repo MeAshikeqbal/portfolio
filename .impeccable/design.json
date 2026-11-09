@@ -249,19 +249,44 @@
     ],
     "motion": [
       {
+        "name": "ease-arrive",
+        "value": "cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "Confident arrivals: sparkline trace, chip reveal."
+      },
+      {
+        "name": "sparkline-trace",
+        "value": "700ms ease-arrive, +60ms per row (max 300ms), head lands at +520ms",
+        "purpose": "Once, when the projects panel scrolls into view."
+      },
+      {
+        "name": "theme-crossfade",
+        "value": "240ms",
+        "purpose": "Theme switch via document.startViewTransition (lib/view-transition.ts)."
+      },
+      {
+        "name": "menu-drop",
+        "value": "200ms fade + slide-in-from-top-2",
+        "purpose": "Mobile menu open; closes instantly."
+      },
+      {
+        "name": "chip-reveal",
+        "value": "200ms opacity / 280ms translate, 12ms cascade capped at 16",
+        "purpose": "Inventory chips revealed by Show all (@starting-style)."
+      },
+      {
+        "name": "status-shift",
+        "value": "500ms background-color",
+        "purpose": "A re-judged status dot changes colour smoothly."
+      },
+      {
         "name": "pulse-dot",
         "value": "pulse-dot 2s ease-in-out infinite",
         "purpose": "Live status dots only; motion-safe."
       },
       {
-        "name": "color-transition",
-        "value": "color/background-color 150ms ease",
-        "purpose": "Hover fills on rows, nav links, chips and buttons."
-      },
-      {
-        "name": "smooth-scroll",
-        "value": "scroll-behavior: smooth",
-        "purpose": "Anchor navigation, only with prefers-reduced-motion: no-preference."
+        "name": "skeleton-pulse",
+        "value": "animate-pulse (motion-safe)",
+        "purpose": "Skeletons while a link preview or the Turnstile check loads."
       }
     ],
     "breakpoints": [
@@ -392,7 +417,7 @@
       "Do hide a status, count or sparkline when its data is missing rather than showing a placeholder value.",
       "Do separate sections and panels with 1px hairlines and tonal steps, not shadows.",
       "Do run `tests/unit/tokens.test.ts` after changing any token. Every text/background pair must stay at WCAG AA in both themes.",
-      "Do gate any motion behind `motion-safe` / `prefers-reduced-motion`."
+      "Do gate any motion behind `motion-safe` / `prefers-reduced-motion`, and keep content visible by default: animations arm only after hydration."
     ],
     "donts": [
       "Don't introduce a brand or accent colour, gradients, or coloured series in charts.",
@@ -402,6 +427,7 @@
       "Don't add shadows to panels, tiles, cards or rows. Only dialogs float.",
       "Don't use mono for sentences people read. It is for labels, metadata, identifiers and numbers.",
       "Don't invent metrics, uptime figures or service states. If the CMS has no status for a project, show none.",
+      "Don't add scroll reveals, entrance staggers on sections, parallax or count-up numbers.",
       "Don't let the metaphor rename an action into something obscure. \"Get in touch\" beats \"Open a ticket\"."
     ]
   }

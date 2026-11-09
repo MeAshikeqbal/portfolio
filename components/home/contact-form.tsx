@@ -1,14 +1,15 @@
 "use client"
 
 import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile"
-import { CircleCheck } from "lucide-react"
-import { useActionState, useEffect, useRef, type ReactNode } from "react"
+import { CircleCheck, LoaderCircle } from "lucide-react"
+import { useActionState, useEffect, useRef, useState, type ReactNode } from "react"
 import { submitContact, type ContactState } from "@/actions/submit-contact"
 import { HONEYPOT_FIELD } from "@/lib/contact-fields"
 import { StatusPill } from "@/components/dashboard/status-pill"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Skeleton } from "@/components/ui/skeleton"
 import { Textarea } from "@/components/ui/textarea"
 
 const siteKey = process.env.NEXT_PUBLIC_CLOUDFLARE_TURNSTILE_SITE_KEY
@@ -18,6 +19,8 @@ export function ContactForm() {
     status: "idle",
   })
   const turnstile = useRef<TurnstileInstance>(null)
+  // Cloudflare's widget arrives a moment after the form: hold its space with a skeleton.
+  const [challenge, setChallenge] = useState<"loading" | "ready" | "failed">("loading")
 
   // A Turnstile token is single-use: get a fresh one after any failed attempt.
   useEffect(() => {
@@ -26,7 +29,10 @@ export function ContactForm() {
 
   if (state.status === "success") {
     return (
-      <div role="status" className="flex flex-col items-start gap-3 py-6">
+      <div
+        role="status"
+        className="flex animate-in flex-col items-start gap-3 py-6 duration-300 fade-in-0 motion-safe:slide-in-from-bottom-2"
+      >
         <StatusPill status="up">message sent</StatusPill>
         <p className="flex items-center gap-2 text-lg font-medium">
           <CircleCheck className="size-5 text-status-up-fg" aria-hidden /> Thanks, your message is
@@ -90,11 +96,25 @@ export function ContactForm() {
       </div>
 
       {siteKey ? (
-        <Turnstile
-          ref={turnstile}
-          siteKey={siteKey}
-          options={{ theme: "auto", size: "flexible" }}
-        />
+        <div className="relative min-h-[65px]">
+          {challenge !== "ready" && (
+            <div className="absolute inset-0 flex items-center gap-3 rounded-md border px-3">
+              {challenge === "loading" && <Skeleton className="size-6 shrink-0 rounded-full" />}
+              <p role="status" className="text-sm text-muted-foreground">
+                {challenge === "failed"
+                  ? "The spam check couldn't load. Refresh the page, or use another channel."
+                  : "Loading spam check…"}
+              </p>
+            </div>
+          )}
+          <Turnstile
+            ref={turnstile}
+            siteKey={siteKey}
+            options={{ theme: "auto", size: "flexible" }}
+            onWidgetLoad={() => setChallenge("ready")}
+            onError={() => setChallenge("failed")}
+          />
+        </div>
       ) : (
         <p
           role="note"
@@ -120,6 +140,7 @@ export function ContactForm() {
       )}
 
       <Button type="submit" disabled={pending || !siteKey} className="w-full sm:w-auto">
+        {pending && <LoaderCircle aria-hidden className="motion-safe:animate-spin" />}
         {pending ? "Sending…" : "Send message"}
       </Button>
     </form>

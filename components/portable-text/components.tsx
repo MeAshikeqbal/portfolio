@@ -101,7 +101,7 @@ export function createPortableTextComponents(
               width={1600}
               height={900}
               sizes="(min-width: 768px) 720px, 100vw"
-              className="h-auto w-full rounded-lg border"
+              className="h-auto w-full rounded-lg border bg-surface-2"
             />
             {value.caption && <figcaption>{value.caption}</figcaption>}
           </figure>

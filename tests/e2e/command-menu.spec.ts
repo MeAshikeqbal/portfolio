@@ -17,10 +17,10 @@ test.describe("command palette", () => {
 
   test("'/' opens it, but not while typing in a field", async ({ page }) => {
     await page.goto("/projects")
-    await page.getByLabel("Filter projects").click()
+    await page.getByLabel("Search projects").click()
     await page.keyboard.type("/")
     await expect(page.getByRole("dialog")).toBeHidden()
-    await expect(page.getByLabel("Filter projects")).toHaveValue("/")
+    await expect(page.getByLabel("Search projects")).toHaveValue("/")
 
     await page.locator("body").click({ position: { x: 5, y: 300 } })
     await page.keyboard.press("/")

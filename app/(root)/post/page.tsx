@@ -17,7 +17,7 @@ export default async function PostsPage() {
   return (
     <main>
       <Section className="pt-12 sm:pt-16">
-        <Container className="max-w-4xl">
+        <Container>
           <SectionHeader
             as="h1"
             title="Writing"
