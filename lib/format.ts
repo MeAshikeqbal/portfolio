@@ -45,14 +45,21 @@ export function formatCompact(value: number): string {
 }
 
 /**
- * Whether a free-text period like "2022 - 2026", "2026" or "2024 – present" is ongoing,
- * judged by its last year (or the word "present") against `now`.
+ * Whether a free-text period like "2022 - 2026", "2026" or "2024 – present" is ongoing.
+ * - "present" / "now" / "current" are ongoing.
+ * - A single year ("2026") is a start: ongoing from that year on.
+ * - A range ends at its last year, so it's ongoing only while that year is still ahead.
+ *   "2022 - 2026" stops counting as current once 2026 arrives: a finished degree must not
+ *   keep a green "current" dot all year (write "2022 – present" if it's still running).
  */
 export function isCurrentPeriod(period: string | null | undefined, now = new Date()): boolean {
   if (!period) return false
   if (/\b(present|now|current)\b/i.test(period)) return true
   const years = period.match(/\d{4}/g)
-  return years ? Number(years[years.length - 1]) >= now.getUTCFullYear() : false
+  if (!years) return false
+  const last = Number(years[years.length - 1])
+  const year = now.getUTCFullYear()
+  return years.length === 1 ? last >= year : last > year
 }
 
 /**
