@@ -1,0 +1,149 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-09T00:00:00Z",
+  "title": "Design System: itsashik.dev",
+  "extensions": {
+    "colorMeta": {
+      "background": { "role": "neutral", "displayName": "Paper Grey", "canonical": "oklch(0.985 0.002 247)", "dark": "oklch(0.145 0.004 286)", "tonalRamp": ["oklch(0.15 0.004 286)", "oklch(0.27 0.005 286)", "oklch(0.39 0.006 286)", "oklch(0.51 0.006 286)", "oklch(0.63 0.006 286)", "oklch(0.75 0.005 286)", "oklch(0.87 0.004 286)", "oklch(0.985 0.002 247)"] },
+      "surface": { "role": "neutral", "displayName": "Panel White", "canonical": "oklch(1 0 0)", "dark": "oklch(0.18 0.005 286)" },
+      "surface-2": { "role": "neutral", "displayName": "Rack Grey", "canonical": "oklch(0.967 0.003 265)", "dark": "oklch(0.225 0.006 286)" },
+      "ink": { "role": "primary", "displayName": "Console Ink", "canonical": "oklch(0.21 0.006 286)", "dark": "oklch(0.97 0.002 286)", "tonalRamp": ["oklch(0.15 0.006 286)", "oklch(0.21 0.006 286)", "oklch(0.33 0.008 286)", "oklch(0.45 0.01 286)", "oklch(0.57 0.01 286)", "oklch(0.69 0.008 286)", "oklch(0.82 0.005 286)", "oklch(0.95 0.002 286)"] },
+      "muted-ink": { "role": "neutral", "displayName": "Muted Ink", "canonical": "oklch(0.48 0.016 286)", "dark": "oklch(0.71 0.012 286)" },
+      "hairline": { "role": "neutral", "displayName": "Hairline", "canonical": "oklch(0.92 0.004 286)", "dark": "oklch(0.27 0.006 286)" },
+      "hairline-strong": { "role": "neutral", "displayName": "Strong Hairline", "canonical": "oklch(0.87 0.006 286)", "dark": "oklch(0.34 0.008 286)" },
+      "focus-ring": { "role": "status", "displayName": "Focus Blue", "canonical": "oklch(0.55 0.17 255)", "dark": "oklch(0.7 0.14 250)" },
+      "destructive": { "role": "status", "displayName": "Destructive Red", "canonical": "oklch(0.55 0.2 25)", "dark": "oklch(0.55 0.2 25)" },
+      "status-up": { "role": "status", "displayName": "Live Green", "canonical": "oklch(0.64 0.17 150)", "dark": "oklch(0.74 0.18 150)", "tonalRamp": ["oklch(0.25 0.06 150)", "oklch(0.35 0.1 150)", "oklch(0.47 0.13 150)", "oklch(0.57 0.16 150)", "oklch(0.64 0.17 150)", "oklch(0.74 0.15 150)", "oklch(0.86 0.09 150)", "oklch(0.96 0.04 150)"] },
+      "status-up-fg": { "role": "status", "displayName": "Live Green Text", "canonical": "oklch(0.47 0.13 150)", "dark": "oklch(0.82 0.15 150)" },
+      "status-up-soft": { "role": "status", "displayName": "Live Green Tint", "canonical": "oklch(0.96 0.04 150)", "dark": "oklch(0.28 0.06 150)" },
+      "status-warn": { "role": "status", "displayName": "Attention Amber", "canonical": "oklch(0.66 0.16 60)", "dark": "oklch(0.8 0.16 78)", "tonalRamp": ["oklch(0.28 0.06 60)", "oklch(0.38 0.09 60)", "oklch(0.5 0.12 60)", "oklch(0.6 0.15 60)", "oklch(0.66 0.16 60)", "oklch(0.76 0.14 70)", "oklch(0.87 0.09 80)", "oklch(0.965 0.05 85)"] },
+      "status-warn-fg": { "role": "status", "displayName": "Attention Amber Text", "canonical": "oklch(0.5 0.12 60)", "dark": "oklch(0.86 0.14 85)" },
+      "status-warn-soft": { "role": "status", "displayName": "Attention Amber Tint", "canonical": "oklch(0.965 0.05 85)", "dark": "oklch(0.3 0.06 75)" },
+      "status-down": { "role": "status", "displayName": "Fault Red", "canonical": "oklch(0.6 0.21 25)", "dark": "oklch(0.68 0.2 25)", "tonalRamp": ["oklch(0.27 0.08 25)", "oklch(0.38 0.14 25)", "oklch(0.5 0.19 25)", "oklch(0.6 0.21 25)", "oklch(0.68 0.18 25)", "oklch(0.78 0.12 25)", "oklch(0.88 0.06 22)", "oklch(0.96 0.03 20)"] },
+      "status-down-fg": { "role": "status", "displayName": "Fault Red Text", "canonical": "oklch(0.5 0.19 25)", "dark": "oklch(0.8 0.14 25)" },
+      "status-down-soft": { "role": "status", "displayName": "Fault Red Tint", "canonical": "oklch(0.96 0.03 20)", "dark": "oklch(0.3 0.08 25)" },
+      "status-info": { "role": "status", "displayName": "Link Blue", "canonical": "oklch(0.6 0.17 255)", "dark": "oklch(0.7 0.14 250)", "tonalRamp": ["oklch(0.27 0.07 255)", "oklch(0.38 0.12 257)", "oklch(0.5 0.17 258)", "oklch(0.6 0.17 255)", "oklch(0.7 0.14 250)", "oklch(0.8 0.1 250)", "oklch(0.89 0.06 255)", "oklch(0.96 0.03 255)"] },
+      "status-info-fg": { "role": "status", "displayName": "Link Blue Text", "canonical": "oklch(0.5 0.17 258)", "dark": "oklch(0.8 0.11 250)" },
+      "status-info-soft": { "role": "status", "displayName": "Link Blue Tint", "canonical": "oklch(0.96 0.03 255)", "dark": "oklch(0.29 0.06 255)" },
+      "status-idle": { "role": "status", "displayName": "Standby Grey", "canonical": "oklch(0.62 0.01 286)", "dark": "oklch(0.6 0.01 286)" },
+      "status-idle-fg": { "role": "status", "displayName": "Standby Grey Text", "canonical": "oklch(0.48 0.016 286)", "dark": "oklch(0.71 0.012 286)" },
+      "status-idle-soft": { "role": "status", "displayName": "Standby Grey Tint", "canonical": "oklch(0.955 0.003 286)", "dark": "oklch(0.25 0.006 286)" }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "The name in the hero only." },
+      "headline": { "displayName": "Headline", "purpose": "Section titles from SectionHeader; 1.5rem on phones, 1.875rem from sm." },
+      "title": { "displayName": "Title", "purpose": "Row titles in data lists." },
+      "metric": { "displayName": "Metric", "purpose": "Live numbers in metric tiles and the hero node panel; tabular figures." },
+      "body": { "displayName": "Body", "purpose": "Running text and descriptions, max about 65ch." },
+      "label": { "displayName": "Label caps", "purpose": "Mono uppercase eyebrows, panel headers, metadata, system bar." }
+    },
+    "shadows": [
+      { "name": "dialog", "value": "0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)", "purpose": "Dialogs and the command palette only, over a 55% black scrim." },
+      { "name": "control-hint", "value": "0 1px 2px 0 rgb(0 0 0 / 0.05)", "purpose": "Near-invisible lift on outline buttons and inputs (shadcn default)." }
+    ],
+    "motion": [
+      { "name": "pulse-dot", "value": "pulse-dot 2s ease-in-out infinite", "purpose": "Live status dots only; motion-safe." },
+      { "name": "color-transition", "value": "color/background-color 150ms ease", "purpose": "Hover fills on rows, nav links, chips and buttons." },
+      { "name": "smooth-scroll", "value": "scroll-behavior: smooth", "purpose": "Anchor navigation, only with prefers-reduced-motion: no-preference." }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "md", "value": "768px" },
+      { "name": "lg", "value": "1024px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Inverted ink. At most one per view (the hero's Résumé).",
+      "html": "<button class=\"ds-btn-primary\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z\"/><path d=\"M14 2v4a2 2 0 0 0 2 2h4\"/><path d=\"M10 9H8\"/><path d=\"M16 13H8\"/><path d=\"M16 17H8\"/></svg>Résumé</button>",
+      "css": ".ds-btn-primary { display: inline-flex; align-items: center; gap: 8px; height: 36px; padding: 8px 16px; border: 0; border-radius: 4px; background: var(--foreground, oklch(0.21 0.006 286)); color: var(--background, oklch(0.985 0.002 247)); font: 500 14px/1 Geist, ui-sans-serif, system-ui, sans-serif; cursor: pointer; transition: background-color 150ms ease; } .ds-btn-primary:hover { background: color-mix(in oklch, var(--foreground, oklch(0.21 0.006 286)) 90%, transparent); } .ds-btn-primary:focus-visible { outline: 2px solid var(--ring, oklch(0.55 0.17 255)); outline-offset: 2px; }"
+    },
+    {
+      "name": "Outline Button",
+      "kind": "button",
+      "refersTo": "button-outline",
+      "description": "Secondary action next to the primary.",
+      "html": "<button class=\"ds-btn-outline\">Get in touch</button>",
+      "css": ".ds-btn-outline { display: inline-flex; align-items: center; height: 36px; padding: 8px 16px; border: 1px solid var(--border, oklch(0.92 0.004 286)); border-radius: 4px; background: var(--background, oklch(0.985 0.002 247)); color: var(--foreground, oklch(0.21 0.006 286)); font: 500 14px/1 Geist, ui-sans-serif, system-ui, sans-serif; box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05); cursor: pointer; transition: background-color 150ms ease; } .ds-btn-outline:hover { background: var(--surface-2, oklch(0.967 0.003 265)); } .ds-btn-outline:focus-visible { outline: 2px solid var(--ring, oklch(0.55 0.17 255)); outline-offset: 2px; }"
+    },
+    {
+      "name": "Text Input",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Strong-hairline stroke, focus ring in info blue.",
+      "html": "<input class=\"ds-input\" type=\"email\" placeholder=\"you@example.com\" aria-label=\"Email\">",
+      "css": ".ds-input { height: 36px; width: 280px; padding: 4px 12px; border: 1px solid var(--border-strong, oklch(0.87 0.006 286)); border-radius: 4px; background: transparent; color: var(--foreground, oklch(0.21 0.006 286)); font: 400 14px/1.5 Geist, ui-sans-serif, system-ui, sans-serif; box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05); outline: none; transition: box-shadow 150ms ease, border-color 150ms ease; } .ds-input::placeholder { color: var(--muted-foreground, oklch(0.48 0.016 286)); } .ds-input:focus-visible { border-color: var(--ring, oklch(0.55 0.17 255)); box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring, oklch(0.55 0.17 255)) 50%, transparent); }"
+    },
+    {
+      "name": "Status Pill",
+      "kind": "chip",
+      "refersTo": "status-pill-up",
+      "description": "Dot plus visible label on a status tint; the label carries the meaning.",
+      "html": "<span class=\"ds-pill\"><span class=\"ds-pill-dot\" aria-hidden=\"true\"></span>open to opportunities</span>",
+      "css": ".ds-pill { display: inline-flex; align-items: center; gap: 6px; padding: 2px 8px; border-radius: 9999px; background: var(--status-up-soft, oklch(0.96 0.04 150)); color: var(--status-up-fg, oklch(0.47 0.13 150)); font: 400 11px/16px 'Geist Mono', ui-monospace, monospace; letter-spacing: 0.06em; text-transform: uppercase; } .ds-pill-dot { width: 6px; height: 6px; border-radius: 9999px; background: var(--status-up, oklch(0.64 0.17 150)); } @media (prefers-reduced-motion: no-preference) { .ds-pill-dot { animation: ds-pulse 2s ease-in-out infinite; } } @keyframes ds-pulse { 0%,100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.45; transform: scale(0.8); } }"
+    },
+    {
+      "name": "Filter Chip",
+      "kind": "chip",
+      "refersTo": "chip",
+      "description": "Mono toggle chips; the active one is inverted ink.",
+      "html": "<div class=\"ds-chips\"><button class=\"ds-chip\" aria-pressed=\"true\">all</button><button class=\"ds-chip\" aria-pressed=\"false\">typescript</button><button class=\"ds-chip\" aria-pressed=\"false\">svelte</button></div>",
+      "css": ".ds-chips { display: flex; gap: 8px; } .ds-chip { padding: 4px 10px; border: 1px solid var(--border, oklch(0.92 0.004 286)); border-radius: 9999px; background: transparent; color: var(--muted-foreground, oklch(0.48 0.016 286)); font: 400 12px/16px 'Geist Mono', ui-monospace, monospace; cursor: pointer; transition: color 150ms ease, background-color 150ms ease; } .ds-chip:hover { color: var(--foreground, oklch(0.21 0.006 286)); } .ds-chip[aria-pressed='true'] { border-color: var(--foreground, oklch(0.21 0.006 286)); background: var(--foreground, oklch(0.21 0.006 286)); color: var(--background, oklch(0.985 0.002 247)); } .ds-chip:focus-visible { outline: 2px solid var(--ring, oklch(0.55 0.17 255)); outline-offset: 2px; }"
+    },
+    {
+      "name": "Panel with Service Rows",
+      "kind": "card",
+      "refersTo": "panel",
+      "description": "Flat hairline panel with a mono header and dense, hairline-divided service rows.",
+      "html": "<div class=\"ds-panel\"><div class=\"ds-panel-header\"><span>services</span><span>3 running</span></div><ul class=\"ds-rows\"><li><a class=\"ds-row\" href=\"#\"><span class=\"ds-dot\" aria-hidden=\"true\"></span><span class=\"ds-row-main\"><span class=\"ds-row-title\">bluebox</span><span class=\"ds-row-desc\">End-to-end encrypted chat on Svelte and Gun.js</span></span><span class=\"ds-row-meta\">svelte</span></a></li><li><a class=\"ds-row\" href=\"#\"><span class=\"ds-dot\" aria-hidden=\"true\"></span><span class=\"ds-row-main\"><span class=\"ds-row-title\">mc-status-page</span><span class=\"ds-row-desc\">All-in-one status page for a Minecraft server</span></span><span class=\"ds-row-meta\">typescript</span></a></li></ul></div>",
+      "css": ".ds-panel { width: 520px; overflow: hidden; border: 1px solid var(--border, oklch(0.92 0.004 286)); border-radius: 6px; background: var(--surface, oklch(1 0 0)); color: var(--foreground, oklch(0.21 0.006 286)); font-family: Geist, ui-sans-serif, system-ui, sans-serif; } .ds-panel-header, .ds-row-meta { font: 400 11px/16px 'Geist Mono', ui-monospace, monospace; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted-foreground, oklch(0.48 0.016 286)); } .ds-panel-header { display: flex; justify-content: space-between; min-height: 40px; align-items: center; padding: 8px 16px; border-bottom: 1px solid var(--border, oklch(0.92 0.004 286)); } .ds-rows { list-style: none; margin: 0; padding: 0; } .ds-rows li + li { border-top: 1px solid var(--border, oklch(0.92 0.004 286)); } .ds-row { display: flex; align-items: center; gap: 12px; padding: 12px 16px; color: inherit; text-decoration: none; transition: background-color 150ms ease; } .ds-row:hover, .ds-row:focus-visible { background: var(--surface-2, oklch(0.967 0.003 265)); outline: none; } .ds-dot { width: 8px; height: 8px; flex: none; border-radius: 9999px; background: var(--status-up, oklch(0.64 0.17 150)); } .ds-row-main { display: flex; flex-direction: column; min-width: 0; flex: 1; } .ds-row-title { font-weight: 500; } .ds-row-desc { font-size: 14px; color: var(--muted-foreground, oklch(0.48 0.016 286)); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }"
+    },
+    {
+      "name": "Navigation",
+      "kind": "nav",
+      "refersTo": "nav-link-active",
+      "description": "Mono wordmark plus muted pill links; the active link gets a surface-2 fill.",
+      "html": "<nav class=\"ds-nav\" aria-label=\"Main\"><span class=\"ds-wordmark\">itsashik<span>.dev</span></span><a href=\"#\">Work</a><a href=\"#\" aria-current=\"page\">Writing</a><a href=\"#\">Projects</a><a href=\"#\">Contact</a></nav>",
+      "css": ".ds-nav { display: flex; align-items: center; gap: 4px; height: 56px; padding: 0 16px; border-bottom: 1px solid var(--border, oklch(0.92 0.004 286)); font-family: Geist, ui-sans-serif, system-ui, sans-serif; } .ds-wordmark { margin-right: auto; font: 500 14px/1 'Geist Mono', ui-monospace, monospace; letter-spacing: -0.025em; color: var(--foreground, oklch(0.21 0.006 286)); } .ds-wordmark span { color: var(--muted-foreground, oklch(0.48 0.016 286)); } .ds-nav a { padding: 6px 12px; border-radius: 4px; font-size: 14px; color: var(--muted-foreground, oklch(0.48 0.016 286)); text-decoration: none; transition: color 150ms ease, background-color 150ms ease; } .ds-nav a:hover, .ds-nav a[aria-current='page'] { background: var(--surface-2, oklch(0.967 0.003 265)); color: var(--foreground, oklch(0.21 0.006 286)); } .ds-nav a:focus-visible { outline: 2px solid var(--ring, oklch(0.55 0.17 255)); outline-offset: 2px; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Homelab Status Page",
+    "overview": "The site is presented as the status page of a small, well-run homelab. Projects are services, writing is the incident log, experience is uptime, and skills are the inventory. The ink is quiet and the hairlines thin. Every number on the page is real, coming from GitHub sync or the CMS, so the dashboard reads as an instrument rather than a costume.\n\nThe UI is monochrome on purpose. Neutral surfaces, near-black (or near-white) ink and 1px hairlines carry the structure. The only colour on the page is status, and the five status colours have fixed meanings. Because colour is that scarce, a single green dot is enough to say \"live\". Density is moderate, like a tidy admin console: compact rows, small mono labels and generous section breaks, so long-form reading is still comfortable.\n\nThe metaphor organizes the site; it never stands in for meaning. Each dashboard term sits next to a plain-language title, and the actions people need (read, contact, open a project) use ordinary words.",
+    "keyCharacteristics": [
+      "Monochrome neutrals with a cool grey cast (hue 286) in both themes; the theme follows the system setting.",
+      "Five status colours (up, warn, down, info, idle), each a triple: dot, text (`-fg`) and tint (`-soft`).",
+      "Geist for words and Geist Mono for labels, metadata and numbers.",
+      "Flat 1px-bordered panels. Only dialogs cast a shadow.",
+      "Live data shown with tabular figures, status dots and muted-ink sparklines."
+    ],
+    "rules": [
+      { "name": "The Colour Means Something Rule", "body": "A hue appears only to report a state: up, warn, down, info or idle. No brand colour, no decorative accents, no coloured illustrations of UI.", "section": "colors" },
+      { "name": "The Label Carries It Rule", "body": "Status is never shown by colour alone. A dot comes with a visible label (StatusPill) or a screen-reader label (StatusDot `label`).", "section": "colors" },
+      { "name": "The Neutral Chart Rule", "body": "Data viz uses `ink`, `muted-ink` and `hairline-strong` only. Trends are muted ink and the current value is ink. Status colours are never series colours.", "section": "colors" },
+      { "name": "The Machine Voice Rule", "body": "Mono is for things a system would print: labels, metadata, measurements, identifiers and filter values. Words people read in sentences are always Geist sans.", "section": "typography" },
+      { "name": "The Tabular Rule", "body": "Every number that can change (counts, stars, commits, dates in rows) uses tabular figures so it doesn't jitter.", "section": "typography" },
+      { "name": "The Only Dialogs Float Rule", "body": "Dialogs are the only surfaces with a real shadow. Panels, tiles, cards and rows stay flat and rely on hairlines.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do keep every hue tied to a status. If a new element needs colour, it needs a state first.",
+      "Do pair every status dot with a visible or screen-reader label.",
+      "Do pull every number from GitHub sync or the CMS and set it in tabular figures.",
+      "Do pair dashboard vocabulary (eyebrow, panel header) with a plain-language title or action label.",
+      "Do separate sections and panels with 1px hairlines and tonal steps, not shadows.",
+      "Do run `tests/unit/tokens.test.ts` after changing any token. Every text/background pair must stay at WCAG AA in both themes.",
+      "Do gate any motion behind `motion-safe` / `prefers-reduced-motion`."
+    ],
+    "donts": [
+      "Don't introduce a brand or accent colour, gradients, or coloured series in charts.",
+      "Don't show status by colour alone.",
+      "Don't add shadows to panels, tiles, cards or rows. Only dialogs float.",
+      "Don't use mono for sentences people read. It is for labels, metadata, identifiers and numbers.",
+      "Don't invent metrics, uptime figures or service states. If the CMS has no status for a project, show none.",
+      "Don't let the metaphor rename an action into something obscure. \"Get in touch\" beats \"Open a ticket\"."
+    ]
+  }
+}
