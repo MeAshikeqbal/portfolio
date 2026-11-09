@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test"
-import { ABOUT_PAGES, ABOUT_PATHS } from "./about-state"
+import { ABOUT_PAGES, ABOUT_PATHS, sitemapLoc } from "./about-state"
 
 test.describe("/uses and /now before they're published", () => {
   test.skip(ABOUT_PAGES !== "unpublished", "ABOUT_PAGES isn't 'unpublished'")
@@ -14,6 +14,6 @@ test.describe("/uses and /now before they're published", () => {
 
   test("stay out of the sitemap", async ({ request }) => {
     const sitemap = await (await request.get("/sitemap.xml")).text()
-    for (const path of ABOUT_PATHS) expect(sitemap).not.toContain(path)
+    for (const path of ABOUT_PATHS) expect(sitemap).not.toContain(sitemapLoc(path))
   })
 })

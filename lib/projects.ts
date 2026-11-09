@@ -4,11 +4,12 @@ import { formatMonth } from "@/lib/format"
 /** Facts shown beside a project, skipping anything empty or zero. */
 export function projectMeta(project: Project): string[] {
   const gh = project.githubData
+  const pushed = formatMonth(gh?.pushedAt)
   return [
     gh?.language,
     gh?.stars ? `★ ${gh.stars}` : null,
     gh?.commits ? `${gh.commits} commits` : null,
-    gh?.pushedAt ? `pushed ${formatMonth(gh.pushedAt)}` : null,
+    pushed ? `pushed ${pushed}` : null,
   ].filter((item): item is string => Boolean(item))
 }
 
