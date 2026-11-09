@@ -1,27 +1,30 @@
-import { Roboto, Roboto_Mono } from 'next/font/google';
-import type { Metadata } from 'next';
-import "./globals.css";
-import { siteConfig } from '@/lib/site';
-import { SanityLive } from '@/sanity/lib/live';
-import { ThemeProvider } from "@/components/theme-provider";
-import { ToastProvider } from '@/components/ui/toast';
-import { Toaster } from '@/components/ui/toaster';
-import { BackToTop } from "@/components/back-to-top";
+import { Geist, Geist_Mono } from "next/font/google"
+import type { Metadata, Viewport } from "next"
+import "./globals.css"
+import { siteConfig } from "@/lib/site"
+import { Providers } from "@/components/providers"
 import { Analytics } from "@vercel/analytics/react"
 import { SpeedInsights } from "@vercel/speed-insights/next"
 
-const roboto = Roboto({
-  variable: "--font-roboto",
+const geistSans = Geist({
+  variable: "--font-geist-sans",
   subsets: ["latin"],
-  weight: ["300", "400", "500", "700"],
-  display: 'swap',
-});
+  display: "swap",
+})
 
-const robotoMono = Roboto_Mono({
-  variable: "--font-roboto-mono",
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
   subsets: ["latin"],
-  display: 'swap',
-});
+  display: "swap",
+})
+
+/** Matches --background in app/globals.css (browser UI tint on mobile). */
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#f9fafb" },
+    { media: "(prefers-color-scheme: dark)", color: "#0a0a0c" },
+  ],
+}
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
@@ -30,74 +33,60 @@ export const metadata: Metadata = {
     template: `%s | ${siteConfig.name}`,
   },
   description: siteConfig.description,
-  keywords: ['Ashik Eqbal', 'Software Engineer', 'Web Development', 'Portfolio', 'Blog'],
+  keywords: ["Ashik Eqbal", "Software Engineer", "Web Development", "Portfolio", "Blog"],
   authors: [{ name: siteConfig.name, url: siteConfig.url }],
   creator: siteConfig.name,
   openGraph: {
-    type: 'website',
+    type: "website",
     locale: siteConfig.locale,
     url: siteConfig.url,
     siteName: `${siteConfig.name} Portfolio`,
     title: siteConfig.title,
     description: siteConfig.description,
-    images: [
-      {
-        url: siteConfig.ogImage,
-        width: 1200,
-        height: 630,
-        alt: siteConfig.title,
-      },
-    ],
+    // Images come from the generated app/**/opengraph-image.tsx routes.
   },
   twitter: {
-    card: 'summary_large_image',
+    card: "summary_large_image",
     title: siteConfig.title,
     description: siteConfig.description,
-    images: [siteConfig.ogImage],
     creator: siteConfig.twitterHandle,
   },
   icons: {
     icon: [
-      { url: '/favicon.ico' },
-      { url: '/favicon-96x96.png', sizes: '96x96', type: 'image/png' },
+      { url: "/favicon.ico" },
+      { url: "/favicon-96x96.png", sizes: "96x96", type: "image/png" },
     ],
-    apple: [
-      { url: '/apple-touch-icon.png' },
-    ],
+    apple: [{ url: "/apple-touch-icon.png" }],
   },
-  manifest: '/site.webmanifest',
-};
+}
 
 export default function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode;
+  children: React.ReactNode
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning className={`${roboto.variable} ${robotoMono.variable}`}>
+    <html
+      lang="en"
+      suppressHydrationWarning
+      className={`${geistSans.variable} ${geistMono.variable}`}
+    >
       <head>
         {/* In <head> rather than metadata.alternates, which child pages' canonicals would override. */}
-        <link rel="alternate" type="application/rss+xml" title={`${siteConfig.name} - Blog RSS Feed`} href="/rss.xml" />
+        <link
+          rel="alternate"
+          type="application/rss+xml"
+          title={`${siteConfig.name} - Blog RSS Feed`}
+          href="/rss.xml"
+        />
       </head>
-      <body className="font-sans antialiased min-h-screen flex flex-col">
-        <ToastProvider>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
-            enableSystem
-            disableTransitionOnChange
-          >
-            <div className="flex-grow">
-            {children}
-            </div>
-            <BackToTop />
-          </ThemeProvider>
-          <Toaster />
-        </ToastProvider>
-        <SanityLive />
+      <body className="flex min-h-screen flex-col">
+        <Providers>
+          <div className="grow">{children}</div>
+        </Providers>
         <Analytics />
         <SpeedInsights />
       </body>
     </html>
-  );
+  )
 }

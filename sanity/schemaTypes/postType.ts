@@ -24,7 +24,8 @@ export const postType = defineType({
       name: "excerpt",
       type: "text",
       rows: 3,
-      description: "Short summary for cards, feeds and search results. Defaults to the start of the post.",
+      description:
+        "Short summary for cards, feeds and search results. Defaults to the start of the post.",
       validation: (rule) => rule.max(200),
     }),
     defineField({
@@ -88,4 +89,3 @@ export const postType = defineType({
     },
   },
 })
-

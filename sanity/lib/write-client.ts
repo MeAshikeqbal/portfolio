@@ -1,8 +1,8 @@
-import 'server-only'
+import "server-only"
 
-import { createClient } from 'next-sanity'
+import { createClient } from "next-sanity"
 
-import { apiVersion, dataset, projectId } from '../env'
+import { apiVersion, dataset, projectId } from "../env"
 
 /**
  * Authenticated client for mutations (contact form, GitHub sync).
