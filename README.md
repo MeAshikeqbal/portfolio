@@ -87,24 +87,27 @@ tests/unit, tests/e2e
   the generated defaults for posts and projects.
 - **Skill icons** are [Iconify](https://icon-sets.iconify.design) names (`logos:aws`,
   `mdi:security`) from the `logos`, `mdi`, `simple-icons` and `ri` sets.
-- **Availability badge.** Set `siteConfig.availability` in `lib/site.ts`.
+- **`/uses` and `/now`** are singletons under *Personal Info* in the Studio. Each page stays
+  a 404, and isn't linked from the footer, ⌘K palette or sitemap, until it has published
+  content.
+- **Draft previews.** Open *Presentation* in the Studio to edit with a live preview of the
+  real site, drafts included. This needs `SANITY_API_READ_TOKEN` (a Viewer token).
+- **Availability badge.** The hero badge comes from `siteConfig.availability` in `lib/site.ts`:
+  change the label, use `status: "warn"` for limited availability, or set it to `null` to hide it.
 
 ## Deployment checklist (Vercel)
 
-1. Set the environment variables from `.env.example` (Production and Preview).
+1. Set the environment variables from `.env.example` (Production and Preview). For draft
+   previews, create a **Viewer** token at sanity.io/manage → API → Tokens and set it as
+   `SANITY_API_READ_TOKEN`.
 2. In sanity.io/manage → API:
    - add `https://www.itsashik.dev` (and preview domains) as **CORS origins**, for live updates
    - add a **webhook** to `https://www.itsashik.dev/api/sanity-webhook` with header
      `Authorization: Bearer $SANITY_WEBHOOK_SECRET`
 3. The cron in `vercel.json` calls the GitHub sync daily; Vercel adds the `CRON_SECRET` header.
 
-## Ideas / not yet done
+## License
 
-- Draft mode + Sanity Presentation (visual editing). Needs a read token
-  (`SANITY_API_READ_TOKEN`) and the `next-sanity` draft-mode route.
-- `/uses` and `/now` pages as Sanity singletons.
-
-## Third-party assets
-
-The Geist fonts in `assets/fonts` (used by the generated share images) are under the SIL Open
-Font License; see `assets/fonts/OFL.txt`. Blog content © Ashik Eqbal.
+Code is released under the [MIT License](LICENSE). Blog posts, images and other site content are
+© Ashik Eqbal and not covered by it. The Geist fonts in `assets/fonts` (used by the generated
+share images) are under the SIL Open Font License; see `assets/fonts/OFL.txt`.
