@@ -1,4 +1,5 @@
 import Link from "next/link"
+import { LabNodeBadge, LabSummary } from "@/components/lab/lab-badges"
 
 export interface HomelabItem {
   _key: string
@@ -8,7 +9,9 @@ export interface HomelabItem {
 
 /**
  * The hero card's homelab rows: the first items of the /uses "Homelab" section (the query
- * caps them at five). Renders nothing until that section has named items.
+ * caps them at five). Renders nothing until that section has named items. Rows whose name
+ * matches a machine in the lab's heartbeat show its measured state; the header shows the
+ * summary ("3/3 up"), which is all phones see.
  */
 export function HomelabList({ items }: { items: HomelabItem[] | null | undefined }) {
   const homelab = (items ?? []).filter((item) => item.name?.trim())
@@ -17,7 +20,10 @@ export function HomelabList({ items }: { items: HomelabItem[] | null | undefined
   return (
     <div className="border-b">
       <div className="flex items-center justify-between px-4 pt-3 pb-3 label-caps sm:pb-0">
-        <span>homelab</span>
+        <span className="flex items-center gap-2">
+          homelab
+          <LabSummary />
+        </span>
         {/* The visible label is small; the padding gives it a 44px touch target. */}
         <Link
           href="/uses"
@@ -33,8 +39,11 @@ export function HomelabList({ items }: { items: HomelabItem[] | null | undefined
           <li key={item._key} className="flex items-baseline gap-3 py-1 text-sm">
             <span className="shrink-0 font-medium">{item.name}</span>
             {item.description && (
-              <span className="truncate text-muted-foreground">{item.description}</span>
+              <span className="min-w-0 flex-1 truncate text-muted-foreground">
+                {item.description}
+              </span>
             )}
+            {item.name && <LabNodeBadge name={item.name} className="ml-auto" />}
           </li>
         ))}
       </ul>
