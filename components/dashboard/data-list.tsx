@@ -1,7 +1,7 @@
 import { ArrowUpRight } from "lucide-react"
 import Link from "next/link"
 import type { ReactNode } from "react"
-import type { Status } from "@/lib/status"
+import { STATUS_TEXT_CLASS, type Status } from "@/lib/status"
 import { cn } from "@/lib/utils"
 import { StatusDot } from "./status-dot"
 
@@ -15,7 +15,8 @@ interface DataRowProps {
   href?: string
   status?: { status: Status; label: string }
   description?: ReactNode
-  /** Secondary facts (language, date…). Inline on wide screens, under the title on phones. */
+  /** Secondary facts (language, date…). Inline on wide screens, under the title on phones;
+   * the status label, when there is one, always comes first. */
   meta?: ReactNode[]
   /** Right-aligned value, e.g. a metric or a sparkline. */
   value?: ReactNode
@@ -32,11 +33,19 @@ export function DataRow({
   className,
 }: DataRowProps) {
   const external = Boolean(href && !href.startsWith("/"))
+  // The Label Carries It: the status is spelled out in the row's metadata, in its own colour,
+  // so the dot is only a scanning aid (and screen readers hear the word, once).
+  const facts: ReactNode[] = status
+    ? [
+        <span key="status" className={STATUS_TEXT_CLASS[status.status]}>
+          {status.label}
+        </span>,
+        ...meta,
+      ]
+    : meta
   const body = (
     <>
-      {status && (
-        <StatusDot status={status.status} label={status.label} className="mt-1.5 sm:mt-0" />
-      )}
+      {status && <StatusDot status={status.status} className="mt-1.5 sm:mt-0" />}
       <div className="min-w-0 flex-1">
         {/* Titles wrap rather than truncate: a cut-off name is no name at all. */}
         <div className="font-medium text-pretty">
@@ -55,17 +64,17 @@ export function DataRow({
           // ~80 characters at text-sm: a readable measure even on wide rows.
           <p className="line-clamp-1 max-w-md text-sm text-muted-foreground">{description}</p>
         )}
-        {meta.length > 0 && (
+        {facts.length > 0 && (
           <div className="mt-1 flex flex-wrap gap-x-3 label-caps sm:hidden">
-            {meta.map((item, i) => (
+            {facts.map((item, i) => (
               <span key={i}>{item}</span>
             ))}
           </div>
         )}
       </div>
-      {meta.length > 0 && (
+      {facts.length > 0 && (
         <div className="hidden shrink-0 items-center gap-4 label-caps sm:flex">
-          {meta.map((item, i) => (
+          {facts.map((item, i) => (
             <span key={i}>{item}</span>
           ))}
         </div>

@@ -6,12 +6,12 @@ import { Sparkline } from "@/components/dashboard/sparkline"
 import { StatusPill } from "@/components/dashboard/status-pill"
 import { LinkPreview } from "@/components/ui/link-preview"
 import type { Project } from "@/lib/api"
-import { projectHref, projectMeta, shortLicense } from "@/lib/projects"
+import { hasActivity, projectHref, projectMeta, shortLicense } from "@/lib/projects"
 import { projectStatus } from "@/lib/status"
 
 /** A project as a dashboard panel: status, title, description, metrics and links. */
-export function ProjectPanel({ project }: { project: Project }) {
-  const status = projectStatus(project.status)
+export function ProjectPanel({ project, now }: { project: Project; now?: string }) {
+  const status = projectStatus(project, now ? new Date(now) : undefined)
   const weekly = project.githubData?.weeklyCommits ?? []
   const title = project.title ?? "Untitled project"
   const detailsHref = project.slug ? projectHref(project) : undefined
@@ -47,7 +47,7 @@ export function ProjectPanel({ project }: { project: Project }) {
               <span key={item}>{item}</span>
             ))}
           </p>
-          {weekly.length > 1 && <Sparkline values={weekly} label={`${title} commits per week`} />}
+          {hasActivity(weekly) && <Sparkline values={weekly} label={`${title} commits per week`} />}
         </div>
       </div>
       <div className="flex items-center gap-4 border-t px-4 py-2.5 text-sm">

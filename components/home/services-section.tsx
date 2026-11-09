@@ -6,18 +6,16 @@ import { Sparkline } from "@/components/dashboard/sparkline"
 import { TraceOnView } from "@/components/dashboard/trace-on-view"
 import { getProjects } from "@/lib/api"
 import { formatDate } from "@/lib/format"
-import { projectHref, projectMeta } from "@/lib/projects"
+import { byActivity, hasActivity, projectHref, projectMeta } from "@/lib/projects"
 import { projectStatus } from "@/lib/status"
 
 export async function ServicesSection() {
   const projects = await getProjects()
   if (projects.length === 0) return null
 
-  const selected = [
-    ...projects.filter((p) => p.featured),
-    ...projects.filter((p) => !p.featured),
-  ].slice(0, 6)
-  const hasTrends = selected.some((p) => (p.githubData?.weeklyCommits?.length ?? 0) > 1)
+  // The six most recently pushed: the panel is an instrument, so it shows what's moving.
+  const selected = byActivity(projects).slice(0, 6)
+  const hasTrends = selected.some((p) => hasActivity(p.githubData?.weeklyCommits))
   // Newest GitHub sync across all projects; absent until the sync has run.
   const syncedAt = projects
     .map((p) => p.githubData?.syncedAt)
@@ -56,11 +54,12 @@ export async function ServicesSection() {
                     key={project._id}
                     href={projectHref(project)}
                     title={project.title ?? "Untitled project"}
-                    status={projectStatus(project.status) ?? undefined}
+                    status={projectStatus(project) ?? undefined}
                     description={project.description}
                     meta={projectMeta(project)}
                     value={
-                      weekly.length > 1 ? (
+                      // Only draw a trend that has something in it; the push date is in the meta.
+                      hasActivity(weekly) ? (
                         <Sparkline
                           values={weekly}
                           label={`${project.title} commits per week, last ${weekly.length} weeks`}

@@ -1,6 +1,13 @@
 import { describe, expect, it } from "vitest"
 import type { Project } from "@/lib/api"
-import { projectHref, projectMeta, projectTags, shortLicense } from "@/lib/projects"
+import {
+  byActivity,
+  hasActivity,
+  projectHref,
+  projectMeta,
+  projectTags,
+  shortLicense,
+} from "@/lib/projects"
 
 function project(overrides: Partial<Project> = {}): Project {
   return {
@@ -81,5 +88,34 @@ describe("shortLicense", () => {
     expect(shortLicense("Some Custom License")).toBe("Some Custom License")
     expect(shortLicense("Not specified")).toBeNull()
     expect(shortLicense(null)).toBeNull()
+  })
+})
+
+describe("hasActivity", () => {
+  it("only reports a series with at least one commit", () => {
+    expect(hasActivity([0, 0, 0, 0])).toBe(false)
+    expect(hasActivity([0, 0, 2, 0])).toBe(true)
+    expect(hasActivity([3])).toBe(false)
+    expect(hasActivity(null)).toBe(false)
+  })
+})
+
+describe("byActivity", () => {
+  const p = (id: string, pushedAt: string | null, status: Project["status"] = "maintained") =>
+    project({
+      _id: id,
+      status,
+      githubData: pushedAt ? ({ pushedAt } as Project["githubData"]) : null,
+    })
+
+  it("orders by last push, with unmeasured and archived projects last", () => {
+    const ordered = byActivity([
+      p("old", "2025-04-01T00:00:00Z"),
+      p("none", null),
+      p("archived-recent", "2026-11-01T00:00:00Z", "archived"),
+      p("new", "2026-11-09T00:00:00Z"),
+      p("mid", "2026-03-01T00:00:00Z"),
+    ])
+    expect(ordered.map((x) => x._id)).toEqual(["new", "mid", "old", "none", "archived-recent"])
   })
 })

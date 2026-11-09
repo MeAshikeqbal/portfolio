@@ -15,6 +15,10 @@ export const metadata: Metadata = {
 export default async function ProjectsPage() {
   const projects = await getProjects()
 
+  // Render time, passed down so the client re-renders statuses (which depend on push age)
+  // exactly as the server did: no hydration mismatch when a project crosses into "dormant".
+  const now = new Date().toISOString()
+
   return (
     <main>
       <Section className="pt-12 sm:pt-16">
@@ -30,13 +34,13 @@ export default async function ProjectsPage() {
               <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {projects.map((project) => (
                   <li key={project._id}>
-                    <ProjectPanel project={project} />
+                    <ProjectPanel project={project} now={now} />
                   </li>
                 ))}
               </ul>
             }
           >
-            <ProjectsBrowser projects={projects} />
+            <ProjectsBrowser projects={projects} now={now} />
           </Suspense>
         </Container>
       </Section>

@@ -45,7 +45,7 @@ export default async function Image({ params }: { params: Promise<{ slug: string
     )
   }
 
-  const status = projectStatus(project.status)
+  const status = projectStatus(project)
   const gh = project.githubData
   const footer = [
     gh?.language,

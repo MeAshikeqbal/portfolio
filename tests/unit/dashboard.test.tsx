@@ -7,17 +7,49 @@ import { StatusPill } from "@/components/dashboard/status-pill"
 import { projectStatus } from "@/lib/status"
 
 describe("projectStatus", () => {
+  const now = new Date("2026-11-10T00:00:00Z")
+  const daysAgo = (days: number) => new Date(now.getTime() - days * 86_400_000).toISOString()
+
   it.each([
-    ["active", "up", "live"],
-    ["maintained", "info", "maintained"],
+    ["active", "up", "active"],
+    ["maintained", "idle", "maintained"],
     ["archived", "idle", "archived"],
-  ])("maps %s to %s", (value, status, label) => {
-    expect(projectStatus(value)).toEqual({ status, label })
+  ])("maps a recently pushed %s project to %s %s", (value, status, label) => {
+    const project = { status: value, githubData: { pushedAt: daysAgo(10) } }
+    expect(projectStatus(project, now)).toEqual({ status, label })
+  })
+
+  it("lets measured inactivity win over the CMS: no push for 180+ days is dormant", () => {
+    for (const value of ["active", "maintained"]) {
+      expect(projectStatus({ status: value, githubData: { pushedAt: daysAgo(181) } }, now)).toEqual(
+        { status: "idle", label: "dormant" },
+      )
+      expect(
+        projectStatus({ status: value, githubData: { pushedAt: daysAgo(179) } }, now)?.label,
+      ).not.toBe("dormant")
+    }
+    // Archived stays archived, however old.
+    expect(
+      projectStatus({ status: "archived", githubData: { pushedAt: daysAgo(900) } }, now)?.label,
+    ).toBe("archived")
+  })
+
+  it("falls back to the CMS when there is nothing measured", () => {
+    expect(projectStatus({ status: "active", githubData: null }, now)?.label).toBe("active")
+    expect(
+      projectStatus({ status: "maintained", githubData: { pushedAt: "garbage" } }, now)?.label,
+    ).toBe("maintained")
+  })
+
+  it("never uses the link/info blue for a project", () => {
+    for (const value of ["active", "maintained", "archived"]) {
+      expect(projectStatus({ status: value }, now)?.status).not.toBe("info")
+    }
   })
 
   it("claims nothing when the status is unset", () => {
-    expect(projectStatus(null)).toBeNull()
-    expect(projectStatus(undefined)).toBeNull()
+    expect(projectStatus({ status: null }, now)).toBeNull()
+    expect(projectStatus({}, now)).toBeNull()
   })
 })
 
@@ -69,13 +101,19 @@ describe("DataRow", () => {
         <DataRow
           title="arogify"
           href="/projects/arogify"
-          status={{ status: "up", label: "live" }}
+          status={{ status: "up", label: "active" }}
           meta={["TypeScript"]}
         />
       </DataList>,
     )
     expect(screen.getByRole("link")).toHaveAttribute("href", "/projects/arogify")
-    expect(screen.getByText("live")).toHaveClass("sr-only")
+    // The status is a visible word in its status colour, first in the meta, never colour alone.
+    const labels = screen.getAllByText("active")
+    expect(labels).toHaveLength(2)
+    for (const label of labels) {
+      expect(label).not.toHaveClass("sr-only")
+      expect(label).toHaveClass("text-status-up-fg")
+    }
     // Meta renders twice: stacked for phones, inline for wider screens.
     expect(screen.getAllByText("TypeScript")).toHaveLength(2)
   })
