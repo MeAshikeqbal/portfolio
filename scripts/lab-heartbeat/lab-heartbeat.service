@@ -1,0 +1,17 @@
+[Unit]
+Description=Send the homelab heartbeat to itsashik.dev
+Wants=network-online.target
+After=network-online.target pve-cluster.service
+
+[Service]
+Type=oneshot
+EnvironmentFile=/etc/lab-heartbeat.env
+ExecStart=/usr/local/bin/lab-heartbeat
+# Unprivileged: a throwaway user that can only read Proxmox's CA (group www-data).
+DynamicUser=yes
+SupplementaryGroups=www-data
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+RestrictAddressFamilies=AF_INET AF_INET6

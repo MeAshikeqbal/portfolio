@@ -2,6 +2,7 @@ import { ArrowUpRight } from "lucide-react"
 import { Container, Section } from "@/components/dashboard/layout"
 import { Panel, PanelHeader } from "@/components/dashboard/panel"
 import { SectionHeader } from "@/components/dashboard/section-header"
+import { LabNodeBadge, LabSummary } from "@/components/lab/lab-badges"
 import { SkillIcon } from "@/components/skill-icon"
 import type { USES_QUERY_RESULT } from "@/sanity.types"
 import { formatDate } from "@/lib/format"
@@ -47,7 +48,13 @@ export function UsesView({ uses }: { uses: Uses }) {
               <Panel key={section._key}>
                 <PanelHeader
                   title={section.title}
-                  meta={<span>{section.items.length} items</span>}
+                  meta={
+                    <>
+                      {/* The homelab's measured state, once the lab has sent a heartbeat. */}
+                      {isHomelab(section.title) && <LabSummary />}
+                      <span>{section.items.length} items</span>
+                    </>
+                  }
                 />
                 <ul className="divide-y">
                   {section.items.map((item) => (
@@ -66,7 +73,7 @@ export function UsesView({ uses }: { uses: Uses }) {
                           />
                         </span>
                       )}
-                      <div className="min-w-0">
+                      <div className="min-w-0 flex-1">
                         {item.url ? (
                           <a
                             href={item.url}
@@ -84,6 +91,9 @@ export function UsesView({ uses }: { uses: Uses }) {
                           <p className="text-sm text-muted-foreground">{item.description}</p>
                         )}
                       </div>
+                      {isHomelab(section.title) && item.name && (
+                        <LabNodeBadge name={item.name} className="mt-1" />
+                      )}
                     </li>
                   ))}
                 </ul>
@@ -94,4 +104,9 @@ export function UsesView({ uses }: { uses: Uses }) {
       </Section>
     </main>
   )
+}
+
+/** The section the hero also reads (title starts with "Homelab"). */
+function isHomelab(title: string | null | undefined): boolean {
+  return /^homelab/i.test(title ?? "")
 }
