@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from "react"
 import { useWorkspace } from "sanity"
 import { Link } from "sanity/router"
 
-import { iconUrl } from "../../lib/icons"
+import { iconExists } from "../lib/icon-check"
 import { inboxDatasetName, inboxMessageHref } from "../inbox/dataset"
 import {
   dedupeRecent,
@@ -171,16 +171,7 @@ function useBrokenIcons(skills: IconDoc[] | undefined): IconDoc[] | undefined {
     if (!skills) return
     let cancelled = false
     Promise.all(
-      skills.map(async (skill) => {
-        const url = iconUrl(skill.icon)
-        if (!url) return skill
-        try {
-          const response = await fetch(url, { method: "HEAD" })
-          return response.headers.get("x-icon-found") === "0" ? skill : null
-        } catch {
-          return null
-        }
-      }),
+      skills.map(async (skill) => ((await iconExists(skill.icon)) === false ? skill : null)),
     ).then((results) => {
       if (!cancelled) setBroken(results.filter((skill): skill is IconDoc => skill !== null))
     })

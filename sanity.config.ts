@@ -24,6 +24,10 @@ import { InboxIcon, RssIcon } from "lucide-react"
 import { media } from "sanity-plugin-media"
 import { codeInput } from "@sanity/code-input"
 
+/** One-off documents with fixed ids (see sanity/structure.ts): no create, delete or duplicate. */
+const SINGLETONS = new Set(["cv", "uses", "now"])
+const SINGLETON_ACTIONS = new Set(["publish", "discardChanges", "restore"])
+
 /** Shared look for both workspaces. */
 const shared = {
   projectId,
@@ -63,6 +67,16 @@ export default defineConfig([
       media(),
       codeInput(),
     ],
+    document: {
+      newDocumentOptions: (prev, { creationContext }) =>
+        creationContext.type === "global"
+          ? prev.filter((item) => !SINGLETONS.has(item.templateId))
+          : prev,
+      actions: (prev, { schemaType }) =>
+        SINGLETONS.has(schemaType)
+          ? prev.filter(({ action }) => action && SINGLETON_ACTIONS.has(action))
+          : prev,
+    },
     // Home dashboard first (the Studio opens on the first tool); Vision for admins only.
     tools: (prev, { currentUser }) => [
       dashboardTool,

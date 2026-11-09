@@ -26,12 +26,28 @@ export function resolveLanguage(language: string | null | undefined): BundledLan
  * Highlights code to HTML at build/render time. Both themes are emitted as CSS variables
  * (`--shiki-light` / `--shiki-dark`) and app/globals.css picks one per theme, so there is no
  * client-side highlighting and no flash when switching themes. Shiki escapes the code.
+ *
+ * `highlightLines` (1-based, as stored by Sanity's code input) get a `highlighted` class.
  */
-export async function highlight(code: string, language?: string | null): Promise<string> {
+export async function highlight(
+  code: string,
+  language?: string | null,
+  { highlightLines = [] }: { highlightLines?: number[] } = {},
+): Promise<string> {
+  const marked = new Set(highlightLines)
   return codeToHtml(code, {
     lang: resolveLanguage(language),
     // The "-default" (Primer) variants meet WCAG AA contrast on our code background.
     themes: { light: "github-light-default", dark: "github-dark-default" },
     defaultColor: false,
+    transformers: marked.size
+      ? [
+          {
+            line(node, line) {
+              if (marked.has(line)) this.addClassToHast(node, "highlighted")
+            },
+          },
+        ]
+      : [],
   })
 }

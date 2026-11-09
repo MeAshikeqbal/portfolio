@@ -284,3 +284,15 @@
 .light .code-block span {
   color: var(--shiki-light);
 }
+
+/* Lines marked in the CMS: full-width tint with an accent edge. */
+.code-block .line.highlighted {
+  display: inline-block;
+  min-width: calc(100% + 2rem);
+  margin-inline: -1rem;
+  padding-inline: calc(1rem - 2px) 1rem;
+  border-left: 2px solid var(--status-info);
+  /* The page background sits further from the syntax colours than the panel does (lighter in
+     light mode, darker in dark mode), so highlighting never lowers text contrast. */
+  background: color-mix(in oklch, var(--status-info) 4%, var(--background));
+}

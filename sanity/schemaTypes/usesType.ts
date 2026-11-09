@@ -1,6 +1,8 @@
 import { DesktopIcon } from "@sanity/icons/Desktop"
 import { defineArrayMember, defineField, defineType } from "sanity"
 
+import { IconInput, validateIcon } from "../components/icon-input"
+
 /** Singleton behind /uses: the hardware, software and services you use. */
 export const usesType = defineType({
   name: "uses",
@@ -44,11 +46,14 @@ export const usesType = defineType({
                     defineField({ name: "url", title: "Link", type: "url" }),
                     defineField({
                       name: "icon",
-                      title: "Icon (Iconify name)",
+                      title: "Icon",
                       type: "string",
                       description: "Optional, e.g. logos:visual-studio-code or mdi:server.",
-                      validation: (rule) =>
+                      components: { input: IconInput },
+                      validation: (rule) => [
                         rule.regex(/^[a-z0-9-]+:[a-z0-9-]+$/, { name: "Iconify name" }),
+                        rule.custom(validateIcon).warning(),
+                      ],
                     }),
                   ],
                   preview: { select: { title: "name", subtitle: "description" } },
