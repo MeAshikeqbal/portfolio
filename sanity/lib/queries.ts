@@ -150,5 +150,6 @@ export const COMMAND_INDEX_QUERY = defineQuery(`{
   "projects": *[_type == "project" && ${published}] | order(coalesce(order, 999) asc, _createdAt desc) {
     _id, title, "slug": slug.current, url, github
   },
-  "cvUrl": *[_type == "cv"][0].cvFile.asset->url
+  // Only whether a CV exists: the file itself is served from /resume.pdf.
+  "hasCv": defined(*[_type == "cv"][0].cvFile.asset)
 }`)

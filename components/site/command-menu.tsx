@@ -171,13 +171,13 @@ export function CommandMenu({ index, className }: { index: CommandIndex; classNa
             >
               Copy link to this page
             </Item>
-            {index.cvUrl && (
+            {index.hasCv && (
               <Item
                 icon={<FileDown />}
-                onSelect={() => visit(index.cvUrl!)}
+                onSelect={() => visit("/resume.pdf")}
                 keywords={["cv", "resume", "download"]}
               >
-                Download résumé
+                Open résumé
               </Item>
             )}
             <Item

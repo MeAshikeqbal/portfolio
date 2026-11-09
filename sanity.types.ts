@@ -794,7 +794,7 @@ export type SITEMAP_QUERY_RESULT = {
 
 // Source: sanity/lib/queries.ts
 // Variable: COMMAND_INDEX_QUERY
-// Query: {  "posts": *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current)] | order(publishedAt desc) {    _id, title, "slug": slug.current, "topics": categories[]->title  },  "projects": *[_type == "project" && !(_id in path("drafts.**"))] | order(coalesce(order, 999) asc, _createdAt desc) {    _id, title, "slug": slug.current, url, github  },  "cvUrl": *[_type == "cv"][0].cvFile.asset->url}
+// Query: {  "posts": *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current)] | order(publishedAt desc) {    _id, title, "slug": slug.current, "topics": categories[]->title  },  "projects": *[_type == "project" && !(_id in path("drafts.**"))] | order(coalesce(order, 999) asc, _createdAt desc) {    _id, title, "slug": slug.current, url, github  },  // Only whether a CV exists: the file itself is served from /resume.pdf.  "hasCv": defined(*[_type == "cv"][0].cvFile.asset)}
 export type COMMAND_INDEX_QUERY_RESULT = {
   posts: Array<{
     _id: string
@@ -809,7 +809,7 @@ export type COMMAND_INDEX_QUERY_RESULT = {
     url: string | null
     github: string | null
   }>
-  cvUrl: string | null
+  hasCv: false | true
 }
 
 // Query TypeMap
@@ -830,7 +830,7 @@ declare global {
     '\n  *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current)] | order(publishedAt desc) {\n    title,\n    "slug": slug.current,\n    publishedAt,\n    _updatedAt,\n    "excerpt": coalesce(excerpt, array::join(string::split(pt::text(body[_type == "block" && style == "normal"]), "")[0...200], "")),\n    author->{ name },\n    "categories": categories[]->title,\n    "image": mainImage.asset->{ url, "mimeType": mimeType }\n  }\n': FEED_POSTS_QUERY_RESULT
     '\n  *[_type == "project" && defined(github)] { _id, title, github }\n': GITHUB_PROJECTS_QUERY_RESULT
     '{\n  "posts": *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && seo.noIndex != true]\n    | order(publishedAt desc) { "slug": slug.current, _updatedAt },\n  "projects": *[_type == "project" && !(_id in path("drafts.**")) && defined(slug.current) && seo.noIndex != true]\n    { "slug": slug.current, _updatedAt }\n}': SITEMAP_QUERY_RESULT
-    '{\n  "posts": *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current)] | order(publishedAt desc) {\n    _id, title, "slug": slug.current, "topics": categories[]->title\n  },\n  "projects": *[_type == "project" && !(_id in path("drafts.**"))] | order(coalesce(order, 999) asc, _createdAt desc) {\n    _id, title, "slug": slug.current, url, github\n  },\n  "cvUrl": *[_type == "cv"][0].cvFile.asset->url\n}': COMMAND_INDEX_QUERY_RESULT
+    '{\n  "posts": *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current)] | order(publishedAt desc) {\n    _id, title, "slug": slug.current, "topics": categories[]->title\n  },\n  "projects": *[_type == "project" && !(_id in path("drafts.**"))] | order(coalesce(order, 999) asc, _createdAt desc) {\n    _id, title, "slug": slug.current, url, github\n  },\n  // Only whether a CV exists: the file itself is served from /resume.pdf.\n  "hasCv": defined(*[_type == "cv"][0].cvFile.asset)\n}': COMMAND_INDEX_QUERY_RESULT
   }
 }
 // Lets @sanity/client releases that predate the global registry read it too

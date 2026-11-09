@@ -52,6 +52,10 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  async redirects() {
+    // Short, shareable alias for the CV served at /resume.pdf.
+    return [{ source: "/resume", destination: "/resume.pdf", permanent: false }]
+  },
   async headers() {
     return [
       { source: "/:path*", headers: securityHeaders },
