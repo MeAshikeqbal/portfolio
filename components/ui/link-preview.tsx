@@ -4,20 +4,8 @@ import Image from "next/image"
 import { HoverCard } from "radix-ui"
 import { useState, type ReactNode } from "react"
 import { Skeleton } from "@/components/ui/skeleton"
+import { screenshotUrl } from "@/lib/screenshot"
 import { cn } from "@/lib/utils"
-
-/** Viewport the target page is rendered at before cropping and scaling. */
-const VIEWPORT_WIDTH = 1280
-
-/**
- * thum.io screenshot of a page's first screen, cropped to the preview's aspect ratio and
- * rendered at 2× for sharp hover cards. Keyless free tier; next/image caches each result, so
- * repeat hovers don't reach thum.io again.
- */
-export function screenshotUrl(url: string, width: number, height: number): string {
-  const crop = Math.round((VIEWPORT_WIDTH * height) / width)
-  return `https://image.thum.io/get/noanimate/viewportWidth/${VIEWPORT_WIDTH}/width/${width * 2}/crop/${crop}/${url}`
-}
 
 interface LinkPreviewProps {
   url: string
@@ -42,6 +30,7 @@ export function LinkPreview({
 }: LinkPreviewProps) {
   // A first capture takes a second or two: show a skeleton until the image arrives.
   const [state, setState] = useState<"loading" | "loaded" | "failed">("loading")
+  const src = screenshotUrl(url, width, height)
   let host = url
   try {
     host = new URL(url).hostname
@@ -75,13 +64,13 @@ export function LinkPreview({
               <div className="absolute inset-0 grid place-items-center">
                 <Skeleton className="absolute inset-0" />
                 <span role="status" className="relative label-caps">
-                  {state === "failed" ? "preview unavailable" : "capturing screenshot…"}
+                  {state === "failed" || !src ? "preview unavailable" : "capturing screenshot…"}
                 </span>
               </div>
             )}
-            {state !== "failed" && (
+            {state !== "failed" && src && (
               <Image
-                src={screenshotUrl(url, width, height)}
+                src={src}
                 width={width}
                 height={height}
                 quality={60}
