@@ -122,7 +122,8 @@ export default async function PostPage({ params }: Props) {
                   ))}
                 </ul>
               )}
-              <h1 className="mt-2 max-w-3xl text-[2rem] leading-tight font-semibold tracking-tight text-balance sm:mt-3 sm:text-5xl">
+              {/* On the type scale: the headline step (1.875rem) on phones, 3rem from sm. */}
+              <h1 className="mt-2 max-w-3xl text-3xl leading-tight font-semibold tracking-tight text-balance sm:mt-3 sm:text-5xl">
                 {title}
               </h1>
               {post.excerpt && (

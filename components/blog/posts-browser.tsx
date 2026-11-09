@@ -111,7 +111,9 @@ function PostRow({ post }: { post: PostCard }) {
           sizes="160px"
           placeholder={post.lqip ? "blur" : "empty"}
           blurDataURL={post.lqip ?? undefined}
-          className="hidden aspect-[8/5] w-40 shrink-0 rounded-md border object-cover sm:block"
+          // Greyscale until the row is hovered or focused: cover art carries no colour at rest,
+          // so the list stays a log and colour stays a status signal.
+          className="hidden aspect-[8/5] w-40 shrink-0 rounded-md border object-cover grayscale transition-[filter] duration-300 group-hover:grayscale-0 group-focus-visible:grayscale-0 motion-reduce:transition-none sm:block"
         />
       )}
       <div className="min-w-0 flex-1">

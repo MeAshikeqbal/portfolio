@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button"
 import { getProject, getProjectSlugs } from "@/lib/api"
 import { formatMonth } from "@/lib/format"
 import { absoluteUrl } from "@/lib/site"
+import { hasActivity } from "@/lib/projects"
 import { projectStatus } from "@/lib/status"
 import { breadcrumbSchema, jsonLdGraph, projectSchema } from "@/lib/structured-data"
 import { urlFor } from "@/sanity/lib/image"
@@ -58,7 +59,7 @@ export default async function ProjectPage({ params }: Props) {
   const liveShot =
     !project.mainImage?.asset && project.url ? screenshotUrl(project.url, 896, 560) : null
 
-  const status = projectStatus(project.status)
+  const status = projectStatus(project)
   const gh = project.githubData
   const weekly = gh?.weeklyCommits ?? []
   const title = project.title ?? "Untitled project"
@@ -126,7 +127,7 @@ export default async function ProjectPage({ params }: Props) {
                 value={gh.commits ?? "—"}
                 hint="past year"
                 trend={
-                  weekly.length > 1 ? (
+                  hasActivity(weekly) ? (
                     <Sparkline values={weekly} label={`${title} commits per week`} />
                   ) : undefined
                 }

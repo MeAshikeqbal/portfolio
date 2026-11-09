@@ -17,8 +17,12 @@ describe("formatting", () => {
 describe("isCurrentPeriod", () => {
   const now = new Date("2026-11-09T00:00:00Z")
   it.each([
-    ["2022 - 2026", true],
+    // A range that ends this year is finished (the degree's green dot was a false claim).
+    ["2022 - 2026", false],
+    ["2022 - 2027", true],
+    // A single year is when it started: still ongoing.
     ["2026", true],
+    ["2025", false],
     ["2024 – present", true],
     ["2018 - 2022", false],
     ["", false],

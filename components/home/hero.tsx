@@ -49,6 +49,7 @@ export async function Hero() {
                 {/* Served from our own domain (app/resume.pdf/route.ts), not the Sanity CDN. */}
                 <a href="/resume.pdf" target="_blank" rel="noopener">
                   <FileText /> Résumé
+                  <span className="sr-only"> (PDF, opens in a new tab)</span>
                 </a>
               </Button>
             )}

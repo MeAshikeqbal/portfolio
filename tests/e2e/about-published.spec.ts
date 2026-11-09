@@ -24,13 +24,17 @@ test.describe("/uses and /now once published", () => {
     for (const path of ABOUT_PATHS) expect(sitemap).toContain(sitemapLoc(path))
   })
 
-  test("feed the hero's homelab list", async ({ page }) => {
+  test("feed the hero's homelab list", async ({ page, isMobile }) => {
     await page.goto("/")
     const hero = page.locator("#home")
     await expect(hero.getByRole("link", { name: "full setup" })).toHaveAttribute("href", "/uses")
-    const count = await hero.getByRole("list", { name: "Homelab" }).getByRole("listitem").count()
+    const list = hero.getByRole("list", { name: "Homelab", includeHidden: true })
+    const count = await list.getByRole("listitem", { includeHidden: true }).count()
     expect(count).toBeGreaterThanOrEqual(1)
     expect(count).toBeLessThanOrEqual(5)
+    // Phones get the header and link only, so Writing starts inside the first screen.
+    if (isMobile) await expect(list).toBeHidden()
+    else await expect(list).toBeVisible()
   })
 
   test("are in the command menu", async ({ page }) => {

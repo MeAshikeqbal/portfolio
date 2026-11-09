@@ -48,3 +48,29 @@ export function projectTags(project: Project): string[] {
     ),
   ]
 }
+
+/** Whether a weekly commit series has anything to draw: a flat zero line reports nothing. */
+export function hasActivity(weekly: readonly number[] | null | undefined): weekly is number[] {
+  return Array.isArray(weekly) && weekly.length > 1 && weekly.some((value) => value > 0)
+}
+
+/**
+ * Most recently pushed first, so a short list shows what's actually moving. Archived
+ * projects and projects without GitHub data go last; ties keep their CMS order.
+ */
+export function byActivity<T extends Pick<Project, "status" | "githubData">>(projects: T[]): T[] {
+  const pushed = (p: T) => {
+    const time = p.githubData?.pushedAt ? Date.parse(p.githubData.pushedAt) : NaN
+    return Number.isNaN(time) ? -Infinity : time
+  }
+  const rank = (p: T) => (p.status === "archived" ? 1 : 0)
+  return projects
+    .map((project, index) => ({ project, index }))
+    .sort(
+      (a, b) =>
+        rank(a.project) - rank(b.project) ||
+        pushed(b.project) - pushed(a.project) ||
+        a.index - b.index,
+    )
+    .map(({ project }) => project)
+}
