@@ -5,6 +5,8 @@ import { InventorySection } from "@/components/home/inventory-section"
 import { ServicesSection } from "@/components/home/services-section"
 import { UptimeSection } from "@/components/home/uptime-section"
 import { WritingSection } from "@/components/home/writing-section"
+import { JsonLd } from "@/components/seo/json-ld"
+import { jsonLdGraph, personSchema, websiteSchema } from "@/lib/structured-data"
 
 export const metadata: Metadata = {
   alternates: { canonical: "/" },
@@ -13,6 +15,7 @@ export const metadata: Metadata = {
 export default function Home() {
   return (
     <main>
+      <JsonLd data={jsonLdGraph(personSchema(), websiteSchema())} />
       <Hero />
       <ServicesSection />
       <WritingSection />

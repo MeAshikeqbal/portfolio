@@ -10,11 +10,13 @@ import { DataList, DataRow } from "@/components/dashboard/data-list"
 import { Container, GridBackdrop } from "@/components/dashboard/layout"
 import { Panel, PanelHeader } from "@/components/dashboard/panel"
 import { createPortableTextComponents } from "@/components/portable-text/components"
+import { JsonLd } from "@/components/seo/json-ld"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { getPost, getPostSlugs } from "@/lib/api"
 import { formatDate } from "@/lib/format"
-import { buildToc, readingTime } from "@/lib/portable-text"
+import { buildToc, readingTime, wordCount } from "@/lib/portable-text"
 import { absoluteUrl, siteConfig } from "@/lib/site"
+import { blogPostingSchema, breadcrumbSchema, jsonLdGraph } from "@/lib/structured-data"
 import { urlFor } from "@/sanity/lib/image"
 
 type Props = { params: Promise<{ slug: string }> }
@@ -35,11 +37,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     post.seo?.description ||
     post.excerpt ||
     `Read ${post.title}${post.author?.name ? ` by ${post.author.name}` : ""}.`
-  const imageSource = post.seo?.ogImage?.asset
-    ? post.seo.ogImage
-    : post.mainImage?.asset
-      ? post.mainImage
-      : null
 
   return {
     title,
@@ -55,16 +52,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       modifiedTime: post._updatedAt,
       authors: post.author?.name ? [post.author.name] : undefined,
       tags: post.categories?.flatMap((c) => (c.title ? [c.title] : [])),
-      images: imageSource
-        ? [
-            {
-              url: urlFor(imageSource).width(1200).height(630).url(),
-              width: 1200,
-              height: 630,
-              alt: post.mainImage?.alt || post.title,
-            },
-          ]
-        : [],
     },
   }
 }
@@ -80,8 +67,28 @@ export default async function PostPage({ params }: Props) {
   const components = createPortableTextComponents(idsByKey)
   const hasToc = entries.length >= 2
 
+  const structuredData = jsonLdGraph(
+    blogPostingSchema({
+      slug,
+      title,
+      description: post.seo?.description || post.excerpt,
+      publishedAt: post.publishedAt,
+      updatedAt: post._updatedAt,
+      authorName: post.author?.name,
+      tags: post.categories?.flatMap((c) => (c.title ? [c.title] : [])),
+      wordCount: wordCount(post.body),
+      image: post.mainImage?.asset ? urlFor(post.mainImage).width(1200).url() : undefined,
+    }),
+    breadcrumbSchema([
+      { name: "Home", path: "/" },
+      { name: "Writing", path: "/post" },
+      { name: title, path: `/post/${slug}` },
+    ]),
+  )
+
   return (
     <>
+      <JsonLd data={structuredData} />
       <ReadingProgress targetId="post-body" />
       <article>
         <header className="relative overflow-hidden border-b">

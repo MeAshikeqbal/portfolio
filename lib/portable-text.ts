@@ -33,10 +33,14 @@ export function toPlainText(blocks: readonly Block[] | null | undefined): string
     .join("\n")
 }
 
+/** Number of words in a body's text blocks. */
+export function wordCount(blocks: readonly Block[] | null | undefined): number {
+  return toPlainText(blocks).split(/\s+/).filter(Boolean).length
+}
+
 /** Minutes to read at ~220 words per minute, never less than 1. */
 export function readingTime(blocks: readonly Block[] | null | undefined): number {
-  const words = toPlainText(blocks).split(/\s+/).filter(Boolean).length
-  return Math.max(1, Math.round(words / 220))
+  return Math.max(1, Math.round(wordCount(blocks) / 220))
 }
 
 /** URL-safe slug for a heading: "Why I Started Self-Hosting AI" → "why-i-started-self-hosting-ai". */

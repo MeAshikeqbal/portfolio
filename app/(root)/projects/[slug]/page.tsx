@@ -10,11 +10,13 @@ import { MetricGrid, MetricTile } from "@/components/dashboard/metric-tile"
 import { portableTextComponents } from "@/components/portable-text/components"
 import { Sparkline } from "@/components/dashboard/sparkline"
 import { StatusPill } from "@/components/dashboard/status-pill"
+import { JsonLd } from "@/components/seo/json-ld"
 import { Button } from "@/components/ui/button"
 import { getProject, getProjectSlugs } from "@/lib/api"
 import { formatMonth } from "@/lib/format"
 import { absoluteUrl } from "@/lib/site"
 import { projectStatus } from "@/lib/status"
+import { breadcrumbSchema, jsonLdGraph, projectSchema } from "@/lib/structured-data"
 import { urlFor } from "@/sanity/lib/image"
 
 type Props = { params: Promise<{ slug: string }> }
@@ -32,11 +34,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const title = project.seo?.title || project.title
   const description =
     project.seo?.description || project.description || `${project.title}, a project by Ashik Eqbal.`
-  const imageSource = project.seo?.ogImage?.asset
-    ? project.seo.ogImage
-    : project.mainImage?.asset
-      ? project.mainImage
-      : null
 
   return {
     title,
@@ -48,9 +45,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       description,
       type: "article",
       url: absoluteUrl(`/projects/${slug}`),
-      images: imageSource
-        ? [{ url: urlFor(imageSource).width(1200).height(630).url(), width: 1200, height: 630 }]
-        : [],
     },
   }
 }
@@ -65,8 +59,27 @@ export default async function ProjectPage({ params }: Props) {
   const weekly = gh?.weeklyCommits ?? []
   const title = project.title ?? "Untitled project"
 
+  const structuredData = jsonLdGraph(
+    projectSchema({
+      slug,
+      title,
+      description: project.seo?.description || project.description,
+      repo: project.github,
+      url: project.url,
+      language: gh?.language,
+      license: gh?.license,
+      image: project.mainImage?.asset ? urlFor(project.mainImage).width(1200).url() : undefined,
+    }),
+    breadcrumbSchema([
+      { name: "Home", path: "/" },
+      { name: "Projects", path: "/projects" },
+      { name: title, path: `/projects/${slug}` },
+    ]),
+  )
+
   return (
     <main>
+      <JsonLd data={structuredData} />
       <Section className="pt-10 sm:pt-14">
         <Container className="max-w-4xl">
           <Link
