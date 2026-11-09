@@ -4,6 +4,7 @@ import Link from "next/link"
 import { Container, GridBackdrop } from "@/components/dashboard/layout"
 import { Panel, PanelHeader } from "@/components/dashboard/panel"
 import { StatusPill } from "@/components/dashboard/status-pill"
+import { HomelabList } from "@/components/home/homelab-list"
 import { Button } from "@/components/ui/button"
 import { getCvUrl, getHomeStats } from "@/lib/api"
 import { formatCompact, formatDate } from "@/lib/format"
@@ -13,7 +14,6 @@ export async function Hero() {
   const [cvUrl, stats] = await Promise.all([getCvUrl(), getHomeStats()])
   const { availability } = siteConfig
   const latest = stats.latestPost?.slug && stats.latestPost.title ? stats.latestPost : null
-  const homelab = (stats.homelab ?? []).filter((item) => item.name)
 
   // Only counts that exist: commits stay hidden until the GitHub sync has written some.
   const metrics = [
@@ -98,26 +98,7 @@ export async function Hero() {
             </Link>
           )}
 
-          {homelab.length > 0 && (
-            <div className="border-b">
-              <div className="flex items-center justify-between px-4 pt-3 label-caps">
-                <span>homelab</span>
-                <Link href="/uses" className="transition-colors hover:text-foreground">
-                  full setup
-                </Link>
-              </div>
-              <ul className="px-4 pt-1 pb-3">
-                {homelab.map((item) => (
-                  <li key={item._key} className="flex items-baseline gap-3 py-1 text-sm">
-                    <span className="shrink-0 font-medium">{item.name}</span>
-                    {item.description && (
-                      <span className="truncate text-muted-foreground">{item.description}</span>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
+          <HomelabList items={stats.homelab} />
 
           <dl
             className="grid divide-x"

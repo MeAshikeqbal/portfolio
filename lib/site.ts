@@ -27,6 +27,8 @@ export const siteConfig = {
     label: string
   } | null,
   repo: "https://github.com/MeAshikeqbal/portfolio",
+  /** /now shows an amber "stale" pill once its last edit is older than this. */
+  nowStaleAfterDays: 90,
   socials,
   /** Social profiles, in display order (hero, contact, footer). */
   socialLinks: [

@@ -6,19 +6,32 @@ import { StatusPill } from "@/components/dashboard/status-pill"
 import { portableTextComponents } from "@/components/portable-text/components"
 import type { NOW_QUERY_RESULT } from "@/sanity.types"
 import { formatDate } from "@/lib/format"
+import { siteConfig } from "@/lib/site"
+import { isStale } from "@/lib/staleness"
 
 type Now = NonNullable<NOW_QUERY_RESULT>
 
-/** The /now page body: a dated status update. */
-export function NowView({ now }: { now: Now }) {
+/**
+ * The /now page body: a dated status update. The date pill turns amber ("stale") once the
+ * page hasn't been edited for `siteConfig.nowStaleAfterDays` – age is measured, so it may
+ * carry a status colour. `today` is injectable for tests.
+ */
+export function NowView({ now, today = new Date() }: { now: Now; today?: Date }) {
+  const updated = formatDate(now._updatedAt)
+  const stale = isStale(now._updatedAt, today, siteConfig.nowStaleAfterDays)
   return (
     <main>
       <Section className="pt-12 sm:pt-16">
         <Container className="max-w-3xl">
           <SectionHeader as="h1" title="Now" />
           <div className="-mt-2 mb-8 flex flex-wrap items-center gap-3">
-            <StatusPill status="info">updated {formatDate(now._updatedAt)}</StatusPill>
-            {now.location && (
+            {updated && (
+              <StatusPill status={stale ? "warn" : "info"}>
+                updated {updated}
+                {stale && " · stale"}
+              </StatusPill>
+            )}
+            {now.location?.trim() && (
               <span className="flex items-center gap-1 label-caps">
                 <MapPin className="size-3.5" aria-hidden /> {now.location}
               </span>

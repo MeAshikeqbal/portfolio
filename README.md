@@ -102,7 +102,17 @@ tests/unit, tests/e2e
 - **Open on site** (⋯ menu) opens a published post, project, `/uses` or `/now` in a new tab.
 - **`/uses` and `/now`** are singletons under *Personal Info* in the Studio. Each page stays
   a 404, and isn't linked from the footer, ⌘K palette or sitemap, until it has published
-  content.
+  content (`/uses` needs a section with a named item). The hero's *homelab* list shows the
+  first five items of the first `/uses` section whose title starts with "Homelab". `/now`
+  turns its date pill amber once it hasn't been edited for `siteConfig.nowStaleAfterDays`.
+- **Seeding `/uses` and `/now`.** The content lives in `scripts/about-content.data.ts` and is
+  published by a revision-aware script (dry run by default; `--execute` refuses while
+  `// REVIEW:` comments remain or if anything changed in Sanity since the dry run):
+  `npx sanity exec scripts/about-content.ts --with-user-token [-- --execute]`.
+  `scripts/about-content.validate.ts` rejects IPs, hostnames, ports and versions in the copy.
+- **E2E and publication state.** Tests expect `ABOUT_PAGES=published|unpublished`, decided
+  before the build by `export $(node scripts/about-state.mjs)` (uncached Sanity API). CI does
+  this automatically and picks `lighthouserc.published.json` once the pages are live.
 - **Draft previews.** Open *Presentation* in the Studio to edit with a live preview of the
   real site, drafts included. This needs `SANITY_API_READ_TOKEN` (a Viewer token).
 - **Availability badge.** The hero badge comes from `siteConfig.availability` in `lib/site.ts`:

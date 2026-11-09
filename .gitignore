@@ -61,3 +61,6 @@ public/Thumbs.db
 
 # Sanity dataset exports (npm run backup); the inbox export holds personal data
 /backups/
+
+# scripts/about-content.ts dry-run snapshot (revisions + content hash)
+/scripts/.about-content.snapshot.json
