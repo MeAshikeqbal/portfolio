@@ -13,6 +13,7 @@ import {
   githubRows,
   publishedId,
   healthIssues,
+  nowFreshness,
   snippet,
   timeAgo,
   TYPE_LABELS,
@@ -24,6 +25,7 @@ import {
   GITHUB_QUERY,
   HEALTH_QUERY,
   INBOX_QUERY,
+  NOW_FRESHNESS_QUERY,
   OVERVIEW_QUERY,
   RECENT_QUERY,
   type GitHubRow,
@@ -288,6 +290,26 @@ export function GitHubWidget() {
           />
         </Box>
       )}
+    </Widget>
+  )
+}
+
+const FRESHNESS_BADGE = {
+  fresh: { label: "Fresh", tone: "positive" },
+  stale: { label: "Stale", tone: "caution" },
+  unpublished: { label: "Unpublished", tone: "default" },
+} as const
+
+/** How long since /now was last updated; turns to a warning once it's stale. */
+export function FreshnessWidget() {
+  const { data, error, loading, refresh } = useStudioQuery<string | null>(NOW_FRESHNESS_QUERY)
+  const freshness = nowFreshness(data)
+
+  return (
+    <Widget title="Freshness" onRefresh={refresh} loading={loading} error={error}>
+      <DocLink id="now" type="now">
+        <Row title="Now page" subtitle={freshness.label} badge={FRESHNESS_BADGE[freshness.state]} />
+      </DocLink>
     </Widget>
   )
 }
