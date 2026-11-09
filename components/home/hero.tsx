@@ -1,4 +1,4 @@
-import { FileDown, Rss } from "lucide-react"
+import { FileText, Rss } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { FaGithub, FaLinkedin, FaXTwitter } from "react-icons/fa6"
@@ -45,8 +45,9 @@ export async function Hero() {
           <div className="mt-8 flex flex-wrap items-center gap-3">
             {cvUrl && (
               <Button asChild>
-                <a href={cvUrl} download={`${siteConfig.name} CV.pdf`}>
-                  <FileDown /> Résumé
+                {/* Served from our own domain (app/resume.pdf/route.ts), not the Sanity CDN. */}
+                <a href="/resume.pdf" target="_blank" rel="noopener">
+                  <FileText /> Résumé
                 </a>
               </Button>
             )}
