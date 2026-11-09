@@ -19,6 +19,17 @@ updates:
       dev-tooling:
         dependency-type: development
         update-types: ["minor", "patch"]
+    ignore:
+      # Node is pinned to 24.x (package.json engines): keep its types on the same major.
+      - dependency-name: "@types/node"
+        update-types: ["version-update:semver-major"]
+      # typescript-eslint (via eslint-config-next) doesn't support TypeScript 7 yet.
+      - dependency-name: "typescript"
+        update-types: ["version-update:semver-major"]
+      # eslint-plugin-react, -jsx-a11y and -import (via eslint-config-next) don't declare
+      # ESLint 10 support yet. Remove once eslint-config-next ships with it.
+      - dependency-name: "eslint"
+        update-types: ["version-update:semver-major"]
 
   - package-ecosystem: github-actions
     directory: /
