@@ -1,3 +1,4 @@
+import { orderableDocumentListDeskItem } from "@sanity/orderable-document-list"
 import type { StructureResolver } from "sanity/structure"
 import {
   FiFileText,
@@ -13,7 +14,7 @@ import {
   FiClock,
 } from "react-icons/fi"
 
-export const structure: StructureResolver = (S) =>
+export const structure: StructureResolver = (S, context) =>
   S.list()
     .title("Content")
     .items([
@@ -39,8 +40,23 @@ export const structure: StructureResolver = (S) =>
           S.list()
             .title("Portfolio")
             .items([
-              S.documentTypeListItem("project").title("Projects").icon(FiCode),
-              S.documentTypeListItem("skills").title("Skills").icon(FiAward),
+              // Drag to reorder: the site lists projects and skills in this order.
+              orderableDocumentListDeskItem({
+                type: "project",
+                id: "project",
+                title: "Projects",
+                icon: FiCode,
+                S,
+                context,
+              }),
+              orderableDocumentListDeskItem({
+                type: "skills",
+                id: "skills",
+                title: "Skills",
+                icon: FiAward,
+                S,
+                context,
+              }),
             ]),
         ),
 
@@ -52,7 +68,6 @@ export const structure: StructureResolver = (S) =>
           S.list()
             .title("Personal Info")
             .items([
-              S.documentTypeListItem("abouts").title("About Me").icon(FiInfo),
               S.documentTypeListItem("experiences").title("Work Experience").icon(FiBriefcase),
               S.documentTypeListItem("education").title("Education").icon(FiBook),
               // CV as a singleton document
@@ -84,7 +99,6 @@ export const structure: StructureResolver = (S) =>
             "author",
             "project",
             "skills",
-            "abouts",
             "experiences",
             "education",
             "cv",

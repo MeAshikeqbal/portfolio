@@ -76,7 +76,7 @@ const projectFields = `
 `
 
 export const PROJECTS_QUERY = defineQuery(`
-  *[_type == "project" && ${published}] | order(coalesce(order, 999) asc, _createdAt desc) { ${projectFields} }
+  *[_type == "project" && ${published}] | order(orderRank asc, _createdAt desc) { ${projectFields} }
 `)
 
 export const PROJECT_QUERY = defineQuery(`
@@ -97,7 +97,7 @@ export const HOME_STATS_QUERY = defineQuery(`{
 }`)
 
 export const SKILLS_QUERY = defineQuery(`
-  *[_type == "skills"] | order(name asc) { _id, name, icon }
+  *[_type == "skills"] | order(orderRank asc, name asc) { _id, name, icon }
 `)
 
 export const EDUCATION_QUERY = defineQuery(`
@@ -134,6 +134,11 @@ export const GITHUB_PROJECTS_QUERY = defineQuery(`
   *[_type == "project" && defined(github)] { _id, title, github }
 `)
 
+/** Projects named in a Studio "Sync from GitHub" request (see lib/github-sync-request.ts). */
+export const GITHUB_SYNC_REQUESTS_QUERY = defineQuery(`
+  *[_type == "project" && _id in $ids] { _id, title, github, githubSyncRequestedAt }
+`)
+
 /** Indexable posts and projects for the sitemap (documents marked `seo.noIndex` are left out). */
 export const SITEMAP_QUERY = defineQuery(`{
   "posts": *[_type == "post" && ${published} && defined(slug.current) && seo.noIndex != true]
@@ -149,7 +154,7 @@ export const COMMAND_INDEX_QUERY = defineQuery(`{
   "posts": *[_type == "post" && ${published} && defined(slug.current)] | order(publishedAt desc) {
     _id, title, "slug": slug.current, "topics": categories[]->title
   },
-  "projects": *[_type == "project" && ${published}] | order(coalesce(order, 999) asc, _createdAt desc) {
+  "projects": *[_type == "project" && ${published}] | order(orderRank asc, _createdAt desc) {
     _id, title, "slug": slug.current, url, github
   },
   // Only whether a CV exists: the file itself is served from /resume.pdf.

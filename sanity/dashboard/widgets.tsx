@@ -1,12 +1,17 @@
-import { Box, Card, Grid, Stack, Text } from "@sanity/ui"
+import { SyncIcon } from "@sanity/icons/Sync"
+import { Box, Button, Card, Grid, Stack, Text } from "@sanity/ui"
+import { useToast } from "@sanity/ui/toast"
 import { useEffect, useMemo, useState } from "react"
-import { useWorkspace } from "sanity"
+import { useClient, useWorkspace } from "sanity"
 import { Link } from "sanity/router"
 
-import { iconUrl } from "../../lib/icons"
+import { describeSync, requestGitHubSync } from "../actions/request-github-sync"
+import { iconExists } from "../lib/icon-check"
 import { inboxDatasetName, inboxMessageHref } from "../inbox/dataset"
 import {
   dedupeRecent,
+  githubRows,
+  publishedId,
   healthIssues,
   snippet,
   timeAgo,
@@ -16,10 +21,12 @@ import {
   type HealthDoc,
 } from "./logic"
 import {
+  GITHUB_QUERY,
   HEALTH_QUERY,
   INBOX_QUERY,
   OVERVIEW_QUERY,
   RECENT_QUERY,
+  type GitHubRow,
   type InboxResult,
   type OverviewResult,
 } from "./queries"
@@ -171,16 +178,7 @@ function useBrokenIcons(skills: IconDoc[] | undefined): IconDoc[] | undefined {
     if (!skills) return
     let cancelled = false
     Promise.all(
-      skills.map(async (skill) => {
-        const url = iconUrl(skill.icon)
-        if (!url) return skill
-        try {
-          const response = await fetch(url, { method: "HEAD" })
-          return response.headers.get("x-icon-found") === "0" ? skill : null
-        } catch {
-          return null
-        }
-      }),
+      skills.map(async (skill) => ((await iconExists(skill.icon)) === false ? skill : null)),
     ).then((results) => {
       if (!cancelled) setBroken(results.filter((skill): skill is IconDoc => skill !== null))
     })
@@ -224,6 +222,71 @@ export function HealthWidget() {
         ))
       ) : (
         <Empty>No problems found.</Empty>
+      )}
+    </Widget>
+  )
+}
+
+export function GitHubWidget() {
+  const client = useClient({ apiVersion: "2026-11-01" })
+  const toast = useToast()
+  const [syncing, setSyncing] = useState(false)
+  const { data, error, loading, refresh } = useStudioQuery<GitHubRow[]>(GITHUB_QUERY)
+  const { rows, ids } = useMemo(() => githubRows(data ?? []), [data])
+
+  async function syncAll() {
+    setSyncing(true)
+    try {
+      const result = await requestGitHubSync(client, ids)
+      toast.push({
+        status: result.failed.length ? "warning" : "success",
+        title: result.failed.length ? "Some projects didn't sync" : "Synced from GitHub",
+        description: describeSync(result, rows.length),
+      })
+    } catch (syncError) {
+      toast.push({
+        status: "error",
+        title: "GitHub sync failed",
+        description: syncError instanceof Error ? syncError.message : String(syncError),
+      })
+    } finally {
+      setSyncing(false)
+      refresh()
+    }
+  }
+
+  return (
+    <Widget
+      title="GitHub sync"
+      meta="daily at 03:00 UTC"
+      onRefresh={refresh}
+      loading={loading}
+      error={error}
+    >
+      {rows.length ? (
+        rows.map((row) => (
+          <DocLink key={row._id} id={publishedId(row._id)} type="project">
+            <Row
+              title={row.title || "Untitled"}
+              subtitle={row.language ?? undefined}
+              meta={row.syncedAt ? `synced ${timeAgo(row.syncedAt)}` : "not synced yet"}
+            />
+          </DocLink>
+        ))
+      ) : (
+        <Empty>No projects with a GitHub repository.</Empty>
+      )}
+      {rows.length > 0 && (
+        <Box paddingX={2} paddingTop={2}>
+          <Button
+            icon={SyncIcon}
+            text={syncing ? "Syncing…" : "Sync all now"}
+            mode="ghost"
+            fontSize={1}
+            disabled={syncing}
+            onClick={syncAll}
+          />
+        </Box>
       )}
     </Widget>
   )

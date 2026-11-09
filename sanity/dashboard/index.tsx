@@ -3,7 +3,7 @@ import { Box, Container, Grid, Stack, Text } from "@sanity/ui"
 import { useCurrentUser, type Tool } from "sanity"
 
 import { MONO } from "./widget"
-import { HealthWidget, InboxWidget, OverviewWidget, RecentWidget } from "./widgets"
+import { GitHubWidget, HealthWidget, InboxWidget, OverviewWidget, RecentWidget } from "./widgets"
 
 /** Hover state for clickable rows and tiles (Sanity UI cards have no hover by default). */
 const ROW_HOVER_CSS = `
@@ -47,7 +47,10 @@ function Dashboard() {
               <InboxWidget />
               <HealthWidget />
             </Stack>
-            <RecentWidget />
+            <Stack gap={4}>
+              <RecentWidget />
+              <GitHubWidget />
+            </Stack>
           </Grid>
         </Stack>
       </Container>
