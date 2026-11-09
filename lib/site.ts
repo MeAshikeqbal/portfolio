@@ -22,7 +22,7 @@ export const siteConfig = {
    * Hero availability badge. `status`: "up" (green, pulsing) = available, "warn" (amber) =
    * limited, "idle" (grey) = not looking. Set to `null` to hide the badge entirely.
    */
-  availability: { status: "up", label: "open to opportunities" } as {
+  availability: null as {
     status: "up" | "warn" | "idle"
     label: string
   } | null,
