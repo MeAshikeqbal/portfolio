@@ -47,7 +47,9 @@ test.describe("hydration", () => {
           errors.push(message.text())
         }
       })
-      await page.goto(path, { waitUntil: "networkidle" })
+      await page.goto(path, { waitUntil: "load" })
+      // Not networkidle: Turnstile and the live-content connection keep the network busy.
+      await page.waitForTimeout(1000)
       expect(errors).toEqual([])
     })
   }
@@ -55,7 +57,8 @@ test.describe("hydration", () => {
   test("a post with code blocks hydrates without errors", async ({ page }) => {
     const errors: string[] = []
     page.on("pageerror", (error) => errors.push(error.message))
-    await page.goto("/post/why-i-started-self-hosting-ai-at-home", { waitUntil: "networkidle" })
+    await page.goto("/post/why-i-started-self-hosting-ai-at-home", { waitUntil: "load" })
+    await page.waitForTimeout(1000)
     expect(errors).toEqual([])
   })
 })

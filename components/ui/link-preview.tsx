@@ -1,134 +1,81 @@
 "use client"
 
-import { HoverCard as HoverCardPrimitive } from "radix-ui"
 import Image from "next/image"
 import { encode } from "qss"
-import React, { useState } from "react"
-import { useHydrated } from "@/hooks/use-hydrated"
-import { AnimatePresence, motion, useMotionValue, useSpring } from "motion/react"
-import Link from "next/link"
+import { HoverCard } from "radix-ui"
+import type { ReactNode } from "react"
 import { cn } from "@/lib/utils"
 
-type LinkPreviewProps = {
-  children: React.ReactNode
+/** Microlink screenshot URL for a page, rendered at 3× the preview size and downscaled. */
+export function microlinkScreenshot(url: string, width: number, height: number): string {
+  return `https://api.microlink.io/?${encode({
+    url,
+    screenshot: true,
+    meta: false,
+    embed: "screenshot.url",
+    colorScheme: "dark",
+    "viewport.deviceScaleFactor": 0.5,
+    "viewport.width": width * 3,
+    "viewport.height": height * 3,
+  })}`
+}
+
+interface LinkPreviewProps {
   url: string
+  children: ReactNode
   className?: string
   width?: number
   height?: number
-  quality?: number
-  style?: React.CSSProperties
-} & ({ isStatic: true; imageSrc: string } | { isStatic?: false; imageSrc?: never })
+}
 
-export const LinkPreview: React.FC<LinkPreviewProps> = ({
-  children,
+/**
+ * External link that shows a screenshot of the target on hover.
+ * The screenshot is only requested once the card opens (after a short hover intent delay),
+ * never on page load, which keeps Microlink's free tier from rate-limiting. Touch devices
+ * don't open hover cards, so they just get the link.
+ */
+export function LinkPreview({
   url,
+  children,
   className,
-  width = 200,
-  height = 125,
-  quality = 50,
-  style = {},
-  isStatic = false,
-  imageSrc = "",
-}) => {
-  const [isOpen, setOpen] = useState(false)
-  const isMounted = useHydrated()
-
-  const src = isStatic
-    ? imageSrc
-    : `https://api.microlink.io/?${encode({
-        url,
-        // qss can't encode nested objects; a nested value was sent as "[object Object]".
-        screenshot: true,
-        meta: false,
-        embed: "screenshot.url",
-        colorScheme: "dark",
-        "viewport.deviceScaleFactor": 0.5,
-        "viewport.width": width * 3,
-        "viewport.height": height * 3,
-      })}`
-
-  const springConfig = { stiffness: 100, damping: 15 }
-  const x = useMotionValue(0)
-  const translateX = useSpring(x, springConfig)
-
-  const handleMouseMove = (event: React.MouseEvent<HTMLAnchorElement>) => {
-    const targetRect = event.currentTarget.getBoundingClientRect()
-    const eventOffsetX = event.clientX - targetRect.left
-    const offsetFromCenter = (eventOffsetX - targetRect.width / 2) / 2
-    x.set(offsetFromCenter)
+  width = 240,
+  height = 150,
+}: LinkPreviewProps) {
+  let host = url
+  try {
+    host = new URL(url).hostname
+  } catch {
+    // Keep the raw URL as the label.
   }
 
   return (
-    <>
-      {isMounted && (
-        <div className="hidden">
+    <HoverCard.Root openDelay={300} closeDelay={100}>
+      <HoverCard.Trigger asChild>
+        <a href={url} target="_blank" rel="noopener noreferrer" className={className}>
+          {children}
+        </a>
+      </HoverCard.Trigger>
+      <HoverCard.Portal>
+        <HoverCard.Content
+          side="top"
+          sideOffset={8}
+          className={cn(
+            "z-50 rounded-lg border bg-surface p-1 shadow-md",
+            "data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95",
+            "data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95",
+          )}
+        >
           <Image
-            src={src}
+            src={microlinkScreenshot(url, width, height)}
             width={width}
             height={height}
-            quality={quality}
-            style={style}
-            priority={true}
-            alt="Link preview"
+            quality={60}
+            alt={`Screenshot of ${host}`}
+            className="rounded-md bg-surface-2"
           />
-        </div>
-      )}
-
-      <HoverCardPrimitive.Root openDelay={50} closeDelay={100} onOpenChange={setOpen}>
-        <HoverCardPrimitive.Trigger asChild>
-          <Link
-            href={url}
-            className={cn("text-foreground", className)}
-            onMouseMove={handleMouseMove}
-          >
-            {children}
-          </Link>
-        </HoverCardPrimitive.Trigger>
-
-        <HoverCardPrimitive.Content
-          className="z-50 origin-(--radix-hover-card-content-transform-origin)"
-          side="top"
-          align="center"
-          sideOffset={10}
-        >
-          <AnimatePresence>
-            {isOpen && (
-              <motion.div
-                initial={{ opacity: 0, y: 20, scale: 0.6 }}
-                animate={{
-                  opacity: 1,
-                  y: 0,
-                  scale: 1,
-                  transition: {
-                    type: "spring",
-                    stiffness: 260,
-                    damping: 20,
-                  },
-                }}
-                exit={{ opacity: 0, y: 20, scale: 0.6 }}
-                className="rounded-xl shadow-xl"
-                style={{ x: translateX }}
-              >
-                <Link
-                  href={url}
-                  className="block rounded-lg border bg-surface p-1 shadow-md hover:border-border-strong"
-                >
-                  <Image
-                    src={src}
-                    width={width}
-                    height={height}
-                    quality={quality}
-                    style={style}
-                    priority={true}
-                    className="rounded-lg"
-                    alt="Link preview"
-                  />
-                </Link>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </HoverCardPrimitive.Content>
-      </HoverCardPrimitive.Root>
-    </>
+          <p className="truncate px-1 pt-1 label-caps">{host}</p>
+        </HoverCard.Content>
+      </HoverCard.Portal>
+    </HoverCard.Root>
   )
 }

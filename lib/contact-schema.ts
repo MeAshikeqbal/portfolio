@@ -19,3 +19,5 @@ export const contactSchema = z.object({
 })
 
 export type ContactInput = z.infer<typeof contactSchema>
+
+export { HONEYPOT_FIELD } from "./contact-fields"

@@ -4,8 +4,10 @@ test.describe("smoke", () => {
   test("home page renders its main sections", async ({ page }) => {
     await page.goto("/")
     await expect(page).toHaveTitle(/Ashik Eqbal/)
-    await expect(page.locator("#Home")).toBeVisible()
-    await expect(page.locator("#Tech-Stack")).toBeAttached()
+    await expect(page.getByRole("heading", { level: 1, name: "Ashik Eqbal" })).toBeVisible()
+    for (const id of ["services", "writing", "uptime", "inventory", "contact"]) {
+      await expect(page.locator(`#${id}`)).toBeAttached()
+    }
     await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
       "href",
       "https://www.itsashik.dev",
@@ -27,7 +29,7 @@ test.describe("smoke", () => {
 
   test("projects page lists projects", async ({ page }) => {
     await page.goto("/projects")
-    await expect(page.getByRole("heading", { name: "All Projects" })).toBeVisible()
+    await expect(page.getByRole("heading", { level: 1, name: "Projects" })).toBeVisible()
   })
 
   test("unknown routes return 404", async ({ page }) => {

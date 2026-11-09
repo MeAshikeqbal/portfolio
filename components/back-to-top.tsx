@@ -1,44 +1,34 @@
 "use client"
 
-import { useState, useEffect } from "react"
 import { ArrowUp } from "lucide-react"
+import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 
 export function BackToTop() {
-  const [isVisible, setIsVisible] = useState(false)
+  const [visible, setVisible] = useState(false)
 
   useEffect(() => {
-    const toggleVisibility = () => {
-      if (window.pageYOffset > 300) {
-        setIsVisible(true)
-      } else {
-        setIsVisible(false)
-      }
-    }
-
-    window.addEventListener("scroll", toggleVisibility)
-
-    return () => window.removeEventListener("scroll", toggleVisibility)
+    const onScroll = () => setVisible(window.scrollY > 600)
+    window.addEventListener("scroll", onScroll, { passive: true })
+    return () => window.removeEventListener("scroll", onScroll)
   }, [])
 
-  const scrollToTop = () => {
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
-    })
-  }
+  if (!visible) return null
 
-  if (!isVisible) {
-    return null
+  const scrollToTop = () => {
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    window.scrollTo({ top: 0, behavior: reduce ? "auto" : "smooth" })
   }
 
   return (
     <Button
-      className="fixed right-4 bottom-4 rounded-full p-2 shadow-lg transition-opacity duration-300 hover:opacity-80 focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:outline-hidden"
+      variant="outline"
+      size="icon"
+      className="fixed right-4 bottom-4 z-30 rounded-full bg-surface/90 backdrop-blur"
       onClick={scrollToTop}
       aria-label="Back to top"
     >
-      <ArrowUp className="h-6 w-6" />
+      <ArrowUp />
     </Button>
   )
 }
