@@ -7,6 +7,7 @@ import {
   EDUCATION_QUERY,
   EXPERIENCES_QUERY,
   HOME_STATS_QUERY,
+  NOW_QUERY,
   LATEST_POSTS_QUERY,
   POST_QUERY,
   POST_SLUGS_QUERY,
@@ -15,6 +16,7 @@ import {
   PROJECT_SLUGS_QUERY,
   PROJECTS_QUERY,
   SKILLS_QUERY,
+  USES_QUERY,
 } from "@/sanity/lib/queries"
 import type {
   EDUCATION_QUERY_RESULT,
@@ -107,5 +109,15 @@ export type CommandIndex = COMMAND_INDEX_QUERY_RESULT
 
 export async function getCommandIndex() {
   const { data } = await sanityFetch({ query: COMMAND_INDEX_QUERY, stega: false })
+  return data
+}
+
+export async function getUses() {
+  const { data } = await sanityFetch({ query: USES_QUERY, stega: false })
+  return data
+}
+
+export async function getNow() {
+  const { data } = await sanityFetch({ query: NOW_QUERY, stega: false })
   return data
 }

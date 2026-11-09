@@ -139,7 +139,9 @@ export const SITEMAP_QUERY = defineQuery(`{
   "posts": *[_type == "post" && ${published} && defined(slug.current) && seo.noIndex != true]
     | order(publishedAt desc) { "slug": slug.current, _updatedAt },
   "projects": *[_type == "project" && ${published} && defined(slug.current) && seo.noIndex != true]
-    { "slug": slug.current, _updatedAt }
+    { "slug": slug.current, _updatedAt },
+  "uses": *[_type == "uses" && _id == "uses" && count(sections) > 0][0]._updatedAt,
+  "now": *[_type == "now" && _id == "now" && count(body) > 0][0]._updatedAt
 }`)
 
 /** Small index of everything navigable, for the ⌘K command palette. */
@@ -151,5 +153,20 @@ export const COMMAND_INDEX_QUERY = defineQuery(`{
     _id, title, "slug": slug.current, url, github
   },
   // Only whether a CV exists: the file itself is served from /resume.pdf.
-  "hasCv": defined(*[_type == "cv"][0].cvFile.asset)
+  "hasCv": defined(*[_type == "cv"][0].cvFile.asset),
+  // /uses and /now are only linked once they have published content.
+  "hasUses": count(*[_type == "uses" && _id == "uses"][0].sections) > 0,
+  "hasNow": count(*[_type == "now" && _id == "now"][0].body) > 0
 }`)
+
+export const USES_QUERY = defineQuery(`
+  *[_type == "uses" && _id == "uses"][0] {
+    _updatedAt,
+    intro,
+    sections[]{ _key, title, items[]{ _key, name, description, url, icon } }
+  }
+`)
+
+export const NOW_QUERY = defineQuery(`
+  *[_type == "now" && _id == "now"][0] { _updatedAt, location, body }
+`)

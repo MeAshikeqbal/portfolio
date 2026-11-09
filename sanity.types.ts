@@ -15,11 +15,78 @@
 export declare const internalGroqTypeReferenceTo: unique symbol
 
 // Source: schema.json
+export type Now = {
+  _id: string
+  _type: "now"
+  _createdAt: string
+  _updatedAt: string
+  _rev: string
+  location?: string
+  body?: BlockContent
+}
+
 export type SanityImageAssetReference = {
   _ref: string
   _type: "reference"
   _weak?: boolean
   [internalGroqTypeReferenceTo]?: "sanity.imageAsset"
+}
+
+export type BlockContent = Array<
+  | {
+      children?: Array<{
+        marks?: Array<string>
+        text?: string
+        _type: "span"
+        _key: string
+      }>
+      style?: "normal" | "h1" | "h2" | "h3" | "h4" | "blockquote"
+      listItem?: "bullet"
+      markDefs?: Array<
+        | {
+            href?: string
+            _type: "link"
+            _key: string
+          }
+        | ({
+            _key: string
+          } & Code)
+      >
+      level?: number
+      _type: "block"
+      _key: string
+    }
+  | {
+      asset?: SanityImageAssetReference
+      media?: unknown
+      hotspot?: SanityImageHotspot
+      crop?: SanityImageCrop
+      alt?: string
+      _type: "image"
+      _key: string
+    }
+>
+
+export type Uses = {
+  _id: string
+  _type: "uses"
+  _createdAt: string
+  _updatedAt: string
+  _rev: string
+  intro?: string
+  sections?: Array<{
+    title?: string
+    items?: Array<{
+      name?: string
+      description?: string
+      url?: string
+      icon?: string
+      _type: "usesItem"
+      _key: string
+    }>
+    _type: "usesSection"
+    _key: string
+  }>
 }
 
 export type Seo = {
@@ -118,41 +185,6 @@ export type SanityImageHotspot = {
   height?: number
   width?: number
 }
-
-export type BlockContent = Array<
-  | {
-      children?: Array<{
-        marks?: Array<string>
-        text?: string
-        _type: "span"
-        _key: string
-      }>
-      style?: "normal" | "h1" | "h2" | "h3" | "h4" | "blockquote"
-      listItem?: "bullet"
-      markDefs?: Array<
-        | {
-            href?: string
-            _type: "link"
-            _key: string
-          }
-        | ({
-            _key: string
-          } & Code)
-      >
-      level?: number
-      _type: "block"
-      _key: string
-    }
-  | {
-      asset?: SanityImageAssetReference
-      media?: unknown
-      hotspot?: SanityImageHotspot
-      crop?: SanityImageCrop
-      alt?: string
-      _type: "image"
-      _key: string
-    }
->
 
 export type Slug = {
   _type: "slug"
@@ -450,7 +482,10 @@ export type Geopoint = {
 }
 
 export type AllSanitySchemaTypes =
+  | Now
   | SanityImageAssetReference
+  | BlockContent
+  | Uses
   | Seo
   | SanityFileAssetReference
   | Cv
@@ -458,7 +493,6 @@ export type AllSanitySchemaTypes =
   | Project
   | SanityImageCrop
   | SanityImageHotspot
-  | BlockContent
   | Slug
   | Education
   | Experiences
@@ -780,7 +814,7 @@ export type GITHUB_PROJECTS_QUERY_RESULT = Array<{
 
 // Source: sanity/lib/queries.ts
 // Variable: SITEMAP_QUERY
-// Query: {  "posts": *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && seo.noIndex != true]    | order(publishedAt desc) { "slug": slug.current, _updatedAt },  "projects": *[_type == "project" && !(_id in path("drafts.**")) && defined(slug.current) && seo.noIndex != true]    { "slug": slug.current, _updatedAt }}
+// Query: {  "posts": *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && seo.noIndex != true]    | order(publishedAt desc) { "slug": slug.current, _updatedAt },  "projects": *[_type == "project" && !(_id in path("drafts.**")) && defined(slug.current) && seo.noIndex != true]    { "slug": slug.current, _updatedAt },  "uses": *[_type == "uses" && _id == "uses" && count(sections) > 0][0]._updatedAt,  "now": *[_type == "now" && _id == "now" && count(body) > 0][0]._updatedAt}
 export type SITEMAP_QUERY_RESULT = {
   posts: Array<{
     slug: string | null
@@ -790,11 +824,13 @@ export type SITEMAP_QUERY_RESULT = {
     slug: string | null
     _updatedAt: string
   }>
+  uses: string | null
+  now: string | null
 }
 
 // Source: sanity/lib/queries.ts
 // Variable: COMMAND_INDEX_QUERY
-// Query: {  "posts": *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current)] | order(publishedAt desc) {    _id, title, "slug": slug.current, "topics": categories[]->title  },  "projects": *[_type == "project" && !(_id in path("drafts.**"))] | order(coalesce(order, 999) asc, _createdAt desc) {    _id, title, "slug": slug.current, url, github  },  // Only whether a CV exists: the file itself is served from /resume.pdf.  "hasCv": defined(*[_type == "cv"][0].cvFile.asset)}
+// Query: {  "posts": *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current)] | order(publishedAt desc) {    _id, title, "slug": slug.current, "topics": categories[]->title  },  "projects": *[_type == "project" && !(_id in path("drafts.**"))] | order(coalesce(order, 999) asc, _createdAt desc) {    _id, title, "slug": slug.current, url, github  },  // Only whether a CV exists: the file itself is served from /resume.pdf.  "hasCv": defined(*[_type == "cv"][0].cvFile.asset),  // /uses and /now are only linked once they have published content.  "hasUses": count(*[_type == "uses" && _id == "uses"][0].sections) > 0,  "hasNow": count(*[_type == "now" && _id == "now"][0].body) > 0}
 export type COMMAND_INDEX_QUERY_RESULT = {
   posts: Array<{
     _id: string
@@ -810,7 +846,37 @@ export type COMMAND_INDEX_QUERY_RESULT = {
     github: string | null
   }>
   hasCv: false | true
+  hasUses: boolean | null
+  hasNow: boolean | null
 }
+
+// Source: sanity/lib/queries.ts
+// Variable: USES_QUERY
+// Query: *[_type == "uses" && _id == "uses"][0] {    _updatedAt,    intro,    sections[]{ _key, title, items[]{ _key, name, description, url, icon } }  }
+export type USES_QUERY_RESULT = {
+  _updatedAt: string
+  intro: string | null
+  sections: Array<{
+    _key: string
+    title: string | null
+    items: Array<{
+      _key: string
+      name: string | null
+      description: string | null
+      url: string | null
+      icon: string | null
+    }> | null
+  }> | null
+} | null
+
+// Source: sanity/lib/queries.ts
+// Variable: NOW_QUERY
+// Query: *[_type == "now" && _id == "now"][0] { _updatedAt, location, body }
+export type NOW_QUERY_RESULT = {
+  _updatedAt: string
+  location: string | null
+  body: BlockContent | null
+} | null
 
 // Query TypeMap
 declare global {
@@ -829,8 +895,10 @@ declare global {
     '\n  *[_type == "cv"][0].cvFile.asset->url\n': CV_URL_QUERY_RESULT
     '\n  *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current)] | order(publishedAt desc) {\n    title,\n    "slug": slug.current,\n    publishedAt,\n    _updatedAt,\n    "excerpt": coalesce(excerpt, array::join(string::split(pt::text(body[_type == "block" && style == "normal"]), "")[0...200], "")),\n    author->{ name },\n    "categories": categories[]->title,\n    "image": mainImage.asset->{ url, "mimeType": mimeType }\n  }\n': FEED_POSTS_QUERY_RESULT
     '\n  *[_type == "project" && defined(github)] { _id, title, github }\n': GITHUB_PROJECTS_QUERY_RESULT
-    '{\n  "posts": *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && seo.noIndex != true]\n    | order(publishedAt desc) { "slug": slug.current, _updatedAt },\n  "projects": *[_type == "project" && !(_id in path("drafts.**")) && defined(slug.current) && seo.noIndex != true]\n    { "slug": slug.current, _updatedAt }\n}': SITEMAP_QUERY_RESULT
-    '{\n  "posts": *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current)] | order(publishedAt desc) {\n    _id, title, "slug": slug.current, "topics": categories[]->title\n  },\n  "projects": *[_type == "project" && !(_id in path("drafts.**"))] | order(coalesce(order, 999) asc, _createdAt desc) {\n    _id, title, "slug": slug.current, url, github\n  },\n  // Only whether a CV exists: the file itself is served from /resume.pdf.\n  "hasCv": defined(*[_type == "cv"][0].cvFile.asset)\n}': COMMAND_INDEX_QUERY_RESULT
+    '{\n  "posts": *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && seo.noIndex != true]\n    | order(publishedAt desc) { "slug": slug.current, _updatedAt },\n  "projects": *[_type == "project" && !(_id in path("drafts.**")) && defined(slug.current) && seo.noIndex != true]\n    { "slug": slug.current, _updatedAt },\n  "uses": *[_type == "uses" && _id == "uses" && count(sections) > 0][0]._updatedAt,\n  "now": *[_type == "now" && _id == "now" && count(body) > 0][0]._updatedAt\n}': SITEMAP_QUERY_RESULT
+    '{\n  "posts": *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current)] | order(publishedAt desc) {\n    _id, title, "slug": slug.current, "topics": categories[]->title\n  },\n  "projects": *[_type == "project" && !(_id in path("drafts.**"))] | order(coalesce(order, 999) asc, _createdAt desc) {\n    _id, title, "slug": slug.current, url, github\n  },\n  // Only whether a CV exists: the file itself is served from /resume.pdf.\n  "hasCv": defined(*[_type == "cv"][0].cvFile.asset),\n  // /uses and /now are only linked once they have published content.\n  "hasUses": count(*[_type == "uses" && _id == "uses"][0].sections) > 0,\n  "hasNow": count(*[_type == "now" && _id == "now"][0].body) > 0\n}': COMMAND_INDEX_QUERY_RESULT
+    '\n  *[_type == "uses" && _id == "uses"][0] {\n    _updatedAt,\n    intro,\n    sections[]{ _key, title, items[]{ _key, name, description, url, icon } }\n  }\n': USES_QUERY_RESULT
+    '\n  *[_type == "now" && _id == "now"][0] { _updatedAt, location, body }\n': NOW_QUERY_RESULT
   }
 }
 // Lets @sanity/client releases that predate the global registry read it too
