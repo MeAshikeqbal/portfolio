@@ -1,5 +1,6 @@
 import { PortableText } from "@portabletext/react"
 import { MapPin } from "lucide-react"
+import type { ReactNode } from "react"
 import { Container, Section } from "@/components/dashboard/layout"
 import { SectionHeader } from "@/components/dashboard/section-header"
 import { StatusPill } from "@/components/dashboard/status-pill"
@@ -16,7 +17,16 @@ type Now = NonNullable<NOW_QUERY_RESULT>
  * page hasn't been edited for `siteConfig.nowStaleAfterDays` – age is measured, so it may
  * carry a status colour. `today` is injectable for tests.
  */
-export function NowView({ now, today = new Date() }: { now: Now; today?: Date }) {
+export function NowView({
+  now,
+  today = new Date(),
+  live,
+}: {
+  now: Now
+  today?: Date
+  /** Live activity, rendered client-side under the update (see components/live). */
+  live?: ReactNode
+}) {
   const updated = formatDate(now._updatedAt)
   const stale = isStale(now._updatedAt, today, siteConfig.nowStaleAfterDays)
   return (
@@ -40,6 +50,11 @@ export function NowView({ now, today = new Date() }: { now: Now; today?: Date })
           <article className="prose prose-lg max-w-none">
             <PortableText value={now.body ?? []} components={portableTextComponents} />
           </article>
+          {live && (
+            <section id="live" aria-label="Live activity" className="mt-10 scroll-mt-24">
+              {live}
+            </section>
+          )}
           <p className="mt-12 text-sm text-muted-foreground">
             This is a{" "}
             <a

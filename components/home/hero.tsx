@@ -5,6 +5,7 @@ import { Container, GridBackdrop } from "@/components/dashboard/layout"
 import { Panel, PanelHeader } from "@/components/dashboard/panel"
 import { StatusPill } from "@/components/dashboard/status-pill"
 import { HomelabList } from "@/components/home/homelab-list"
+import { LiveLine } from "@/components/home/live-line"
 import { Button } from "@/components/ui/button"
 import { getCvUrl, getHomeStats } from "@/lib/api"
 import { formatCompact, formatDate } from "@/lib/format"
@@ -99,6 +100,7 @@ export async function Hero() {
           )}
 
           <HomelabList items={stats.homelab} />
+          <LiveLine />
 
           <dl
             className="grid divide-x"

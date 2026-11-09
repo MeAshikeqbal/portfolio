@@ -52,6 +52,11 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "api.microlink.io",
       },
+      // Spotify album art on /now; served through /_next/image, so the CSP needs no change.
+      {
+        protocol: "https",
+        hostname: "i.scdn.co",
+      },
     ],
   },
   async redirects() {
