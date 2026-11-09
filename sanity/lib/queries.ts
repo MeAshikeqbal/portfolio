@@ -8,13 +8,15 @@ import { defineQuery } from "next-sanity"
 const published = `!(_id in path("drafts.**"))`
 
 /** First 200 characters of the post body as plain text, unless an explicit excerpt is set. */
-const excerpt = `coalesce(excerpt, array::join(string::split(pt::text(body), "")[0...200], ""))`
+// Paragraphs only, so headings like "Introduction" don't lead the excerpt.
+const excerpt = `coalesce(excerpt, array::join(string::split(pt::text(body[_type == "block" && style == "normal"]), "")[0...200], ""))`
 
 const postCard = `
   _id,
   title,
   "slug": slug.current,
   mainImage,
+  "lqip": mainImage.asset->metadata.lqip,
   publishedAt,
   "excerpt": ${excerpt},
   categories[]->{ _id, title },
@@ -26,23 +28,31 @@ export const POSTS_QUERY = defineQuery(`
 `)
 
 export const LATEST_POSTS_QUERY = defineQuery(`
-  *[_type == "post" && ${published} && defined(slug.current)] | order(publishedAt desc) [0...3] { ${postCard} }
+  *[_type == "post" && ${published} && defined(slug.current)] | order(publishedAt desc) [0...5] { ${postCard} }
 `)
 
-export const CATEGORIES_QUERY = defineQuery(`
-  *[_type == "category"] | order(title asc) { _id, title }
-`)
+const indexablePost = `_type == "post" && ${published} && defined(slug.current)`
 
 export const POST_QUERY = defineQuery(`
   *[_type == "post" && ${published} && slug.current == $slug][0] {
+    _id,
     title,
     "slug": slug.current,
     author->{ name, image },
     mainImage,
+    "cover": mainImage.asset->metadata{ lqip, "width": dimensions.width, "height": dimensions.height },
     categories[]->{ _id, title },
     publishedAt,
+    _updatedAt,
     body,
-    excerpt
+    excerpt,
+    seo,
+    "previous": *[${indexablePost} && publishedAt < ^.publishedAt]
+      | order(publishedAt desc)[0] { title, "slug": slug.current },
+    "next": *[${indexablePost} && publishedAt > ^.publishedAt]
+      | order(publishedAt asc)[0] { title, "slug": slug.current },
+    "related": *[${indexablePost} && _id != ^._id && count(categories[@._ref in ^.^.categories[]._ref]) > 0]
+      | order(publishedAt desc)[0...3] { ${postCard} }
   }
 `)
 
@@ -50,22 +60,41 @@ export const POST_SLUGS_QUERY = defineQuery(`
   *[_type == "post" && ${published} && defined(slug.current)].slug.current
 `)
 
+const projectFields = `
+  _id,
+  title,
+  "slug": slug.current,
+  description,
+  mainImage,
+  publishedAt,
+  github,
+  url,
+  featured,
+  status,
+  tech,
+  githubData
+`
+
 export const PROJECTS_QUERY = defineQuery(`
-  *[_type == "project" && ${published}] | order(coalesce(order, 999) asc, _createdAt desc) {
-    _id,
-    title,
-    "slug": slug.current,
-    description,
-    mainImage,
-    publishedAt,
-    github,
-    url,
-    featured,
-    status,
-    tech,
-    githubData
-  }
+  *[_type == "project" && ${published}] | order(coalesce(order, 999) asc, _createdAt desc) { ${projectFields} }
 `)
+
+export const PROJECT_QUERY = defineQuery(`
+  *[_type == "project" && ${published} && slug.current == $slug][0] { ${projectFields}, body, seo }
+`)
+
+export const PROJECT_SLUGS_QUERY = defineQuery(`
+  *[_type == "project" && ${published} && defined(slug.current)].slug.current
+`)
+
+/** Headline numbers for the home page status panel. */
+export const HOME_STATS_QUERY = defineQuery(`{
+  "posts": count(*[_type == "post" && ${published} && defined(slug.current)]),
+  "projects": count(*[_type == "project" && ${published}]),
+  "commits": math::sum(*[_type == "project" && ${published}].githubData.commits),
+  "skills": count(*[_type == "skills"]),
+  "latestPost": *[_type == "post" && ${published}] | order(publishedAt desc)[0].publishedAt
+}`)
 
 export const SKILLS_QUERY = defineQuery(`
   *[_type == "skills"] | order(name asc) { _id, name, icon }
@@ -103,4 +132,41 @@ export const FEED_POSTS_QUERY = defineQuery(`
 /** Includes drafts on purpose: the GitHub sync updates every project with a repo. */
 export const GITHUB_PROJECTS_QUERY = defineQuery(`
   *[_type == "project" && defined(github)] { _id, title, github }
+`)
+
+/** Indexable posts and projects for the sitemap (documents marked `seo.noIndex` are left out). */
+export const SITEMAP_QUERY = defineQuery(`{
+  "posts": *[_type == "post" && ${published} && defined(slug.current) && seo.noIndex != true]
+    | order(publishedAt desc) { "slug": slug.current, _updatedAt },
+  "projects": *[_type == "project" && ${published} && defined(slug.current) && seo.noIndex != true]
+    { "slug": slug.current, _updatedAt },
+  "uses": *[_type == "uses" && _id == "uses" && count(sections) > 0][0]._updatedAt,
+  "now": *[_type == "now" && _id == "now" && count(body) > 0][0]._updatedAt
+}`)
+
+/** Small index of everything navigable, for the ⌘K command palette. */
+export const COMMAND_INDEX_QUERY = defineQuery(`{
+  "posts": *[_type == "post" && ${published} && defined(slug.current)] | order(publishedAt desc) {
+    _id, title, "slug": slug.current, "topics": categories[]->title
+  },
+  "projects": *[_type == "project" && ${published}] | order(coalesce(order, 999) asc, _createdAt desc) {
+    _id, title, "slug": slug.current, url, github
+  },
+  // Only whether a CV exists: the file itself is served from /resume.pdf.
+  "hasCv": defined(*[_type == "cv"][0].cvFile.asset),
+  // /uses and /now are only linked once they have published content.
+  "hasUses": count(*[_type == "uses" && _id == "uses"][0].sections) > 0,
+  "hasNow": count(*[_type == "now" && _id == "now"][0].body) > 0
+}`)
+
+export const USES_QUERY = defineQuery(`
+  *[_type == "uses" && _id == "uses"][0] {
+    _updatedAt,
+    intro,
+    sections[]{ _key, title, items[]{ _key, name, description, url, icon } }
+  }
+`)
+
+export const NOW_QUERY = defineQuery(`
+  *[_type == "now" && _id == "now"][0] { _updatedAt, location, body }
 `)

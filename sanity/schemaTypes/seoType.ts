@@ -17,7 +17,8 @@ export const seoType = defineType({
       name: "description",
       type: "text",
       rows: 3,
-      validation: (rule) => rule.max(160).warning("Descriptions over 160 characters get truncated."),
+      validation: (rule) =>
+        rule.max(160).warning("Descriptions over 160 characters get truncated."),
     }),
     defineField({
       name: "ogImage",

@@ -8,9 +8,12 @@ describe("iconUrl", () => {
     expect(iconUrl("logos:aws")).toBe("/icons/logos/aws.svg")
   })
 
-  it.each(["", "aws", "logos:", "logos:aws/../x", "javascript:alert(1)"])("rejects malformed name %j", (name) => {
-    expect(iconUrl(name)).toBeNull()
-  })
+  it.each(["", "aws", "logos:", "logos:aws/../x", "javascript:alert(1)"])(
+    "rejects malformed name %j",
+    (name) => {
+      expect(iconUrl(name)).toBeNull()
+    },
+  )
 })
 
 describe("renderIconSvg", () => {

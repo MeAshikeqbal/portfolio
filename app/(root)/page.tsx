@@ -1,25 +1,26 @@
-import type { Metadata } from "next";
-import EducationTimeline from "@/components/sections/EducationTimeline";
-import { ContactSection } from "@/components/sections/contact-section";
-//import ExperiencesTimeline from "@/components/sections/ExperiencesTimeline";
-import Hero from "@/components/sections/hero-section";
-import PostSection from "@/components/sections/LatestPostSection";
-import { ProjectsSection } from "@/components/sections/projects-section";
-import TechStackSection from "@/components/sections/techStack-section";
+import type { Metadata } from "next"
+import { ContactSection } from "@/components/home/contact-section"
+import { Hero } from "@/components/home/hero"
+import { InventorySection } from "@/components/home/inventory-section"
+import { ServicesSection } from "@/components/home/services-section"
+import { UptimeSection } from "@/components/home/uptime-section"
+import { WritingSection } from "@/components/home/writing-section"
+import { JsonLd } from "@/components/seo/json-ld"
+import { jsonLdGraph, personSchema, websiteSchema } from "@/lib/structured-data"
 
 export const metadata: Metadata = {
   alternates: { canonical: "/" },
-};
+}
 
-export default async function Home() {
+export default function Home() {
   return (
     <main>
+      <JsonLd data={jsonLdGraph(personSchema(), websiteSchema())} />
       <Hero />
-      <PostSection />
-      <EducationTimeline />
-      {/*<ExperiencesTimeline />*/}
-      <ProjectsSection />
-      <TechStackSection />
+      <ServicesSection />
+      <WritingSection />
+      <UptimeSection />
+      <InventorySection />
       <ContactSection />
     </main>
   )

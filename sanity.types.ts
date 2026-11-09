@@ -12,444 +12,480 @@
  * ---------------------------------------------------------------------------------
  */
 
-export declare const internalGroqTypeReferenceTo: unique symbol;
+export declare const internalGroqTypeReferenceTo: unique symbol
 
 // Source: schema.json
+export type Now = {
+  _id: string
+  _type: "now"
+  _createdAt: string
+  _updatedAt: string
+  _rev: string
+  location?: string
+  body?: BlockContent
+}
+
 export type SanityImageAssetReference = {
-  _ref: string;
-  _type: "reference";
-  _weak?: boolean;
-  [internalGroqTypeReferenceTo]?: "sanity.imageAsset";
-};
-
-export type Seo = {
-  _type: "seo";
-  title?: string;
-  description?: string;
-  ogImage?: {
-    asset?: SanityImageAssetReference;
-    media?: unknown;
-    hotspot?: SanityImageHotspot;
-    crop?: SanityImageCrop;
-    _type: "image";
-  };
-  noIndex?: boolean;
-};
-
-export type SanityFileAssetReference = {
-  _ref: string;
-  _type: "reference";
-  _weak?: boolean;
-  [internalGroqTypeReferenceTo]?: "sanity.fileAsset";
-};
-
-export type Cv = {
-  _id: string;
-  _type: "cv";
-  _createdAt: string;
-  _updatedAt: string;
-  _rev: string;
-  cvFile?: {
-    asset?: SanityFileAssetReference;
-    media?: unknown;
-    _type: "file";
-  };
-};
-
-export type Skills = {
-  _id: string;
-  _type: "skills";
-  _createdAt: string;
-  _updatedAt: string;
-  _rev: string;
-  name?: string;
-  icon?: string;
-};
-
-export type Project = {
-  _id: string;
-  _type: "project";
-  _createdAt: string;
-  _updatedAt: string;
-  _rev: string;
-  title?: string;
-  slug?: Slug;
-  description?: string;
-  status?: "active" | "maintained" | "archived";
-  featured?: boolean;
-  order?: number;
-  tech?: Array<string>;
-  body?: BlockContent;
-  mainImage?: {
-    asset?: SanityImageAssetReference;
-    media?: unknown;
-    hotspot?: SanityImageHotspot;
-    crop?: SanityImageCrop;
-    alt?: string;
-    _type: "image";
-  };
-  publishedAt?: string;
-  github?: string;
-  url?: string;
-  githubData?: {
-    stars?: number;
-    commits?: number;
-    license?: string;
-    language?: string;
-    topics?: Array<string>;
-    pushedAt?: string;
-  };
-  seo?: Seo;
-};
-
-export type SanityImageCrop = {
-  _type: "sanity.imageCrop";
-  top?: number;
-  bottom?: number;
-  left?: number;
-  right?: number;
-};
-
-export type SanityImageHotspot = {
-  _type: "sanity.imageHotspot";
-  x?: number;
-  y?: number;
-  height?: number;
-  width?: number;
-};
+  _ref: string
+  _type: "reference"
+  _weak?: boolean
+  [internalGroqTypeReferenceTo]?: "sanity.imageAsset"
+}
 
 export type BlockContent = Array<
   | {
       children?: Array<{
-        marks?: Array<string>;
-        text?: string;
-        _type: "span";
-        _key: string;
-      }>;
-      style?: "normal" | "h1" | "h2" | "h3" | "h4" | "blockquote";
-      listItem?: "bullet";
+        marks?: Array<string>
+        text?: string
+        _type: "span"
+        _key: string
+      }>
+      style?: "normal" | "h1" | "h2" | "h3" | "h4" | "blockquote"
+      listItem?: "bullet"
       markDefs?: Array<
         | {
-            href?: string;
-            _type: "link";
-            _key: string;
+            href?: string
+            _type: "link"
+            _key: string
           }
         | ({
-            _key: string;
+            _key: string
           } & Code)
-      >;
-      level?: number;
-      _type: "block";
-      _key: string;
+      >
+      level?: number
+      _type: "block"
+      _key: string
     }
   | {
-      asset?: SanityImageAssetReference;
-      media?: unknown;
-      hotspot?: SanityImageHotspot;
-      crop?: SanityImageCrop;
-      alt?: string;
-      _type: "image";
-      _key: string;
+      asset?: SanityImageAssetReference
+      media?: unknown
+      hotspot?: SanityImageHotspot
+      crop?: SanityImageCrop
+      alt?: string
+      _type: "image"
+      _key: string
     }
->;
+>
+
+export type Uses = {
+  _id: string
+  _type: "uses"
+  _createdAt: string
+  _updatedAt: string
+  _rev: string
+  intro?: string
+  sections?: Array<{
+    title?: string
+    items?: Array<{
+      name?: string
+      description?: string
+      url?: string
+      icon?: string
+      _type: "usesItem"
+      _key: string
+    }>
+    _type: "usesSection"
+    _key: string
+  }>
+}
+
+export type Seo = {
+  _type: "seo"
+  title?: string
+  description?: string
+  ogImage?: {
+    asset?: SanityImageAssetReference
+    media?: unknown
+    hotspot?: SanityImageHotspot
+    crop?: SanityImageCrop
+    _type: "image"
+  }
+  noIndex?: boolean
+}
+
+export type SanityFileAssetReference = {
+  _ref: string
+  _type: "reference"
+  _weak?: boolean
+  [internalGroqTypeReferenceTo]?: "sanity.fileAsset"
+}
+
+export type Cv = {
+  _id: string
+  _type: "cv"
+  _createdAt: string
+  _updatedAt: string
+  _rev: string
+  cvFile?: {
+    asset?: SanityFileAssetReference
+    media?: unknown
+    _type: "file"
+  }
+}
+
+export type Skills = {
+  _id: string
+  _type: "skills"
+  _createdAt: string
+  _updatedAt: string
+  _rev: string
+  name?: string
+  icon?: string
+}
+
+export type Project = {
+  _id: string
+  _type: "project"
+  _createdAt: string
+  _updatedAt: string
+  _rev: string
+  title?: string
+  slug?: Slug
+  description?: string
+  status?: "active" | "maintained" | "archived"
+  featured?: boolean
+  order?: number
+  tech?: Array<string>
+  body?: BlockContent
+  mainImage?: {
+    asset?: SanityImageAssetReference
+    media?: unknown
+    hotspot?: SanityImageHotspot
+    crop?: SanityImageCrop
+    alt?: string
+    _type: "image"
+  }
+  publishedAt?: string
+  github?: string
+  url?: string
+  githubData?: {
+    stars?: number
+    commits?: number
+    license?: string
+    language?: string
+    topics?: Array<string>
+    pushedAt?: string
+    weeklyCommits?: Array<number>
+  }
+  seo?: Seo
+}
+
+export type SanityImageCrop = {
+  _type: "sanity.imageCrop"
+  top?: number
+  bottom?: number
+  left?: number
+  right?: number
+}
+
+export type SanityImageHotspot = {
+  _type: "sanity.imageHotspot"
+  x?: number
+  y?: number
+  height?: number
+  width?: number
+}
 
 export type Slug = {
-  _type: "slug";
-  current?: string;
-  source?: string;
-};
+  _type: "slug"
+  current?: string
+  source?: string
+}
 
 export type Education = {
-  _id: string;
-  _type: "education";
-  _createdAt: string;
-  _updatedAt: string;
-  _rev: string;
-  year?: string;
-  degree?: string;
-  school?: string;
+  _id: string
+  _type: "education"
+  _createdAt: string
+  _updatedAt: string
+  _rev: string
+  year?: string
+  degree?: string
+  school?: string
   schoolLogo?: {
-    asset?: SanityImageAssetReference;
-    media?: unknown;
-    hotspot?: SanityImageHotspot;
-    crop?: SanityImageCrop;
-    _type: "image";
-  };
-  desc?: string;
-};
+    asset?: SanityImageAssetReference
+    media?: unknown
+    hotspot?: SanityImageHotspot
+    crop?: SanityImageCrop
+    _type: "image"
+  }
+  desc?: string
+}
 
 export type Experiences = {
-  _id: string;
-  _type: "experiences";
-  _createdAt: string;
-  _updatedAt: string;
-  _rev: string;
-  year?: string;
+  _id: string
+  _type: "experiences"
+  _createdAt: string
+  _updatedAt: string
+  _rev: string
+  year?: string
   works?: Array<{
-    name?: string;
-    company?: string;
+    name?: string
+    company?: string
     copmanyLogo?: {
-      asset?: SanityImageAssetReference;
-      media?: unknown;
-      hotspot?: SanityImageHotspot;
-      crop?: SanityImageCrop;
-      _type: "image";
-    };
-    desc?: string;
-    _key: string;
-  }>;
-};
+      asset?: SanityImageAssetReference
+      media?: unknown
+      hotspot?: SanityImageHotspot
+      crop?: SanityImageCrop
+      _type: "image"
+    }
+    desc?: string
+    _key: string
+  }>
+}
 
 export type Contact = {
-  _id: string;
-  _type: "contact";
-  _createdAt: string;
-  _updatedAt: string;
-  _rev: string;
-  name?: string;
-  email?: string;
-  message?: string;
-};
+  _id: string
+  _type: "contact"
+  _createdAt: string
+  _updatedAt: string
+  _rev: string
+  name?: string
+  email?: string
+  message?: string
+}
 
 export type Abouts = {
-  _id: string;
-  _type: "abouts";
-  _createdAt: string;
-  _updatedAt: string;
-  _rev: string;
-  title?: string;
-  description?: string;
+  _id: string
+  _type: "abouts"
+  _createdAt: string
+  _updatedAt: string
+  _rev: string
+  title?: string
+  description?: string
   imgUrl?: {
-    asset?: SanityImageAssetReference;
-    media?: unknown;
-    hotspot?: SanityImageHotspot;
-    crop?: SanityImageCrop;
-    _type: "image";
-  };
-};
+    asset?: SanityImageAssetReference
+    media?: unknown
+    hotspot?: SanityImageHotspot
+    crop?: SanityImageCrop
+    _type: "image"
+  }
+}
 
 export type AuthorReference = {
-  _ref: string;
-  _type: "reference";
-  _weak?: boolean;
-  [internalGroqTypeReferenceTo]?: "author";
-};
+  _ref: string
+  _type: "reference"
+  _weak?: boolean
+  [internalGroqTypeReferenceTo]?: "author"
+}
 
 export type CategoryReference = {
-  _ref: string;
-  _type: "reference";
-  _weak?: boolean;
-  [internalGroqTypeReferenceTo]?: "category";
-};
+  _ref: string
+  _type: "reference"
+  _weak?: boolean
+  [internalGroqTypeReferenceTo]?: "category"
+}
 
 export type Post = {
-  _id: string;
-  _type: "post";
-  _createdAt: string;
-  _updatedAt: string;
-  _rev: string;
-  title?: string;
-  slug?: Slug;
-  excerpt?: string;
-  author?: AuthorReference;
+  _id: string
+  _type: "post"
+  _createdAt: string
+  _updatedAt: string
+  _rev: string
+  title?: string
+  slug?: Slug
+  excerpt?: string
+  author?: AuthorReference
   mainImage?: {
-    asset?: SanityImageAssetReference;
-    media?: unknown;
-    hotspot?: SanityImageHotspot;
-    crop?: SanityImageCrop;
-    alt?: string;
-    _type: "image";
-  };
+    asset?: SanityImageAssetReference
+    media?: unknown
+    hotspot?: SanityImageHotspot
+    crop?: SanityImageCrop
+    alt?: string
+    _type: "image"
+  }
   categories?: Array<
     {
-      _key: string;
+      _key: string
     } & CategoryReference
-  >;
-  publishedAt?: string;
-  featured?: boolean;
-  body?: BlockContent;
-  seo?: Seo;
-};
+  >
+  publishedAt?: string
+  featured?: boolean
+  body?: BlockContent
+  seo?: Seo
+}
 
 export type Author = {
-  _id: string;
-  _type: "author";
-  _createdAt: string;
-  _updatedAt: string;
-  _rev: string;
-  name?: string;
-  slug?: Slug;
+  _id: string
+  _type: "author"
+  _createdAt: string
+  _updatedAt: string
+  _rev: string
+  name?: string
+  slug?: Slug
   image?: {
-    asset?: SanityImageAssetReference;
-    media?: unknown;
-    hotspot?: SanityImageHotspot;
-    crop?: SanityImageCrop;
-    _type: "image";
-  };
+    asset?: SanityImageAssetReference
+    media?: unknown
+    hotspot?: SanityImageHotspot
+    crop?: SanityImageCrop
+    _type: "image"
+  }
   bio?: Array<{
     children?: Array<{
-      marks?: Array<string>;
-      text?: string;
-      _type: "span";
-      _key: string;
-    }>;
-    style?: "normal";
-    listItem?: never;
+      marks?: Array<string>
+      text?: string
+      _type: "span"
+      _key: string
+    }>
+    style?: "normal"
+    listItem?: never
     markDefs?: Array<{
-      href?: string;
-      _type: "link";
-      _key: string;
-    }>;
-    level?: number;
-    _type: "block";
-    _key: string;
-  }>;
-};
+      href?: string
+      _type: "link"
+      _key: string
+    }>
+    level?: number
+    _type: "block"
+    _key: string
+  }>
+}
 
 export type Category = {
-  _id: string;
-  _type: "category";
-  _createdAt: string;
-  _updatedAt: string;
-  _rev: string;
-  title?: string;
-  slug?: Slug;
-  description?: string;
-};
+  _id: string
+  _type: "category"
+  _createdAt: string
+  _updatedAt: string
+  _rev: string
+  title?: string
+  slug?: Slug
+  description?: string
+}
 
 export type Code = {
-  _type: "code";
-  language?: string;
-  filename?: string;
-  code?: string;
-  highlightedLines?: Array<number>;
-};
+  _type: "code"
+  language?: string
+  filename?: string
+  code?: string
+  highlightedLines?: Array<number>
+}
 
 export type MediaFolderReference = {
-  _ref: string;
-  _type: "reference";
-  _weak?: boolean;
-  [internalGroqTypeReferenceTo]?: "media.folder";
-};
+  _ref: string
+  _type: "reference"
+  _weak?: boolean
+  [internalGroqTypeReferenceTo]?: "media.folder"
+}
 
 export type MediaFolder = {
-  _id: string;
-  _type: "media.folder";
-  _createdAt: string;
-  _updatedAt: string;
-  _rev: string;
-  name?: string;
-  parent?: MediaFolderReference;
-};
+  _id: string
+  _type: "media.folder"
+  _createdAt: string
+  _updatedAt: string
+  _rev: string
+  name?: string
+  parent?: MediaFolderReference
+}
 
 export type MediaTag = {
-  _id: string;
-  _type: "media.tag";
-  _createdAt: string;
-  _updatedAt: string;
-  _rev: string;
-  name?: Slug;
-};
+  _id: string
+  _type: "media.tag"
+  _createdAt: string
+  _updatedAt: string
+  _rev: string
+  name?: Slug
+}
 
 export type SanityImagePaletteSwatch = {
-  _type: "sanity.imagePaletteSwatch";
-  background?: string;
-  foreground?: string;
-  population?: number;
-  title?: string;
-};
+  _type: "sanity.imagePaletteSwatch"
+  background?: string
+  foreground?: string
+  population?: number
+  title?: string
+}
 
 export type SanityImagePalette = {
-  _type: "sanity.imagePalette";
-  darkMuted?: SanityImagePaletteSwatch;
-  lightVibrant?: SanityImagePaletteSwatch;
-  darkVibrant?: SanityImagePaletteSwatch;
-  vibrant?: SanityImagePaletteSwatch;
-  dominant?: SanityImagePaletteSwatch;
-  lightMuted?: SanityImagePaletteSwatch;
-  muted?: SanityImagePaletteSwatch;
-};
+  _type: "sanity.imagePalette"
+  darkMuted?: SanityImagePaletteSwatch
+  lightVibrant?: SanityImagePaletteSwatch
+  darkVibrant?: SanityImagePaletteSwatch
+  vibrant?: SanityImagePaletteSwatch
+  dominant?: SanityImagePaletteSwatch
+  lightMuted?: SanityImagePaletteSwatch
+  muted?: SanityImagePaletteSwatch
+}
 
 export type SanityImageDimensions = {
-  _type: "sanity.imageDimensions";
-  height?: number;
-  width?: number;
-  aspectRatio?: number;
-};
+  _type: "sanity.imageDimensions"
+  height?: number
+  width?: number
+  aspectRatio?: number
+}
 
 export type SanityImageMetadata = {
-  _type: "sanity.imageMetadata";
-  location?: Geopoint;
-  dimensions?: SanityImageDimensions;
-  palette?: SanityImagePalette;
-  lqip?: string;
-  blurHash?: string;
-  thumbHash?: string;
-  hasAlpha?: boolean;
-  isOpaque?: boolean;
-};
+  _type: "sanity.imageMetadata"
+  location?: Geopoint
+  dimensions?: SanityImageDimensions
+  palette?: SanityImagePalette
+  lqip?: string
+  blurHash?: string
+  thumbHash?: string
+  hasAlpha?: boolean
+  isOpaque?: boolean
+}
 
 export type SanityFileAsset = {
-  _id: string;
-  _type: "sanity.fileAsset";
-  _createdAt: string;
-  _updatedAt: string;
-  _rev: string;
-  originalFilename?: string;
-  label?: string;
-  title?: string;
-  description?: string;
-  altText?: string;
-  sha1hash?: string;
-  extension?: string;
-  mimeType?: string;
-  size?: number;
-  assetId?: string;
-  uploadId?: string;
-  path?: string;
-  url?: string;
-  source?: SanityAssetSourceData;
-};
+  _id: string
+  _type: "sanity.fileAsset"
+  _createdAt: string
+  _updatedAt: string
+  _rev: string
+  originalFilename?: string
+  label?: string
+  title?: string
+  description?: string
+  altText?: string
+  sha1hash?: string
+  extension?: string
+  mimeType?: string
+  size?: number
+  assetId?: string
+  uploadId?: string
+  path?: string
+  url?: string
+  source?: SanityAssetSourceData
+}
 
 export type SanityAssetSourceData = {
-  _type: "sanity.assetSourceData";
-  name?: string;
-  id?: string;
-  url?: string;
-};
+  _type: "sanity.assetSourceData"
+  name?: string
+  id?: string
+  url?: string
+}
 
 export type SanityImageAsset = {
-  _id: string;
-  _type: "sanity.imageAsset";
-  _createdAt: string;
-  _updatedAt: string;
-  _rev: string;
-  originalFilename?: string;
-  label?: string;
-  title?: string;
-  description?: string;
-  altText?: string;
-  sha1hash?: string;
-  extension?: string;
-  mimeType?: string;
-  size?: number;
-  assetId?: string;
-  uploadId?: string;
-  path?: string;
-  url?: string;
-  metadata?: SanityImageMetadata;
-  source?: SanityAssetSourceData;
-};
+  _id: string
+  _type: "sanity.imageAsset"
+  _createdAt: string
+  _updatedAt: string
+  _rev: string
+  originalFilename?: string
+  label?: string
+  title?: string
+  description?: string
+  altText?: string
+  sha1hash?: string
+  extension?: string
+  mimeType?: string
+  size?: number
+  assetId?: string
+  uploadId?: string
+  path?: string
+  url?: string
+  metadata?: SanityImageMetadata
+  source?: SanityAssetSourceData
+}
 
 export type Geopoint = {
-  _type: "geopoint";
-  lat?: number;
-  lng?: number;
-  alt?: number;
-};
+  _type: "geopoint"
+  lat?: number
+  lng?: number
+  alt?: number
+}
 
 export type AllSanitySchemaTypes =
+  | Now
   | SanityImageAssetReference
+  | BlockContent
+  | Uses
   | Seo
   | SanityFileAssetReference
   | Cv
@@ -457,7 +493,6 @@ export type AllSanitySchemaTypes =
   | Project
   | SanityImageCrop
   | SanityImageHotspot
-  | BlockContent
   | Slug
   | Education
   | Experiences
@@ -479,234 +514,391 @@ export type AllSanitySchemaTypes =
   | SanityFileAsset
   | SanityAssetSourceData
   | SanityImageAsset
-  | Geopoint;
+  | Geopoint
 
 // Source: sanity/lib/queries.ts
 // Variable: POSTS_QUERY
-// Query: *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current)] | order(publishedAt desc) {   _id,  title,  "slug": slug.current,  mainImage,  publishedAt,  "excerpt": coalesce(excerpt, array::join(string::split(pt::text(body), "")[0...200], "")),  categories[]->{ _id, title },  author->{ name } }
+// Query: *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current)] | order(publishedAt desc) {   _id,  title,  "slug": slug.current,  mainImage,  "lqip": mainImage.asset->metadata.lqip,  publishedAt,  "excerpt": coalesce(excerpt, array::join(string::split(pt::text(body[_type == "block" && style == "normal"]), "")[0...200], "")),  categories[]->{ _id, title },  author->{ name } }
 export type POSTS_QUERY_RESULT = Array<{
-  _id: string;
-  title: string | null;
-  slug: string | null;
+  _id: string
+  title: string | null
+  slug: string | null
   mainImage: {
-    asset?: SanityImageAssetReference;
-    media?: unknown;
-    hotspot?: SanityImageHotspot;
-    crop?: SanityImageCrop;
-    alt?: string;
-    _type: "image";
-  } | null;
-  publishedAt: string | null;
-  excerpt: string;
+    asset?: SanityImageAssetReference
+    media?: unknown
+    hotspot?: SanityImageHotspot
+    crop?: SanityImageCrop
+    alt?: string
+    _type: "image"
+  } | null
+  lqip: string | null
+  publishedAt: string | null
+  excerpt: string
   categories: Array<{
-    _id: string;
-    title: string | null;
-  }> | null;
+    _id: string
+    title: string | null
+  }> | null
   author: {
-    name: string | null;
-  } | null;
-}>;
+    name: string | null
+  } | null
+}>
 
 // Source: sanity/lib/queries.ts
 // Variable: LATEST_POSTS_QUERY
-// Query: *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current)] | order(publishedAt desc) [0...3] {   _id,  title,  "slug": slug.current,  mainImage,  publishedAt,  "excerpt": coalesce(excerpt, array::join(string::split(pt::text(body), "")[0...200], "")),  categories[]->{ _id, title },  author->{ name } }
+// Query: *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current)] | order(publishedAt desc) [0...5] {   _id,  title,  "slug": slug.current,  mainImage,  "lqip": mainImage.asset->metadata.lqip,  publishedAt,  "excerpt": coalesce(excerpt, array::join(string::split(pt::text(body[_type == "block" && style == "normal"]), "")[0...200], "")),  categories[]->{ _id, title },  author->{ name } }
 export type LATEST_POSTS_QUERY_RESULT = Array<{
-  _id: string;
-  title: string | null;
-  slug: string | null;
+  _id: string
+  title: string | null
+  slug: string | null
   mainImage: {
-    asset?: SanityImageAssetReference;
-    media?: unknown;
-    hotspot?: SanityImageHotspot;
-    crop?: SanityImageCrop;
-    alt?: string;
-    _type: "image";
-  } | null;
-  publishedAt: string | null;
-  excerpt: string;
+    asset?: SanityImageAssetReference
+    media?: unknown
+    hotspot?: SanityImageHotspot
+    crop?: SanityImageCrop
+    alt?: string
+    _type: "image"
+  } | null
+  lqip: string | null
+  publishedAt: string | null
+  excerpt: string
   categories: Array<{
-    _id: string;
-    title: string | null;
-  }> | null;
+    _id: string
+    title: string | null
+  }> | null
   author: {
-    name: string | null;
-  } | null;
-}>;
-
-// Source: sanity/lib/queries.ts
-// Variable: CATEGORIES_QUERY
-// Query: *[_type == "category"] | order(title asc) { _id, title }
-export type CATEGORIES_QUERY_RESULT = Array<{
-  _id: string;
-  title: string | null;
-}>;
+    name: string | null
+  } | null
+}>
 
 // Source: sanity/lib/queries.ts
 // Variable: POST_QUERY
-// Query: *[_type == "post" && !(_id in path("drafts.**")) && slug.current == $slug][0] {    title,    "slug": slug.current,    author->{ name, image },    mainImage,    categories[]->{ _id, title },    publishedAt,    body,    excerpt  }
+// Query: *[_type == "post" && !(_id in path("drafts.**")) && slug.current == $slug][0] {    _id,    title,    "slug": slug.current,    author->{ name, image },    mainImage,    "cover": mainImage.asset->metadata{ lqip, "width": dimensions.width, "height": dimensions.height },    categories[]->{ _id, title },    publishedAt,    _updatedAt,    body,    excerpt,    seo,    "previous": *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && publishedAt < ^.publishedAt]      | order(publishedAt desc)[0] { title, "slug": slug.current },    "next": *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && publishedAt > ^.publishedAt]      | order(publishedAt asc)[0] { title, "slug": slug.current },    "related": *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && _id != ^._id && count(categories[@._ref in ^.^.categories[]._ref]) > 0]      | order(publishedAt desc)[0...3] {   _id,  title,  "slug": slug.current,  mainImage,  "lqip": mainImage.asset->metadata.lqip,  publishedAt,  "excerpt": coalesce(excerpt, array::join(string::split(pt::text(body[_type == "block" && style == "normal"]), "")[0...200], "")),  categories[]->{ _id, title },  author->{ name } }  }
 export type POST_QUERY_RESULT = {
-  title: string | null;
-  slug: string | null;
+  _id: string
+  title: string | null
+  slug: string | null
   author: {
-    name: string | null;
+    name: string | null
     image: {
-      asset?: SanityImageAssetReference;
-      media?: unknown;
-      hotspot?: SanityImageHotspot;
-      crop?: SanityImageCrop;
-      _type: "image";
-    } | null;
-  } | null;
+      asset?: SanityImageAssetReference
+      media?: unknown
+      hotspot?: SanityImageHotspot
+      crop?: SanityImageCrop
+      _type: "image"
+    } | null
+  } | null
   mainImage: {
-    asset?: SanityImageAssetReference;
-    media?: unknown;
-    hotspot?: SanityImageHotspot;
-    crop?: SanityImageCrop;
-    alt?: string;
-    _type: "image";
-  } | null;
+    asset?: SanityImageAssetReference
+    media?: unknown
+    hotspot?: SanityImageHotspot
+    crop?: SanityImageCrop
+    alt?: string
+    _type: "image"
+  } | null
+  cover: {
+    lqip: string | null
+    width: number | null
+    height: number | null
+  } | null
   categories: Array<{
-    _id: string;
-    title: string | null;
-  }> | null;
-  publishedAt: string | null;
-  body: BlockContent | null;
-  excerpt: string | null;
-} | null;
+    _id: string
+    title: string | null
+  }> | null
+  publishedAt: string | null
+  _updatedAt: string
+  body: BlockContent | null
+  excerpt: string | null
+  seo: Seo | null
+  previous: {
+    title: string | null
+    slug: string | null
+  } | null
+  next: {
+    title: string | null
+    slug: string | null
+  } | null
+  related: Array<{
+    _id: string
+    title: string | null
+    slug: string | null
+    mainImage: {
+      asset?: SanityImageAssetReference
+      media?: unknown
+      hotspot?: SanityImageHotspot
+      crop?: SanityImageCrop
+      alt?: string
+      _type: "image"
+    } | null
+    lqip: string | null
+    publishedAt: string | null
+    excerpt: string
+    categories: Array<{
+      _id: string
+      title: string | null
+    }> | null
+    author: {
+      name: string | null
+    } | null
+  }>
+} | null
 
 // Source: sanity/lib/queries.ts
 // Variable: POST_SLUGS_QUERY
 // Query: *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current)].slug.current
-export type POST_SLUGS_QUERY_RESULT = Array<string | null>;
+export type POST_SLUGS_QUERY_RESULT = Array<string | null>
 
 // Source: sanity/lib/queries.ts
 // Variable: PROJECTS_QUERY
-// Query: *[_type == "project" && !(_id in path("drafts.**"))] | order(coalesce(order, 999) asc, _createdAt desc) {    _id,    title,    "slug": slug.current,    description,    mainImage,    publishedAt,    github,    url,    featured,    status,    tech,    githubData  }
+// Query: *[_type == "project" && !(_id in path("drafts.**"))] | order(coalesce(order, 999) asc, _createdAt desc) {   _id,  title,  "slug": slug.current,  description,  mainImage,  publishedAt,  github,  url,  featured,  status,  tech,  githubData }
 export type PROJECTS_QUERY_RESULT = Array<{
-  _id: string;
-  title: string | null;
-  slug: string | null;
-  description: string | null;
+  _id: string
+  title: string | null
+  slug: string | null
+  description: string | null
   mainImage: {
-    asset?: SanityImageAssetReference;
-    media?: unknown;
-    hotspot?: SanityImageHotspot;
-    crop?: SanityImageCrop;
-    alt?: string;
-    _type: "image";
-  } | null;
-  publishedAt: string | null;
-  github: string | null;
-  url: string | null;
-  featured: boolean | null;
-  status: "active" | "archived" | "maintained" | null;
-  tech: Array<string> | null;
+    asset?: SanityImageAssetReference
+    media?: unknown
+    hotspot?: SanityImageHotspot
+    crop?: SanityImageCrop
+    alt?: string
+    _type: "image"
+  } | null
+  publishedAt: string | null
+  github: string | null
+  url: string | null
+  featured: boolean | null
+  status: "active" | "archived" | "maintained" | null
+  tech: Array<string> | null
   githubData: {
-    stars?: number;
-    commits?: number;
-    license?: string;
-    language?: string;
-    topics?: Array<string>;
-    pushedAt?: string;
-  } | null;
-}>;
+    stars?: number
+    commits?: number
+    license?: string
+    language?: string
+    topics?: Array<string>
+    pushedAt?: string
+    weeklyCommits?: Array<number>
+  } | null
+}>
+
+// Source: sanity/lib/queries.ts
+// Variable: PROJECT_QUERY
+// Query: *[_type == "project" && !(_id in path("drafts.**")) && slug.current == $slug][0] {   _id,  title,  "slug": slug.current,  description,  mainImage,  publishedAt,  github,  url,  featured,  status,  tech,  githubData, body, seo }
+export type PROJECT_QUERY_RESULT = {
+  _id: string
+  title: string | null
+  slug: string | null
+  description: string | null
+  mainImage: {
+    asset?: SanityImageAssetReference
+    media?: unknown
+    hotspot?: SanityImageHotspot
+    crop?: SanityImageCrop
+    alt?: string
+    _type: "image"
+  } | null
+  publishedAt: string | null
+  github: string | null
+  url: string | null
+  featured: boolean | null
+  status: "active" | "archived" | "maintained" | null
+  tech: Array<string> | null
+  githubData: {
+    stars?: number
+    commits?: number
+    license?: string
+    language?: string
+    topics?: Array<string>
+    pushedAt?: string
+    weeklyCommits?: Array<number>
+  } | null
+  body: BlockContent | null
+  seo: Seo | null
+} | null
+
+// Source: sanity/lib/queries.ts
+// Variable: PROJECT_SLUGS_QUERY
+// Query: *[_type == "project" && !(_id in path("drafts.**")) && defined(slug.current)].slug.current
+export type PROJECT_SLUGS_QUERY_RESULT = Array<string | null>
+
+// Source: sanity/lib/queries.ts
+// Variable: HOME_STATS_QUERY
+// Query: {  "posts": count(*[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current)]),  "projects": count(*[_type == "project" && !(_id in path("drafts.**"))]),  "commits": math::sum(*[_type == "project" && !(_id in path("drafts.**"))].githubData.commits),  "skills": count(*[_type == "skills"]),  "latestPost": *[_type == "post" && !(_id in path("drafts.**"))] | order(publishedAt desc)[0].publishedAt}
+export type HOME_STATS_QUERY_RESULT = {
+  posts: number
+  projects: number
+  commits: number
+  skills: number
+  latestPost: string | null
+}
 
 // Source: sanity/lib/queries.ts
 // Variable: SKILLS_QUERY
 // Query: *[_type == "skills"] | order(name asc) { _id, name, icon }
 export type SKILLS_QUERY_RESULT = Array<{
-  _id: string;
-  name: string | null;
-  icon: string | null;
-}>;
+  _id: string
+  name: string | null
+  icon: string | null
+}>
 
 // Source: sanity/lib/queries.ts
 // Variable: EDUCATION_QUERY
 // Query: *[_type == "education"] | order(year desc) { _id, year, degree, school, schoolLogo, desc }
 export type EDUCATION_QUERY_RESULT = Array<{
-  _id: string;
-  year: string | null;
-  degree: string | null;
-  school: string | null;
+  _id: string
+  year: string | null
+  degree: string | null
+  school: string | null
   schoolLogo: {
-    asset?: SanityImageAssetReference;
-    media?: unknown;
-    hotspot?: SanityImageHotspot;
-    crop?: SanityImageCrop;
-    _type: "image";
-  } | null;
-  desc: string | null;
-}>;
+    asset?: SanityImageAssetReference
+    media?: unknown
+    hotspot?: SanityImageHotspot
+    crop?: SanityImageCrop
+    _type: "image"
+  } | null
+  desc: string | null
+}>
 
 // Source: sanity/lib/queries.ts
 // Variable: EXPERIENCES_QUERY
 // Query: *[_type == "experiences"] | order(year desc) {    _id,    year,    works[]{ _key, name, company, copmanyLogo, desc }  }
 export type EXPERIENCES_QUERY_RESULT = Array<{
-  _id: string;
-  year: string | null;
+  _id: string
+  year: string | null
   works: Array<{
-    _key: string;
-    name: string | null;
-    company: string | null;
+    _key: string
+    name: string | null
+    company: string | null
     copmanyLogo: {
-      asset?: SanityImageAssetReference;
-      media?: unknown;
-      hotspot?: SanityImageHotspot;
-      crop?: SanityImageCrop;
-      _type: "image";
-    } | null;
-    desc: string | null;
-  }> | null;
-}>;
+      asset?: SanityImageAssetReference
+      media?: unknown
+      hotspot?: SanityImageHotspot
+      crop?: SanityImageCrop
+      _type: "image"
+    } | null
+    desc: string | null
+  }> | null
+}>
 
 // Source: sanity/lib/queries.ts
 // Variable: CV_URL_QUERY
 // Query: *[_type == "cv"][0].cvFile.asset->url
-export type CV_URL_QUERY_RESULT = string | null;
+export type CV_URL_QUERY_RESULT = string | null
 
 // Source: sanity/lib/queries.ts
 // Variable: FEED_POSTS_QUERY
-// Query: *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current)] | order(publishedAt desc) {    title,    "slug": slug.current,    publishedAt,    _updatedAt,    "excerpt": coalesce(excerpt, array::join(string::split(pt::text(body), "")[0...200], "")),    author->{ name },    "categories": categories[]->title,    "image": mainImage.asset->{ url, "mimeType": mimeType }  }
+// Query: *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current)] | order(publishedAt desc) {    title,    "slug": slug.current,    publishedAt,    _updatedAt,    "excerpt": coalesce(excerpt, array::join(string::split(pt::text(body[_type == "block" && style == "normal"]), "")[0...200], "")),    author->{ name },    "categories": categories[]->title,    "image": mainImage.asset->{ url, "mimeType": mimeType }  }
 export type FEED_POSTS_QUERY_RESULT = Array<{
-  title: string | null;
-  slug: string | null;
-  publishedAt: string | null;
-  _updatedAt: string;
-  excerpt: string;
+  title: string | null
+  slug: string | null
+  publishedAt: string | null
+  _updatedAt: string
+  excerpt: string
   author: {
-    name: string | null;
-  } | null;
-  categories: Array<string | null> | null;
+    name: string | null
+  } | null
+  categories: Array<string | null> | null
   image: {
-    url: string | null;
-    mimeType: string | null;
-  } | null;
-}>;
+    url: string | null
+    mimeType: string | null
+  } | null
+}>
 
 // Source: sanity/lib/queries.ts
 // Variable: GITHUB_PROJECTS_QUERY
 // Query: *[_type == "project" && defined(github)] { _id, title, github }
 export type GITHUB_PROJECTS_QUERY_RESULT = Array<{
-  _id: string;
-  title: string | null;
-  github: string;
-}>;
+  _id: string
+  title: string | null
+  github: string
+}>
+
+// Source: sanity/lib/queries.ts
+// Variable: SITEMAP_QUERY
+// Query: {  "posts": *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && seo.noIndex != true]    | order(publishedAt desc) { "slug": slug.current, _updatedAt },  "projects": *[_type == "project" && !(_id in path("drafts.**")) && defined(slug.current) && seo.noIndex != true]    { "slug": slug.current, _updatedAt },  "uses": *[_type == "uses" && _id == "uses" && count(sections) > 0][0]._updatedAt,  "now": *[_type == "now" && _id == "now" && count(body) > 0][0]._updatedAt}
+export type SITEMAP_QUERY_RESULT = {
+  posts: Array<{
+    slug: string | null
+    _updatedAt: string
+  }>
+  projects: Array<{
+    slug: string | null
+    _updatedAt: string
+  }>
+  uses: string | null
+  now: string | null
+}
+
+// Source: sanity/lib/queries.ts
+// Variable: COMMAND_INDEX_QUERY
+// Query: {  "posts": *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current)] | order(publishedAt desc) {    _id, title, "slug": slug.current, "topics": categories[]->title  },  "projects": *[_type == "project" && !(_id in path("drafts.**"))] | order(coalesce(order, 999) asc, _createdAt desc) {    _id, title, "slug": slug.current, url, github  },  // Only whether a CV exists: the file itself is served from /resume.pdf.  "hasCv": defined(*[_type == "cv"][0].cvFile.asset),  // /uses and /now are only linked once they have published content.  "hasUses": count(*[_type == "uses" && _id == "uses"][0].sections) > 0,  "hasNow": count(*[_type == "now" && _id == "now"][0].body) > 0}
+export type COMMAND_INDEX_QUERY_RESULT = {
+  posts: Array<{
+    _id: string
+    title: string | null
+    slug: string | null
+    topics: Array<string | null> | null
+  }>
+  projects: Array<{
+    _id: string
+    title: string | null
+    slug: string | null
+    url: string | null
+    github: string | null
+  }>
+  hasCv: false | true
+  hasUses: boolean | null
+  hasNow: boolean | null
+}
+
+// Source: sanity/lib/queries.ts
+// Variable: USES_QUERY
+// Query: *[_type == "uses" && _id == "uses"][0] {    _updatedAt,    intro,    sections[]{ _key, title, items[]{ _key, name, description, url, icon } }  }
+export type USES_QUERY_RESULT = {
+  _updatedAt: string
+  intro: string | null
+  sections: Array<{
+    _key: string
+    title: string | null
+    items: Array<{
+      _key: string
+      name: string | null
+      description: string | null
+      url: string | null
+      icon: string | null
+    }> | null
+  }> | null
+} | null
+
+// Source: sanity/lib/queries.ts
+// Variable: NOW_QUERY
+// Query: *[_type == "now" && _id == "now"][0] { _updatedAt, location, body }
+export type NOW_QUERY_RESULT = {
+  _updatedAt: string
+  location: string | null
+  body: BlockContent | null
+} | null
 
 // Query TypeMap
 declare global {
   interface SanityQueries {
-    '\n  *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current)] | order(publishedAt desc) { \n  _id,\n  title,\n  "slug": slug.current,\n  mainImage,\n  publishedAt,\n  "excerpt": coalesce(excerpt, array::join(string::split(pt::text(body), "")[0...200], "")),\n  categories[]->{ _id, title },\n  author->{ name }\n }\n': POSTS_QUERY_RESULT;
-    '\n  *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current)] | order(publishedAt desc) [0...3] { \n  _id,\n  title,\n  "slug": slug.current,\n  mainImage,\n  publishedAt,\n  "excerpt": coalesce(excerpt, array::join(string::split(pt::text(body), "")[0...200], "")),\n  categories[]->{ _id, title },\n  author->{ name }\n }\n': LATEST_POSTS_QUERY_RESULT;
-    '\n  *[_type == "category"] | order(title asc) { _id, title }\n': CATEGORIES_QUERY_RESULT;
-    '\n  *[_type == "post" && !(_id in path("drafts.**")) && slug.current == $slug][0] {\n    title,\n    "slug": slug.current,\n    author->{ name, image },\n    mainImage,\n    categories[]->{ _id, title },\n    publishedAt,\n    body,\n    excerpt\n  }\n': POST_QUERY_RESULT;
-    '\n  *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current)].slug.current\n': POST_SLUGS_QUERY_RESULT;
-    '\n  *[_type == "project" && !(_id in path("drafts.**"))] | order(coalesce(order, 999) asc, _createdAt desc) {\n    _id,\n    title,\n    "slug": slug.current,\n    description,\n    mainImage,\n    publishedAt,\n    github,\n    url,\n    featured,\n    status,\n    tech,\n    githubData\n  }\n': PROJECTS_QUERY_RESULT;
-    '\n  *[_type == "skills"] | order(name asc) { _id, name, icon }\n': SKILLS_QUERY_RESULT;
-    '\n  *[_type == "education"] | order(year desc) { _id, year, degree, school, schoolLogo, desc }\n': EDUCATION_QUERY_RESULT;
-    '\n  *[_type == "experiences"] | order(year desc) {\n    _id,\n    year,\n    works[]{ _key, name, company, copmanyLogo, desc }\n  }\n': EXPERIENCES_QUERY_RESULT;
-    '\n  *[_type == "cv"][0].cvFile.asset->url\n': CV_URL_QUERY_RESULT;
-    '\n  *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current)] | order(publishedAt desc) {\n    title,\n    "slug": slug.current,\n    publishedAt,\n    _updatedAt,\n    "excerpt": coalesce(excerpt, array::join(string::split(pt::text(body), "")[0...200], "")),\n    author->{ name },\n    "categories": categories[]->title,\n    "image": mainImage.asset->{ url, "mimeType": mimeType }\n  }\n': FEED_POSTS_QUERY_RESULT;
-    '\n  *[_type == "project" && defined(github)] { _id, title, github }\n': GITHUB_PROJECTS_QUERY_RESULT;
+    '\n  *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current)] | order(publishedAt desc) { \n  _id,\n  title,\n  "slug": slug.current,\n  mainImage,\n  "lqip": mainImage.asset->metadata.lqip,\n  publishedAt,\n  "excerpt": coalesce(excerpt, array::join(string::split(pt::text(body[_type == "block" && style == "normal"]), "")[0...200], "")),\n  categories[]->{ _id, title },\n  author->{ name }\n }\n': POSTS_QUERY_RESULT
+    '\n  *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current)] | order(publishedAt desc) [0...5] { \n  _id,\n  title,\n  "slug": slug.current,\n  mainImage,\n  "lqip": mainImage.asset->metadata.lqip,\n  publishedAt,\n  "excerpt": coalesce(excerpt, array::join(string::split(pt::text(body[_type == "block" && style == "normal"]), "")[0...200], "")),\n  categories[]->{ _id, title },\n  author->{ name }\n }\n': LATEST_POSTS_QUERY_RESULT
+    '\n  *[_type == "post" && !(_id in path("drafts.**")) && slug.current == $slug][0] {\n    _id,\n    title,\n    "slug": slug.current,\n    author->{ name, image },\n    mainImage,\n    "cover": mainImage.asset->metadata{ lqip, "width": dimensions.width, "height": dimensions.height },\n    categories[]->{ _id, title },\n    publishedAt,\n    _updatedAt,\n    body,\n    excerpt,\n    seo,\n    "previous": *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && publishedAt < ^.publishedAt]\n      | order(publishedAt desc)[0] { title, "slug": slug.current },\n    "next": *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && publishedAt > ^.publishedAt]\n      | order(publishedAt asc)[0] { title, "slug": slug.current },\n    "related": *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && _id != ^._id && count(categories[@._ref in ^.^.categories[]._ref]) > 0]\n      | order(publishedAt desc)[0...3] { \n  _id,\n  title,\n  "slug": slug.current,\n  mainImage,\n  "lqip": mainImage.asset->metadata.lqip,\n  publishedAt,\n  "excerpt": coalesce(excerpt, array::join(string::split(pt::text(body[_type == "block" && style == "normal"]), "")[0...200], "")),\n  categories[]->{ _id, title },\n  author->{ name }\n }\n  }\n': POST_QUERY_RESULT
+    '\n  *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current)].slug.current\n': POST_SLUGS_QUERY_RESULT
+    '\n  *[_type == "project" && !(_id in path("drafts.**"))] | order(coalesce(order, 999) asc, _createdAt desc) { \n  _id,\n  title,\n  "slug": slug.current,\n  description,\n  mainImage,\n  publishedAt,\n  github,\n  url,\n  featured,\n  status,\n  tech,\n  githubData\n }\n': PROJECTS_QUERY_RESULT
+    '\n  *[_type == "project" && !(_id in path("drafts.**")) && slug.current == $slug][0] { \n  _id,\n  title,\n  "slug": slug.current,\n  description,\n  mainImage,\n  publishedAt,\n  github,\n  url,\n  featured,\n  status,\n  tech,\n  githubData\n, body, seo }\n': PROJECT_QUERY_RESULT
+    '\n  *[_type == "project" && !(_id in path("drafts.**")) && defined(slug.current)].slug.current\n': PROJECT_SLUGS_QUERY_RESULT
+    '{\n  "posts": count(*[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current)]),\n  "projects": count(*[_type == "project" && !(_id in path("drafts.**"))]),\n  "commits": math::sum(*[_type == "project" && !(_id in path("drafts.**"))].githubData.commits),\n  "skills": count(*[_type == "skills"]),\n  "latestPost": *[_type == "post" && !(_id in path("drafts.**"))] | order(publishedAt desc)[0].publishedAt\n}': HOME_STATS_QUERY_RESULT
+    '\n  *[_type == "skills"] | order(name asc) { _id, name, icon }\n': SKILLS_QUERY_RESULT
+    '\n  *[_type == "education"] | order(year desc) { _id, year, degree, school, schoolLogo, desc }\n': EDUCATION_QUERY_RESULT
+    '\n  *[_type == "experiences"] | order(year desc) {\n    _id,\n    year,\n    works[]{ _key, name, company, copmanyLogo, desc }\n  }\n': EXPERIENCES_QUERY_RESULT
+    '\n  *[_type == "cv"][0].cvFile.asset->url\n': CV_URL_QUERY_RESULT
+    '\n  *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current)] | order(publishedAt desc) {\n    title,\n    "slug": slug.current,\n    publishedAt,\n    _updatedAt,\n    "excerpt": coalesce(excerpt, array::join(string::split(pt::text(body[_type == "block" && style == "normal"]), "")[0...200], "")),\n    author->{ name },\n    "categories": categories[]->title,\n    "image": mainImage.asset->{ url, "mimeType": mimeType }\n  }\n': FEED_POSTS_QUERY_RESULT
+    '\n  *[_type == "project" && defined(github)] { _id, title, github }\n': GITHUB_PROJECTS_QUERY_RESULT
+    '{\n  "posts": *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && seo.noIndex != true]\n    | order(publishedAt desc) { "slug": slug.current, _updatedAt },\n  "projects": *[_type == "project" && !(_id in path("drafts.**")) && defined(slug.current) && seo.noIndex != true]\n    { "slug": slug.current, _updatedAt },\n  "uses": *[_type == "uses" && _id == "uses" && count(sections) > 0][0]._updatedAt,\n  "now": *[_type == "now" && _id == "now" && count(body) > 0][0]._updatedAt\n}': SITEMAP_QUERY_RESULT
+    '{\n  "posts": *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current)] | order(publishedAt desc) {\n    _id, title, "slug": slug.current, "topics": categories[]->title\n  },\n  "projects": *[_type == "project" && !(_id in path("drafts.**"))] | order(coalesce(order, 999) asc, _createdAt desc) {\n    _id, title, "slug": slug.current, url, github\n  },\n  // Only whether a CV exists: the file itself is served from /resume.pdf.\n  "hasCv": defined(*[_type == "cv"][0].cvFile.asset),\n  // /uses and /now are only linked once they have published content.\n  "hasUses": count(*[_type == "uses" && _id == "uses"][0].sections) > 0,\n  "hasNow": count(*[_type == "now" && _id == "now"][0].body) > 0\n}': COMMAND_INDEX_QUERY_RESULT
+    '\n  *[_type == "uses" && _id == "uses"][0] {\n    _updatedAt,\n    intro,\n    sections[]{ _key, title, items[]{ _key, name, description, url, icon } }\n  }\n': USES_QUERY_RESULT
+    '\n  *[_type == "now" && _id == "now"][0] { _updatedAt, location, body }\n': NOW_QUERY_RESULT
   }
 }
 // Lets @sanity/client releases that predate the global registry read it too
