@@ -50,6 +50,10 @@ jobs:
           key: nextjs-${{ hashFiles('package-lock.json') }}-${{ hashFiles('app/**', 'components/**', 'lib/**', 'sanity/**') }}
           restore-keys: nextjs-${{ hashFiles('package-lock.json') }}-
       - run: npm run build
+        env:
+          # Cloudflare's documented always-pass test key, so the contact form is testable.
+          # This build is only used for tests, never deployed.
+          NEXT_PUBLIC_CLOUDFLARE_TURNSTILE_SITE_KEY: 1x00000000000000000000AA
       - run: npx playwright install --with-deps chromium
       - run: npx playwright test --project=chromium --project=mobile
       - uses: actions/upload-artifact@v4
@@ -57,4 +61,14 @@ jobs:
         with:
           name: playwright-report
           path: playwright-report/
+          retention-days: 14
+      - name: Lighthouse budgets
+        # Same production build. Accessibility, best practices and SEO are hard gates;
+        # performance only warns (lab numbers on shared runners are noisy).
+        run: npx @lhci/cli@0.15.1 autorun
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: lighthouse-report
+          path: lighthouse-report/
           retention-days: 14

@@ -36,7 +36,7 @@ export function DataRow({
         <StatusDot status={status.status} label={status.label} className="mt-1.5 sm:mt-0" />
       )}
       <div className="min-w-0 flex-1">
-        <div className="truncate font-medium">{title}</div>
+        <div className="line-clamp-2 font-medium sm:line-clamp-1">{title}</div>
         {description && <p className="line-clamp-1 text-sm text-muted-foreground">{description}</p>}
         {meta.length > 0 && (
           <div className="mt-1 flex flex-wrap gap-x-3 label-caps sm:hidden">
