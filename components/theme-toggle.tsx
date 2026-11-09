@@ -4,6 +4,7 @@ import { Monitor, Moon, Sun } from "lucide-react"
 import { useTheme } from "next-themes"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { useHydrated } from "@/hooks/use-hydrated"
+import { withViewTransition } from "@/lib/view-transition"
 import { cn } from "@/lib/utils"
 
 const OPTIONS = [
@@ -23,7 +24,7 @@ export function ThemeToggle({ className }: { className?: string }) {
       size="sm"
       variant="outline"
       value={hydrated ? (theme ?? "system") : ""}
-      onValueChange={(value) => value && setTheme(value)}
+      onValueChange={(value) => value && withViewTransition("theme", () => setTheme(value))}
       aria-label="Colour theme"
       className={cn("h-8", className)}
     >

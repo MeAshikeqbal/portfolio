@@ -159,7 +159,8 @@ export default async function ProjectPage({ params }: Props) {
               alt={project.mainImage.alt || title}
               width={1600}
               height={900}
-              className="mt-10 rounded-lg border"
+              // Tinted until the image arrives (no blur placeholder for project covers).
+              className="mt-10 rounded-lg border bg-surface-2"
               sizes="(min-width: 896px) 896px, 100vw"
             />
           )}

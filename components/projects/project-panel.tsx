@@ -6,7 +6,7 @@ import { Sparkline } from "@/components/dashboard/sparkline"
 import { StatusPill } from "@/components/dashboard/status-pill"
 import { LinkPreview } from "@/components/ui/link-preview"
 import type { Project } from "@/lib/api"
-import { projectHref, projectMeta } from "@/lib/projects"
+import { projectHref, projectMeta, shortLicense } from "@/lib/projects"
 import { projectStatus } from "@/lib/status"
 
 /** A project as a dashboard panel: status, title, description, metrics and links. */
@@ -15,14 +15,16 @@ export function ProjectPanel({ project }: { project: Project }) {
   const weekly = project.githubData?.weeklyCommits ?? []
   const title = project.title ?? "Untitled project"
   const detailsHref = project.slug ? projectHref(project) : undefined
+  const license = shortLicense(project.githubData?.license)
 
   return (
     <Panel className="flex h-full flex-col transition-colors hover:border-border-strong">
       <PanelHeader
         title={status ? <StatusPill status={status.status}>{status.label}</StatusPill> : "service"}
         meta={
-          project.githubData?.license && project.githubData.license !== "Not specified" ? (
-            <span>{project.githubData.license}</span>
+          license ? (
+            // Short id so a long name ("GNU General Public License v3.0") can't squeeze the status.
+            <span title={project.githubData?.license ?? undefined}>{license}</span>
           ) : undefined
         }
       />

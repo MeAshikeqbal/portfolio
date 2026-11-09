@@ -2,6 +2,7 @@
 
 import { useMemo } from "react"
 import { ChipFilter } from "@/components/dashboard/chip-filter"
+import { Panel } from "@/components/dashboard/panel"
 import { SearchInput } from "@/components/dashboard/search-input"
 import { useUrlParam } from "@/hooks/use-url-param"
 import type { Project } from "@/lib/api"
@@ -37,9 +38,9 @@ export function ProjectsBrowser({ projects }: { projects: Project[] }) {
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <SearchInput label="Filter projects" value={query} onChange={setQuery} />
+        <SearchInput label="Search projects" value={query} onChange={setQuery} />
         <p className="label-caps" aria-live="polite">
-          {visible.length} of {projects.length} shown
+          {visible.length} of {projects.length} projects
         </p>
       </div>
 
@@ -63,9 +64,10 @@ export function ProjectsBrowser({ projects }: { projects: Project[] }) {
           ))}
         </ul>
       ) : (
-        <p className="rounded-lg border border-dashed p-10 text-center text-muted-foreground">
-          No projects match these filters.
-        </p>
+        // Same empty state as the posts log: a panel, not a dashed placeholder.
+        <Panel>
+          <p className="p-10 text-center text-muted-foreground">No projects match these filters.</p>
+        </Panel>
       )}
     </div>
   )
