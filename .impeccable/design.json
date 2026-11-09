@@ -251,17 +251,7 @@
       {
         "name": "ease-arrive",
         "value": "cubic-bezier(0.16, 1, 0.3, 1)",
-        "purpose": "Confident arrivals: title morph, sparkline trace, chip reveal."
-      },
-      {
-        "name": "title-morph",
-        "value": "380ms ease-arrive, 2px blur at 35%",
-        "purpose": "Post/project title shared between list and detail page (React ViewTransition, share=\"morph\")."
-      },
-      {
-        "name": "page-crossfade",
-        "value": "180ms",
-        "purpose": "Root view transition on navigation; the header (view-transition-name: site-header) holds still."
+        "purpose": "Confident arrivals: sparkline trace, chip reveal."
       },
       {
         "name": "sparkline-trace",
@@ -292,6 +282,11 @@
         "name": "pulse-dot",
         "value": "pulse-dot 2s ease-in-out infinite",
         "purpose": "Live status dots only; motion-safe."
+      },
+      {
+        "name": "skeleton-pulse",
+        "value": "animate-pulse (motion-safe)",
+        "purpose": "Skeletons while a link preview or the Turnstile check loads."
       }
     ],
     "breakpoints": [

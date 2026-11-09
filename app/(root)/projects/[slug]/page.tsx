@@ -7,7 +7,6 @@ import { notFound } from "next/navigation"
 import { FaGithub } from "react-icons/fa6"
 import { Container, Section } from "@/components/dashboard/layout"
 import { MetricGrid, MetricTile } from "@/components/dashboard/metric-tile"
-import { MorphTitle } from "@/components/motion/morph-title"
 import { portableTextComponents } from "@/components/portable-text/components"
 import { Sparkline } from "@/components/dashboard/sparkline"
 import { StatusPill } from "@/components/dashboard/status-pill"
@@ -92,11 +91,9 @@ export default async function ProjectPage({ params }: Props) {
 
           <header className="mt-6">
             {status && <StatusPill status={status.status}>{status.label}</StatusPill>}
-            <MorphTitle kind="project" id={project.slug}>
-              <h1 className="mt-3 text-4xl font-semibold tracking-tight text-balance sm:text-5xl">
-                {title}
-              </h1>
-            </MorphTitle>
+            <h1 className="mt-3 text-4xl font-semibold tracking-tight text-balance sm:text-5xl">
+              {title}
+            </h1>
             {project.description && (
               <p className="mt-4 max-w-2xl text-lg text-muted-foreground">{project.description}</p>
             )}
@@ -162,7 +159,8 @@ export default async function ProjectPage({ params }: Props) {
               alt={project.mainImage.alt || title}
               width={1600}
               height={900}
-              className="mt-10 rounded-lg border"
+              // Tinted until the image arrives (no blur placeholder for project covers).
+              className="mt-10 rounded-lg border bg-surface-2"
               sizes="(min-width: 896px) 896px, 100vw"
             />
           )}

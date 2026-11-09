@@ -74,28 +74,28 @@ test.describe("contact", () => {
 test.describe("projects", () => {
   test("search filters the grid and is kept in the URL", async ({ page }) => {
     await page.goto("/projects")
-    const count = page.getByText(/\d+ of \d+ shown/)
+    const count = page.getByText(/\d+ of \d+ projects/)
     await expect(count).toBeVisible()
-    await page.getByLabel("Filter projects").fill("portfolio")
+    await page.getByLabel("Search projects").fill("portfolio")
     await expect(page).toHaveURL(/\?q=portfolio/)
-    await expect(count).toHaveText(/^1 of \d+ shown$/)
+    await expect(count).toHaveText(/^1 of \d+ projects$/)
 
     await page.reload()
-    await expect(page.getByLabel("Filter projects")).toHaveValue("portfolio")
-    await expect(count).toHaveText(/^1 of \d+ shown$/)
+    await expect(page.getByLabel("Search projects")).toHaveValue("portfolio")
+    await expect(count).toHaveText(/^1 of \d+ projects$/)
   })
 
   test("the search box follows navigation back to an unfiltered list", async ({ page }) => {
     await page.goto("/projects?q=portfolio")
-    await expect(page.getByLabel("Filter projects")).toHaveValue("portfolio")
+    await expect(page.getByLabel("Search projects")).toHaveValue("portfolio")
     await page.goto("/")
     await page.goBack()
-    await expect(page.getByLabel("Filter projects")).toHaveValue("portfolio")
+    await expect(page.getByLabel("Search projects")).toHaveValue("portfolio")
     // Clicking the nav link lands on a clean /projects and the input clears with it.
     await page.locator('a[href="/projects"]').last().click()
     await expect(page).toHaveURL(/\/projects$/)
-    await expect(page.getByLabel("Filter projects")).toHaveValue("")
-    await expect(page.getByText(/^(\d+) of \1 shown$/)).toBeVisible()
+    await expect(page.getByLabel("Search projects")).toHaveValue("")
+    await expect(page.getByText(/^(\d+) of \1 projects$/)).toBeVisible()
   })
 
   test("a case study page renders its metrics and links", async ({ page }) => {

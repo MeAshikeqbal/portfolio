@@ -2,13 +2,14 @@
 
 import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile"
 import { CircleCheck, LoaderCircle } from "lucide-react"
-import { useActionState, useEffect, useRef, type ReactNode } from "react"
+import { useActionState, useEffect, useRef, useState, type ReactNode } from "react"
 import { submitContact, type ContactState } from "@/actions/submit-contact"
 import { HONEYPOT_FIELD } from "@/lib/contact-fields"
 import { StatusPill } from "@/components/dashboard/status-pill"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Skeleton } from "@/components/ui/skeleton"
 import { Textarea } from "@/components/ui/textarea"
 
 const siteKey = process.env.NEXT_PUBLIC_CLOUDFLARE_TURNSTILE_SITE_KEY
@@ -18,6 +19,8 @@ export function ContactForm() {
     status: "idle",
   })
   const turnstile = useRef<TurnstileInstance>(null)
+  // Cloudflare's widget arrives a moment after the form: hold its space with a skeleton.
+  const [challenge, setChallenge] = useState<"loading" | "ready" | "failed">("loading")
 
   // A Turnstile token is single-use: get a fresh one after any failed attempt.
   useEffect(() => {
@@ -93,11 +96,25 @@ export function ContactForm() {
       </div>
 
       {siteKey ? (
-        <Turnstile
-          ref={turnstile}
-          siteKey={siteKey}
-          options={{ theme: "auto", size: "flexible" }}
-        />
+        <div className="relative min-h-[65px]">
+          {challenge !== "ready" && (
+            <div className="absolute inset-0 flex items-center gap-3 rounded-md border px-3">
+              {challenge === "loading" && <Skeleton className="size-6 shrink-0 rounded-full" />}
+              <p role="status" className="text-sm text-muted-foreground">
+                {challenge === "failed"
+                  ? "The spam check couldn't load. Refresh the page, or use another channel."
+                  : "Loading spam check…"}
+              </p>
+            </div>
+          )}
+          <Turnstile
+            ref={turnstile}
+            siteKey={siteKey}
+            options={{ theme: "auto", size: "flexible" }}
+            onWidgetLoad={() => setChallenge("ready")}
+            onError={() => setChallenge("failed")}
+          />
+        </div>
       ) : (
         <p
           role="note"

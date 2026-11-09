@@ -5,7 +5,6 @@ import Link from "next/link"
 import { useMemo } from "react"
 import { ChipFilter } from "@/components/dashboard/chip-filter"
 import { Panel, PanelHeader } from "@/components/dashboard/panel"
-import { MorphTitle } from "@/components/motion/morph-title"
 import { SearchInput } from "@/components/dashboard/search-input"
 import { useUrlParam } from "@/hooks/use-url-param"
 import type { PostCard } from "@/lib/api"
@@ -72,7 +71,7 @@ export function PostsBrowserView({
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <SearchInput label="Search posts" value={query} onChange={setQuery} />
         <p className="label-caps" aria-live="polite">
-          {visible.length} of {posts.length} entries
+          {visible.length} of {posts.length} posts
         </p>
       </div>
       {categories.length > 1 && (
@@ -124,11 +123,11 @@ function PostRow({ post }: { post: PostCard }) {
             <span key={c._id}>#{c.title?.toLowerCase()}</span>
           ))}
         </div>
-        <MorphTitle kind="post" id={post.slug}>
-          <h2 className="mt-1 font-medium text-balance group-hover:underline">{post.title}</h2>
-        </MorphTitle>
+        <h2 className="mt-1 font-medium text-balance group-hover:underline">{post.title}</h2>
         {post.excerpt && (
-          <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">{post.excerpt}</p>
+          <p className="mt-1 line-clamp-2 max-w-prose text-sm text-muted-foreground">
+            {post.excerpt}
+          </p>
         )}
       </div>
     </Link>

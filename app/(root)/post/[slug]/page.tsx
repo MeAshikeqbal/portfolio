@@ -10,7 +10,6 @@ import { DataList, DataRow } from "@/components/dashboard/data-list"
 import { Container, GridBackdrop } from "@/components/dashboard/layout"
 import { Panel, PanelHeader } from "@/components/dashboard/panel"
 import { createPortableTextComponents } from "@/components/portable-text/components"
-import { MorphTitle } from "@/components/motion/morph-title"
 import { JsonLd } from "@/components/seo/json-ld"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { getPost, getPostSlugs } from "@/lib/api"
@@ -115,11 +114,9 @@ export default async function PostPage({ params }: Props) {
                 ))}
               </ul>
             )}
-            <MorphTitle kind="post" id={post.slug}>
-              <h1 className="mt-3 max-w-3xl text-4xl font-semibold tracking-tight text-balance sm:text-5xl">
-                {title}
-              </h1>
-            </MorphTitle>
+            <h1 className="mt-3 max-w-3xl text-4xl font-semibold tracking-tight text-balance sm:text-5xl">
+              {title}
+            </h1>
             {post.excerpt && (
               <p className="mt-4 max-w-2xl text-lg text-muted-foreground">{post.excerpt}</p>
             )}

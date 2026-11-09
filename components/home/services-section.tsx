@@ -4,7 +4,6 @@ import { Panel, PanelHeader } from "@/components/dashboard/panel"
 import { SectionHeader } from "@/components/dashboard/section-header"
 import { Sparkline } from "@/components/dashboard/sparkline"
 import { TraceOnView } from "@/components/dashboard/trace-on-view"
-import { MorphTitle } from "@/components/motion/morph-title"
 import { getProjects } from "@/lib/api"
 import { formatDate } from "@/lib/format"
 import { projectHref, projectMeta } from "@/lib/projects"
@@ -56,12 +55,7 @@ export async function ServicesSection() {
                   <DataRow
                     key={project._id}
                     href={projectHref(project)}
-                    title={
-                      <MorphTitle kind="project" id={project.slug}>
-                        {/* inline-block: a view-transition name can't sit on a wrapped inline box. */}
-                        <span className="inline-block">{project.title ?? "Untitled project"}</span>
-                      </MorphTitle>
-                    }
+                    title={project.title ?? "Untitled project"}
                     status={projectStatus(project.status) ?? undefined}
                     description={project.description}
                     meta={projectMeta(project)}

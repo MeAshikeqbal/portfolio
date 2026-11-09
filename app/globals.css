@@ -302,33 +302,6 @@
  * state changes (colour, opacity) stay.
  */
 
-/* Navigation: a quick page crossfade; titles morph between list and detail (MorphTitle). */
-::view-transition-old(root),
-::view-transition-new(root) {
-  animation-duration: 180ms;
-}
-
-/* The header is the same on every page: keep it still instead of crossfading it. */
-::view-transition-group(site-header) {
-  animation: none;
-}
-
-::view-transition-group(.morph) {
-  animation-duration: 380ms;
-  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-/* A touch of blur mid-flight hides the scaling of text snapshots. */
-::view-transition-image-pair(.morph) {
-  animation-name: morph-blur;
-}
-
-@keyframes morph-blur {
-  35% {
-    filter: blur(2px);
-  }
-}
-
 /* Theme switch: a short crossfade instead of a hard flash (lib/view-transition.ts). */
 html[data-transition="theme"]::view-transition-old(root),
 html[data-transition="theme"]::view-transition-new(root) {
@@ -413,12 +386,7 @@ html[data-transition="theme"]::view-transition-new(root) {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  ::view-transition-group(*),
-  ::view-transition-image-pair(*) {
-    animation: none !important;
-  }
-
-  /* Keep the crossfade (a state change), drop the movement. */
+  /* Keep the theme crossfade (a state change), just shorter. */
   ::view-transition-old(*),
   ::view-transition-new(*) {
     animation-duration: 120ms !important;

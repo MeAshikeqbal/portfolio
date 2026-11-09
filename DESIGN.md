@@ -278,9 +278,15 @@ A plain-language headline ("Writing", "Get in touch") with no label above it, an
 
 ### Motion
 Motion explains continuity, state or feedback; nothing animates just because it scrolled into view.
-- **Title morph:** a post or project title is one object across pages. Navigating from a list to its page morphs the title into the heading (380ms, `cubic-bezier(0.16, 1, 0.3, 1)`, a 2px blur mid-flight) while the page crossfades in 180ms and the header holds still. Each title id appears at most once per page.
 - **Feedback:** the mobile menu drops in (200ms) and closes instantly; revealed skill chips fade up in a capped cascade; the contact button spins while sending and the confirmation rises in; a theme switch crossfades (240ms); a re-judged status dot shifts colour over 500ms.
-- **Reduced motion:** movement goes (no morph travel, no trace, no slides); crossfades shorten and colour changes stay.
+- **Navigation is instant.** Pages swap without transitions; continuity comes from consistent layout, not motion.
+- **Reduced motion:** movement goes (no trace, no slides); crossfades shorten and colour changes stay.
+
+### Skeletons
+Only where the visitor actually waits: a Microlink link preview (seconds), the Turnstile check in the contact form, and large images without a blur placeholder (tinted `surface-2` until they arrive). A skeleton is `surface-2` with a pulse under `motion-safe`, always paired with text for status ("capturing screenshot…", "Loading spam check…") and a failure message. No route-level `loading.tsx` on detail pages: streaming turns `notFound()` into a 200.
+
+### Index pages
+`/post` and `/projects` share one frame: full-width container, an H1 with a one-line description, a "Search posts / Search projects" field with an "N of M posts / projects" count, chip filter rows, then the content (a log panel of rows for posts, a grid of project panels for projects). Empty results use the same panel message.
 
 ## Do's and Don'ts
 

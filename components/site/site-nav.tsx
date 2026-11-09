@@ -59,11 +59,7 @@ export function SiteNav({ commandIndex }: { commandIndex?: CommandIndex }) {
   }
 
   return (
-    <header
-      ref={header}
-      // Named so page transitions keep the header still (app/globals.css).
-      className="sticky top-0 z-40 border-b bg-background/80 backdrop-blur-md [view-transition-name:site-header]"
-    >
+    <header ref={header} className="sticky top-0 z-40 border-b bg-background/80 backdrop-blur-md">
       <Container className="flex h-14 items-center justify-between gap-4">
         <Link
           href="/"

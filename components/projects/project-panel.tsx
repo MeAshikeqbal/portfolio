@@ -2,12 +2,11 @@ import { ArrowUpRight } from "lucide-react"
 import Link from "next/link"
 import { FaGithub } from "react-icons/fa6"
 import { Panel, PanelHeader } from "@/components/dashboard/panel"
-import { MorphTitle } from "@/components/motion/morph-title"
 import { Sparkline } from "@/components/dashboard/sparkline"
 import { StatusPill } from "@/components/dashboard/status-pill"
 import { LinkPreview } from "@/components/ui/link-preview"
 import type { Project } from "@/lib/api"
-import { projectHref, projectMeta } from "@/lib/projects"
+import { projectHref, projectMeta, shortLicense } from "@/lib/projects"
 import { projectStatus } from "@/lib/status"
 
 /** A project as a dashboard panel: status, title, description, metrics and links. */
@@ -16,29 +15,29 @@ export function ProjectPanel({ project }: { project: Project }) {
   const weekly = project.githubData?.weeklyCommits ?? []
   const title = project.title ?? "Untitled project"
   const detailsHref = project.slug ? projectHref(project) : undefined
+  const license = shortLicense(project.githubData?.license)
 
   return (
     <Panel className="flex h-full flex-col transition-colors hover:border-border-strong">
       <PanelHeader
         title={status ? <StatusPill status={status.status}>{status.label}</StatusPill> : "service"}
         meta={
-          project.githubData?.license && project.githubData.license !== "Not specified" ? (
-            <span>{project.githubData.license}</span>
+          license ? (
+            // Short id so a long name ("GNU General Public License v3.0") can't squeeze the status.
+            <span title={project.githubData?.license ?? undefined}>{license}</span>
           ) : undefined
         }
       />
       <div className="flex flex-1 flex-col gap-3 p-4">
-        <MorphTitle kind="project" id={detailsHref ? project.slug : null}>
-          <h2 className="text-lg font-semibold tracking-tight">
-            {detailsHref ? (
-              <Link href={detailsHref} className="hover:underline">
-                {title}
-              </Link>
-            ) : (
-              title
-            )}
-          </h2>
-        </MorphTitle>
+        <h2 className="text-lg font-semibold tracking-tight">
+          {detailsHref ? (
+            <Link href={detailsHref} className="hover:underline">
+              {title}
+            </Link>
+          ) : (
+            title
+          )}
+        </h2>
         {project.description && (
           <p className="line-clamp-3 text-sm text-muted-foreground">{project.description}</p>
         )}
