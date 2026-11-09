@@ -12,7 +12,8 @@
  *   file still has `// REVIEW:` comments.
  * - Missing documents are created with `create`, which fails atomically if one appeared in
  *   the meantime. Existing documents are left alone unless --force, and then patched with
- *   `ifRevisionId`, so a concurrent edit aborts the whole transaction.
+ *   `ifRevisionId` (setting the data file's fields; any others are kept), so a concurrent
+ *   edit aborts the whole transaction.
  * - Drafts would shadow the new content in the Studio: the run stops unless
  *   --discard-drafts, which deletes them in the same transaction (revision-checked too).
  */
@@ -79,7 +80,8 @@ async function main() {
     process.exit(1)
   }
 
-  const reviews = readFileSync(DATA_FILE, "utf8").match(/^\s*\/\/\s*REVIEW:.*$/gm) ?? []
+  // Standalone or trailing `// REVIEW:` comments both block publishing.
+  const reviews = readFileSync(DATA_FILE, "utf8").match(/^.*\/\/\s*REVIEW:.*$/gm) ?? []
   const revisions = await currentRevisions()
 
   if (!execute) {
@@ -136,7 +138,8 @@ async function main() {
       console.log(`create   ${_id}`)
     } else if (force) {
       tx.patch(_id, (p) => p.ifRevisionId(rev).set({ ...fields }))
-      console.log(`replace  ${_id} (rev ${rev})`)
+      // A patch: fields not in the data file are kept, not removed.
+      console.log(`patch    ${_id} (rev ${rev}; fields not in the data file are kept)`)
     } else {
       throw new Error(`${_id} is already published (rev ${rev}); pass --force to replace it.`)
     }

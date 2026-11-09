@@ -123,3 +123,51 @@ describe("validateAboutContent", () => {
     expect(problems).toContainEqual(expect.stringMatching(/now.body is empty/))
   })
 })
+
+describe("validateAboutContent edge cases from review", () => {
+  it.each([
+    ["a spaced port", "Dashboard :8006", true],
+    ["a host port", "host:8006", true],
+    ["a time", "Standup at 10:30", false],
+    ["a label with a spaced number", "Note: 12 items", false],
+  ])("port check: %s", async (_, description, rejected) => {
+    const problems = await validateAboutContent(
+      variant((draft) => {
+        draft.uses.sections[1].items[0].description = description
+      }),
+    )
+    expect(problems.some((p) => p.includes("port number"))).toBe(rejected)
+  })
+
+  it("checks /now link destinations", async () => {
+    const problems = await validateAboutContent(
+      variant((draft) => {
+        draft.now.body[0].markDefs = [
+          { _key: "l", _type: "link", href: "http://192.168.1.10:8006" },
+        ]
+      }),
+    )
+    expect(problems).toContainEqual(expect.stringMatching(/now\.building\.link: looks like a IPv4/))
+  })
+
+  it("forbids links in the first section even under another key", async () => {
+    const problems = await validateAboutContent(
+      variant((draft) => {
+        draft.uses.sections[0]._key = "lab"
+        draft.uses.sections[0].items[0].url = "https://itsashik.dev/x"
+      }),
+    )
+    expect(problems).toContainEqual(expect.stringMatching(/must not carry URLs/))
+  })
+
+  it("rejects icon names with extra segments", async () => {
+    const problems = await validateAboutContent(
+      variant((draft) => {
+        draft.uses.sections[3].items[0].icon = "mdi:server:extra"
+      }),
+    )
+    expect(problems).toContainEqual(
+      expect.stringMatching(/mdi:server:extra isn't in a bundled set/),
+    )
+  })
+})

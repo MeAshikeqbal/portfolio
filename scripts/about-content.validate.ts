@@ -21,7 +21,8 @@ const ALLOWED_DOMAINS = new Set(["itsashik.dev"])
  */
 export const FORBIDDEN_PATTERNS: { label: string; pattern: RegExp }[] = [
   { label: "IPv4 address", pattern: /\b\d{1,3}(?:\.\d{1,3}){3}\b/ },
-  { label: "port number", pattern: /(?:^|[^\d\s]):\d{2,5}\b/ },
+  // ":8006", "host:8006" or "Dashboard :8006", but not a time like "10:30" or "Note: 12".
+  { label: "port number", pattern: /(?<![\d:]):\d{2,5}\b/ },
   { label: "node hostname", pattern: /\bpve(?:-\d+)?\b/i },
   { label: "private DNS suffix", pattern: /\.(?:lan|local|internal|home\.arpa)\b/i },
   { label: "lab domain or org name", pattern: /homecave|exsbe/i },
@@ -32,6 +33,9 @@ export const FORBIDDEN_PATTERNS: { label: string; pattern: RegExp }[] = [
   { label: "camera detail", pattern: /\bcamera|\bcam\d|\brtsp\b|\bonvif\b/i },
   { label: "subnet detail", pattern: /\bsubnet\b/i },
 ]
+
+/** The full Iconify name ("set:icon"), the same rule as lib/icons.ts. */
+const ICON_NAME = /^[a-z0-9-]+:[a-z0-9-]+$/
 
 const DOMAIN =
   /\b[a-z0-9-]+(?:\.[a-z0-9-]+)*\.(?:com|net|org|io|site|dev|tech|xyz|app|me|cloud)\b/gi
@@ -56,6 +60,9 @@ function publicStrings({ uses, now }: AboutContent): { where: string; text: stri
   out.push({ where: "now.location", text: now.location })
   for (const block of now.body) {
     for (const child of block.children) out.push({ where: `now.${block._key}`, text: child.text })
+    for (const mark of block.markDefs ?? []) {
+      out.push({ where: `now.${block._key}.link`, text: mark.href })
+    }
   }
   return out
 }
@@ -96,25 +103,29 @@ export async function validateAboutContent(content: AboutContent): Promise<strin
     }
   }
 
+  const iconChecks: { item: string; icon: string }[] = []
   for (const key of duplicateKeys(uses.sections.map((s) => s._key))) {
     problems.push(`duplicate section _key "${key}"`)
   }
-  for (const section of uses.sections) {
+  uses.sections.forEach((section, index) => {
+    // The first section feeds the hero, whatever its key: treat it as homelab too.
+    const infra = index === 0 || INFRA_SECTIONS.has(section._key)
     if (section.items.length === 0) problems.push(`section "${section.title}" has no items`)
     for (const key of duplicateKeys(section.items.map((i) => i._key))) {
       problems.push(`duplicate item _key "${key}" in "${section.title}"`)
     }
     for (const item of section.items) {
       if (!item.name.trim()) problems.push(`an item in "${section.title}" has no name`)
-      if (INFRA_SECTIONS.has(section._key) && item.url) {
+      if (infra && item.url) {
         problems.push(`"${item.name}" links out; homelab items must not carry URLs`)
       }
-      if (item.icon) {
-        const [prefix, name] = item.icon.split(":")
-        if (!prefix || !name || !(await renderIconSvg(prefix, name))) {
-          problems.push(`"${item.name}": icon ${item.icon} isn't in a bundled set`)
-        }
-      }
+      if (item.icon) iconChecks.push({ item: item.name, icon: item.icon })
+    }
+  })
+  for (const { item, icon } of iconChecks) {
+    const [prefix, name] = icon.split(":")
+    if (!ICON_NAME.test(icon) || !(await renderIconSvg(prefix, name))) {
+      problems.push(`"${item}": icon ${icon} isn't in a bundled set`)
     }
   }
 
