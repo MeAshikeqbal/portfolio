@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
 import { Suspense } from "react"
-import { PostsBrowser } from "@/components/blog/posts-browser"
+import { PostsBrowser, PostsBrowserView } from "@/components/blog/posts-browser"
 import { Container, Section } from "@/components/dashboard/layout"
 import { SectionHeader } from "@/components/dashboard/section-header"
 import { getPosts } from "@/lib/api"
@@ -24,16 +24,12 @@ export default async function PostsPage() {
             title="Writing"
             description="Notes on building, breaking and fixing things."
           />
-          {/* Filters read the URL; without JS (or while loading) the full list renders. */}
-          <Suspense fallback={<PostsBrowserFallback count={posts.length} />}>
+          {/* Filters read the URL; the prerendered fallback is the same list, unfiltered. */}
+          <Suspense fallback={<PostsBrowserView posts={posts} />}>
             <PostsBrowser posts={posts} />
           </Suspense>
         </Container>
       </Section>
     </main>
   )
-}
-
-function PostsBrowserFallback({ count }: { count: number }) {
-  return <p className="label-caps">{count} entries</p>
 }

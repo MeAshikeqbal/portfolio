@@ -35,6 +35,7 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+!.env.example
 .env.local
 
 # vercel
@@ -53,3 +54,7 @@ public/Thumbs.db
 
 # sanity typegen intermediate
 /schema.json
+
+# lighthouse ci
+/.lighthouseci/
+/lighthouse-report/
