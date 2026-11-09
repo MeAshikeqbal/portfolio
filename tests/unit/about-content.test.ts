@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest"
+import { describe, expect, it, vi } from "vitest"
 import { NOW, USES } from "@/scripts/about-content.data"
 import {
   HOMELAB_DESCRIPTION_MAX,
@@ -6,6 +6,10 @@ import {
   validateAboutContent,
   type AboutContent,
 } from "@/scripts/about-content.validate"
+
+// Validation loads whole icon sets (several MB of JSON); under the full parallel suite that
+// can take longer than the default 5s.
+vi.setConfig({ testTimeout: 30_000 })
 
 const content: AboutContent = { uses: USES, now: NOW }
 
