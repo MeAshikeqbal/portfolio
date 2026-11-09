@@ -1,57 +1,86 @@
-'use server'
+"use server"
 
-import { z } from 'zod'
-import { client } from '@/sanity/lib/client'
+import { headers } from "next/headers"
+import { contactSchema, HONEYPOT_FIELD } from "@/lib/contact-schema"
+import { writeClient } from "@/sanity/lib/write-client"
 
-const formSchema = z.object({
-  name: z.string().min(2),
-  email: z.string().email(),
-  message: z.string().min(10),
-  turnstileToken: z.string().min(1),
-})
+type Field = "name" | "email" | "message" | "turnstileToken"
 
-export async function submitContact(formData: z.infer<typeof formSchema>) {
-  const validatedFields = formSchema.safeParse(formData)
+export interface ContactState {
+  status: "idle" | "success" | "error"
+  message?: string
+  fieldErrors?: Partial<Record<Field, string>>
+  /** Echoed back on error so the form keeps what the visitor typed. */
+  values?: { name: string; email: string; message: string }
+}
 
-  if (!validatedFields.success) {
-    return { success: false, error: 'Invalid form data' }
+/** Turnstile injects its token into the form under this name. */
+const TURNSTILE_FIELD = "cf-turnstile-response"
+
+/**
+ * Server action for the contact form (`useActionState`). Works without JavaScript:
+ * the form posts natively and errors come back as state.
+ */
+export async function submitContact(
+  _prev: ContactState,
+  formData: FormData,
+): Promise<ContactState> {
+  const values = {
+    name: String(formData.get("name") ?? ""),
+    email: String(formData.get("email") ?? ""),
+    message: String(formData.get("message") ?? ""),
   }
 
-  const { name, email, message, turnstileToken } = validatedFields.data
+  // Bots fill every field; pretend it worked so they don't adapt.
+  if (formData.get(HONEYPOT_FIELD)) return { status: "success" }
 
-  // Verify Cloudflare Turnstile token
-  const turnstileResponse = await fetch(
-    'https://challenges.cloudflare.com/turnstile/v0/siteverify',
-    {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        secret: process.env.CLOUDFLARE_TURNSTILE_SECRET_KEY,
-        response: turnstileToken,
-      }),
+  const parsed = contactSchema.safeParse({
+    ...values,
+    turnstileToken: String(formData.get(TURNSTILE_FIELD) ?? ""),
+  })
+  if (!parsed.success) {
+    const fieldErrors: ContactState["fieldErrors"] = {}
+    for (const issue of parsed.error.issues) {
+      const field = issue.path[0] as Field
+      fieldErrors[field] ??= issue.message
     }
-  )
+    return { status: "error", message: "Please fix the highlighted fields.", fieldErrors, values }
+  }
 
-  const turnstileData = await turnstileResponse.json()
+  const secret = process.env.CLOUDFLARE_TURNSTILE_SECRET_KEY
+  if (!secret) {
+    console.error("CLOUDFLARE_TURNSTILE_SECRET_KEY is not set")
+    return { status: "error", message: "The contact form isn't configured right now.", values }
+  }
 
-  if (!turnstileData.success) {
-    return { success: false, error: 'Turnstile verification failed' }
+  const ip = (await headers()).get("x-forwarded-for")?.split(",")[0]?.trim()
+  const verification = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ secret, response: parsed.data.turnstileToken, remoteip: ip }),
+  })
+    .then((res) => res.json() as Promise<{ success: boolean }>)
+    .catch(() => ({ success: false }))
+
+  if (!verification.success) {
+    return {
+      status: "error",
+      message: "The anti-spam check failed. Please try again.",
+      fieldErrors: { turnstileToken: "Please complete the check again." },
+      values,
+    }
   }
 
   try {
-    await client.create({
-      _type: 'contact',
-      name,
-      email,
-      message,
-    })
-
-    return { success: true }
+    const { name, email, message } = parsed.data
+    await writeClient.create({ _type: "contact", name, email, message })
+    return { status: "success" }
   } catch (error) {
-    console.error('Error submitting contact form:', error)
-    return { success: false, error: 'Failed to submit the form' }
+    console.error("Error submitting contact form:", error)
+    return {
+      status: "error",
+      message: "Couldn't send your message. Please try again later.",
+      values,
+    }
   }
 }
-
