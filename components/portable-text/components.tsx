@@ -68,16 +68,6 @@ export function createPortableTextComponents(
     block: {
       h2: anchored("h2"),
       h3: anchored("h3"),
-      // Legacy: code used to be stored as an annotation on a paragraph and rendered as a block
-      // element, which can't live inside a <p> (invalid HTML → hydration error), so those
-      // paragraphs render as <div>. scripts/code-annotations-to-blocks.ts converts them to code
-      // blocks; this (and the annotation branch of `marks.code`) can go once it has run.
-      normal: ({ value, children }) =>
-        value.markDefs?.some((def) => def._type === "code" && typeof def.code === "string") ? (
-          <div className="my-5">{children}</div>
-        ) : (
-          <p>{children}</p>
-        ),
     },
     types: {
       code: ({ value }: { value: CodeBlockValue }) =>
@@ -119,20 +109,6 @@ export function createPortableTextComponents(
       },
     },
     marks: {
-      code: ({ value, children }) => {
-        // Legacy `code` annotation (see `block.normal`): it carries the snippet itself and the
-        // selected text is just its anchor. Otherwise this is the inline-code decorator.
-        if (value && typeof value.code === "string") {
-          return (
-            <CodeBlock
-              code={value.code}
-              language={value.language as string | undefined}
-              filename={value.filename as string | undefined}
-            />
-          )
-        }
-        return <code>{children}</code>
-      },
       link: ({ value, children }) => {
         const href = typeof value?.href === "string" ? value.href : null
         if (!href) return <span>{children}</span>
