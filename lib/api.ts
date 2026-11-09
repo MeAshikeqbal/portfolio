@@ -60,9 +60,17 @@ export async function getPost(slug: string) {
   return data
 }
 
+/**
+ * Build-time reads for `generateStaticParams`, which runs without a request. With a server
+ * token configured, `sanityFetch` would call `draftMode()` to pick a perspective, which Next
+ * rejects there. Pinning the published perspective (and stega off) skips that lookup, and
+ * static params should only ever list published documents anyway.
+ */
+const STATIC_PARAMS = { perspective: "published", stega: false } as const
+
 /** Slugs for `generateStaticParams`. */
 export async function getPostSlugs() {
-  const { data } = await sanityFetch({ query: POST_SLUGS_QUERY, stega: false })
+  const { data } = await sanityFetch({ query: POST_SLUGS_QUERY, ...STATIC_PARAMS })
   return data.filter((slug): slug is string => Boolean(slug))
 }
 
@@ -98,7 +106,7 @@ export async function getProject(slug: string) {
 }
 
 export async function getProjectSlugs() {
-  const { data } = await sanityFetch({ query: PROJECT_SLUGS_QUERY, stega: false })
+  const { data } = await sanityFetch({ query: PROJECT_SLUGS_QUERY, ...STATIC_PARAMS })
   return data.filter((slug): slug is string => Boolean(slug))
 }
 
