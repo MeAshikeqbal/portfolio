@@ -34,6 +34,7 @@ import { useHydrated } from "@/hooks/use-hydrated"
 import type { CommandIndex } from "@/lib/api"
 import { projectHref } from "@/lib/projects"
 import { siteConfig } from "@/lib/site"
+import { withViewTransition } from "@/lib/view-transition"
 import { cn } from "@/lib/utils"
 
 /** True when the keyboard focus is somewhere the user types text. */
@@ -176,21 +177,21 @@ export function CommandMenu({ index, className }: { index: CommandIndex; classNa
           <CommandGroup heading="Actions">
             <Item
               icon={<Monitor />}
-              onSelect={() => run(() => setTheme("system"))}
+              onSelect={() => run(() => withViewTransition("theme", () => setTheme("system")))}
               keywords={["theme", "auto"]}
             >
               Use system theme
             </Item>
             <Item
               icon={<Sun />}
-              onSelect={() => run(() => setTheme("light"))}
+              onSelect={() => run(() => withViewTransition("theme", () => setTheme("light")))}
               keywords={["theme", "mode"]}
             >
               Switch to light theme
             </Item>
             <Item
               icon={<Moon />}
-              onSelect={() => run(() => setTheme("dark"))}
+              onSelect={() => run(() => withViewTransition("theme", () => setTheme("dark")))}
               keywords={["theme", "mode"]}
             >
               Switch to dark theme

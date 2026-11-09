@@ -5,6 +5,7 @@ import Link from "next/link"
 import { useMemo } from "react"
 import { ChipFilter } from "@/components/dashboard/chip-filter"
 import { Panel, PanelHeader } from "@/components/dashboard/panel"
+import { MorphTitle } from "@/components/motion/morph-title"
 import { SearchInput } from "@/components/dashboard/search-input"
 import { useUrlParam } from "@/hooks/use-url-param"
 import type { PostCard } from "@/lib/api"
@@ -123,7 +124,9 @@ function PostRow({ post }: { post: PostCard }) {
             <span key={c._id}>#{c.title?.toLowerCase()}</span>
           ))}
         </div>
-        <h2 className="mt-1 font-medium text-balance group-hover:underline">{post.title}</h2>
+        <MorphTitle kind="post" id={post.slug}>
+          <h2 className="mt-1 font-medium text-balance group-hover:underline">{post.title}</h2>
+        </MorphTitle>
         {post.excerpt && (
           <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">{post.excerpt}</p>
         )}

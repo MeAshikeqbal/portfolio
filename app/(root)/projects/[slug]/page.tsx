@@ -7,6 +7,7 @@ import { notFound } from "next/navigation"
 import { FaGithub } from "react-icons/fa6"
 import { Container, Section } from "@/components/dashboard/layout"
 import { MetricGrid, MetricTile } from "@/components/dashboard/metric-tile"
+import { MorphTitle } from "@/components/motion/morph-title"
 import { portableTextComponents } from "@/components/portable-text/components"
 import { Sparkline } from "@/components/dashboard/sparkline"
 import { StatusPill } from "@/components/dashboard/status-pill"
@@ -91,9 +92,11 @@ export default async function ProjectPage({ params }: Props) {
 
           <header className="mt-6">
             {status && <StatusPill status={status.status}>{status.label}</StatusPill>}
-            <h1 className="mt-3 text-4xl font-semibold tracking-tight text-balance sm:text-5xl">
-              {title}
-            </h1>
+            <MorphTitle kind="project" id={project.slug}>
+              <h1 className="mt-3 text-4xl font-semibold tracking-tight text-balance sm:text-5xl">
+                {title}
+              </h1>
+            </MorphTitle>
             {project.description && (
               <p className="mt-4 max-w-2xl text-lg text-muted-foreground">{project.description}</p>
             )}

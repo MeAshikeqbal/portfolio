@@ -7,7 +7,7 @@ export function projectMeta(project: Project): string[] {
   return [
     gh?.language,
     gh?.stars ? `★ ${gh.stars}` : null,
-    gh?.commits ? `${gh.commits} commits` : null,
+    gh?.commits ? `${gh.commits} ${gh.commits === 1 ? "commit" : "commits"}` : null,
     gh?.pushedAt ? `pushed ${formatMonth(gh.pushedAt)}` : null,
   ].filter((item): item is string => Boolean(item))
 }

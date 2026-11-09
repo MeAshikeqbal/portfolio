@@ -296,3 +296,136 @@
      light mode, darker in dark mode), so highlighting never lowers text contrast. */
   background: color-mix(in oklch, var(--status-info) 4%, var(--background));
 }
+
+/*
+ * Motion. Every rule below has a reduced-motion path at the end of this file: movement goes,
+ * state changes (colour, opacity) stay.
+ */
+
+/* Navigation: a quick page crossfade; titles morph between list and detail (MorphTitle). */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 180ms;
+}
+
+/* The header is the same on every page: keep it still instead of crossfading it. */
+::view-transition-group(site-header) {
+  animation: none;
+}
+
+::view-transition-group(.morph) {
+  animation-duration: 380ms;
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* A touch of blur mid-flight hides the scaling of text snapshots. */
+::view-transition-image-pair(.morph) {
+  animation-name: morph-blur;
+}
+
+@keyframes morph-blur {
+  35% {
+    filter: blur(2px);
+  }
+}
+
+/* Theme switch: a short crossfade instead of a hard flash (lib/view-transition.ts). */
+html[data-transition="theme"]::view-transition-old(root),
+html[data-transition="theme"]::view-transition-new(root) {
+  animation-duration: 240ms;
+}
+
+/*
+ * Sparkline trace: once the projects panel scrolls into view, each 12-week line draws left to
+ * right and its latest point lands. Armed only by script (TraceOnView), so without JS the lines
+ * are simply drawn.
+ */
+[data-trace="armed"] .sparkline-trace {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+}
+
+[data-trace="armed"] .sparkline-head {
+  opacity: 0;
+}
+
+[data-trace="play"] .sparkline-trace {
+  stroke-dasharray: 1;
+  animation: sparkline-trace 700ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: var(--trace-delay, 0ms);
+}
+
+[data-trace="play"] .sparkline-head {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: sparkline-head 240ms ease-out both;
+  animation-delay: calc(var(--trace-delay, 0ms) + 520ms);
+}
+
+/* Rows draw one after another, capped so the last starts within 300ms. */
+[data-trace] li:nth-child(2) {
+  --trace-delay: 60ms;
+}
+[data-trace] li:nth-child(3) {
+  --trace-delay: 120ms;
+}
+[data-trace] li:nth-child(4) {
+  --trace-delay: 180ms;
+}
+[data-trace] li:nth-child(5) {
+  --trace-delay: 240ms;
+}
+[data-trace] li:nth-child(n + 6) {
+  --trace-delay: 300ms;
+}
+
+@keyframes sparkline-trace {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes sparkline-head {
+  from {
+    opacity: 0;
+    scale: 0.3;
+  }
+  to {
+    opacity: 1;
+    scale: 1;
+  }
+}
+
+/* Inventory "Show all": revealed chips fade up in a short, capped cascade. */
+.chip-reveal {
+  transition:
+    opacity 200ms ease-out,
+    translate 280ms cubic-bezier(0.16, 1, 0.3, 1);
+  transition-delay: calc(min(var(--i, 0), 16) * 12ms);
+
+  @starting-style {
+    opacity: 0;
+    translate: 0 4px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-image-pair(*) {
+    animation: none !important;
+  }
+
+  /* Keep the crossfade (a state change), drop the movement. */
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation-duration: 120ms !important;
+  }
+
+  .chip-reveal {
+    translate: none;
+    transition: opacity 150ms ease-out;
+  }
+}

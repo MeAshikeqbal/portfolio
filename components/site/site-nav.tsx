@@ -59,7 +59,11 @@ export function SiteNav({ commandIndex }: { commandIndex?: CommandIndex }) {
   }
 
   return (
-    <header ref={header} className="sticky top-0 z-40 border-b bg-background/80 backdrop-blur-md">
+    <header
+      ref={header}
+      // Named so page transitions keep the header still (app/globals.css).
+      className="sticky top-0 z-40 border-b bg-background/80 backdrop-blur-md [view-transition-name:site-header]"
+    >
       <Container className="flex h-14 items-center justify-between gap-4">
         <Link
           href="/"
@@ -110,7 +114,12 @@ export function SiteNav({ commandIndex }: { commandIndex?: CommandIndex }) {
       </Container>
 
       {open && (
-        <nav id="mobile-menu" aria-label="Main" className="border-t bg-background md:hidden">
+        <nav
+          id="mobile-menu"
+          aria-label="Main"
+          // Opens with a short drop; closes instantly (any scroll or tap dismisses it).
+          className="animate-in border-t bg-background duration-200 fade-in-0 motion-safe:slide-in-from-top-2 md:hidden"
+        >
           <Container className="flex flex-col gap-1 py-3">
             {siteConfig.nav.map((item) => {
               const active = isActive(pathname, item.href)

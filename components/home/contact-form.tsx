@@ -1,7 +1,7 @@
 "use client"
 
 import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile"
-import { CircleCheck } from "lucide-react"
+import { CircleCheck, LoaderCircle } from "lucide-react"
 import { useActionState, useEffect, useRef, type ReactNode } from "react"
 import { submitContact, type ContactState } from "@/actions/submit-contact"
 import { HONEYPOT_FIELD } from "@/lib/contact-fields"
@@ -26,7 +26,10 @@ export function ContactForm() {
 
   if (state.status === "success") {
     return (
-      <div role="status" className="flex flex-col items-start gap-3 py-6">
+      <div
+        role="status"
+        className="flex animate-in flex-col items-start gap-3 py-6 duration-300 fade-in-0 motion-safe:slide-in-from-bottom-2"
+      >
         <StatusPill status="up">message sent</StatusPill>
         <p className="flex items-center gap-2 text-lg font-medium">
           <CircleCheck className="size-5 text-status-up-fg" aria-hidden /> Thanks, your message is
@@ -120,6 +123,7 @@ export function ContactForm() {
       )}
 
       <Button type="submit" disabled={pending || !siteKey} className="w-full sm:w-auto">
+        {pending && <LoaderCircle aria-hidden className="motion-safe:animate-spin" />}
         {pending ? "Sending…" : "Send message"}
       </Button>
     </form>

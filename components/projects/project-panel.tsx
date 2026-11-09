@@ -2,6 +2,7 @@ import { ArrowUpRight } from "lucide-react"
 import Link from "next/link"
 import { FaGithub } from "react-icons/fa6"
 import { Panel, PanelHeader } from "@/components/dashboard/panel"
+import { MorphTitle } from "@/components/motion/morph-title"
 import { Sparkline } from "@/components/dashboard/sparkline"
 import { StatusPill } from "@/components/dashboard/status-pill"
 import { LinkPreview } from "@/components/ui/link-preview"
@@ -27,15 +28,17 @@ export function ProjectPanel({ project }: { project: Project }) {
         }
       />
       <div className="flex flex-1 flex-col gap-3 p-4">
-        <h2 className="text-lg font-semibold tracking-tight">
-          {detailsHref ? (
-            <Link href={detailsHref} className="hover:underline">
-              {title}
-            </Link>
-          ) : (
-            title
-          )}
-        </h2>
+        <MorphTitle kind="project" id={detailsHref ? project.slug : null}>
+          <h2 className="text-lg font-semibold tracking-tight">
+            {detailsHref ? (
+              <Link href={detailsHref} className="hover:underline">
+                {title}
+              </Link>
+            ) : (
+              title
+            )}
+          </h2>
+        </MorphTitle>
         {project.description && (
           <p className="line-clamp-3 text-sm text-muted-foreground">{project.description}</p>
         )}

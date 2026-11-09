@@ -3,6 +3,7 @@ import Link from "next/link"
 import { Container, Section } from "@/components/dashboard/layout"
 import { Panel, PanelHeader } from "@/components/dashboard/panel"
 import { SectionHeader } from "@/components/dashboard/section-header"
+import { MorphTitle } from "@/components/motion/morph-title"
 import { getHomeStats, getLatestPosts } from "@/lib/api"
 import { formatDate, trimText } from "@/lib/format"
 
@@ -54,9 +55,11 @@ export async function WritingSection() {
                       <span aria-hidden />
                     )}
                     <div className="min-w-0">
-                      <h3 className="text-lg font-semibold tracking-tight text-pretty sm:text-xl">
-                        {post.title ?? "Untitled post"}
-                      </h3>
+                      <MorphTitle kind="post" id={post.slug}>
+                        <h3 className="text-lg font-semibold tracking-tight text-pretty sm:text-xl">
+                          {post.title ?? "Untitled post"}
+                        </h3>
+                      </MorphTitle>
                       {excerpt && (
                         <p className="mt-1.5 max-w-prose text-pretty text-muted-foreground">
                           {excerpt}
