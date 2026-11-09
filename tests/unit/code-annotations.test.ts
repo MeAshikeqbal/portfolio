@@ -99,6 +99,27 @@ describe("convertCodeAnnotations", () => {
 
   it("leaves documents without code annotations untouched", () => {
     const body = [para("a", "Hello"), { _key: "i", _type: "image" }]
-    expect(convertCodeAnnotations(body)).toEqual({ body, converted: 0 })
+    expect(convertCodeAnnotations(body)).toEqual({ body, converted: 0, skippedListItems: [] })
+  })
+
+  it("leaves a list item with text around its snippet for manual conversion", () => {
+    const item = {
+      _key: "li",
+      _type: "block",
+      style: "normal",
+      listItem: "bullet",
+      level: 1,
+      markDefs: [{ _key: "m1", _type: "code", code: "npm i" }],
+      children: [
+        { _key: "s1", _type: "span", text: "Run ", marks: [] },
+        { _key: "s2", _type: "span", text: "npm i", marks: ["m1"] },
+        { _key: "s3", _type: "span", text: " first", marks: [] },
+      ],
+    }
+    expect(convertCodeAnnotations([item])).toEqual({
+      body: [item],
+      converted: 0,
+      skippedListItems: ["li"],
+    })
   })
 })

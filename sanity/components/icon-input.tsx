@@ -33,17 +33,21 @@ function IconTile({ name, size = 32 }: { name: string; size?: number }) {
 }
 
 function useIconStatus(name: string | undefined) {
-  const [status, setStatus] = useState<{ name: string; found: boolean | null }>()
+  const [status, setStatus] = useState<{ key: string; found: boolean | null }>()
+  // Bumped by "Check again" after a failed check, to re-run it for the same name.
+  const [attempt, setAttempt] = useState(0)
+  const key = `${name}#${attempt}`
   useEffect(() => {
     if (!name) return
     let cancelled = false
-    iconExists(name).then((found) => !cancelled && setStatus({ name, found }))
+    iconExists(name).then((found) => !cancelled && setStatus({ key, found }))
     return () => {
       cancelled = true
     }
-  }, [name])
-  // Ignore a result for a previous value while the new one is being checked.
-  return status && status.name === name ? status.found : undefined
+  }, [name, key])
+  // Ignore a result for a previous value (or attempt) while the new one is being checked.
+  const found = status && status.key === key ? status.found : undefined
+  return { found, retry: () => setAttempt((n) => n + 1) }
 }
 
 function useIconSearch(query: string) {
@@ -89,7 +93,7 @@ function useIconSearch(query: string) {
 export function IconInput(props: StringInputProps) {
   const { value, onChange, readOnly } = props
   const [query, setQuery] = useState("")
-  const found = useIconStatus(value)
+  const { found, retry } = useIconStatus(value)
   const search = useIconSearch(query)
 
   return (
@@ -114,10 +118,13 @@ export function IconInput(props: StringInputProps) {
           {found === undefined
             ? "Checking…"
             : found === null
-              ? "Couldn't check this icon."
+              ? "Couldn't check this icon. "
               : found
                 ? "Icon found."
                 : `Not available: use an icon from ${BUNDLED_ICON_SETS.join(", ")}.`}
+          {found === null && (
+            <Button mode="bleed" fontSize={1} padding={1} text="Check again" onClick={retry} />
+          )}
         </Text>
       )}
       {!readOnly && (

@@ -33,15 +33,24 @@ async function main() {
   if (docs.length === 0) return
 
   const tx = client.transaction()
+  let patches = 0
   for (const doc of docs) {
-    const { body, converted } = convertCodeAnnotations(doc.body)
+    const { body, converted, skippedListItems } = convertCodeAnnotations(doc.body)
+    if (skippedListItems.length) {
+      console.log(
+        `  ${doc._id}: left ${skippedListItems.length} list item(s) as they are, convert by hand: ${skippedListItems.join(", ")}`,
+      )
+    }
+    if (converted === 0) continue
     const blocks = body.filter((item) => item._type === "code").length
     console.log(
       `  ${doc._id}  "${doc.title ?? ""}": ${converted} paragraph(s) → ${blocks} code block(s)`,
     )
     tx.patch(doc._id, (patch) => patch.ifRevisionId(doc._rev).set({ body }))
+    patches++
   }
 
+  if (patches === 0) return
   if (!execute) {
     console.log(`\nDry run: nothing written. Re-run with "-- --execute" to apply.`)
     return

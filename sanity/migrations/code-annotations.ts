@@ -99,15 +99,29 @@ function splitBlock(block: TextBlock): Item[] {
   return out
 }
 
-/** Returns the converted body and how many paragraphs were rewritten. */
-export function convertCodeAnnotations(body: Item[]): { body: Item[]; converted: number } {
+/**
+ * Returns the converted body, how many paragraphs were rewritten, and the keys of list items
+ * that were left alone: splitting one around a code block would break up the list, so those
+ * need converting by hand.
+ */
+export function convertCodeAnnotations(body: Item[]): {
+  body: Item[]
+  converted: number
+  skippedListItems: string[]
+} {
   let converted = 0
+  const skippedListItems: string[] = []
   const next = body.flatMap((item) => {
     if (item._type !== "block") return [item]
     const block = item as TextBlock
     if (!(block.markDefs ?? []).some(isCodeDef)) return [item]
+    const split = splitBlock(block)
+    if (block.listItem && split.length > 1) {
+      skippedListItems.push(block._key)
+      return [item]
+    }
     converted++
-    return splitBlock(block)
+    return split
   })
-  return { body: next, converted }
+  return { body: next, converted, skippedListItems }
 }
