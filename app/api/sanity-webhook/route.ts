@@ -49,6 +49,9 @@ export async function POST(req: NextRequest) {
       revalidatePath("/sitemap.xml")
       revalidatePath("/")
       break
+    case "cv":
+      revalidatePath("/resume.pdf")
+      break
     default:
       revalidatePath("/", "layout")
   }

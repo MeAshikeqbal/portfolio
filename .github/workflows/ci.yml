@@ -62,3 +62,13 @@ jobs:
           name: playwright-report
           path: playwright-report/
           retention-days: 14
+      - name: Lighthouse budgets
+        # Same production build. Accessibility, best practices and SEO are hard gates;
+        # performance only warns (lab numbers on shared runners are noisy).
+        run: npx @lhci/cli@0.15.1 autorun
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: lighthouse-report
+          path: lighthouse-report/
+          retention-days: 14

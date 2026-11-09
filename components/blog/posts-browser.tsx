@@ -15,6 +15,38 @@ import { urlFor } from "@/sanity/lib/image"
 export function PostsBrowser({ posts }: { posts: PostCard[] }) {
   const [query, setQuery] = useUrlParam("q")
   const [category, setCategory] = useUrlParam("category")
+  return (
+    <PostsBrowserView
+      posts={posts}
+      query={query}
+      category={category}
+      onQueryChange={setQuery}
+      onCategoryChange={setCategory}
+    />
+  )
+}
+
+const noop = () => {}
+
+/**
+ * The browser's markup without URL hooks. The page prerenders it (unfiltered) as the Suspense
+ * fallback, so the static HTML already has the full list and nothing shifts when filters load.
+ */
+export function PostsBrowserView({
+  posts,
+  query = "",
+  category = "",
+  onQueryChange = noop,
+  onCategoryChange = noop,
+}: {
+  posts: PostCard[]
+  query?: string
+  category?: string
+  onQueryChange?: (value: string) => void
+  onCategoryChange?: (value: string) => void
+}) {
+  const setQuery = onQueryChange
+  const setCategory = onCategoryChange
 
   const categories = useMemo(
     () =>
