@@ -282,6 +282,12 @@ Motion explains continuity, state or feedback; nothing animates just because it 
 - **Navigation is instant.** Pages swap without transitions; continuity comes from consistent layout, not motion.
 - **Reduced motion:** movement goes (no trace, no slides); crossfades shorten and colour changes stay.
 
+### Post sign-off
+Every post ends with an author card (a panel with portrait, "Written by …", the tagline, then **Follow via RSS** as the primary button, **Get in touch** outlined and **GitHub** ghost), then the older/newer link and **related entries**, ranked by rare shared topics. An archived post shows an idle-tinted note under its meta row ("Archived: kept for reference…") and is noindex.
+
+### Project cover fallback
+A project without a cover image shows a thum.io screenshot of its live site in the same frame, captioned in mono ("live site · host").
+
 ### Skeletons
 Only where the visitor actually waits: a link preview screenshot from thum.io (a second or two on first capture), the Turnstile check in the contact form, and large images without a blur placeholder (tinted `surface-2` until they arrive). A skeleton is `surface-2` with a pulse under `motion-safe`, always paired with text for status ("capturing screenshot…", "Loading spam check…") and a failure message. No route-level `loading.tsx` on detail pages: streaming turns `notFound()` into a 200.
 

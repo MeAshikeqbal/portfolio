@@ -18,6 +18,7 @@ import { absoluteUrl } from "@/lib/site"
 import { projectStatus } from "@/lib/status"
 import { breadcrumbSchema, jsonLdGraph, projectSchema } from "@/lib/structured-data"
 import { urlFor } from "@/sanity/lib/image"
+import { screenshotUrl } from "@/lib/screenshot"
 
 type Props = { params: Promise<{ slug: string }> }
 
@@ -153,7 +154,7 @@ export default async function ProjectPage({ params }: Props) {
             </ul>
           )}
 
-          {project.mainImage?.asset && (
+          {project.mainImage?.asset ? (
             <Image
               src={urlFor(project.mainImage).width(1600).height(900).url()}
               alt={project.mainImage.alt || title}
@@ -163,6 +164,23 @@ export default async function ProjectPage({ params }: Props) {
               className="mt-10 rounded-lg border bg-surface-2"
               sizes="(min-width: 896px) 896px, 100vw"
             />
+          ) : (
+            project.url && (
+              // No cover set: show the live site itself (thum.io, cached by next/image).
+              <figure className="mt-10">
+                <Image
+                  src={screenshotUrl(project.url, 896, 560)}
+                  alt={`Screenshot of ${hostOf(project.url)}`}
+                  width={1792}
+                  height={1120}
+                  className="rounded-lg border bg-surface-2"
+                  sizes="(min-width: 896px) 896px, 100vw"
+                />
+                <figcaption className="mt-2 label-caps">
+                  live site · {hostOf(project.url)}
+                </figcaption>
+              </figure>
+            )
           )}
 
           <div className="mt-12">
@@ -190,4 +208,13 @@ export default async function ProjectPage({ params }: Props) {
       </Section>
     </main>
   )
+}
+
+/** "www.example.com" from a URL, or the URL itself if it doesn't parse. */
+function hostOf(url: string): string {
+  try {
+    return new URL(url).hostname
+  } catch {
+    return url
+  }
 }

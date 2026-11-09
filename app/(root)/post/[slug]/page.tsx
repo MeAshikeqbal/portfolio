@@ -4,6 +4,7 @@ import type { Metadata } from "next"
 import Image from "next/image"
 import Link from "next/link"
 import { notFound } from "next/navigation"
+import { AuthorCard } from "@/components/blog/author-card"
 import { ReadingProgress } from "@/components/blog/reading-progress"
 import { TableOfContents } from "@/components/blog/table-of-contents"
 import { DataList, DataRow } from "@/components/dashboard/data-list"
@@ -14,6 +15,7 @@ import { JsonLd } from "@/components/seo/json-ld"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { getPost, getPostSlugs } from "@/lib/api"
 import { formatDate } from "@/lib/format"
+import { rankRelated } from "@/lib/related"
 import { buildToc, readingTime, wordCount } from "@/lib/portable-text"
 import { absoluteUrl, siteConfig } from "@/lib/site"
 import { blogPostingSchema, breadcrumbSchema, jsonLdGraph } from "@/lib/structured-data"
@@ -42,7 +44,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title,
     description,
     alternates: { canonical: `/post/${slug}` },
-    robots: post.seo?.noIndex ? { index: false } : undefined,
+    // Archived posts stay reachable but leave search results, like the site's own lists.
+    robots: post.seo?.noIndex || post.archived ? { index: false } : undefined,
     openGraph: {
       title,
       description,
@@ -66,6 +69,7 @@ export default async function PostPage({ params }: Props) {
   const minutes = readingTime(post.body)
   const components = createPortableTextComponents(idsByKey)
   const hasToc = entries.length >= 2
+  const related = rankRelated(post.related, post.categories)
 
   const structuredData = jsonLdGraph(
     blogPostingSchema({
@@ -90,178 +94,189 @@ export default async function PostPage({ params }: Props) {
     <>
       <JsonLd data={structuredData} />
       <ReadingProgress targetId="post-body" />
-      <article>
-        <header className="relative overflow-hidden border-b">
-          <GridBackdrop />
-          <Container className="relative max-w-5xl py-10 sm:py-14">
-            <Link
-              href="/post"
-              className="inline-flex items-center gap-1.5 label-caps transition-colors hover:text-foreground"
-            >
-              <ArrowLeft className="size-3.5" aria-hidden /> all posts
-            </Link>
-            {post.categories && post.categories.length > 0 && (
-              <ul className="mt-6 flex flex-wrap gap-x-3 label-caps" aria-label="Categories">
-                {post.categories.map((category) => (
-                  <li key={category._id}>
-                    <Link
-                      href={`/post?category=${encodeURIComponent(category.title ?? "")}`}
-                      className="transition-colors hover:text-foreground"
-                    >
-                      #{category.title?.toLowerCase()}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            )}
-            <h1 className="mt-3 max-w-3xl text-4xl font-semibold tracking-tight text-balance sm:text-5xl">
-              {title}
-            </h1>
-            {post.excerpt && (
-              <p className="mt-4 max-w-2xl text-lg text-muted-foreground">{post.excerpt}</p>
-            )}
-            <div className="mt-6 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted-foreground">
-              <span className="flex items-center gap-2 text-foreground">
-                <Avatar className="size-7">
-                  {post.author?.image?.asset && (
-                    <AvatarImage
-                      src={urlFor(post.author.image).width(64).height(64).url()}
-                      alt=""
-                    />
-                  )}
-                  <AvatarFallback className="text-xs">
-                    {(post.author?.name ?? siteConfig.name).slice(0, 2).toUpperCase()}
-                  </AvatarFallback>
-                </Avatar>
-                {post.author?.name ?? siteConfig.name}
-              </span>
-              {post.publishedAt && (
-                <time dateTime={post.publishedAt} className="label-caps">
-                  {formatDate(post.publishedAt)}
-                </time>
-              )}
-              <span className="label-caps">{minutes} min read</span>
-            </div>
-          </Container>
-        </header>
-
-        {post.mainImage?.asset && (
-          <Container className="max-w-5xl pt-8">
-            <Image
-              src={urlFor(post.mainImage).width(1600).fit("max").auto("format").url()}
-              alt={post.mainImage.alt || ""}
-              width={post.cover?.width ?? 1600}
-              height={post.cover?.height ?? 900}
-              priority
-              sizes="(min-width: 1024px) 1024px, 100vw"
-              placeholder={post.cover?.lqip ? "blur" : "empty"}
-              blurDataURL={post.cover?.lqip ?? undefined}
-              className="h-auto w-full rounded-lg border"
-            />
-          </Container>
-        )}
-
-        <Container
-          className={
-            hasToc
-              ? "grid max-w-5xl gap-10 py-10 lg:grid-cols-[minmax(0,1fr)_13rem]"
-              : "max-w-3xl py-10"
-          }
-        >
-          <div id="post-body" className="min-w-0">
-            {hasToc && (
-              <details className="mb-8 rounded-lg border bg-surface p-4 lg:hidden">
-                <summary className="cursor-pointer label-caps">on this page</summary>
-                <ol className="mt-3 space-y-2 text-sm">
-                  {entries.map((entry) => (
-                    <li key={entry.id} className={entry.level === 3 ? "pl-4" : undefined}>
-                      <a
-                        href={`#${entry.id}`}
-                        className="text-muted-foreground hover:text-foreground"
+      <main>
+        <article>
+          <header className="relative overflow-hidden border-b">
+            <GridBackdrop />
+            <Container className="relative max-w-5xl py-6 sm:py-14">
+              <Link
+                href="/post"
+                className="inline-flex items-center gap-1.5 label-caps transition-colors hover:text-foreground"
+              >
+                <ArrowLeft className="size-3.5" aria-hidden /> all posts
+              </Link>
+              {post.categories && post.categories.length > 0 && (
+                <ul
+                  className="mt-4 flex flex-wrap gap-x-3 label-caps sm:mt-6"
+                  aria-label="Categories"
+                >
+                  {post.categories.map((category) => (
+                    <li key={category._id}>
+                      <Link
+                        href={`/post?category=${encodeURIComponent(category.title ?? "")}`}
+                        className="transition-colors hover:text-foreground"
                       >
-                        {entry.text}
-                      </a>
+                        #{category.title?.toLowerCase()}
+                      </Link>
                     </li>
                   ))}
-                </ol>
-              </details>
-            )}
-            <div className="prose prose-lg max-w-none">
-              <PortableText value={post.body ?? []} components={components} />
-            </div>
-          </div>
-          {hasToc && (
-            <aside className="hidden lg:block">
-              <TableOfContents entries={entries} className="sticky top-24" />
-            </aside>
-          )}
-        </Container>
-
-        <footer className="border-t">
-          <Container className="max-w-5xl space-y-10 py-12">
-            {(post.previous || post.next) && (
-              <nav aria-label="More posts" className="grid gap-4 sm:grid-cols-2">
-                {post.previous?.slug ? (
-                  <Link
-                    href={`/post/${post.previous.slug}`}
-                    className="group rounded-lg border bg-surface p-4 transition-colors hover:border-border-strong"
-                  >
-                    <span className="flex items-center gap-1.5 label-caps">
-                      <ArrowLeft className="size-3.5" aria-hidden /> older
-                    </span>
-                    <span className="mt-1 block font-medium group-hover:underline">
-                      {post.previous.title}
-                    </span>
-                  </Link>
-                ) : (
-                  <span aria-hidden />
-                )}
-                {post.next?.slug && (
-                  <Link
-                    href={`/post/${post.next.slug}`}
-                    className="group rounded-lg border bg-surface p-4 text-right transition-colors hover:border-border-strong"
-                  >
-                    <span className="flex items-center justify-end gap-1.5 label-caps">
-                      newer <ArrowRight className="size-3.5" aria-hidden />
-                    </span>
-                    <span className="mt-1 block font-medium group-hover:underline">
-                      {post.next.title}
-                    </span>
-                  </Link>
-                )}
-              </nav>
-            )}
-
-            {post.related.length > 0 && (
-              <section aria-labelledby="related-heading">
-                <Panel>
-                  <PanelHeader title={<span id="related-heading">related entries</span>} />
-                  <DataList>
-                    {post.related.map((related) => (
-                      <DataRow
-                        key={related._id}
-                        href={`/post/${related.slug}`}
-                        title={related.title ?? "Untitled post"}
-                        description={related.excerpt}
-                        value={
-                          related.publishedAt && (
-                            <time
-                              dateTime={related.publishedAt}
-                              className="label-caps whitespace-nowrap"
-                            >
-                              {formatDate(related.publishedAt)}
-                            </time>
-                          )
-                        }
+                </ul>
+              )}
+              <h1 className="mt-2 max-w-3xl text-[2rem] leading-tight font-semibold tracking-tight text-balance sm:mt-3 sm:text-5xl">
+                {title}
+              </h1>
+              {post.excerpt && (
+                <p className="mt-4 max-w-2xl text-lg text-muted-foreground">{post.excerpt}</p>
+              )}
+              <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted-foreground sm:mt-6">
+                <span className="flex items-center gap-2 text-foreground">
+                  <Avatar className="size-7">
+                    {post.author?.image?.asset && (
+                      <AvatarImage
+                        src={urlFor(post.author.image).width(64).height(64).url()}
+                        alt=""
                       />
+                    )}
+                    <AvatarFallback className="text-xs">
+                      {(post.author?.name ?? siteConfig.name).slice(0, 2).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  {post.author?.name ?? siteConfig.name}
+                </span>
+                {post.publishedAt && (
+                  <time dateTime={post.publishedAt} className="label-caps">
+                    {formatDate(post.publishedAt)}
+                  </time>
+                )}
+                <span className="label-caps">{minutes} min read</span>
+              </div>
+              {post.archived && (
+                <p className="mt-5 max-w-2xl rounded-md bg-status-idle-soft px-3 py-2 text-sm text-status-idle-fg">
+                  Archived: this post is kept for reference and may be out of date.
+                </p>
+              )}
+            </Container>
+          </header>
+
+          {post.mainImage?.asset && (
+            <Container className="max-w-5xl pt-4 sm:pt-8">
+              <Image
+                src={urlFor(post.mainImage).width(1600).fit("max").auto("format").url()}
+                alt={post.mainImage.alt || ""}
+                width={post.cover?.width ?? 1600}
+                height={post.cover?.height ?? 900}
+                priority
+                sizes="(min-width: 1024px) 1024px, 100vw"
+                placeholder={post.cover?.lqip ? "blur" : "empty"}
+                blurDataURL={post.cover?.lqip ?? undefined}
+                className="h-auto w-full rounded-lg border"
+              />
+            </Container>
+          )}
+
+          <Container
+            className={
+              hasToc
+                ? "grid max-w-5xl gap-10 py-6 sm:py-10 lg:grid-cols-[minmax(0,1fr)_13rem]"
+                : "max-w-3xl py-6 sm:py-10"
+            }
+          >
+            <div id="post-body" className="min-w-0">
+              {hasToc && (
+                <details className="mb-6 rounded-lg border bg-surface p-4 sm:mb-8 lg:hidden">
+                  <summary className="cursor-pointer label-caps">on this page</summary>
+                  <ol className="mt-3 space-y-2 text-sm">
+                    {entries.map((entry) => (
+                      <li key={entry.id} className={entry.level === 3 ? "pl-4" : undefined}>
+                        <a
+                          href={`#${entry.id}`}
+                          className="text-muted-foreground hover:text-foreground"
+                        >
+                          {entry.text}
+                        </a>
+                      </li>
                     ))}
-                  </DataList>
-                </Panel>
-              </section>
+                  </ol>
+                </details>
+              )}
+              <div className="prose prose-lg max-w-none">
+                <PortableText value={post.body ?? []} components={components} />
+              </div>
+            </div>
+            {hasToc && (
+              <aside className="hidden lg:block">
+                <TableOfContents entries={entries} className="sticky top-24" />
+              </aside>
             )}
           </Container>
-        </footer>
-      </article>
+
+          <footer className="border-t">
+            <Container className="max-w-5xl space-y-10 py-12">
+              <AuthorCard name={post.author?.name} />
+              {(post.previous || post.next) && (
+                <nav aria-label="More posts" className="grid gap-4 sm:grid-cols-2">
+                  {post.previous?.slug ? (
+                    <Link
+                      href={`/post/${post.previous.slug}`}
+                      className="group rounded-lg border bg-surface p-4 transition-colors hover:border-border-strong"
+                    >
+                      <span className="flex items-center gap-1.5 label-caps">
+                        <ArrowLeft className="size-3.5" aria-hidden /> older
+                      </span>
+                      <span className="mt-1 block font-medium group-hover:underline">
+                        {post.previous.title}
+                      </span>
+                    </Link>
+                  ) : (
+                    <span aria-hidden />
+                  )}
+                  {post.next?.slug && (
+                    <Link
+                      href={`/post/${post.next.slug}`}
+                      className="group rounded-lg border bg-surface p-4 text-right transition-colors hover:border-border-strong"
+                    >
+                      <span className="flex items-center justify-end gap-1.5 label-caps">
+                        newer <ArrowRight className="size-3.5" aria-hidden />
+                      </span>
+                      <span className="mt-1 block font-medium group-hover:underline">
+                        {post.next.title}
+                      </span>
+                    </Link>
+                  )}
+                </nav>
+              )}
+
+              {related.length > 0 && (
+                <section aria-labelledby="related-heading">
+                  <Panel>
+                    <PanelHeader title={<span id="related-heading">related entries</span>} />
+                    <DataList>
+                      {related.map((related) => (
+                        <DataRow
+                          key={related._id}
+                          href={`/post/${related.slug}`}
+                          title={related.title ?? "Untitled post"}
+                          description={related.excerpt}
+                          value={
+                            related.publishedAt && (
+                              <time
+                                dateTime={related.publishedAt}
+                                className="label-caps whitespace-nowrap"
+                              >
+                                {formatDate(related.publishedAt)}
+                              </time>
+                            )
+                          }
+                        />
+                      ))}
+                    </DataList>
+                  </Panel>
+                </section>
+              )}
+            </Container>
+          </footer>
+        </article>
+      </main>
     </>
   )
 }

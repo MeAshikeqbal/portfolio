@@ -4,20 +4,8 @@ import Image from "next/image"
 import { HoverCard } from "radix-ui"
 import { useState, type ReactNode } from "react"
 import { Skeleton } from "@/components/ui/skeleton"
+import { screenshotUrl } from "@/lib/screenshot"
 import { cn } from "@/lib/utils"
-
-/** Viewport the target page is rendered at before cropping and scaling. */
-const VIEWPORT_WIDTH = 1280
-
-/**
- * thum.io screenshot of a page's first screen, cropped to the preview's aspect ratio and
- * rendered at 2× for sharp hover cards. Keyless free tier; next/image caches each result, so
- * repeat hovers don't reach thum.io again.
- */
-export function screenshotUrl(url: string, width: number, height: number): string {
-  const crop = Math.round((VIEWPORT_WIDTH * height) / width)
-  return `https://image.thum.io/get/noanimate/viewportWidth/${VIEWPORT_WIDTH}/width/${width * 2}/crop/${crop}/${url}`
-}
 
 interface LinkPreviewProps {
   url: string
