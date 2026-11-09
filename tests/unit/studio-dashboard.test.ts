@@ -5,6 +5,8 @@ import {
   dedupeRecent,
   healthIssues,
   isAdmin,
+  NOW_STALE_AFTER_DAYS,
+  nowFreshness,
   publishedId,
   snippet,
   timeAgo,
@@ -97,5 +99,35 @@ describe("icon route X-Icon-Found", () => {
     expect((await get("logos", "aws.svg")).headers.get("X-Icon-Found")).toBe("1")
     expect((await get("logos", "definitely-not-an-icon.svg")).headers.get("X-Icon-Found")).toBe("0")
     expect((await get("nope", "aws.svg")).headers.get("X-Icon-Found")).toBe("0")
+  })
+})
+
+describe("nowFreshness", () => {
+  const now = Date.parse("2026-11-09T12:00:00Z")
+  const daysAgo = (days: number) => new Date(now - days * 86_400_000).toISOString()
+
+  it("is fresh up to the threshold and stale after it", () => {
+    expect(nowFreshness(daysAgo(0), now)).toMatchObject({ state: "fresh", label: "Updated today" })
+    expect(nowFreshness(daysAgo(1), now).label).toBe("Updated 1 day ago")
+    expect(nowFreshness(daysAgo(90), now)).toMatchObject({ state: "fresh", days: 90 })
+    expect(nowFreshness(daysAgo(91), now)).toMatchObject({
+      state: "stale",
+      days: 91,
+      label: "Updated 91 days ago: time for a new update",
+    })
+  })
+
+  it("reports a missing or invalid date as unpublished", () => {
+    expect(nowFreshness(null, now).state).toBe("unpublished")
+    expect(nowFreshness(undefined, now).state).toBe("unpublished")
+    expect(nowFreshness("garbage", now).state).toBe("unpublished")
+  })
+
+  it("never goes negative for future timestamps", () => {
+    expect(nowFreshness(daysAgo(-3), now)).toMatchObject({ state: "fresh", days: 0 })
+  })
+
+  it("matches the site's threshold", () => {
+    expect(NOW_STALE_AFTER_DAYS).toBe(90)
   })
 })
