@@ -13,7 +13,7 @@ export const siteConfig = {
   name: "Ashik Eqbal",
   title: "Ashik Eqbal - Software Engineer",
   description:
-    "Personal portfolio and blog of Ashik Eqbal, a software engineer specializing in web development.",
+    "Writing and projects from Ashik Eqbal, a full-stack engineer who builds for the web, runs a homelab, and writes up what breaks.",
   locale: "en_US",
   twitterHandle: "@me_ashikeqbal",
   role: "Software engineer",
