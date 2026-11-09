@@ -11,7 +11,7 @@ export function ContactSection() {
         <div>
           <SectionHeader
             eyebrow="support"
-            title="Open a ticket"
+            title="Get in touch"
             description="Questions, collaboration ideas, or just saying hello. Send a message and I'll reply by email."
           />
           <p className="label-caps">other channels</p>

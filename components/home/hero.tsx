@@ -52,7 +52,7 @@ export async function Hero() {
               </Button>
             )}
             <Button asChild variant="outline">
-              <Link href="/#contact">Open a ticket</Link>
+              <Link href="/#contact">Get in touch</Link>
             </Button>
             <div className="ml-1 flex items-center gap-1">
               {siteConfig.socialLinks.map(({ id, href, label }) => {

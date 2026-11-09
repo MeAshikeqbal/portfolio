@@ -459,7 +459,7 @@ function HomeMockup() {
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
             <Button>Résumé</Button>
-            <Button variant="outline">Open a ticket</Button>
+            <Button variant="outline">Get in touch</Button>
           </div>
         </Container>
       </div>

@@ -17,7 +17,7 @@ export const siteConfig = {
   locale: "en_US",
   twitterHandle: "@me_ashikeqbal",
   role: "Software engineer",
-  tagline: "A passionate software engineer who loves to build web applications.",
+  tagline: "Building for the web, running my own infrastructure, and writing up what breaks.",
   /**
    * Hero availability badge. `status`: "up" (green, pulsing) = available, "warn" (amber) =
    * limited, "idle" (grey) = not looking. Set to `null` to hide the badge entirely.
