@@ -27,8 +27,10 @@ export const POSTS_QUERY = defineQuery(`
   *[_type == "post" && ${published} && defined(slug.current)] | order(publishedAt desc) { ${postCard} }
 `)
 
+/** Home page writing: featured posts first, then the newest, three in all. */
 export const LATEST_POSTS_QUERY = defineQuery(`
-  *[_type == "post" && ${published} && defined(slug.current)] | order(publishedAt desc) [0...5] { ${postCard} }
+  *[_type == "post" && ${published} && defined(slug.current)]
+    | order(coalesce(featured, false) desc, publishedAt desc) [0...3] { ${postCard} }
 `)
 
 const indexablePost = `_type == "post" && ${published} && defined(slug.current)`
@@ -87,17 +89,33 @@ export const PROJECT_SLUGS_QUERY = defineQuery(`
   *[_type == "project" && ${published} && defined(slug.current)].slug.current
 `)
 
-/** Headline numbers for the home page status panel. */
+/** Facts for the hero's node panel. Every value is measured or written in the CMS. */
 export const HOME_STATS_QUERY = defineQuery(`{
   "posts": count(*[_type == "post" && ${published} && defined(slug.current)]),
   "projects": count(*[_type == "project" && ${published}]),
+  // Past-52-week commits per repo, summed (see lib/fetch-github-data.ts).
   "commits": math::sum(*[_type == "project" && ${published}].githubData.commits),
-  "skills": count(*[_type == "skills"]),
-  "latestPost": *[_type == "post" && ${published}] | order(publishedAt desc)[0].publishedAt
+  "latestPost": *[_type == "post" && ${published} && defined(slug.current)]
+    | order(publishedAt desc)[0] { title, "slug": slug.current, publishedAt },
+  // The "Homelab" section of /uses, if there is one.
+  "homelab": *[_type == "uses" && _id == "uses"][0]
+    .sections[string::startsWith(lower(title), "homelab")][0]
+    .items[0...5] { _key, name, description, url, icon }
+}`)
+
+/**
+ * Real signals for the system bar: when the GitHub sync last wrote to a project, and the
+ * newest post. Both are null until they exist; nothing is assumed.
+ */
+export const SITE_STATUS_QUERY = defineQuery(`{
+  "syncedAt": *[_type == "project" && ${published} && defined(githubData.syncedAt)]
+    | order(githubData.syncedAt desc)[0].githubData.syncedAt,
+  "latestPostAt": *[_type == "post" && ${published} && defined(slug.current)]
+    | order(publishedAt desc)[0].publishedAt
 }`)
 
 export const SKILLS_QUERY = defineQuery(`
-  *[_type == "skills"] | order(orderRank asc, name asc) { _id, name, icon }
+  *[_type == "skills"] | order(orderRank asc, name asc) { _id, name, icon, category }
 `)
 
 export const EDUCATION_QUERY = defineQuery(`

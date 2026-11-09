@@ -17,8 +17,8 @@ export default function Home() {
     <main>
       <JsonLd data={jsonLdGraph(personSchema(), websiteSchema())} />
       <Hero />
-      <ServicesSection />
       <WritingSection />
+      <ServicesSection />
       <UptimeSection />
       <InventorySection />
       <ContactSection />

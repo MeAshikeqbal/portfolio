@@ -37,7 +37,7 @@ export default async function Image({ params }: { params: Promise<{ slug: string
   if (!project?.title) {
     return new ImageResponse(
       <OgFrame
-        eyebrow="services"
+        eyebrow="project"
         title="Project not found"
         status={{ color: OG_COLORS.idle, label: "http 404" }}
       />,
@@ -57,7 +57,7 @@ export default async function Image({ params }: { params: Promise<{ slug: string
 
   return new ImageResponse(
     <OgFrame
-      eyebrow={status ? `services · ${status.label}` : "services"}
+      eyebrow={status ? `project · ${status.label}` : "project"}
       title={project.title}
       description={project.description}
       footer={footer}

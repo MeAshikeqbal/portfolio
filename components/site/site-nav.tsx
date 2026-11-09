@@ -3,7 +3,7 @@
 import { Menu, X } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { Container } from "@/components/dashboard/layout"
 import { ThemeToggle } from "@/components/theme-toggle"
 import type { CommandIndex } from "@/lib/api"
@@ -21,9 +21,45 @@ function isActive(pathname: string, href: string) {
 export function SiteNav({ commandIndex }: { commandIndex?: CommandIndex }) {
   const pathname = usePathname()
   const [open, setOpen] = useState(false)
+  const header = useRef<HTMLElement>(null)
+  const toggle = useRef<HTMLButtonElement>(null)
+
+  // The open menu covers most of a phone screen, so any sign of moving on closes it:
+  // Escape (focus returns to the toggle), a tap outside, scrolling, or a route change.
+  useEffect(() => {
+    if (!open) return
+    const startY = window.scrollY
+    const close = () => setOpen(false)
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return
+      close()
+      toggle.current?.focus()
+    }
+    const onPointerDown = (event: PointerEvent) => {
+      if (!header.current?.contains(event.target as Node)) close()
+    }
+    const onScroll = () => {
+      if (Math.abs(window.scrollY - startY) > 24) close()
+    }
+    document.addEventListener("keydown", onKeyDown)
+    document.addEventListener("pointerdown", onPointerDown)
+    window.addEventListener("scroll", onScroll, { passive: true })
+    return () => {
+      document.removeEventListener("keydown", onKeyDown)
+      document.removeEventListener("pointerdown", onPointerDown)
+      window.removeEventListener("scroll", onScroll)
+    }
+  }, [open])
+
+  // Close on navigation (links also close on click; this covers back/forward and the palette).
+  const [lastPath, setLastPath] = useState(pathname)
+  if (pathname !== lastPath) {
+    setLastPath(pathname)
+    setOpen(false)
+  }
 
   return (
-    <header className="sticky top-0 z-40 border-b bg-background/80 backdrop-blur-md">
+    <header ref={header} className="sticky top-0 z-40 border-b bg-background/80 backdrop-blur-md">
       <Container className="flex h-14 items-center justify-between gap-4">
         <Link
           href="/"
@@ -59,6 +95,7 @@ export function SiteNav({ commandIndex }: { commandIndex?: CommandIndex }) {
           {commandIndex && <CommandMenu index={commandIndex} />}
           <ThemeToggle className="hidden md:flex" />
           <Button
+            ref={toggle}
             variant="ghost"
             size="icon"
             className="md:hidden"
@@ -73,12 +110,7 @@ export function SiteNav({ commandIndex }: { commandIndex?: CommandIndex }) {
       </Container>
 
       {open && (
-        <nav
-          id="mobile-menu"
-          aria-label="Main"
-          className="border-t bg-background md:hidden"
-          onKeyDown={(event) => event.key === "Escape" && setOpen(false)}
-        >
+        <nav id="mobile-menu" aria-label="Main" className="border-t bg-background md:hidden">
           <Container className="flex flex-col gap-1 py-3">
             {siteConfig.nav.map((item) => {
               const active = isActive(pathname, item.href)

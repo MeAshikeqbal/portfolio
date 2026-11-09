@@ -137,14 +137,14 @@ The site is presented as the status page of a small, well-run homelab. Projects 
 
 The UI is monochrome on purpose. Neutral surfaces, near-black (or near-white) ink and 1px hairlines carry the structure. The only colour on the page is status, and the five status colours have fixed meanings. Because colour is that scarce, a single green dot is enough to say "live". Density is moderate, like a tidy admin console: compact rows, small mono labels and generous section breaks, so long-form reading is still comfortable.
 
-The metaphor organizes the site; it never stands in for meaning. Each dashboard term sits next to a plain-language title, and the actions people need (read, contact, open a project) use ordinary words.
+The metaphor lives in the data, not the headings. Section titles are plain ("Writing", "Projects"); the dashboard voice appears where a real instrument would put it: panel headers ("services · 6 of 7", "log", "inventory"), status dots backed by data, and the system bar. Actions people need (read, follow, contact) use ordinary words.
 
 **Key Characteristics:**
 - Monochrome neutrals with a cool grey cast (hue 286) in both themes; the theme follows the system setting.
 - Five status colours (up, warn, down, info, idle), each a triple: dot, text (`-fg`) and tint (`-soft`).
 - Geist for words and Geist Mono for labels, metadata and numbers.
 - Flat 1px-bordered panels. Only dialogs cast a shadow.
-- Live data shown with tabular figures, status dots and muted-ink sparklines.
+- Live data shown with tabular figures, status dots and muted-ink sparklines. Nothing shows a status it can't measure.
 
 ## Colors
 
@@ -190,20 +190,24 @@ Each status follows one recipe. The dot is at least 3:1 against the surface. The
 - **Title** (500, 1rem): row titles in data lists, clamped to one line (two on phones).
 - **Metric** (600, 1.5rem, leading 1, tabular figures): numbers in metric tiles and in the hero node panel.
 - **Body** (400, 1rem, 1.5; descriptions at 1.125rem in the hero; max-width `prose`, about 65ch): running text and descriptions in muted ink. Blog posts use Tailwind Typography mapped onto these tokens.
-- **Label** (400 mono, 0.6875rem, 0.08em tracking, uppercase, muted ink; the `label-caps` utility): section eyebrows, panel headers, metadata, the system bar.
+- **Label** (400 mono, 0.6875rem, 0.08em tracking, uppercase, muted ink; the `label-caps` utility): panel headers, metadata, dates, the system bar. Never above a heading.
 
 ### Named Rules
 **The Machine Voice Rule.** Mono is for things a system would print: labels, metadata, measurements, identifiers and filter values. Words people read in sentences are always Geist sans.
 
 **The Tabular Rule.** Every number that can change (counts, stars, commits, dates in rows) uses tabular figures so it doesn't jitter.
 
+**The No Kicker Rule.** Headings stand alone. No mono label sits above an H1 or H2; the dashboard vocabulary belongs in panel headers.
+
 ## Layout
 
 There is a single centred column, at most 72rem (`max-w-6xl`), with 16px gutters on phones and 24px from `sm`. Sections stack vertically with 64px of vertical padding (96px from `sm`) and are separated by full-width hairlines (`border-t` / `border-b`), not by background changes. Anchored sections clear the sticky 56px header with `scroll-mt-20`.
 
-The page shell runs top to bottom: a 32px **system bar** (status dot, a message such as "all systems operational", and the build SHA from `sm` up), then a sticky **header** at 56px with an 80% background and a backdrop blur, then the sections, then the footer.
+The page shell runs top to bottom: a 32px **system bar**, then a sticky **header** at 56px with an 80% background and a backdrop blur, then the sections, then the footer. The system bar reports only measured facts: the GitHub sync's health (a status dot re-judged in the browser against the visitor's clock, so a stale static page can't keep showing green; hidden until the sync has run), the newest post's date, and the build SHA and date from `sm` up. A page may pass one explicit notice (the 404 page says "1 page not found").
 
-Inside sections, content sits in panels and dense lists. The hero splits 1.35fr / 1fr from `lg` (identity on the left, a "node" panel on the right) and stacks on smaller screens. The contact section splits 1fr / 1.3fr. Metric grids run two columns on phones and four from `sm`. Data rows move metadata under the title on phones and inline on wider screens.
+The home page reads in priority order: hero, **Writing** (the lead section), Projects, Experience & education, Stack, Contact.
+
+Inside sections, content sits in panels and dense lists. The hero splits 1.35fr / 1fr from `lg` (portrait, name, tagline and actions on the left; the node panel on the right) and stacks on smaller screens, kept short enough that the first section starts within the first phone screen. The contact section splits 1fr / 1.3fr. Metric grids run two columns on phones and four from `sm`. Data rows move metadata under the title on phones and inline on wider screens.
 
 A faint 20px dot grid (`bg-grid`) sits behind the hero only, masked to fade out from the top.
 
@@ -229,8 +233,8 @@ Shadcn/ui on the monochrome tokens.
 - **Shape:** gently rounded (4px), 36px tall (32px small, 40px large), 14px medium text, 16px icon.
 - **Primary:** inverted ink: an ink background with background-coloured text, 90% ink on hover. Used once per view at most (the hero's Résumé).
 - **Outline:** background fill, a hairline border and a faint `shadow-xs`, with a `surface-2` fill on hover. Used for the secondary action ("Get in touch").
-- **Ghost:** no fill until hover (`surface-2`). Used for icon buttons (socials, RSS, menu, theme).
-- **Focus:** a 3px ring in the focus colour at 50%, plus the global 2px `focus-visible` outline offset by 2px.
+- **Ghost:** no fill until hover (`surface-2`). Used for labelled tertiary actions ("Follow via RSS") and icon buttons (menu, theme).
+- **Focus:** the one site-wide style: a solid 2px outline in the focus colour, offset 2px. Inside panels (rows, list links) the offset is -2px so `overflow-hidden` can't clip it.
 
 ### Status pill and status dot (signature)
 - **Pill:** fully rounded, 2px × 8px padding, a mono 11px uppercase label tracked at 0.06em, a status `-soft` background with `-fg` text, and a 6px dot at the front. The label carries the meaning.
@@ -243,13 +247,22 @@ Shadcn/ui on the monochrome tokens.
 - **Body:** 16px padding.
 
 ### Data list / service row (signature)
-Dense rows divided by hairlines. Each row has an optional status dot, a medium-weight title, a one-line muted description, mono metadata, and a right-aligned tabular value or sparkline. Linked rows fill with `surface-2` on hover and focus.
+Dense rows divided by hairlines. Each row has an optional status dot (only when the CMS sets one), a medium-weight title that wraps rather than truncates, a one-line muted description capped at about 80 characters, mono metadata, and a right-aligned tabular value or sparkline. Linked rows fill with `surface-2` on hover and focus; rows that leave the site carry an arrow and open in a new tab.
+
+### Writing log (signature)
+The home page's lead list. Each entry is one link: a mono date column (7.5rem from `sm`), a semibold 1.125–1.25rem title that is never cut off, an excerpt trimmed on a word boundary (about 160 characters, `text-pretty`), and mono tags. Three entries: featured posts first, then the newest.
+
+### Node panel (signature)
+The hero's instrument. Header "node · itsashik" with the availability pill as its status. Below it, only real facts: the latest post (a link), the homelab services from the "Homelab" section of /uses when present, and counts (posts, projects, and commits/yr once the GitHub sync has written them).
 
 ### Metric tile
 A `label-caps` label above a 1.5rem semibold tabular value, with an optional sparkline at the right and a 12px muted hint. It is built as a description list (`dl` / `dt` / `dd`).
 
 ### Sparkline
 A 96 × 24 server-rendered SVG in muted ink, with the latest point in ink. It carries a text summary (range and peak) as its accessible name and has no hover layer.
+
+### Inventory chips
+Skills render as wrapping chips (6px corners, a hairline border, a 24px icon plate, the full name) grouped into four rows: languages & frontend, backend & data, infrastructure & homelab, tools & AI. Eight per group are visible; a checkbox-driven "Show all" reveals the rest through `:has()`, without JavaScript.
 
 ### Chips (filters)
 Fully rounded, 4px × 10px, mono 12px, with a hairline border. Inactive chips are muted ink and turn ink on hover. Active chips are inverted ink (an ink fill with background-coloured text) and set `aria-pressed`. The first option is always "all".
@@ -261,7 +274,7 @@ Fully rounded, 4px × 10px, mono 12px, with a hairline border. Inactive chips ar
 The wordmark `itsashik.dev` in mono, with ".dev" in muted ink. Desktop links are 14px muted-ink pills that get a `surface-2` fill on hover and when active (`aria-current="page"`). Hash links are never marked active. On mobile, a ghost menu button opens a full-width panel with 16px links and a theme row. The ⌘K command palette is available on every screen size.
 
 ### Section header
-A mono eyebrow in dashboard vocabulary (for example "support"), a plain-language headline ("Get in touch"), an optional description up to about 65ch, and an optional right-aligned mono action link ending in "→".
+A plain-language headline ("Writing", "Get in touch") with no label above it, an optional description up to about 65ch, and optional actions on the right: 14px medium links with an icon (an arrow, or RSS), padded to 44px tall.
 
 ## Do's and Don'ts
 
@@ -269,7 +282,8 @@ A mono eyebrow in dashboard vocabulary (for example "support"), a plain-language
 - **Do** keep every hue tied to a status. If a new element needs colour, it needs a state first.
 - **Do** pair every status dot with a visible or screen-reader label.
 - **Do** pull every number from GitHub sync or the CMS and set it in tabular figures.
-- **Do** pair dashboard vocabulary (eyebrow, panel header) with a plain-language title or action label.
+- **Do** put dashboard vocabulary in panel headers and metadata; keep headings and actions in plain words.
+- **Do** hide a status, count or sparkline when its data is missing rather than showing a placeholder value.
 - **Do** separate sections and panels with 1px hairlines and tonal steps, not shadows.
 - **Do** run `tests/unit/tokens.test.ts` after changing any token. Every text/background pair must stay at WCAG AA in both themes.
 - **Do** gate any motion behind `motion-safe` / `prefers-reduced-motion`.
@@ -277,6 +291,8 @@ A mono eyebrow in dashboard vocabulary (for example "support"), a plain-language
 ### Don't:
 - **Don't** introduce a brand or accent colour, gradients, or coloured series in charts.
 - **Don't** show status by colour alone.
+- **Don't** hardcode a healthy state ("operational", "online"). If nothing measures it, it isn't shown.
+- **Don't** put a mono label above a heading.
 - **Don't** add shadows to panels, tiles, cards or rows. Only dialogs float.
 - **Don't** use mono for sentences people read. It is for labels, metadata, identifiers and numbers.
 - **Don't** invent metrics, uptime figures or service states. If the CMS has no status for a project, show none.

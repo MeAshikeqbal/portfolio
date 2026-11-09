@@ -38,3 +38,21 @@ export function projectStatus(
       return null
   }
 }
+
+/** How long the daily GitHub sync can go quiet before it counts as stale. */
+export const SYNC_FRESH_HOURS = 36
+
+/**
+ * Health of the GitHub sync, judged from when it last wrote to a project.
+ * Returns null when it has never run, so nothing is claimed.
+ */
+export function syncStatus(
+  syncedAt: string | null | undefined,
+  now: Date = new Date(),
+): { status: Status; label: string } | null {
+  if (!syncedAt) return null
+  const ageHours = (now.getTime() - new Date(syncedAt).getTime()) / 3_600_000
+  return ageHours <= SYNC_FRESH_HOURS
+    ? { status: "up", label: "github sync ok" }
+    : { status: "warn", label: "github sync stale" }
+}

@@ -39,7 +39,10 @@ Downloading the résumé (`/resume.pdf`) is not one of the goals, but the hero k
 - **Stack (incumbent):** Next.js 16 App Router (static prerendering), React 19, TypeScript, Sanity 6, Tailwind CSS 4, shadcn/ui on Radix, Shiki, `next/og`, Vercel hosting. Pages are static and revalidate when content is published.
 - **Content comes from Sanity:** posts, projects, experience, education, skills, CV, `/uses`, `/now`. Copy belongs in the CMS rather than in code, except site-wide identity, which lives in `lib/site.ts`.
 - **GitHub sync:** projects carry stars, primary language, last push, past-year commits and a 12-week activity series.
-- **Availability badge:** configured in `lib/site.ts` as `up` / `warn` / `idle`, or hidden.
+- **Availability badge:** configured in `lib/site.ts` as `up` / `warn` / `idle`, or hidden. It is the node panel's status.
+- **Home page writing:** posts marked **featured** in the Studio come first, then the newest; three in all.
+- **Homelab panel:** the hero lists up to five items from the section of `/uses` whose title starts with "Homelab". It stays hidden until that section exists.
+- **GitHub sync status:** the system bar shows the sync's health only once it has run, and re-judges its age in the visitor's browser.
 - **Contact form:** protected by Cloudflare Turnstile; submissions go to the private `inbox` dataset.
 - **Security:** strict security headers and a CSP. Third-party scripts and assets have to fit inside them.
 - **Tagline (confirmed 2026-11-09):** "Building for the web, running my own infrastructure, and writing up what breaks." It lives in `lib/site.ts`.
@@ -48,11 +51,11 @@ Downloading the résumé (`/resume.pdf`) is not one of the goals, but the hero k
 ## Brand Commitments
 
 - **Name and identity:** Ashik Eqbal, `itsashik.dev`, handle `@me_ashikeqbal`. GitHub `MeAshikEqbal`, LinkedIn `itsashik`.
-- **The homelab-dashboard metaphor is how the site is organized.** Each section maps to something on the dashboard, and future work keeps these names:
+- **The homelab-dashboard metaphor is how the site is organized.** Headings and actions stay in plain words ("Writing", "Projects", "Get in touch"); the dashboard vocabulary lives in panel headers and real status:
   - projects are **services**;
-  - writing is the **incident log**;
-  - experience is **uptime**;
+  - writing is the **log** ("incident log" was dropped on 2026-11-09 because it read as outages);
   - skills are the **inventory**.
+  The site never shows a healthy state it doesn't measure.
 - **Colour means status only:** green = live, amber = attention, red = down, blue = link/info. There is no brand colour. The full visual system is in the code (`app/globals.css`, `components/dashboard/`) and has not yet been written up in DESIGN.md.
 - **Voice:** first person, from a practitioner, about real things Ashik has built and run (for example "Trial, Error, and Ethernet: My Homelab Learning Journey", "Why I Started Self-Hosting AI at Home").
 

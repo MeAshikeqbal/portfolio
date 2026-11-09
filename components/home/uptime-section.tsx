@@ -47,7 +47,7 @@ export async function UptimeSection() {
   return (
     <Section id="uptime" className="border-t">
       <Container>
-        <SectionHeader eyebrow="uptime" title="Experience & education" />
+        <SectionHeader title="Experience & education" />
         <div className="grid gap-6 lg:grid-cols-2">
           {work.length > 0 && <Log title="experience" entries={work} />}
           {study.length > 0 && <Log title="education" entries={study} />}
@@ -82,7 +82,7 @@ function Log({ title, entries }: { title: string; entries: Entry[] }) {
               <div className="mt-1 flex items-start gap-3">
                 {entry.logo}
                 <div className="min-w-0">
-                  <p className="font-medium">{entry.title}</p>
+                  <p className="font-medium text-pretty">{entry.title}</p>
                   <p className="text-sm text-muted-foreground">{entry.org}</p>
                 </div>
               </div>

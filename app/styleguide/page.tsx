@@ -92,14 +92,14 @@ export default function StyleguidePage() {
       </Container>
 
       <Container className="space-y-20">
-        <Block id="colour" eyebrow="tokens" title="Colour">
+        <Block id="colour" title="Colour">
           <div className="grid gap-4 lg:grid-cols-2">
             <ThemePreview mode="light" tokens={tokens.light} />
             <ThemePreview mode="dark" tokens={tokens.dark} />
           </div>
         </Block>
 
-        <Block id="type" eyebrow="tokens" title="Typography">
+        <Block id="type" title="Typography">
           <div className="space-y-4">
             <p className="text-display font-semibold">Display — Ashik Eqbal</p>
             <p className="text-3xl font-semibold tracking-tight">Heading 2 — Selected work</p>
@@ -109,7 +109,7 @@ export default function StyleguidePage() {
               and write about what breaks.
             </p>
             <p className="text-muted-foreground">Muted — supporting copy and descriptions.</p>
-            <p className="label-caps">label-caps — services · incident log · uptime</p>
+            <p className="label-caps">label-caps — panel headers · metadata · counts</p>
             <p className="font-mono text-sm">Geist Mono — const status = &quot;up&quot;</p>
             <p className="text-2xl font-semibold tabular">1,284 · 12.9K · 0.97</p>
           </div>
@@ -127,7 +127,7 @@ export default function StyleguidePage() {
           </article>
         </Block>
 
-        <Block id="status" eyebrow="primitives" title="Status">
+        <Block id="status" title="Status">
           <div className="flex flex-wrap items-center gap-6">
             {STATUSES.map((status) => (
               <span key={status} className="flex items-center gap-2 text-sm">
@@ -146,7 +146,7 @@ export default function StyleguidePage() {
           </div>
         </Block>
 
-        <Block id="data" eyebrow="primitives" title="Panels, metrics and rows">
+        <Block id="data" title="Panels, metrics and rows">
           <MetricGrid>
             <MetricTile
               label="commits / wk"
@@ -183,7 +183,7 @@ export default function StyleguidePage() {
           </Panel>
         </Block>
 
-        <Block id="components" eyebrow="shadcn/ui" title="Components">
+        <Block id="components" title="Components">
           <div className="grid gap-6 lg:grid-cols-2">
             <Panel>
               <PanelHeader title="buttons & badges" />
@@ -298,7 +298,7 @@ export default function StyleguidePage() {
           </div>
         </Block>
 
-        <Block id="rich-text" eyebrow="cms" title="Rich text">
+        <Block id="rich-text" title="Rich text">
           <Panel>
             <PanelHeader title="blockContent" meta={<span>posts, case studies, /now</span>} />
             <div className="prose max-w-none p-6">
@@ -307,7 +307,7 @@ export default function StyleguidePage() {
           </Panel>
         </Block>
 
-        <Block id="mockup" eyebrow="composition" title="Home page mockup (phase 4)">
+        <Block id="mockup" title="Home page mockup (phase 4)">
           <HomeMockup />
         </Block>
       </Container>
@@ -376,20 +376,10 @@ const RICH_TEXT_SAMPLE = [
   },
 ]
 
-function Block({
-  id,
-  eyebrow,
-  title,
-  children,
-}: {
-  id: string
-  eyebrow: string
-  title: string
-  children: ReactNode
-}) {
+function Block({ id, title, children }: { id: string; title: string; children: ReactNode }) {
   return (
     <section id={id} className="scroll-mt-10">
-      <SectionHeader eyebrow={eyebrow} title={title} />
+      <SectionHeader title={title} />
       {children}
     </section>
   )
@@ -466,11 +456,7 @@ function HomeMockup() {
 
       <Container>
         <Section className="py-12 sm:py-16">
-          <SectionHeader
-            eyebrow="services"
-            title="Projects"
-            action={{ href: "#mockup", label: "all projects" }}
-          />
+          <SectionHeader title="Projects" actions={[{ href: "#mockup", label: "All projects" }]} />
           <Panel>
             <PanelHeader
               title={
@@ -503,11 +489,7 @@ function HomeMockup() {
 
         <Section className="grid gap-10 py-12 sm:py-16 lg:grid-cols-2">
           <div>
-            <SectionHeader
-              eyebrow="incident log"
-              title="Writing"
-              action={{ href: "#mockup", label: "all posts" }}
-            />
+            <SectionHeader title="Writing" actions={[{ href: "#mockup", label: "All posts" }]} />
             <Panel>
               <DataList>
                 {fixturePosts.map((post) => (
@@ -523,7 +505,7 @@ function HomeMockup() {
             </Panel>
           </div>
           <div>
-            <SectionHeader eyebrow="uptime" title="Experience" />
+            <SectionHeader title="Experience" />
             <ol className="relative space-y-6 border-l pl-6">
               {fixtureTimeline.map((entry) => (
                 <li key={entry.title} className="relative">
@@ -541,7 +523,7 @@ function HomeMockup() {
         </Section>
 
         <Section className="py-12 sm:py-16">
-          <SectionHeader eyebrow="inventory" title="Stack" />
+          <SectionHeader title="Stack" />
           <ul className="grid grid-cols-2 gap-2 sm:grid-cols-4">
             {fixtureSkills.map((skill) => (
               <li

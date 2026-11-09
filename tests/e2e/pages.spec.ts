@@ -14,10 +14,13 @@ test.describe("home", () => {
   }) => {
     await page.goto("/")
     const inventory = page.locator("#inventory")
-    const summary = inventory.locator("summary")
-    await summary.scrollIntoViewIfNeeded()
-    await summary.click()
-    await expect(inventory.locator("details")).toHaveAttribute("open", "")
+    const visibleBefore = await inventory.locator("li:visible").count()
+    const toggle = inventory.getByText(/^Show all \d+$/)
+    await toggle.scrollIntoViewIfNeeded()
+    await toggle.click()
+    await expect(inventory.getByRole("checkbox")).toBeChecked()
+    await expect(inventory.getByText("Show fewer")).toBeVisible()
+    expect(await inventory.locator("li:visible").count()).toBeGreaterThan(visibleBefore)
   })
 
   test("nav links reach each section and page", async ({ page, isMobile }) => {
@@ -45,7 +48,7 @@ test.describe("contact", () => {
     await page.getByLabel("Name").fill("Ada Lovelace")
     await page.getByLabel("Email").fill("not-an-email")
     await page.getByLabel("Message").fill("short")
-    await page.getByRole("button", { name: "Submit ticket" }).click()
+    await page.getByRole("button", { name: "Send message" }).click()
 
     await expect(page.getByText("Please enter a valid email address.")).toBeVisible()
     await expect(page.getByText("Message must be at least 10 characters.")).toBeVisible()
@@ -63,8 +66,8 @@ test.describe("contact", () => {
       const trap = el.querySelector<HTMLInputElement>('input[name="hp_field_7c1"]')
       if (trap) trap.value = "Spam Inc"
     })
-    await page.getByRole("button", { name: "Submit ticket" }).click()
-    await expect(page.getByText("ticket received")).toBeVisible()
+    await page.getByRole("button", { name: "Send message" }).click()
+    await expect(page.getByText("message sent")).toBeVisible()
   })
 })
 

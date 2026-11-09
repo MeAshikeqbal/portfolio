@@ -45,3 +45,16 @@ export function isCurrentPeriod(period: string | null | undefined, now = new Dat
   const years = period.match(/\d{4}/g)
   return years ? Number(years[years.length - 1]) >= now.getUTCFullYear() : false
 }
+
+/**
+ * Shortens text to at most `max` characters on a word boundary, adding an ellipsis, so
+ * excerpts never stop mid-word.
+ */
+export function trimText(text: string | null | undefined, max: number): string | null {
+  if (!text) return null
+  const clean = text.replace(/\s+/g, " ").trim()
+  if (clean.length <= max) return clean
+  const cut = clean.slice(0, max)
+  const space = cut.lastIndexOf(" ")
+  return `${(space > max * 0.6 ? cut.slice(0, space) : cut).replace(/[\s.,;:!?-]+$/, "")}…`
+}

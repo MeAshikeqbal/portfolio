@@ -20,7 +20,6 @@ export default async function PostsPage() {
         <Container className="max-w-4xl">
           <SectionHeader
             as="h1"
-            eyebrow="incident log"
             title="Writing"
             description="Notes on building, breaking and fixing things."
           />
