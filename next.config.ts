@@ -50,7 +50,7 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: "https",
-        hostname: "api.microlink.io",
+        hostname: "image.thum.io",
       },
     ],
   },

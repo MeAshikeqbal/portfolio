@@ -283,7 +283,7 @@ Motion explains continuity, state or feedback; nothing animates just because it 
 - **Reduced motion:** movement goes (no trace, no slides); crossfades shorten and colour changes stay.
 
 ### Skeletons
-Only where the visitor actually waits: a Microlink link preview (seconds), the Turnstile check in the contact form, and large images without a blur placeholder (tinted `surface-2` until they arrive). A skeleton is `surface-2` with a pulse under `motion-safe`, always paired with text for status ("capturing screenshot…", "Loading spam check…") and a failure message. No route-level `loading.tsx` on detail pages: streaming turns `notFound()` into a 200.
+Only where the visitor actually waits: a link preview screenshot from thum.io (a second or two on first capture), the Turnstile check in the contact form, and large images without a blur placeholder (tinted `surface-2` until they arrive). A skeleton is `surface-2` with a pulse under `motion-safe`, always paired with text for status ("capturing screenshot…", "Loading spam check…") and a failure message. No route-level `loading.tsx` on detail pages: streaming turns `notFound()` into a 200.
 
 ### Index pages
 `/post` and `/projects` share one frame: full-width container, an H1 with a one-line description, a "Search posts / Search projects" field with an "N of M posts / projects" count, chip filter rows, then the content (a log panel of rows for posts, a grid of project panels for projects). Empty results use the same panel message.
