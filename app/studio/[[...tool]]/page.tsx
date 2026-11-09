@@ -12,7 +12,15 @@ import config from "../../../sanity.config"
 
 export const dynamic = "force-static"
 
-export { metadata, viewport } from "next-sanity/studio"
+import { metadata as studioMetadata } from "next-sanity/studio"
+import type { Metadata } from "next"
+
+export { viewport } from "next-sanity/studio"
+
+export const metadata: Metadata = {
+  ...studioMetadata,
+  title: { absolute: "Studio · itsashik.dev" },
+}
 
 export default function StudioPage() {
   return <NextStudio config={config} />

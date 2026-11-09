@@ -1,0 +1,52 @@
+/**
+ * GROQ for the Studio dashboard. Run with the raw perspective (drafts and published copies
+ * both visible), so "published" filters exclude `drafts.` and `versions.` ids explicitly.
+ */
+
+const PUBLISHED = `!(_id in path("drafts.**")) && !(_id in path("versions.**"))`
+
+export const OVERVIEW_QUERY = `{
+  "posts": count(*[_type == "post" && ${PUBLISHED}]),
+  "projects": count(*[_type == "project" && ${PUBLISHED}]),
+  "skills": count(*[_type == "skills" && ${PUBLISHED}]),
+  "drafts": count(*[_id in path("drafts.**")])
+}`
+
+export interface OverviewResult {
+  posts: number
+  projects: number
+  skills: number
+  drafts: number
+}
+
+/** Runs against the private inbox dataset. */
+export const INBOX_QUERY = `{
+  "unread": count(*[_type == "message" && status == "unread" && ${PUBLISHED}]),
+  "latest": *[_type == "message" && status != "archived" && ${PUBLISHED}]
+    | order(receivedAt desc)[0...5]{ _id, name, status, receivedAt, message }
+}`
+
+export interface InboxResult {
+  unread: number
+  latest: {
+    _id: string
+    name: string | null
+    status: string | null
+    receivedAt: string
+    message: string | null
+  }[]
+}
+
+export const RECENT_QUERY = `*[_type in $types && !(_id in path("versions.**"))]
+  | order(_updatedAt desc)[0...24]{
+    _id, _type, _updatedAt,
+    "title": coalesce(title, name, degree, year, select(_type == "cv" => "Résumé"))
+  }`
+
+export const HEALTH_QUERY = `{
+  "postsNoExcerpt": *[_type == "post" && ${PUBLISHED} && (!defined(excerpt) || excerpt == "")]{ _id, _type, title },
+  "imagesNoAlt": *[_type in ["post", "project"] && ${PUBLISHED} && defined(mainImage.asset) && (!defined(mainImage.alt) || mainImage.alt == "")]{ _id, _type, title },
+  "projectsIncomplete": *[_type == "project" && ${PUBLISHED} && (!defined(status) || !defined(tech) || count(tech) == 0)]{ _id, _type, title },
+  "skillsNoIcon": *[_type == "skills" && ${PUBLISHED} && (!defined(icon) || icon == "")]{ _id, _type, "title": name },
+  "skillIcons": *[_type == "skills" && ${PUBLISHED} && defined(icon) && icon != ""]{ _id, _type, "title": name, icon }
+}`

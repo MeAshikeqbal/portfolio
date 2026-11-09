@@ -16,6 +16,8 @@ export const messageType = defineType({
   title: "Message",
   type: "document",
   icon: EnvelopeIcon,
+  // Status changes apply immediately: no draft to publish just to mark a message read.
+  liveEdit: true,
   fields: [
     defineField({
       name: "status",
