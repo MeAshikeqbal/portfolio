@@ -12,6 +12,8 @@ import { skillType } from "./skillType"
 import { projectType } from "./projectType"
 import { cvType } from "./cvType"
 import { seoType } from "./seoType"
+import { usesType } from "./usesType"
+import { nowType } from "./nowType"
 
 export const schema: { types: SchemaTypeDefinition[] } = {
   types: [
@@ -27,5 +29,7 @@ export const schema: { types: SchemaTypeDefinition[] } = {
     skillType,
     cvType,
     seoType,
+    usesType,
+    nowType,
   ],
 }
