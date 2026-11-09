@@ -74,9 +74,8 @@ tests/unit, tests/e2e
 - **Design tokens.** Colours are OKLCH tokens in `app/globals.css`.
   `tests/unit/tokens.test.ts` fails the build if any text/background pair drops below WCAG AA.
 - **Contact messages.** The form stores each message in a **private** `inbox` dataset, shown in
-  the Studio as the *Inbox* workspace (`/studio/inbox`), and emails you a notification via
-  Resend with Reply-To set to the sender. Messages never go to the public `production`
-  dataset. If storing fails, the email is sent immediately so nothing is lost.
+  the Studio as the *Inbox* workspace (`/studio/inbox`, Unread / Read / Archived). Messages
+  never go to the public `production` dataset.
 - **Security.** `next.config.ts` sends HSTS, `nosniff`, a referrer policy, a permissions policy
   and a Content Security Policy. The CSP applies to production builds only and doesn't cover
   the Studio. `tests/e2e/security.spec.ts` fails on any CSP violation.
