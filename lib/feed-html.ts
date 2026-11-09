@@ -2,6 +2,17 @@ import { escapeHTML, toHTML, type PortableTextComponents } from "@portabletext/t
 import type { TypedObject } from "@portabletext/types"
 import { urlFor } from "@/sanity/lib/image"
 
+/** Absolute image URL, or null for a missing or malformed asset reference (never throws). */
+function imageUrl(value: { asset?: { _ref?: string } } | undefined): string | null {
+  if (!value?.asset?._ref) return null
+  try {
+    return urlFor(value).width(1200).fit("max").auto("format").url()
+  } catch {
+    // One broken reference shouldn't take down the whole feed.
+    return null
+  }
+}
+
 /**
  * Plain-HTML renderers for feed readers: no classes, no client code, absolute image URLs.
  * The site's own renderers (components/portable-text) are React server components with Shiki
@@ -17,10 +28,16 @@ const feedComponents: PortableTextComponents = {
       value?.text
         ? `<blockquote><p><strong>${escapeHTML(value.title || (value.tone === "warning" ? "Warning" : "Note"))}</strong></p><p>${escapeHTML(value.text)}</p></blockquote>`
         : "",
-    image: ({ value }: { value: { asset?: { _ref?: string }; alt?: string; caption?: string } }) =>
-      value?.asset?._ref
-        ? `<figure><img src="${escapeHTML(urlFor(value).width(1200).fit("max").auto("format").url())}" alt="${escapeHTML(value.alt ?? "")}"/>${value.caption ? `<figcaption>${escapeHTML(value.caption)}</figcaption>` : ""}</figure>`
-        : "",
+    image: ({
+      value,
+    }: {
+      value: { asset?: { _ref?: string }; alt?: string; caption?: string }
+    }) => {
+      const src = imageUrl(value)
+      return src
+        ? `<figure><img src="${escapeHTML(src)}" alt="${escapeHTML(value.alt ?? "")}"/>${value.caption ? `<figcaption>${escapeHTML(value.caption)}</figcaption>` : ""}</figure>`
+        : ""
+    },
   },
 }
 

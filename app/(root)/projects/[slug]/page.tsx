@@ -18,6 +18,7 @@ import { absoluteUrl } from "@/lib/site"
 import { projectStatus } from "@/lib/status"
 import { breadcrumbSchema, jsonLdGraph, projectSchema } from "@/lib/structured-data"
 import { urlFor } from "@/sanity/lib/image"
+import { LiveSiteShot } from "@/components/projects/live-site-shot"
 import { screenshotUrl } from "@/lib/screenshot"
 
 type Props = { params: Promise<{ slug: string }> }
@@ -54,6 +55,8 @@ export default async function ProjectPage({ params }: Props) {
   const { slug } = await params
   const project = await getProject(slug)
   if (!project) notFound()
+  const liveShot =
+    !project.mainImage?.asset && project.url ? screenshotUrl(project.url, 896, 560) : null
 
   const status = projectStatus(project.status)
   const gh = project.githubData
@@ -165,22 +168,8 @@ export default async function ProjectPage({ params }: Props) {
               sizes="(min-width: 896px) 896px, 100vw"
             />
           ) : (
-            project.url && (
-              // No cover set: show the live site itself (thum.io, cached by next/image).
-              <figure className="mt-10">
-                <Image
-                  src={screenshotUrl(project.url, 896, 560)}
-                  alt={`Screenshot of ${hostOf(project.url)}`}
-                  width={1792}
-                  height={1120}
-                  className="rounded-lg border bg-surface-2"
-                  sizes="(min-width: 896px) 896px, 100vw"
-                />
-                <figcaption className="mt-2 label-caps">
-                  live site · {hostOf(project.url)}
-                </figcaption>
-              </figure>
-            )
+            // No cover set: show the live site itself (thum.io, cached by next/image).
+            liveShot && project.url && <LiveSiteShot src={liveShot} host={hostOf(project.url)} />
           )}
 
           <div className="mt-12">

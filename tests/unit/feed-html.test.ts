@@ -1,9 +1,15 @@
 import { describe, expect, it, vi } from "vitest"
 
 vi.mock("@/sanity/lib/image", () => ({
-  urlFor: () => ({
-    width: () => ({ fit: () => ({ auto: () => ({ url: () => "https://cdn.sanity.io/x.png" }) }) }),
-  }),
+  urlFor: (value: { asset?: { _ref?: string } }) => {
+    // Like the real builder, a malformed reference throws.
+    if (value?.asset?._ref === "not-a-valid-ref") throw new Error("Malformed asset _ref")
+    return {
+      width: () => ({
+        fit: () => ({ auto: () => ({ url: () => "https://cdn.sanity.io/x.png" }) }),
+      }),
+    }
+  },
 }))
 
 const { portableTextToFeedHtml } = await import("@/lib/feed-html")
@@ -35,5 +41,22 @@ describe("portableTextToFeedHtml", () => {
   it("returns an empty string for an empty body", () => {
     expect(portableTextToFeedHtml([])).toBe("")
     expect(portableTextToFeedHtml(null)).toBe("")
+  })
+})
+
+describe("feed images with broken references", () => {
+  it("skips a malformed asset reference instead of throwing", () => {
+    const html = portableTextToFeedHtml([
+      { _type: "image", _key: "bad", asset: { _ref: "not-a-valid-ref" }, alt: "x" },
+      {
+        _type: "block",
+        _key: "ok",
+        style: "normal",
+        markDefs: [],
+        children: [{ _type: "span", _key: "s", text: "Still here.", marks: [] }],
+      },
+    ] as never)
+    expect(html).not.toContain("<img")
+    expect(html).toContain("Still here.")
   })
 })

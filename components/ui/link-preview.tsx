@@ -30,6 +30,7 @@ export function LinkPreview({
 }: LinkPreviewProps) {
   // A first capture takes a second or two: show a skeleton until the image arrives.
   const [state, setState] = useState<"loading" | "loaded" | "failed">("loading")
+  const src = screenshotUrl(url, width, height)
   let host = url
   try {
     host = new URL(url).hostname
@@ -63,13 +64,13 @@ export function LinkPreview({
               <div className="absolute inset-0 grid place-items-center">
                 <Skeleton className="absolute inset-0" />
                 <span role="status" className="relative label-caps">
-                  {state === "failed" ? "preview unavailable" : "capturing screenshot…"}
+                  {state === "failed" || !src ? "preview unavailable" : "capturing screenshot…"}
                 </span>
               </div>
             )}
-            {state !== "failed" && (
+            {state !== "failed" && src && (
               <Image
-                src={screenshotUrl(url, width, height)}
+                src={src}
                 width={width}
                 height={height}
                 quality={60}

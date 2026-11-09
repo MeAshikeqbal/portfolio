@@ -39,7 +39,6 @@ export const LATEST_POSTS_QUERY = defineQuery(`
     | order(coalesce(featured, false) desc, publishedAt desc) [0...3] { ${postCard} }
 `)
 
-
 export const POST_QUERY = defineQuery(`
   *[_type == "post" && ${published} && slug.current == $slug][0] {
     _id,
@@ -60,9 +59,11 @@ export const POST_QUERY = defineQuery(`
       | order(publishedAt desc)[0] { title, "slug": slug.current },
     "next": *[${listedPost} && publishedAt > ^.publishedAt]
       | order(publishedAt asc)[0] { title, "slug": slug.current },
-    // Candidates sharing any category; ranked in lib/related.ts (rare shared topics first).
+    // Every candidate sharing a category, ranked in lib/related.ts (rare shared topics first).
+    // The cap is only a payload guard, far above the site's post count: limiting by date
+    // first would drop an older rare-topic match before it could be ranked.
     "related": *[${listedPost} && _id != ^._id && count(categories[@._ref in ^.^.categories[]._ref]) > 0]
-      | order(publishedAt desc)[0...20] { ${postCard}, "categoryIds": categories[]._ref }
+      | order(publishedAt desc)[0...200] { ${postCard}, "categoryIds": categories[]._ref }
   }
 `)
 
