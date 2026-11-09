@@ -9,9 +9,14 @@ export function LiveLineView({ line }: { line: LiveLineContent }) {
   return (
     <Link
       href="/now#live"
-      className="flex items-center gap-2 border-b px-4 py-2.5 text-sm transition-colors hover:bg-surface-2"
+      // Inset outline: this sits inside the hero panel, whose overflow-hidden would clip it.
+      className="flex items-center gap-2 border-b px-4 py-2.5 text-sm transition-colors hover:bg-surface-2 focus-visible:bg-surface-2 focus-visible:-outline-offset-2"
     >
-      <StatusDot status={line.status} pulse={line.status === "up"} />
+      <StatusDot
+        status={line.status}
+        pulse={line.status === "up"}
+        label={line.status === "up" ? "Now:" : "Earlier:"}
+      />
       <span className="shrink-0 label-caps">{line.verb}</span>
       <span className="truncate text-muted-foreground">{line.text}</span>
     </Link>

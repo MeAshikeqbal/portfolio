@@ -18,7 +18,11 @@ export function HomelabList({ items }: { items: HomelabItem[] | null | undefined
     <div className="border-b">
       <div className="flex items-center justify-between px-4 pt-3 pb-3 label-caps sm:pb-0">
         <span>homelab</span>
-        <Link href="/uses" className="transition-colors hover:text-foreground">
+        {/* The visible label is small; the padding gives it a 44px touch target. */}
+        <Link
+          href="/uses"
+          className="-my-3.5 -mr-2 inline-flex min-h-11 items-center px-2 transition-colors hover:text-foreground focus-visible:-outline-offset-2"
+        >
           full setup
         </Link>
       </div>

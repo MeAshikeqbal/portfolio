@@ -4,11 +4,23 @@ import { ArrowUp } from "lucide-react"
 import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 
+/**
+ * Appears once the page is scrolled well down *and* the reader heads back up: that's when
+ * they want it, and it never sits over content they're reading on the way down (on phones it
+ * used to cover the right edge of rows).
+ */
 export function BackToTop() {
   const [visible, setVisible] = useState(false)
 
   useEffect(() => {
-    const onScroll = () => setVisible(window.scrollY > 600)
+    let last = window.scrollY
+    const onScroll = () => {
+      const y = window.scrollY
+      // Ignore jitter (momentum, address-bar resizes) under a few pixels.
+      if (Math.abs(y - last) < 4) return
+      setVisible(y > 600 && y < last)
+      last = y
+    }
     window.addEventListener("scroll", onScroll, { passive: true })
     return () => window.removeEventListener("scroll", onScroll)
   }, [])
@@ -24,7 +36,7 @@ export function BackToTop() {
     <Button
       variant="outline"
       size="icon"
-      className="fixed right-4 bottom-4 z-30 rounded-full bg-surface/90 backdrop-blur"
+      className="fixed right-4 bottom-[max(1rem,env(safe-area-inset-bottom))] z-30 rounded-full bg-surface/90 backdrop-blur"
       onClick={scrollToTop}
       aria-label="Back to top"
     >
