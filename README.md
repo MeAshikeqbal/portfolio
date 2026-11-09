@@ -40,6 +40,7 @@ sync and webhook just report that they aren't configured.
 | `npm run format` · `npm run format:check` | Prettier (with Tailwind class sorting) |
 | `npm run test:e2e` | Playwright against a production build (`npm run build` first) |
 | `npm run typegen` | Regenerate `sanity.types.ts` after changing a schema or a query |
+| `npm run backup` | Export the `production` and `inbox` datasets (with assets) into `backups/` (git-ignored). Needs `npx sanity login` |
 
 ## Project layout
 
@@ -48,7 +49,7 @@ app/
   (root)/            public site: home, /post, /post/[slug], /projects, /projects/[slug]
   studio/            embedded Sanity Studio
   styleguide/        living style guide (404 in production)
-  api/               sanity-webhook (revalidation), sync-github-data (cron)
+  api/               sanity-webhook (revalidation), sync-github-data (cron), github-sync (Studio)
   icons/             self-hosted Iconify SVGs for the skills inventory
   opengraph-image.tsx, sitemap.ts, robots.ts, manifest.ts, rss.xml/
 components/
@@ -56,7 +57,8 @@ components/
   home/ blog/ projects/ site/ portable-text/ seo/
   ui/                shadcn/ui components
 lib/                 data access (api.ts), helpers, structured data, OG frame
-sanity/              schema types, GROQ queries, clients
+sanity/              schema types, GROQ queries, clients; Studio dashboard, actions, inputs
+scripts/             one-off data migrations (dry run by default) and the backup script
 tests/unit, tests/e2e
 ```
 
@@ -70,7 +72,10 @@ tests/unit, tests/e2e
 - **GitHub stats.** `/api/sync-github-data` runs daily (`vercel.json`). It updates stars,
   language, last push and past-year commit activity (including a 12-week series for the
   sparklines) on every project with a repo. It also creates draft projects for new public
-  repositories.
+  repositories. In the Studio, **Sync from GitHub** (a project's ⋯ menu) or **Sync all now**
+  (Home dashboard) runs it on demand: the Studio stamps `githubSyncRequestedAt` with the
+  editor's own permissions and `/api/github-sync` only syncs freshly stamped projects, so no
+  secret ever reaches the browser.
 - **Design tokens.** Colours are OKLCH tokens in `app/globals.css`.
   `tests/unit/tokens.test.ts` fails the build if any text/background pair drops below WCAG AA.
 - **Contact messages.** The form stores each message in a **private** `inbox` dataset, shown in
@@ -84,12 +89,17 @@ tests/unit, tests/e2e
 
 - **Project `status`** (active / maintained / archived) turns on status pills. Nothing is
   claimed until it's set.
-- **Project `featured` + `order`** decide what leads the home page. Adding `tech` and a
+- **Project `featured`** and the drag-and-drop order of the *Projects* list decide what leads
+  the home page (skills follow the order of the *Skills* list). Adding `tech` and a
   case-study `body` fills `/projects/[slug]` and the filters.
 - **`excerpt`** and the **SEO** fields (title, description, social image, noindex) override
   the generated defaults for posts and projects.
 - **Skill icons** are [Iconify](https://icon-sets.iconify.design) names (`logos:aws`,
-  `mdi:security`) from the `logos`, `mdi`, `simple-icons` and `ri` sets.
+  `mdi:security`) from the `logos`, `mdi`, `simple-icons` and `ri` sets. The icon field has a
+  search and warns when a name doesn't exist.
+- **Rich text** has code blocks (language, filename, highlighted lines), note/warning
+  callouts, numbered lists and inline code. `/styleguide` shows every block type.
+- **Open on site** (⋯ menu) opens a published post, project, `/uses` or `/now` in a new tab.
 - **`/uses` and `/now`** are singletons under *Personal Info* in the Studio. Each page stays
   a 404, and isn't linked from the footer, ⌘K palette or sitemap, until it has published
   content.

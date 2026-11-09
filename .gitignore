@@ -58,3 +58,6 @@ public/Thumbs.db
 # lighthouse ci
 /.lighthouseci/
 /lighthouse-report/
+
+# Sanity dataset exports (npm run backup); the inbox export holds personal data
+/backups/

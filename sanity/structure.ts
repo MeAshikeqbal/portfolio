@@ -68,7 +68,6 @@ export const structure: StructureResolver = (S, context) =>
           S.list()
             .title("Personal Info")
             .items([
-              S.documentTypeListItem("abouts").title("About Me").icon(FiInfo),
               S.documentTypeListItem("experiences").title("Work Experience").icon(FiBriefcase),
               S.documentTypeListItem("education").title("Education").icon(FiBook),
               // CV as a singleton document
@@ -100,7 +99,6 @@ export const structure: StructureResolver = (S, context) =>
             "author",
             "project",
             "skills",
-            "abouts",
             "experiences",
             "education",
             "cv",

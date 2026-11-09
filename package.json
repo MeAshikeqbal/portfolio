@@ -12,6 +12,7 @@
     "test:watch": "vitest",
     "test:e2e": "playwright test",
     "check": "npm run lint && npm run typecheck && npm run test",
+    "backup": "node scripts/backup.mjs",
     "typegen": "node -e \"require('fs').rmSync('schema.json',{force:true})\" && sanity schema extract --workspace content --path schema.json && sanity typegen generate",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
