@@ -1,49 +1,43 @@
-'use client'
+"use client"
 
-import * as React from 'react'
-import { useTheme } from 'next-themes'
-import { motion } from 'motion/react'
-import { Moon, Sun } from 'lucide-react'
+import { Monitor, Moon, Sun } from "lucide-react"
+import { useTheme } from "next-themes"
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
+import { useHydrated } from "@/hooks/use-hydrated"
+import { cn } from "@/lib/utils"
 
-export function AnimatedThemeSwitch() {
+const OPTIONS = [
+  { value: "system", label: "System theme", icon: Monitor },
+  { value: "light", label: "Light theme", icon: Sun },
+  { value: "dark", label: "Dark theme", icon: Moon },
+] as const
+
+/** Three-way theme switch (system / light / dark). Renders a same-size placeholder until hydrated. */
+export function ThemeToggle({ className }: { className?: string }) {
   const { theme, setTheme } = useTheme()
-  const [mounted, setMounted] = React.useState(false)
-
-  React.useEffect(() => {
-    setMounted(true)
-  }, [])
-
-  if (!mounted) {
-    return null
-  }
-
-  const toggleTheme = () => {
-    setTheme(theme === 'light' ? 'dark' : 'light')
-  }
+  const hydrated = useHydrated()
 
   return (
-    <motion.button
-      className="relative inline-flex h-5 w-10 items-center justify-between rounded-full bg-gray-200 p-1 dark:bg-gray-800"
-      onClick={toggleTheme}
-      aria-label="Toggle theme"
-      whileTap={{ scale: 0.95 }}
+    <ToggleGroup
+      type="single"
+      size="sm"
+      variant="outline"
+      value={hydrated ? (theme ?? "system") : ""}
+      onValueChange={(value) => value && setTheme(value)}
+      aria-label="Colour theme"
+      className={cn("h-8", className)}
     >
-      <motion.div
-        className="flex h-4 w-4 items-center justify-center rounded-full bg-white shadow-md dark:bg-gray-700"
-        initial={{ x: theme === 'dark' ? 20 : 0 }}
-        animate={{ x: theme === 'dark' ? 20 : 0 }}
-        transition={{
-          type: "spring",
-          stiffness: 700,
-          damping: 30
-        }}
-      >
-        <Sun className={`h-2 w-2 text-yellow-500 absolute ${theme === 'dark' ? 'opacity-0' : 'opacity-100'} transition-opacity`} />
-        <Moon className={`h-2 w-2 text-blue-500 absolute ${theme === 'light' ? 'opacity-0' : 'opacity-100'} transition-opacity`} />
-      </motion.div>
-      <span className="sr-only">
-        {theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
-      </span>
-    </motion.button>
+      {OPTIONS.map(({ value, label, icon: Icon }) => (
+        <ToggleGroupItem
+          key={value}
+          value={value}
+          aria-label={label}
+          title={label}
+          className="h-8 w-8 px-0 data-[state=on]:bg-surface-2 data-[state=on]:text-foreground"
+        >
+          <Icon className="size-3.5" />
+        </ToggleGroupItem>
+      ))}
+    </ToggleGroup>
   )
 }

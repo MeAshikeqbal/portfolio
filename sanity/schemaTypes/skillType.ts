@@ -1,5 +1,5 @@
-import { defineType } from "sanity";
-import { BarChartIcon } from "@sanity/icons";
+import { defineType } from "sanity"
+import { BarChartIcon } from "@sanity/icons/BarChart"
 
 export const skillType = defineType({
   name: "skills",
@@ -21,4 +21,4 @@ export const skillType = defineType({
         rule.regex(/^[a-z0-9-]+:[a-z0-9-]+$/, { name: "Iconify name", invert: false }),
     },
   ],
-});
+})

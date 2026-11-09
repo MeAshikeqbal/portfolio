@@ -4,9 +4,14 @@ test.describe("smoke", () => {
   test("home page renders its main sections", async ({ page }) => {
     await page.goto("/")
     await expect(page).toHaveTitle(/Ashik Eqbal/)
-    await expect(page.locator("#Home")).toBeVisible()
-    await expect(page.locator("#Tech-Stack")).toBeAttached()
-    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute("href", "https://www.itsashik.dev")
+    await expect(page.getByRole("heading", { level: 1, name: "Ashik Eqbal" })).toBeVisible()
+    for (const id of ["services", "writing", "uptime", "inventory", "contact"]) {
+      await expect(page.locator(`#${id}`)).toBeAttached()
+    }
+    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
+      "href",
+      "https://www.itsashik.dev",
+    )
   })
 
   test("blog index links through to a post", async ({ page }) => {
@@ -16,12 +21,15 @@ test.describe("smoke", () => {
     const href = await firstPost.getAttribute("href")
     await page.goto(href!)
     await expect(page.locator("article h1").first()).toBeVisible()
-    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute("href", `https://www.itsashik.dev${href}`)
+    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
+      "href",
+      `https://www.itsashik.dev${href}`,
+    )
   })
 
   test("projects page lists projects", async ({ page }) => {
     await page.goto("/projects")
-    await expect(page.getByRole("heading", { name: "All Projects" })).toBeVisible()
+    await expect(page.getByRole("heading", { level: 1, name: "Projects" })).toBeVisible()
   })
 
   test("unknown routes return 404", async ({ page }) => {
@@ -37,5 +45,25 @@ test.describe("smoke", () => {
     const sitemap = await request.get("/sitemap.xml")
     expect(sitemap.ok()).toBe(true)
     expect(await sitemap.text()).toContain("https://www.itsashik.dev/post/")
+
+    const robots = await request.get("/robots.txt")
+    expect(await robots.text()).toContain("Sitemap: https://www.itsashik.dev/sitemap.xml")
+  })
+
+  test("Sanity Studio boots", async ({ page }) => {
+    // The Studio bundle is large; the first cold load on the mobile profile can take a while.
+    test.slow()
+    const errors: string[] = []
+    page.on("pageerror", (error) => errors.push(error.message))
+    await page.goto("/studio")
+    // Signed out, the Studio shows its login screen, or (when this origin isn't in the project's
+    // CORS list, as on localhost) its "connect this Studio" screen. Either means it booted.
+    await expect(page.locator("#sanity")).toBeAttached({ timeout: 60_000 })
+    await expect(
+      page.getByText(/sign in|log in|choose login provider|connect this studio/i).first(),
+    ).toBeVisible({
+      timeout: 60_000,
+    })
+    expect(errors).toEqual([])
   })
 })

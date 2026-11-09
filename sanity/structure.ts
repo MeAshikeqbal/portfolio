@@ -1,5 +1,18 @@
 import type { StructureResolver } from "sanity/structure"
-import { FiFileText, FiUser, FiTag, FiBriefcase, FiBook, FiInfo, FiMail, FiCode, FiAward, FiFile } from "react-icons/fi"
+import {
+  FiFileText,
+  FiUser,
+  FiTag,
+  FiBriefcase,
+  FiBook,
+  FiInfo,
+  FiMail,
+  FiCode,
+  FiAward,
+  FiFile,
+  FiMonitor,
+  FiClock,
+} from "react-icons/fi"
 
 export const structure: StructureResolver = (S) =>
   S.list()
@@ -48,12 +61,16 @@ export const structure: StructureResolver = (S) =>
               S.listItem()
                 .title("CV/Resume")
                 .icon(FiFile)
-                .child(
-                  S.editor()
-                    .id("cv")
-                    .schemaType("cv")
-                    .documentId("cv")
-                ),
+                .child(S.editor().id("cv").schemaType("cv").documentId("cv")),
+              // Singletons behind /uses and /now
+              S.listItem()
+                .title("Uses")
+                .icon(FiMonitor)
+                .child(S.editor().id("uses").schemaType("uses").documentId("uses")),
+              S.listItem()
+                .title("Now")
+                .icon(FiClock)
+                .child(S.editor().id("now").schemaType("now").documentId("now")),
             ]),
         ),
 
@@ -74,7 +91,9 @@ export const structure: StructureResolver = (S) =>
             "experiences",
             "education",
             "cv",
-            "media.tag"
+            "uses",
+            "now",
+            "media.tag",
           ].includes(item.getId()!),
       ),
     ])
