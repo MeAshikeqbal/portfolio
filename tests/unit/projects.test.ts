@@ -38,6 +38,13 @@ describe("projectMeta", () => {
   it("is empty without GitHub data", () => {
     expect(projectMeta(project())).toEqual([])
   })
+
+  it("skips an invalid push date instead of printing 'pushed null'", () => {
+    const meta = projectMeta(
+      project({ githubData: { language: "Go", pushedAt: "garbage" } as Project["githubData"] }),
+    )
+    expect(meta).toEqual(["Go"])
+  })
 })
 
 describe("projectHref", () => {

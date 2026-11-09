@@ -49,6 +49,12 @@ jobs:
           path: .next/cache
           key: nextjs-${{ hashFiles('package-lock.json') }}-${{ hashFiles('app/**', 'components/**', 'lib/**', 'sanity/**') }}
           restore-keys: nextjs-${{ hashFiles('package-lock.json') }}-
+      - name: Publication state of /uses and /now
+        # Read from the Sanity API host (not the CDN) before building, so the build and the
+        # tests agree. Drop Next's restored fetch cache so the build can't serve stale content.
+        run: |
+          node scripts/about-state.mjs >> "$GITHUB_ENV"
+          rm -rf .next/cache/fetch-cache
       - run: npm run build
         env:
           # Cloudflare's documented always-pass test key, so the contact form is testable.
@@ -65,7 +71,8 @@ jobs:
       - name: Lighthouse budgets
         # Same production build. Accessibility, best practices and SEO are hard gates;
         # performance only warns (lab numbers on shared runners are noisy).
-        run: npx @lhci/cli@0.15.1 autorun
+        # /uses and /now join the audited pages once they're published.
+        run: npx @lhci/cli@0.15.1 autorun --config=${{ env.ABOUT_PAGES == 'published' && 'lighthouserc.published.json' || 'lighthouserc.json' }}
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
         with:

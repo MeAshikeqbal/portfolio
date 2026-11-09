@@ -20,14 +20,23 @@ const compactFormat = new Intl.NumberFormat("en-US", {
   maximumFractionDigits: 1,
 })
 
-/** "Mar 10, 2026" */
-export function formatDate(iso: string | null | undefined): string | null {
-  return iso ? dateFormat.format(new Date(iso)) : null
+/** A Date for a valid ISO-ish string, or null for missing or unparseable input. */
+export function parseDate(iso: string | null | undefined): Date | null {
+  if (!iso) return null
+  const date = new Date(iso)
+  return Number.isNaN(date.getTime()) ? null : date
 }
 
-/** "Mar 2026" */
+/** "Mar 10, 2026", or null for missing or invalid dates. */
+export function formatDate(iso: string | null | undefined): string | null {
+  const date = parseDate(iso)
+  return date ? dateFormat.format(date) : null
+}
+
+/** "Mar 2026", or null for missing or invalid dates. */
 export function formatMonth(iso: string | null | undefined): string | null {
-  return iso ? monthFormat.format(new Date(iso)) : null
+  const date = parseDate(iso)
+  return date ? monthFormat.format(date) : null
 }
 
 /** 1284 → "1.3K" */

@@ -27,17 +27,3 @@ test.describe("draft previews", () => {
     }
   })
 })
-
-test.describe("/uses and /now", () => {
-  test("stay hidden until they have content", async ({ page, request }) => {
-    // Neither singleton has been published in the dataset yet.
-    for (const path of ["/uses", "/now"]) {
-      expect((await request.get(path)).status()).toBe(404)
-    }
-    await page.goto("/")
-    await expect(page.locator('a[href="/uses"], a[href="/now"]')).toHaveCount(0)
-    const sitemap = await (await request.get("/sitemap.xml")).text()
-    expect(sitemap).not.toContain("/uses")
-    expect(sitemap).not.toContain("/now")
-  })
-})

@@ -1,4 +1,5 @@
 import { expect, test, type Page } from "@playwright/test"
+import { ABOUT_PAGES, ABOUT_PATHS } from "./about-state"
 
 async function structuredData(page: Page) {
   const raw = await page.locator('script[type="application/ld+json"]').first().textContent()
@@ -14,7 +15,13 @@ async function ogImage(page: Page): Promise<string> {
 }
 
 test.describe("seo", () => {
-  for (const path of ["/", "/post/why-i-started-self-hosting-ai-at-home", "/projects/portfolio"]) {
+  const sharePages = [
+    "/",
+    "/post/why-i-started-self-hosting-ai-at-home",
+    "/projects/portfolio",
+    ...(ABOUT_PAGES === "published" ? ABOUT_PATHS : []),
+  ]
+  for (const path of sharePages) {
     test(`${path} has a generated 1200×630 share image`, async ({ page, request }) => {
       await page.goto(path)
       const image = await request.get(await ogImage(page))
