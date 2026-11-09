@@ -21,8 +21,10 @@ export function SkillIcon({ name, label, className }: SkillIconProps) {
     const mask = `url(${url}) center / contain no-repeat`
     return (
       <span
-        role="img"
-        aria-label={label}
+        // An empty label marks the icon as decorative (e.g. when its name is printed beside it).
+        role={label ? "img" : undefined}
+        aria-label={label || undefined}
+        aria-hidden={label ? undefined : true}
         className={cn("inline-block bg-current", className)}
         style={{ mask, WebkitMask: mask }}
       />
@@ -32,6 +34,12 @@ export function SkillIcon({ name, label, className }: SkillIconProps) {
   return (
     // next/image would need `dangerouslyAllowSVG`; these are small, immutable, same-origin SVGs.
     // eslint-disable-next-line @next/next/no-img-element
-    <img src={url} alt={label} loading="lazy" decoding="async" className={cn("object-contain", className)} />
+    <img
+      src={url}
+      alt={label}
+      loading="lazy"
+      decoding="async"
+      className={cn("object-contain", className)}
+    />
   )
 }

@@ -9,7 +9,10 @@ const FALLBACK_SVG =
  * Same-origin matters: CSS `mask-image` (used for theme-coloured icons) requires CORS for
  * cross-origin URLs, and self-hosting avoids the public Iconify API's rate limits.
  */
-export async function GET(_req: Request, { params }: { params: Promise<{ prefix: string; icon: string }> }) {
+export async function GET(
+  _req: Request,
+  { params }: { params: Promise<{ prefix: string; icon: string }> },
+) {
   const { prefix, icon } = await params
   const svg = await renderIconSvg(prefix, icon.replace(/\.svg$/, ""))
 

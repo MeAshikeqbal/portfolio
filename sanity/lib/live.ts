@@ -1,13 +1,19 @@
-// Querying with "sanityFetch" will keep content automatically updated
-// Before using it, import and render "<SanityLive />" in your layout, see
-// https://github.com/sanity-io/next-sanity#live-content-api for more information.
-import { defineLive } from "next-sanity";
-import { client } from './client'
+import { defineLive } from "next-sanity/live"
 
-export const { sanityFetch, SanityLive } = defineLive({ 
-  client: client.withConfig({ 
-    // Live content is currently only available on the experimental API
-    // https://www.sanity.io/docs/api-versioning
-    apiVersion: 'vX' 
-  }) 
-});
+import { client } from "./client"
+import { readToken } from "./token"
+
+/**
+ * `sanityFetch` tags every query with Sanity sync tags; `<SanityLive />` (rendered in the
+ * public layout) listens to the Live Content API and revalidates those tags when content
+ * changes, so pages update without a redeploy.
+ *
+ * In draft mode (enabled from the Studio's Presentation tool) `sanityFetch` reads drafts with
+ * the server token, and `<SanityLive includeDrafts />` streams draft edits to the previewing
+ * browser. The browser only receives the token while draft mode is on.
+ */
+export const { sanityFetch, SanityLive } = defineLive({
+  client,
+  serverToken: readToken || false,
+  browserToken: readToken || false,
+})

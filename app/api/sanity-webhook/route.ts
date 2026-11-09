@@ -5,8 +5,9 @@ import { type NextRequest, NextResponse } from "next/server"
 /**
  * Sanity webhook: revalidates cached pages when content is published.
  *
- * Expects `Authorization: Bearer <SANITY_WEBHOOK_SECRET>`. Phase 2 of the
- * modernization plan replaces this with signed, tag-based revalidation.
+ * `<SanityLive />` already revalidates content while visitors are on the site;
+ * this webhook is the backstop for changes published while nobody is browsing.
+ * Expects `Authorization: Bearer <SANITY_WEBHOOK_SECRET>`.
  */
 function isAuthorized(header: string | null, secret: string): boolean {
   if (!header) return false
@@ -26,26 +27,30 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 
-  let body: { _type?: string; slug?: { current?: string } | string } = {}
+  let body: { _type?: string } = {}
   try {
     body = await req.json()
   } catch {
     // An empty or non-JSON body still triggers a full revalidation below.
   }
 
-  const slug = typeof body.slug === "string" ? body.slug : body.slug?.current
-
   switch (body._type) {
     case "post":
       revalidatePath("/post")
-      if (slug) revalidatePath(`/post/${slug}`)
+      // Every post page, so renamed or unpublished slugs stop serving stale copies.
+      revalidatePath("/post/[slug]", "page")
       revalidatePath("/rss.xml")
       revalidatePath("/sitemap.xml")
       revalidatePath("/")
       break
     case "project":
       revalidatePath("/projects")
+      revalidatePath("/projects/[slug]", "page")
+      revalidatePath("/sitemap.xml")
       revalidatePath("/")
+      break
+    case "cv":
+      revalidatePath("/resume.pdf")
       break
     default:
       revalidatePath("/", "layout")
