@@ -50,3 +50,14 @@ export const HEALTH_QUERY = `{
   "skillsNoIcon": *[_type == "skills" && ${PUBLISHED} && (!defined(icon) || icon == "")]{ _id, _type, "title": name },
   "skillIcons": *[_type == "skills" && ${PUBLISHED} && defined(icon) && icon != ""]{ _id, _type, "title": name, icon }
 }`
+
+/** Both versions of each project with a repo, so "Sync all" refreshes drafts too. */
+export const GITHUB_QUERY = `*[_type == "project" && defined(github) && !(_id in path("versions.**"))]
+  | order(lower(title) asc){ _id, title, "syncedAt": githubData.syncedAt, "language": githubData.language }`
+
+export interface GitHubRow {
+  _id: string
+  title: string | null
+  syncedAt: string | null
+  language: string | null
+}

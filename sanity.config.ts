@@ -11,11 +11,13 @@ import { structureTool } from "sanity/structure"
 
 import { apiVersion, dataset, projectId } from "./sanity/env"
 import { schema } from "./sanity/schemaTypes"
+import { TYPES_WITH_PAGES } from "./sanity/presentation/paths"
 import { resolve } from "./sanity/presentation/resolve"
 import { structure } from "./sanity/structure"
 import { inboxDatasetName } from "./sanity/inbox/dataset"
 import { inboxSchema } from "./sanity/inbox/schema"
 import { inboxStructure } from "./sanity/inbox/structure"
+import { OpenOnSiteAction, SyncFromGitHubAction } from "./sanity/actions"
 import { dashboardTool } from "./sanity/dashboard"
 import { isAdmin } from "./sanity/dashboard/logic"
 import { StudioLogo } from "./sanity/components/studio-logo"
@@ -72,10 +74,16 @@ export default defineConfig([
         creationContext.type === "global"
           ? prev.filter((item) => !SINGLETONS.has(item.templateId))
           : prev,
-      actions: (prev, { schemaType }) =>
-        SINGLETONS.has(schemaType)
+      actions: (prev, { schemaType }) => {
+        const actions = SINGLETONS.has(schemaType)
           ? prev.filter(({ action }) => action && SINGLETON_ACTIONS.has(action))
-          : prev,
+          : prev
+        return [
+          ...actions,
+          ...(TYPES_WITH_PAGES.has(schemaType) ? [OpenOnSiteAction] : []),
+          ...(schemaType === "project" ? [SyncFromGitHubAction] : []),
+        ]
+      },
     },
     // Home dashboard first (the Studio opens on the first tool); Vision for admins only.
     tools: (prev, { currentUser }) => [

@@ -128,9 +128,10 @@ export const projectType = defineType({
       title: "GitHub data",
       type: "object",
       group: "github",
-      description: "Synced daily from GitHub by /api/sync-github-data.",
+      description: "Synced daily from GitHub, or now with “Sync from GitHub” in the ⋯ menu.",
       readOnly: true,
       fields: [
+        { name: "syncedAt", title: "Last synced", type: "datetime" },
         { name: "stars", type: "number" },
         { name: "commits", type: "number" },
         { name: "license", type: "string" },
@@ -149,6 +150,13 @@ export const projectType = defineType({
       name: "seo",
       type: "seo",
       group: "seo",
+    }),
+    defineField({
+      // Stamped by the "Sync from GitHub" action; cleared once the sync has run.
+      name: "githubSyncRequestedAt",
+      type: "datetime",
+      hidden: true,
+      readOnly: true,
     }),
   ],
   preview: {

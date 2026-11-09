@@ -134,6 +134,11 @@ export const GITHUB_PROJECTS_QUERY = defineQuery(`
   *[_type == "project" && defined(github)] { _id, title, github }
 `)
 
+/** Projects named in a Studio "Sync from GitHub" request (see lib/github-sync-request.ts). */
+export const GITHUB_SYNC_REQUESTS_QUERY = defineQuery(`
+  *[_type == "project" && _id in $ids] { _id, title, github, githubSyncRequestedAt }
+`)
+
 /** Indexable posts and projects for the sitemap (documents marked `seo.noIndex` are left out). */
 export const SITEMAP_QUERY = defineQuery(`{
   "posts": *[_type == "post" && ${published} && defined(slug.current) && seo.noIndex != true]

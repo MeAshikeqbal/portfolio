@@ -134,3 +134,13 @@ export function snippet(text: string | null | undefined, max = 80): string {
 export function isAdmin(user: { roles?: { name: string }[] } | null | undefined): boolean {
   return Boolean(user?.roles?.some((role) => role.name === "administrator"))
 }
+
+/** One row per project (the published copy wins over its draft), plus every id to sync. */
+export function githubRows<T extends { _id: string }>(docs: T[]): { rows: T[]; ids: string[] } {
+  const rows = new Map<string, T>()
+  for (const doc of docs) {
+    const id = publishedId(doc._id)
+    if (!rows.has(id) || !doc._id.startsWith(DRAFT_PREFIX)) rows.set(id, doc)
+  }
+  return { rows: [...rows.values()], ids: docs.map((doc) => doc._id) }
+}
