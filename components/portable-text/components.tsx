@@ -4,6 +4,8 @@ import type { ReactNode } from "react"
 import { blockText, slugify } from "@/lib/portable-text"
 import { urlFor } from "@/sanity/lib/image"
 import { cn } from "@/lib/utils"
+import { StatusDot } from "@/components/dashboard/status-dot"
+import type { Status } from "@/lib/status"
 import { CodeBlock } from "./code-block"
 
 interface ImageBlock {
@@ -25,10 +27,12 @@ interface CalloutValue {
   text?: string
 }
 
+// A tinted panel with a hairline and a status dot + label, not a coloured side stripe: the
+// label carries the tone, and the system's panels are 1px all round.
 const CALLOUT_STYLES = {
-  note: { label: "Note", className: "border-status-info bg-status-info-soft" },
-  warning: { label: "Warning", className: "border-status-warn bg-status-warn-soft" },
-}
+  note: { label: "Note", status: "info", className: "bg-status-info-soft" },
+  warning: { label: "Warning", status: "warn", className: "bg-status-warn-soft" },
+} as const satisfies Record<string, { label: string; status: Status; className: string }>
 
 /**
  * Renderers for the `blockContent` schema (sanity/schemaTypes/blockContentType.ts), shared by
@@ -84,9 +88,17 @@ export function createPortableTextComponents(
         const tone = CALLOUT_STYLES[value.tone ?? "note"] ?? CALLOUT_STYLES.note
         return (
           <aside
-            className={cn("not-prose my-6 rounded-lg border-l-2 px-4 py-3 text-sm", tone.className)}
+            className={cn("not-prose my-6 rounded-lg border px-4 py-3 text-sm", tone.className)}
           >
-            <p className="mb-1 label-caps text-foreground">{value.title || tone.label}</p>
+            <p className="mb-1 flex items-center gap-2 label-caps text-foreground">
+              {/* With a custom title, the dot still tells screen readers the tone. */}
+              <StatusDot
+                status={tone.status}
+                label={value.title ? tone.label : undefined}
+                className="size-1.5"
+              />
+              {value.title || tone.label}
+            </p>
             <p className="leading-relaxed whitespace-pre-line text-foreground">{value.text}</p>
           </aside>
         )

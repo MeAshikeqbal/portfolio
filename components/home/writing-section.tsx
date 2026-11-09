@@ -7,11 +7,14 @@ import { getHomeStats, getLatestPosts } from "@/lib/api"
 import { formatDate, trimText } from "@/lib/format"
 
 /**
- * The lead section: writing is what most visitors come for. Featured posts first (set in the
- * Studio), then the newest. Titles are never cut off.
+ * The lead section: writing is what most visitors come for. Pinned posts first (featured in
+ * the Studio, and labelled so the dates don't look out of order), then the newest. The post
+ * the hero already shows as "latest post" is skipped, so every slot is a new entry.
  */
 export async function WritingSection() {
-  const [posts, stats] = await Promise.all([getLatestPosts(), getHomeStats()])
+  const [candidates, stats] = await Promise.all([getLatestPosts(), getHomeStats()])
+  const heroSlug = stats.latestPost?.slug
+  const posts = candidates.filter((post) => post.slug !== heroSlug).slice(0, 3)
   if (posts.length === 0) return null
 
   return (
@@ -46,13 +49,14 @@ export async function WritingSection() {
                     href={`/post/${post.slug}`}
                     className="grid gap-x-8 gap-y-1.5 px-4 py-5 transition-colors hover:bg-surface-2 focus-visible:bg-surface-2 focus-visible:-outline-offset-2 sm:grid-cols-[7.5rem_minmax(0,1fr)] sm:px-6 sm:py-6"
                   >
-                    {post.publishedAt ? (
-                      <time dateTime={post.publishedAt} className="label-caps tabular sm:pt-1.5">
-                        {formatDate(post.publishedAt)}
-                      </time>
-                    ) : (
-                      <span aria-hidden />
-                    )}
+                    <span className="flex flex-wrap items-baseline gap-x-2 gap-y-1 label-caps sm:flex-col sm:pt-1.5">
+                      {post.publishedAt && (
+                        <time dateTime={post.publishedAt} className="tabular">
+                          {formatDate(post.publishedAt)}
+                        </time>
+                      )}
+                      {post.pinned && <span className="text-foreground">pinned</span>}
+                    </span>
                     <div className="min-w-0">
                       <h3 className="text-lg font-semibold tracking-tight text-pretty sm:text-xl">
                         {post.title ?? "Untitled post"}

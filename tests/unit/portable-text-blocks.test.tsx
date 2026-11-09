@@ -13,7 +13,15 @@ describe("portable text blocks", () => {
     const callout = screen.getByRole("complementary")
     expect(callout).toHaveTextContent("Warning")
     expect(callout).toHaveTextContent("Back up first.")
-    expect(callout.className).toContain("border-status-warn")
+    // A tinted panel with a hairline all round: no coloured side stripe.
+    expect(callout.className).toContain("bg-status-warn-soft")
+    expect(callout.className).not.toMatch(/border-[lr]-/)
+  })
+
+  it("keeps the tone audible when a callout has its own title", () => {
+    renderBody([{ _type: "callout", _key: "w", tone: "warning", title: "Careful", text: "x" }])
+    expect(screen.getByRole("complementary")).toHaveTextContent("Careful")
+    expect(screen.getByText("Warning")).toHaveClass("sr-only")
   })
 
   it("uses a callout's own title and skips empty callouts", () => {

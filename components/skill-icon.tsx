@@ -10,8 +10,10 @@ interface SkillIconProps {
 
 /**
  * Renders a bundled Iconify icon served from `/icons/...`.
- * Monochrome sets are drawn with a CSS mask so they inherit `currentColor` (dark-mode safe);
- * multicolour sets (e.g. `logos`) render as a plain image.
+ * Monochrome sets are drawn with a CSS mask so they inherit `currentColor` (dark-mode safe).
+ * Multicolour sets (e.g. `logos`) render as an image in greyscale: colour on this site only
+ * ever means status, so brand hues stay out. (A mask would turn filled logos, like
+ * JavaScript's square, into a solid block; greyscale keeps their detail.)
  */
 export function SkillIcon({ name, label, className }: SkillIconProps) {
   const url = iconUrl(name)
@@ -39,7 +41,7 @@ export function SkillIcon({ name, label, className }: SkillIconProps) {
       alt={label}
       loading="lazy"
       decoding="async"
-      className={cn("object-contain", className)}
+      className={cn("object-contain grayscale", className)}
     />
   )
 }

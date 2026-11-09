@@ -74,7 +74,7 @@ spacing:
   panel: "16px"
   row-y: "12px"
   section: "64px"
-  section-sm: "96px"
+  section-sm: "80px"
   container: "72rem"
 components:
   button-primary:
@@ -201,7 +201,7 @@ Each status follows one recipe. The dot is at least 3:1 against the surface. The
 
 ## Layout
 
-There is a single centred column, at most 72rem (`max-w-6xl`), with 16px gutters on phones and 24px from `sm`. Sections stack vertically with 64px of vertical padding (96px from `sm`) and are separated by full-width hairlines (`border-t` / `border-b`), not by background changes. Anchored sections clear the sticky 56px header with `scroll-mt-20`.
+There is a single centred column, at most 72rem (`max-w-6xl`), with 16px gutters on phones and 24px from `sm`. Sections stack vertically with 64px of vertical padding (80px from `sm`) and are separated by full-width hairlines (`border-t` / `border-b`), not by background changes. Anchored sections clear the sticky 56px header with `scroll-mt-20`.
 
 The page shell runs top to bottom: a 32px **system bar**, then a sticky **header** at 56px with an 80% background and a backdrop blur, then the sections, then the footer. The system bar reports only measured facts: the GitHub sync's health (a status dot re-judged in the browser against the visitor's clock, so a stale static page can't keep showing green; hidden until the sync has run), the newest post's date, and the build SHA and date from `sm` up. A page may pass one explicit notice (the 404 page says "1 page not found").
 
@@ -250,7 +250,7 @@ Shadcn/ui on the monochrome tokens.
 Dense rows divided by hairlines. Each row has an optional status dot (only when the CMS sets one), a medium-weight title that wraps rather than truncates, a one-line muted description capped at about 80 characters, mono metadata, and a right-aligned tabular value or sparkline. Linked rows fill with `surface-2` on hover and focus; rows that leave the site carry an arrow and open in a new tab.
 
 ### Writing log (signature)
-The home page's lead list. Each entry is one link: a mono date column (7.5rem from `sm`), a semibold 1.125–1.25rem title that is never cut off, an excerpt trimmed on a word boundary (about 160 characters, `text-pretty`), and mono tags. Three entries: featured posts first, then the newest.
+The home page's lead list. Each entry is one link: a mono date column (7.5rem from `sm`, with a "pinned" mark under the date for featured posts), a semibold 1.125–1.25rem title that is never cut off, an excerpt trimmed on a word boundary (about 160 characters, `text-pretty`), and mono tags. Three entries: pinned posts first, then the newest, skipping the post the hero already shows as "latest post".
 
 ### Node panel (signature)
 The hero's instrument. Header "node · itsashik", with the availability pill as its status when one is configured (currently off). Below it, only real facts: the latest post (a link), the homelab services from the "Homelab" section of /uses when present, and counts (posts, projects, and commits/yr once the GitHub sync has written them).

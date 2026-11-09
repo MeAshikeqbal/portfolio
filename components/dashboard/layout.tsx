@@ -8,7 +8,7 @@ export function Container({ className, ...props }: ComponentProps<"div">) {
 
 /** A page section with consistent vertical rhythm; `scroll-mt` clears the sticky header for anchor links. */
 export function Section({ className, ...props }: ComponentProps<"section">) {
-  return <section className={cn("scroll-mt-20 py-16 sm:py-24", className)} {...props} />
+  return <section className={cn("scroll-mt-20 py-16 sm:py-20", className)} {...props} />
 }
 
 /** Faint dot grid that fades out downward. Place inside a `relative` parent. */

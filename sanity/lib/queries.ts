@@ -34,9 +34,13 @@ export const POSTS_QUERY = defineQuery(`
 `)
 
 /** Home page writing: featured posts first, then the newest, three in all. */
+// Four, so the home page can drop the post the hero already shows and still list three.
 export const LATEST_POSTS_QUERY = defineQuery(`
   *[${listedPost}]
-    | order(coalesce(featured, false) desc, publishedAt desc) [0...3] { ${postCard} }
+    | order(coalesce(featured, false) desc, publishedAt desc) [0...4] {
+      ${postCard},
+      "pinned": featured == true
+    }
 `)
 
 export const POST_QUERY = defineQuery(`

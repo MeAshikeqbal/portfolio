@@ -102,7 +102,8 @@ function Logo({ src }: { src: string }) {
       alt=""
       width={32}
       height={32}
-      className="mt-0.5 size-8 shrink-0 rounded-md bg-icon-plate object-contain p-0.5 ring-1 ring-border"
+      // Greyscale: colour means status only, so employer and school logos carry no brand hue.
+      className="mt-0.5 size-8 shrink-0 rounded-md bg-icon-plate object-contain p-0.5 ring-1 ring-border grayscale"
     />
   )
 }
