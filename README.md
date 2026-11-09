@@ -87,7 +87,8 @@ tests/unit, tests/e2e
   the generated defaults for posts and projects.
 - **Skill icons** are [Iconify](https://icon-sets.iconify.design) names (`logos:aws`,
   `mdi:security`) from the `logos`, `mdi`, `simple-icons` and `ri` sets.
-- **Availability badge.** Set `siteConfig.availability` in `lib/site.ts`.
+- **Availability badge.** The hero badge comes from `siteConfig.availability` in `lib/site.ts`:
+  change the label, use `status: "warn"` for limited availability, or set it to `null` to hide it.
 
 ## Deployment checklist (Vercel)
 
@@ -104,7 +105,8 @@ tests/unit, tests/e2e
   (`SANITY_API_READ_TOKEN`) and the `next-sanity` draft-mode route.
 - `/uses` and `/now` pages as Sanity singletons.
 
-## Third-party assets
+## License
 
-The Geist fonts in `assets/fonts` (used by the generated share images) are under the SIL Open
-Font License; see `assets/fonts/OFL.txt`. Blog content © Ashik Eqbal.
+Code is released under the [MIT License](LICENSE). Blog posts, images and other site content are
+© Ashik Eqbal and not covered by it. The Geist fonts in `assets/fonts` (used by the generated
+share images) are under the SIL Open Font License; see `assets/fonts/OFL.txt`.
