@@ -10,6 +10,8 @@ import {
   FiCode,
   FiAward,
   FiFile,
+  FiMonitor,
+  FiClock,
 } from "react-icons/fi"
 
 export const structure: StructureResolver = (S) =>
@@ -60,6 +62,15 @@ export const structure: StructureResolver = (S) =>
                 .title("CV/Resume")
                 .icon(FiFile)
                 .child(S.editor().id("cv").schemaType("cv").documentId("cv")),
+              // Singletons behind /uses and /now
+              S.listItem()
+                .title("Uses")
+                .icon(FiMonitor)
+                .child(S.editor().id("uses").schemaType("uses").documentId("uses")),
+              S.listItem()
+                .title("Now")
+                .icon(FiClock)
+                .child(S.editor().id("now").schemaType("now").documentId("now")),
             ]),
         ),
 
@@ -80,6 +91,8 @@ export const structure: StructureResolver = (S) =>
             "experiences",
             "education",
             "cv",
+            "uses",
+            "now",
             "media.tag",
           ].includes(item.getId()!),
       ),

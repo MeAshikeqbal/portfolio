@@ -58,3 +58,29 @@ test.describe("seo", () => {
     expect(manifest.icons.length).toBeGreaterThan(0)
   })
 })
+
+test.describe("résumé", () => {
+  test("is served from our own domain as a PDF", async ({ request }) => {
+    const response = await request.get("/resume.pdf")
+    expect(response.status()).toBe(200)
+    expect(response.headers()["content-type"]).toBe("application/pdf")
+    expect(response.headers()["content-disposition"]).toContain('filename="Ashik-Eqbal-Resume.pdf"')
+    expect((await response.body()).subarray(0, 5).toString()).toBe("%PDF-")
+  })
+
+  test("/resume redirects to it, and the hero links to it (never the Sanity CDN)", async ({
+    page,
+    request,
+  }) => {
+    const redirect = await request.get("/resume", { maxRedirects: 0 })
+    expect(redirect.status()).toBe(307)
+    expect(redirect.headers()["location"]).toBe("/resume.pdf")
+
+    await page.goto("/")
+    await expect(page.locator("#home").getByRole("link", { name: /Résumé/ })).toHaveAttribute(
+      "href",
+      "/resume.pdf",
+    )
+    expect(await page.content()).not.toContain("cdn.sanity.io/files")
+  })
+})
