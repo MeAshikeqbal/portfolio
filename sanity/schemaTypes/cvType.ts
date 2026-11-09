@@ -1,5 +1,5 @@
-import { FileText } from "lucide-react";
-import { defineField, defineType } from "sanity";
+import { FileText } from "lucide-react"
+import { defineField, defineType } from "sanity"
 
 export const cvType = defineType({
   name: "cv",
@@ -16,4 +16,4 @@ export const cvType = defineType({
       },
     }),
   ],
-});
+})

@@ -1,5 +1,5 @@
-import { UserIcon } from "@sanity/icons";
-import { defineField, defineType } from "sanity";
+import { UserIcon } from "@sanity/icons/User"
+import { defineField, defineType } from "sanity"
 
 export const aboutType = defineType({
   name: "abouts",
@@ -23,4 +23,4 @@ export const aboutType = defineType({
       },
     }),
   ],
-});
+})

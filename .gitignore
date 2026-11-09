@@ -35,6 +35,7 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+!.env.example
 .env.local
 
 # vercel
@@ -45,3 +46,15 @@ yarn-error.log*
 next-env.d.ts
 
 public/Thumbs.db
+
+# test artifacts
+/playwright-report/
+/test-results/
+/blob-report/
+
+# sanity typegen intermediate
+/schema.json
+
+# lighthouse ci
+/.lighthouseci/
+/lighthouse-report/

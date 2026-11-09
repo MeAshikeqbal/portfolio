@@ -1,155 +1,267 @@
+import { PortableText } from "@portabletext/react"
+import { ArrowLeft, ArrowRight } from "lucide-react"
 import type { Metadata } from "next"
+import Image from "next/image"
+import Link from "next/link"
 import { notFound } from "next/navigation"
-import { client } from "@/sanity/lib/client"
+import { ReadingProgress } from "@/components/blog/reading-progress"
+import { TableOfContents } from "@/components/blog/table-of-contents"
+import { DataList, DataRow } from "@/components/dashboard/data-list"
+import { Container, GridBackdrop } from "@/components/dashboard/layout"
+import { Panel, PanelHeader } from "@/components/dashboard/panel"
+import { createPortableTextComponents } from "@/components/portable-text/components"
+import { JsonLd } from "@/components/seo/json-ld"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { getPost, getPostSlugs } from "@/lib/api"
+import { formatDate } from "@/lib/format"
+import { buildToc, readingTime, wordCount } from "@/lib/portable-text"
+import { absoluteUrl, siteConfig } from "@/lib/site"
+import { blogPostingSchema, breadcrumbSchema, jsonLdGraph } from "@/lib/structured-data"
 import { urlFor } from "@/sanity/lib/image"
-import type { PortableTextBlock } from "@portabletext/types"
-import PostClientPage from "./PostClientPage"
 
-export const revalidate = 60
+type Props = { params: Promise<{ slug: string }> }
 
-interface Author {
-  name: string
-  image?: {
-    asset: {
-      _ref: string
-    }
-  }
+/** Prerender every published post at build time; new posts render on demand. */
+export async function generateStaticParams() {
+  const slugs = await getPostSlugs()
+  return slugs.map((slug) => ({ slug }))
 }
 
-interface Post {
-  title: string
-  slug: {
-    current: string
-  }
-  author?: Author
-  mainImage?: {
-    asset: {
-      _ref: string
-    }
-    alt?: string
-  }
-  categories?: {
-    title: string
-  }[]
-  publishedAt?: string
-  body?: PortableTextBlock[]
-  excerpt?: string
-  audioUrl?: string
-}
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { slug } = await params
+  const post = await getPost(slug)
+  if (!post?.title) return { title: "Post not found" }
 
-async function getPost(slug: string): Promise<Post | null> {
-  return await client.fetch(
-    `
-    *[_type == "post"  && !(_id in path("drafts.**")) && slug.current == $slug][0]{
+  const title = post.seo?.title || post.title
+  const description =
+    post.seo?.description ||
+    post.excerpt ||
+    `Read ${post.title}${post.author?.name ? ` by ${post.author.name}` : ""}.`
+
+  return {
+    title,
+    description,
+    alternates: { canonical: `/post/${slug}` },
+    robots: post.seo?.noIndex ? { index: false } : undefined,
+    openGraph: {
       title,
+      description,
+      type: "article",
+      url: absoluteUrl(`/post/${slug}`),
+      publishedTime: post.publishedAt ?? undefined,
+      modifiedTime: post._updatedAt,
+      authors: post.author?.name ? [post.author.name] : undefined,
+      tags: post.categories?.flatMap((c) => (c.title ? [c.title] : [])),
+    },
+  }
+}
+
+export default async function PostPage({ params }: Props) {
+  const { slug } = await params
+  const post = await getPost(slug)
+  if (!post) notFound()
+
+  const title = post.title ?? "Untitled post"
+  const { entries, idsByKey } = buildToc(post.body)
+  const minutes = readingTime(post.body)
+  const components = createPortableTextComponents(idsByKey)
+  const hasToc = entries.length >= 2
+
+  const structuredData = jsonLdGraph(
+    blogPostingSchema({
       slug,
-      author->{
-        name,
-        image
-      },
-      mainImage,
-      categories[]->{title},
-      publishedAt,
-      body,
-      excerpt,
-      "audioUrl": audioFile.asset->url
-    }
-  `,
-    { slug },
+      title,
+      description: post.seo?.description || post.excerpt,
+      publishedAt: post.publishedAt,
+      updatedAt: post._updatedAt,
+      authorName: post.author?.name,
+      tags: post.categories?.flatMap((c) => (c.title ? [c.title] : [])),
+      wordCount: wordCount(post.body),
+      image: post.mainImage?.asset ? urlFor(post.mainImage).width(1200).url() : undefined,
+    }),
+    breadcrumbSchema([
+      { name: "Home", path: "/" },
+      { name: "Writing", path: "/post" },
+      { name: title, path: `/post/${slug}` },
+    ]),
   )
-}
 
-/**
- * Generates page metadata for a post route based on the post's slug.
- *
- * Retrieves the post data for the provided slug and returns a Metadata object
- * containing the page title, description (falls back to a brief author-based
- * description if no excerpt is present), and Open Graph data (type "article",
- * canonical URL, and an images array when a main image exists).
- *
- * If `slug` is missing or the post is not found, returns metadata with title
- * "Post Not Found". On fetch errors, returns metadata with title
- * "Error Loading Post".
- *
- * @param params - A promise resolving to an object with an optional `slug` string.
- * @returns The generated Metadata for the post page, or a minimal metadata object
- *          indicating not found / error states.
- */
-export async function generateMetadata({
-  params,
-}: { params: Promise<{ slug?: string }> }): Promise<Metadata | undefined> {
-  const { slug } = await params
+  return (
+    <>
+      <JsonLd data={structuredData} />
+      <ReadingProgress targetId="post-body" />
+      <article>
+        <header className="relative overflow-hidden border-b">
+          <GridBackdrop />
+          <Container className="relative max-w-5xl py-10 sm:py-14">
+            <Link
+              href="/post"
+              className="inline-flex items-center gap-1.5 label-caps transition-colors hover:text-foreground"
+            >
+              <ArrowLeft className="size-3.5" aria-hidden /> all posts
+            </Link>
+            {post.categories && post.categories.length > 0 && (
+              <ul className="mt-6 flex flex-wrap gap-x-3 label-caps" aria-label="Categories">
+                {post.categories.map((category) => (
+                  <li key={category._id}>
+                    <Link
+                      href={`/post?category=${encodeURIComponent(category.title ?? "")}`}
+                      className="transition-colors hover:text-foreground"
+                    >
+                      #{category.title?.toLowerCase()}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            )}
+            <h1 className="mt-3 max-w-3xl text-4xl font-semibold tracking-tight text-balance sm:text-5xl">
+              {title}
+            </h1>
+            {post.excerpt && (
+              <p className="mt-4 max-w-2xl text-lg text-muted-foreground">{post.excerpt}</p>
+            )}
+            <div className="mt-6 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted-foreground">
+              <span className="flex items-center gap-2 text-foreground">
+                <Avatar className="size-7">
+                  {post.author?.image?.asset && (
+                    <AvatarImage
+                      src={urlFor(post.author.image).width(64).height(64).url()}
+                      alt=""
+                    />
+                  )}
+                  <AvatarFallback className="text-xs">
+                    {(post.author?.name ?? siteConfig.name).slice(0, 2).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                {post.author?.name ?? siteConfig.name}
+              </span>
+              {post.publishedAt && (
+                <time dateTime={post.publishedAt} className="label-caps">
+                  {formatDate(post.publishedAt)}
+                </time>
+              )}
+              <span className="label-caps">{minutes} min read</span>
+            </div>
+          </Container>
+        </header>
 
-  if (!slug) {
-    return {
-      title: "Post Not Found",
-    }
-  }
+        {post.mainImage?.asset && (
+          <Container className="max-w-5xl pt-8">
+            <Image
+              src={urlFor(post.mainImage).width(1600).fit("max").auto("format").url()}
+              alt={post.mainImage.alt || ""}
+              width={post.cover?.width ?? 1600}
+              height={post.cover?.height ?? 900}
+              priority
+              sizes="(min-width: 1024px) 1024px, 100vw"
+              placeholder={post.cover?.lqip ? "blur" : "empty"}
+              blurDataURL={post.cover?.lqip ?? undefined}
+              className="h-auto w-full rounded-lg border"
+            />
+          </Container>
+        )}
 
-  try {
-    const post = await getPost(slug)
+        <Container
+          className={
+            hasToc
+              ? "grid max-w-5xl gap-10 py-10 lg:grid-cols-[minmax(0,1fr)_13rem]"
+              : "max-w-3xl py-10"
+          }
+        >
+          <div id="post-body" className="min-w-0">
+            {hasToc && (
+              <details className="mb-8 rounded-lg border bg-surface p-4 lg:hidden">
+                <summary className="cursor-pointer label-caps">on this page</summary>
+                <ol className="mt-3 space-y-2 text-sm">
+                  {entries.map((entry) => (
+                    <li key={entry.id} className={entry.level === 3 ? "pl-4" : undefined}>
+                      <a
+                        href={`#${entry.id}`}
+                        className="text-muted-foreground hover:text-foreground"
+                      >
+                        {entry.text}
+                      </a>
+                    </li>
+                  ))}
+                </ol>
+              </details>
+            )}
+            <div className="prose prose-lg max-w-none">
+              <PortableText value={post.body ?? []} components={components} />
+            </div>
+          </div>
+          {hasToc && (
+            <aside className="hidden lg:block">
+              <TableOfContents entries={entries} className="sticky top-24" />
+            </aside>
+          )}
+        </Container>
 
-    if (!post) {
-      return {
-        title: "Post Not Found",
-      }
-    }
+        <footer className="border-t">
+          <Container className="max-w-5xl space-y-10 py-12">
+            {(post.previous || post.next) && (
+              <nav aria-label="More posts" className="grid gap-4 sm:grid-cols-2">
+                {post.previous?.slug ? (
+                  <Link
+                    href={`/post/${post.previous.slug}`}
+                    className="group rounded-lg border bg-surface p-4 transition-colors hover:border-border-strong"
+                  >
+                    <span className="flex items-center gap-1.5 label-caps">
+                      <ArrowLeft className="size-3.5" aria-hidden /> older
+                    </span>
+                    <span className="mt-1 block font-medium group-hover:underline">
+                      {post.previous.title}
+                    </span>
+                  </Link>
+                ) : (
+                  <span aria-hidden />
+                )}
+                {post.next?.slug && (
+                  <Link
+                    href={`/post/${post.next.slug}`}
+                    className="group rounded-lg border bg-surface p-4 text-right transition-colors hover:border-border-strong"
+                  >
+                    <span className="flex items-center justify-end gap-1.5 label-caps">
+                      newer <ArrowRight className="size-3.5" aria-hidden />
+                    </span>
+                    <span className="mt-1 block font-medium group-hover:underline">
+                      {post.next.title}
+                    </span>
+                  </Link>
+                )}
+              </nav>
+            )}
 
-    return {
-      title: post.title,
-      description: post.excerpt || `Read ${post.title} by ${post.author?.name} on my blog`,
-      openGraph: {
-        title: post.title,
-        description: post.excerpt || `Read ${post.title} by ${post.author?.name} on my blog`,
-        type: "article",
-        url: `https://itsashik.dev/post/${post.slug.current}`,
-        images: post.mainImage
-          ? [
-              {
-                url: urlFor(post.mainImage.asset._ref).width(1200).height(630).url(),
-                width: 1200,
-                height: 630,
-                alt: post.mainImage.alt || post.title,
-              },
-            ]
-          : [],
-      },
-    }
-  } catch (error) {
-    console.error("Failed to fetch post metadata:", error)
-    return {
-      title: "Error Loading Post",
-    }
-  }
-}
-
-/**
- * Server component for the dynamic post page — loads a post by slug and renders the client page.
- *
- * Fetches the post with `getPost(slug)`. If `slug` is missing or the post cannot be found, this
- * triggers Next.js's `notFound()` to render a 404. Any fetch error is logged and treated as a
- * not-found condition. On success, the fetched post is passed to `PostClientPage` for client-side rendering.
- *
- * @param params - Route parameters; expects an object with a `slug` string.
- * @returns A Promise that resolves to the JSX element for the post page.
- */
-export default async function PostPage({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = await params
-
-  if (!slug) {
-    notFound()
-  }
-
-  let post: Post | null = null
-  try {
-    post = await getPost(slug)
-  } catch (error) {
-    console.error("Failed to fetch post:", error)
-  }
-
-  if (!post) {
-    notFound()
-  }
-
-  return <PostClientPage post={post} />
+            {post.related.length > 0 && (
+              <section aria-labelledby="related-heading">
+                <Panel>
+                  <PanelHeader title={<span id="related-heading">related entries</span>} />
+                  <DataList>
+                    {post.related.map((related) => (
+                      <DataRow
+                        key={related._id}
+                        href={`/post/${related.slug}`}
+                        title={related.title ?? "Untitled post"}
+                        description={related.excerpt}
+                        value={
+                          related.publishedAt && (
+                            <time
+                              dateTime={related.publishedAt}
+                              className="label-caps whitespace-nowrap"
+                            >
+                              {formatDate(related.publishedAt)}
+                            </time>
+                          )
+                        }
+                      />
+                    ))}
+                  </DataList>
+                </Panel>
+              </section>
+            )}
+          </Container>
+        </footer>
+      </article>
+    </>
+  )
 }
