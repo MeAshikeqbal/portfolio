@@ -10,7 +10,7 @@ web
 
 Mainly **other engineers and technical readers**: people who arrive from a post, a feed reader, GitHub, or a link someone shared. They come to read about building and running software (web apps, homelab, self-hosted AI) and to look at the code behind it.
 
-Recruiters and hiring managers are a secondary audience. The hero's availability badge ("open to opportunities") is for them, but the site is not built around a job search.
+Recruiters and hiring managers are a secondary audience. The site is not built around a job search; the "open to opportunities" badge was switched off on 2026-11-09.
 
 ## Product Purpose
 
@@ -39,7 +39,7 @@ Downloading the résumé (`/resume.pdf`) is not one of the goals, but the hero k
 - **Stack (incumbent):** Next.js 16 App Router (static prerendering), React 19, TypeScript, Sanity 6, Tailwind CSS 4, shadcn/ui on Radix, Shiki, `next/og`, Vercel hosting. Pages are static and revalidate when content is published.
 - **Content comes from Sanity:** posts, projects, experience, education, skills, CV, `/uses`, `/now`. Copy belongs in the CMS rather than in code, except site-wide identity, which lives in `lib/site.ts`.
 - **GitHub sync:** projects carry stars, primary language, last push, past-year commits and a 12-week activity series.
-- **Availability badge:** configured in `lib/site.ts` as `up` / `warn` / `idle`, or hidden. It is the node panel's status.
+- **Availability badge:** configured in `lib/site.ts` as `up` / `warn` / `idle`, or `null` to hide it (hidden since 2026-11-09). When shown, it is the node panel's status.
 - **Home page writing:** posts marked **featured** in the Studio come first, then the newest; three in all.
 - **Homelab panel:** the hero lists up to five items from the section of `/uses` whose title starts with "Homelab". It stays hidden until that section exists.
 - **GitHub sync status:** the system bar shows the sync's health only once it has run, and re-judges its age in the visitor's browser.

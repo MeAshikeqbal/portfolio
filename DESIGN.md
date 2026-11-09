@@ -253,7 +253,7 @@ Dense rows divided by hairlines. Each row has an optional status dot (only when 
 The home page's lead list. Each entry is one link: a mono date column (7.5rem from `sm`), a semibold 1.125–1.25rem title that is never cut off, an excerpt trimmed on a word boundary (about 160 characters, `text-pretty`), and mono tags. Three entries: featured posts first, then the newest.
 
 ### Node panel (signature)
-The hero's instrument. Header "node · itsashik" with the availability pill as its status. Below it, only real facts: the latest post (a link), the homelab services from the "Homelab" section of /uses when present, and counts (posts, projects, and commits/yr once the GitHub sync has written them).
+The hero's instrument. Header "node · itsashik", with the availability pill as its status when one is configured (currently off). Below it, only real facts: the latest post (a link), the homelab services from the "Homelab" section of /uses when present, and counts (posts, projects, and commits/yr once the GitHub sync has written them).
 
 ### Metric tile
 A `label-caps` label above a 1.5rem semibold tabular value, with an optional sparkline at the right and a 12px muted hint. It is built as a description list (`dl` / `dt` / `dd`).
