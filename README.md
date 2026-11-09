@@ -33,7 +33,7 @@ sync and webhook just report that they aren't configured.
 
 | Command | What it does |
 |---|---|
-| `npm run dev` | Dev server (Turbopack) |
+| `npm run dev` | Dev server (Turbopack); Studio at `/studio` (workspaces `content` and `inbox`) |
 | `npm run build` / `npm start` | Production build / serve it |
 | `npm run check` | Lint + typecheck + unit tests |
 | `npm run lint` · `npm run typecheck` · `npm test` | Individually |
@@ -73,6 +73,10 @@ tests/unit, tests/e2e
   repositories.
 - **Design tokens.** Colours are OKLCH tokens in `app/globals.css`.
   `tests/unit/tokens.test.ts` fails the build if any text/background pair drops below WCAG AA.
+- **Contact messages.** The form stores each message in a **private** `inbox` dataset, shown in
+  the Studio as the *Inbox* workspace (`/studio/inbox`), and emails you a notification via
+  Resend with Reply-To set to the sender. Messages never go to the public `production`
+  dataset. If storing fails, the email is sent immediately so nothing is lost.
 - **Security.** `next.config.ts` sends HSTS, `nosniff`, a referrer policy, a permissions policy
   and a Content Security Policy. The CSP applies to production builds only and doesn't cover
   the Studio. `tests/e2e/security.spec.ts` fails on any CSP violation.

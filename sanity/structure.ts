@@ -6,7 +6,6 @@ import {
   FiBriefcase,
   FiBook,
   FiInfo,
-  FiMail,
   FiCode,
   FiAward,
   FiFile,
@@ -54,7 +53,6 @@ export const structure: StructureResolver = (S) =>
             .title("Personal Info")
             .items([
               S.documentTypeListItem("abouts").title("About Me").icon(FiInfo),
-              S.documentTypeListItem("contact").title("Contact").icon(FiMail),
               S.documentTypeListItem("experiences").title("Work Experience").icon(FiBriefcase),
               S.documentTypeListItem("education").title("Education").icon(FiBook),
               // CV as a singleton document
@@ -87,7 +85,6 @@ export const structure: StructureResolver = (S) =>
             "project",
             "skills",
             "abouts",
-            "contact",
             "experiences",
             "education",
             "cv",

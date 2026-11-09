@@ -1,8 +1,12 @@
 "use server"
 
+import { randomUUID } from "node:crypto"
 import { headers } from "next/headers"
+import { after } from "next/server"
 import { contactSchema, HONEYPOT_FIELD } from "@/lib/contact-schema"
-import { writeClient } from "@/sanity/lib/write-client"
+import { buildMessageDocument } from "@/lib/inbox-message"
+import { notifyNewMessage } from "@/lib/notify"
+import { inboxClient } from "@/sanity/lib/inbox-client"
 
 type Field = "name" | "email" | "message" | "turnstileToken"
 
@@ -71,16 +75,33 @@ export async function submitContact(
     }
   }
 
+  const { name, email, message } = parsed.data
+  const submission = { name, email, message }
+  const id = randomUUID()
+
+  // Messages go to the PRIVATE inbox dataset, never the public one (names and emails are
+  // personal data). If storing fails, the email notification becomes the only copy, so it's
+  // sent before responding; otherwise it's sent after the response, off the critical path.
+  let stored = false
   try {
-    const { name, email, message } = parsed.data
-    await writeClient.create({ _type: "contact", name, email, message })
-    return { status: "success" }
+    await inboxClient.create(buildMessageDocument(submission, { id }))
+    stored = true
   } catch (error) {
-    console.error("Error submitting contact form:", error)
-    return {
-      status: "error",
-      message: "Couldn't send your message. Please try again later.",
-      values,
-    }
+    console.error("Couldn't store contact message in the inbox dataset:", error)
+  }
+
+  if (stored) {
+    after(() => notifyNewMessage(submission, { id, stored }))
+    return { status: "success" }
+  }
+
+  if (await notifyNewMessage(submission, { id, stored })) {
+    return { status: "success" }
+  }
+
+  return {
+    status: "error",
+    message: "Couldn't send your message. Please try again later.",
+    values,
   }
 }

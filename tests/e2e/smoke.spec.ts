@@ -55,7 +55,11 @@ test.describe("smoke", () => {
     test.slow()
     const errors: string[] = []
     page.on("pageerror", (error) => errors.push(error.message))
-    await page.goto("/studio")
+    for (const path of ["/studio/inbox", "/studio"]) {
+      await page.goto(path)
+      await expect(page.locator("#sanity")).toBeAttached({ timeout: 60_000 })
+    }
+    await page.goto("/studio/content")
     // Signed out, the Studio shows its login screen, or (when this origin isn't in the project's
     // CORS list, as on localhost) its "connect this Studio" screen. Either means it booted.
     await expect(page.locator("#sanity")).toBeAttached({ timeout: 60_000 })

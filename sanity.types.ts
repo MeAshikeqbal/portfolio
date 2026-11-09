@@ -233,17 +233,6 @@ export type Experiences = {
   }>
 }
 
-export type Contact = {
-  _id: string
-  _type: "contact"
-  _createdAt: string
-  _updatedAt: string
-  _rev: string
-  name?: string
-  email?: string
-  message?: string
-}
-
 export type Abouts = {
   _id: string
   _type: "abouts"
@@ -496,7 +485,6 @@ export type AllSanitySchemaTypes =
   | Slug
   | Education
   | Experiences
-  | Contact
   | Abouts
   | AuthorReference
   | CategoryReference
