@@ -62,7 +62,7 @@ jobs:
           NEXT_PUBLIC_CLOUDFLARE_TURNSTILE_SITE_KEY: 1x00000000000000000000AA
       - run: npx playwright install --with-deps chromium
       - run: npx playwright test --project=chromium --project=mobile
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: ${{ !cancelled() }}
         with:
           name: playwright-report
@@ -73,7 +73,7 @@ jobs:
         # performance only warns (lab numbers on shared runners are noisy).
         # /uses and /now join the audited pages once they're published.
         run: npx @lhci/cli@0.15.1 autorun --config=${{ env.ABOUT_PAGES == 'published' && 'lighthouserc.published.json' || 'lighthouserc.json' }}
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: ${{ !cancelled() }}
         with:
           name: lighthouse-report
