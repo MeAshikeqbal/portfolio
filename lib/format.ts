@@ -67,3 +67,19 @@ export function trimText(text: string | null | undefined, max: number): string |
   const space = cut.lastIndexOf(" ")
   return `${(space > max * 0.6 ? cut.slice(0, space) : cut).replace(/[\s.,;:!?-]+$/, "")}…`
 }
+
+/** "just now", "5m ago", "3h ago", "2d ago" or a date past a month; null for invalid input. */
+export function formatRelative(
+  iso: string | null | undefined,
+  now: Date = new Date(),
+): string | null {
+  const date = parseDate(iso)
+  if (!date) return null
+  const minutes = Math.max(0, Math.round((now.getTime() - date.getTime()) / 60_000))
+  if (minutes < 1) return "just now"
+  if (minutes < 60) return `${minutes}m ago`
+  const hours = Math.round(minutes / 60)
+  if (hours < 24) return `${hours}h ago`
+  const days = Math.round(hours / 24)
+  return days <= 30 ? `${days}d ago` : formatDate(iso)
+}
