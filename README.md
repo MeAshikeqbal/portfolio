@@ -1,36 +1,110 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# itsashik.dev
 
-## Getting Started
+Portfolio and blog of **Ashik Eqbal**, styled as a homelab status dashboard: a monochrome UI where
+colour only ever means status (green = live, amber = attention, red = down, blue = link/info).
 
-First, run the development server:
+**Live:** [www.itsashik.dev](https://www.itsashik.dev) · **Style guide:** `/styleguide` (preview and local builds only)
+
+## Stack
+
+| Area | Choice |
+|---|---|
+| Framework | Next.js 16 (App Router, static prerendering), React 19, TypeScript |
+| Content | Sanity 6 with the Studio embedded at `/studio`, typed GROQ via TypeGen, Live Content API |
+| Styling | Tailwind CSS 4 (CSS-first tokens in `app/globals.css`), shadcn/ui on Radix, Geist |
+| Code highlighting | Shiki, rendered on the server |
+| Share images | `next/og` (`opengraph-image.tsx` routes) |
+| Tests | Vitest + Testing Library, Playwright + axe |
+| Hosting | Vercel (Analytics, Speed Insights, Cron) |
+
+## Getting started
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+nvm use               # Node 24 (see .nvmrc)
+npm ci
+cp .env.example .env.local   # fill in values; the public Sanity id is prefilled
+npm run dev           # http://localhost:3000, Studio at /studio
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Without the server-side secrets the site still builds and renders. The contact form, GitHub
+sync and webhook just report that they aren't configured.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Scripts
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Command | What it does |
+|---|---|
+| `npm run dev` | Dev server (Turbopack) |
+| `npm run build` / `npm start` | Production build / serve it |
+| `npm run check` | Lint + typecheck + unit tests |
+| `npm run lint` · `npm run typecheck` · `npm test` | Individually |
+| `npm run format` · `npm run format:check` | Prettier (with Tailwind class sorting) |
+| `npm run test:e2e` | Playwright against a production build (`npm run build` first) |
+| `npm run typegen` | Regenerate `sanity.types.ts` after changing a schema or a query |
 
-## Learn More
+## Project layout
 
-To learn more about Next.js, take a look at the following resources:
+```
+app/
+  (root)/            public site: home, /post, /post/[slug], /projects, /projects/[slug]
+  studio/            embedded Sanity Studio
+  styleguide/        living style guide (404 in production)
+  api/               sanity-webhook (revalidation), sync-github-data (cron)
+  icons/             self-hosted Iconify SVGs for the skills inventory
+  opengraph-image.tsx, sitemap.ts, robots.ts, manifest.ts, rss.xml/
+components/
+  dashboard/         design-system primitives (StatusPill, Panel, DataRow, Sparkline…)
+  home/ blog/ projects/ site/ portable-text/ seo/
+  ui/                shadcn/ui components
+lib/                 data access (api.ts), helpers, structured data, OG frame
+sanity/              schema types, GROQ queries, clients
+tests/unit, tests/e2e
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## How things work
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- **Content and freshness.** Every read goes through `sanityFetch` (`lib/api.ts`). Pages are
+  static. `<SanityLive />` revalidates them when content is published, and the Sanity webhook
+  (`/api/sanity-webhook`) is the backstop for changes made while nobody is on the site.
+- **Typed queries.** All GROQ lives in `sanity/lib/queries.ts`. After editing a query or a
+  schema, run `npm run typegen`.
+- **GitHub stats.** `/api/sync-github-data` runs daily (`vercel.json`). It updates stars,
+  language, last push and past-year commit activity (including a 12-week series for the
+  sparklines) on every project with a repo. It also creates draft projects for new public
+  repositories.
+- **Design tokens.** Colours are OKLCH tokens in `app/globals.css`.
+  `tests/unit/tokens.test.ts` fails the build if any text/background pair drops below WCAG AA.
+- **Security.** `next.config.ts` sends HSTS, `nosniff`, a referrer policy, a permissions policy
+  and a Content Security Policy. The CSP applies to production builds only and doesn't cover
+  the Studio. `tests/e2e/security.spec.ts` fails on any CSP violation.
 
-## Deploy on Vercel
+## Content tips (Sanity Studio)
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- **Project `status`** (active / maintained / archived) turns on status pills. Nothing is
+  claimed until it's set.
+- **Project `featured` + `order`** decide what leads the home page. Adding `tech` and a
+  case-study `body` fills `/projects/[slug]` and the filters.
+- **`excerpt`** and the **SEO** fields (title, description, social image, noindex) override
+  the generated defaults for posts and projects.
+- **Skill icons** are [Iconify](https://icon-sets.iconify.design) names (`logos:aws`,
+  `mdi:security`) from the `logos`, `mdi`, `simple-icons` and `ri` sets.
+- **Availability badge.** Set `siteConfig.availability` in `lib/site.ts`.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Deployment checklist (Vercel)
+
+1. Set the environment variables from `.env.example` (Production and Preview).
+2. In sanity.io/manage → API:
+   - add `https://www.itsashik.dev` (and preview domains) as **CORS origins**, for live updates
+   - add a **webhook** to `https://www.itsashik.dev/api/sanity-webhook` with header
+     `Authorization: Bearer $SANITY_WEBHOOK_SECRET`
+3. The cron in `vercel.json` calls the GitHub sync daily; Vercel adds the `CRON_SECRET` header.
+
+## Ideas / not yet done
+
+- Draft mode + Sanity Presentation (visual editing). Needs a read token
+  (`SANITY_API_READ_TOKEN`) and the `next-sanity` draft-mode route.
+- `/uses` and `/now` pages as Sanity singletons.
+
+## Third-party assets
+
+The Geist fonts in `assets/fonts` (used by the generated share images) are under the SIL Open
+Font License; see `assets/fonts/OFL.txt`. Blog content © Ashik Eqbal.
