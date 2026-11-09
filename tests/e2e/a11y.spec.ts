@@ -3,11 +3,18 @@ import { expect, test, type Page, type TestInfo } from "@playwright/test"
 
 /**
  * Accessibility audit (WCAG 2.1 AA rules).
- * Redesigned pages must have no serious or critical violations in either theme.
- * Pages not yet redesigned (the blog, until Phase 5) only block on critical ones.
+ * Every page must have no serious or critical violations in either theme.
  */
-const STRICT_PAGES = ["/", "/projects", "/projects/portfolio", "/styleguide", "/no-such-page"]
-const LEGACY_PAGES = ["/post"]
+const STRICT_PAGES = [
+  "/",
+  "/post",
+  "/post/why-i-started-self-hosting-ai-at-home",
+  "/post/a-beginner-s-guide-to-building-a-website-using-a-modern-javascript-framework",
+  "/projects",
+  "/projects/portfolio",
+  "/styleguide",
+  "/no-such-page",
+]
 
 async function violations(page: Page, testInfo: TestInfo, impacts: Set<string>) {
   await page.waitForLoadState("load")
@@ -37,11 +44,4 @@ for (const colorScheme of ["light", "dark"] as const) {
       expect(await violations(page, testInfo, new Set(["serious", "critical"]))).toEqual([])
     })
   }
-}
-
-for (const path of LEGACY_PAGES) {
-  test(`no critical axe violations on ${path}`, async ({ page }, testInfo) => {
-    await page.goto(path)
-    expect(await violations(page, testInfo, new Set(["critical"]))).toEqual([])
-  })
 }

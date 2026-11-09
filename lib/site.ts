@@ -15,15 +15,17 @@ export const siteConfig = {
   description:
     "Personal portfolio and blog of Ashik Eqbal, a software engineer specializing in web development.",
   locale: "en_US",
-  ogImage: "/og-image.jpg",
   twitterHandle: "@me_ashikeqbal",
   role: "Software engineer",
   tagline: "A passionate software engineer who loves to build web applications.",
   /**
-   * Hero availability badge, e.g. `{ status: "up", label: "open to work" }`.
-   * `null` hides it: the site never claims availability unless it's set here.
+   * Hero availability badge. `status`: "up" (green, pulsing) = available, "warn" (amber) =
+   * limited, "idle" (grey) = not looking. Set to `null` to hide the badge entirely.
    */
-  availability: null as { status: "up" | "warn" | "idle"; label: string } | null,
+  availability: { status: "up", label: "open to opportunities" } as {
+    status: "up" | "warn" | "idle"
+    label: string
+  } | null,
   repo: "https://github.com/MeAshikeqbal/portfolio",
   socials,
   /** Social profiles, in display order (hero, contact, footer). */

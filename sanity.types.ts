@@ -15,11 +15,78 @@
 export declare const internalGroqTypeReferenceTo: unique symbol
 
 // Source: schema.json
+export type Now = {
+  _id: string
+  _type: "now"
+  _createdAt: string
+  _updatedAt: string
+  _rev: string
+  location?: string
+  body?: BlockContent
+}
+
 export type SanityImageAssetReference = {
   _ref: string
   _type: "reference"
   _weak?: boolean
   [internalGroqTypeReferenceTo]?: "sanity.imageAsset"
+}
+
+export type BlockContent = Array<
+  | {
+      children?: Array<{
+        marks?: Array<string>
+        text?: string
+        _type: "span"
+        _key: string
+      }>
+      style?: "normal" | "h1" | "h2" | "h3" | "h4" | "blockquote"
+      listItem?: "bullet"
+      markDefs?: Array<
+        | {
+            href?: string
+            _type: "link"
+            _key: string
+          }
+        | ({
+            _key: string
+          } & Code)
+      >
+      level?: number
+      _type: "block"
+      _key: string
+    }
+  | {
+      asset?: SanityImageAssetReference
+      media?: unknown
+      hotspot?: SanityImageHotspot
+      crop?: SanityImageCrop
+      alt?: string
+      _type: "image"
+      _key: string
+    }
+>
+
+export type Uses = {
+  _id: string
+  _type: "uses"
+  _createdAt: string
+  _updatedAt: string
+  _rev: string
+  intro?: string
+  sections?: Array<{
+    title?: string
+    items?: Array<{
+      name?: string
+      description?: string
+      url?: string
+      icon?: string
+      _type: "usesItem"
+      _key: string
+    }>
+    _type: "usesSection"
+    _key: string
+  }>
 }
 
 export type Seo = {
@@ -118,41 +185,6 @@ export type SanityImageHotspot = {
   height?: number
   width?: number
 }
-
-export type BlockContent = Array<
-  | {
-      children?: Array<{
-        marks?: Array<string>
-        text?: string
-        _type: "span"
-        _key: string
-      }>
-      style?: "normal" | "h1" | "h2" | "h3" | "h4" | "blockquote"
-      listItem?: "bullet"
-      markDefs?: Array<
-        | {
-            href?: string
-            _type: "link"
-            _key: string
-          }
-        | ({
-            _key: string
-          } & Code)
-      >
-      level?: number
-      _type: "block"
-      _key: string
-    }
-  | {
-      asset?: SanityImageAssetReference
-      media?: unknown
-      hotspot?: SanityImageHotspot
-      crop?: SanityImageCrop
-      alt?: string
-      _type: "image"
-      _key: string
-    }
->
 
 export type Slug = {
   _type: "slug"
@@ -450,7 +482,10 @@ export type Geopoint = {
 }
 
 export type AllSanitySchemaTypes =
+  | Now
   | SanityImageAssetReference
+  | BlockContent
+  | Uses
   | Seo
   | SanityFileAssetReference
   | Cv
@@ -458,7 +493,6 @@ export type AllSanitySchemaTypes =
   | Project
   | SanityImageCrop
   | SanityImageHotspot
-  | BlockContent
   | Slug
   | Education
   | Experiences
@@ -484,7 +518,7 @@ export type AllSanitySchemaTypes =
 
 // Source: sanity/lib/queries.ts
 // Variable: POSTS_QUERY
-// Query: *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current)] | order(publishedAt desc) {   _id,  title,  "slug": slug.current,  mainImage,  publishedAt,  "excerpt": coalesce(excerpt, array::join(string::split(pt::text(body[_type == "block" && style == "normal"]), "")[0...200], "")),  categories[]->{ _id, title },  author->{ name } }
+// Query: *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current)] | order(publishedAt desc) {   _id,  title,  "slug": slug.current,  mainImage,  "lqip": mainImage.asset->metadata.lqip,  publishedAt,  "excerpt": coalesce(excerpt, array::join(string::split(pt::text(body[_type == "block" && style == "normal"]), "")[0...200], "")),  categories[]->{ _id, title },  author->{ name } }
 export type POSTS_QUERY_RESULT = Array<{
   _id: string
   title: string | null
@@ -497,6 +531,7 @@ export type POSTS_QUERY_RESULT = Array<{
     alt?: string
     _type: "image"
   } | null
+  lqip: string | null
   publishedAt: string | null
   excerpt: string
   categories: Array<{
@@ -510,7 +545,7 @@ export type POSTS_QUERY_RESULT = Array<{
 
 // Source: sanity/lib/queries.ts
 // Variable: LATEST_POSTS_QUERY
-// Query: *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current)] | order(publishedAt desc) [0...5] {   _id,  title,  "slug": slug.current,  mainImage,  publishedAt,  "excerpt": coalesce(excerpt, array::join(string::split(pt::text(body[_type == "block" && style == "normal"]), "")[0...200], "")),  categories[]->{ _id, title },  author->{ name } }
+// Query: *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current)] | order(publishedAt desc) [0...5] {   _id,  title,  "slug": slug.current,  mainImage,  "lqip": mainImage.asset->metadata.lqip,  publishedAt,  "excerpt": coalesce(excerpt, array::join(string::split(pt::text(body[_type == "block" && style == "normal"]), "")[0...200], "")),  categories[]->{ _id, title },  author->{ name } }
 export type LATEST_POSTS_QUERY_RESULT = Array<{
   _id: string
   title: string | null
@@ -523,6 +558,7 @@ export type LATEST_POSTS_QUERY_RESULT = Array<{
     alt?: string
     _type: "image"
   } | null
+  lqip: string | null
   publishedAt: string | null
   excerpt: string
   categories: Array<{
@@ -535,17 +571,10 @@ export type LATEST_POSTS_QUERY_RESULT = Array<{
 }>
 
 // Source: sanity/lib/queries.ts
-// Variable: CATEGORIES_QUERY
-// Query: *[_type == "category"] | order(title asc) { _id, title }
-export type CATEGORIES_QUERY_RESULT = Array<{
-  _id: string
-  title: string | null
-}>
-
-// Source: sanity/lib/queries.ts
 // Variable: POST_QUERY
-// Query: *[_type == "post" && !(_id in path("drafts.**")) && slug.current == $slug][0] {    title,    "slug": slug.current,    author->{ name, image },    mainImage,    categories[]->{ _id, title },    publishedAt,    body,    excerpt  }
+// Query: *[_type == "post" && !(_id in path("drafts.**")) && slug.current == $slug][0] {    _id,    title,    "slug": slug.current,    author->{ name, image },    mainImage,    "cover": mainImage.asset->metadata{ lqip, "width": dimensions.width, "height": dimensions.height },    categories[]->{ _id, title },    publishedAt,    _updatedAt,    body,    excerpt,    seo,    "previous": *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && publishedAt < ^.publishedAt]      | order(publishedAt desc)[0] { title, "slug": slug.current },    "next": *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && publishedAt > ^.publishedAt]      | order(publishedAt asc)[0] { title, "slug": slug.current },    "related": *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && _id != ^._id && count(categories[@._ref in ^.^.categories[]._ref]) > 0]      | order(publishedAt desc)[0...3] {   _id,  title,  "slug": slug.current,  mainImage,  "lqip": mainImage.asset->metadata.lqip,  publishedAt,  "excerpt": coalesce(excerpt, array::join(string::split(pt::text(body[_type == "block" && style == "normal"]), "")[0...200], "")),  categories[]->{ _id, title },  author->{ name } }  }
 export type POST_QUERY_RESULT = {
+  _id: string
   title: string | null
   slug: string | null
   author: {
@@ -566,13 +595,51 @@ export type POST_QUERY_RESULT = {
     alt?: string
     _type: "image"
   } | null
+  cover: {
+    lqip: string | null
+    width: number | null
+    height: number | null
+  } | null
   categories: Array<{
     _id: string
     title: string | null
   }> | null
   publishedAt: string | null
+  _updatedAt: string
   body: BlockContent | null
   excerpt: string | null
+  seo: Seo | null
+  previous: {
+    title: string | null
+    slug: string | null
+  } | null
+  next: {
+    title: string | null
+    slug: string | null
+  } | null
+  related: Array<{
+    _id: string
+    title: string | null
+    slug: string | null
+    mainImage: {
+      asset?: SanityImageAssetReference
+      media?: unknown
+      hotspot?: SanityImageHotspot
+      crop?: SanityImageCrop
+      alt?: string
+      _type: "image"
+    } | null
+    lqip: string | null
+    publishedAt: string | null
+    excerpt: string
+    categories: Array<{
+      _id: string
+      title: string | null
+    }> | null
+    author: {
+      name: string | null
+    } | null
+  }>
 } | null
 
 // Source: sanity/lib/queries.ts
@@ -747,7 +814,7 @@ export type GITHUB_PROJECTS_QUERY_RESULT = Array<{
 
 // Source: sanity/lib/queries.ts
 // Variable: SITEMAP_QUERY
-// Query: {  "posts": *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && seo.noIndex != true]    | order(publishedAt desc) { "slug": slug.current, _updatedAt },  "projects": *[_type == "project" && !(_id in path("drafts.**")) && defined(slug.current) && seo.noIndex != true]    { "slug": slug.current, _updatedAt }}
+// Query: {  "posts": *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && seo.noIndex != true]    | order(publishedAt desc) { "slug": slug.current, _updatedAt },  "projects": *[_type == "project" && !(_id in path("drafts.**")) && defined(slug.current) && seo.noIndex != true]    { "slug": slug.current, _updatedAt },  "uses": *[_type == "uses" && _id == "uses" && count(sections) > 0][0]._updatedAt,  "now": *[_type == "now" && _id == "now" && count(body) > 0][0]._updatedAt}
 export type SITEMAP_QUERY_RESULT = {
   posts: Array<{
     slug: string | null
@@ -757,15 +824,66 @@ export type SITEMAP_QUERY_RESULT = {
     slug: string | null
     _updatedAt: string
   }>
+  uses: string | null
+  now: string | null
 }
+
+// Source: sanity/lib/queries.ts
+// Variable: COMMAND_INDEX_QUERY
+// Query: {  "posts": *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current)] | order(publishedAt desc) {    _id, title, "slug": slug.current, "topics": categories[]->title  },  "projects": *[_type == "project" && !(_id in path("drafts.**"))] | order(coalesce(order, 999) asc, _createdAt desc) {    _id, title, "slug": slug.current, url, github  },  // Only whether a CV exists: the file itself is served from /resume.pdf.  "hasCv": defined(*[_type == "cv"][0].cvFile.asset),  // /uses and /now are only linked once they have published content.  "hasUses": count(*[_type == "uses" && _id == "uses"][0].sections) > 0,  "hasNow": count(*[_type == "now" && _id == "now"][0].body) > 0}
+export type COMMAND_INDEX_QUERY_RESULT = {
+  posts: Array<{
+    _id: string
+    title: string | null
+    slug: string | null
+    topics: Array<string | null> | null
+  }>
+  projects: Array<{
+    _id: string
+    title: string | null
+    slug: string | null
+    url: string | null
+    github: string | null
+  }>
+  hasCv: false | true
+  hasUses: boolean | null
+  hasNow: boolean | null
+}
+
+// Source: sanity/lib/queries.ts
+// Variable: USES_QUERY
+// Query: *[_type == "uses" && _id == "uses"][0] {    _updatedAt,    intro,    sections[]{ _key, title, items[]{ _key, name, description, url, icon } }  }
+export type USES_QUERY_RESULT = {
+  _updatedAt: string
+  intro: string | null
+  sections: Array<{
+    _key: string
+    title: string | null
+    items: Array<{
+      _key: string
+      name: string | null
+      description: string | null
+      url: string | null
+      icon: string | null
+    }> | null
+  }> | null
+} | null
+
+// Source: sanity/lib/queries.ts
+// Variable: NOW_QUERY
+// Query: *[_type == "now" && _id == "now"][0] { _updatedAt, location, body }
+export type NOW_QUERY_RESULT = {
+  _updatedAt: string
+  location: string | null
+  body: BlockContent | null
+} | null
 
 // Query TypeMap
 declare global {
   interface SanityQueries {
-    '\n  *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current)] | order(publishedAt desc) { \n  _id,\n  title,\n  "slug": slug.current,\n  mainImage,\n  publishedAt,\n  "excerpt": coalesce(excerpt, array::join(string::split(pt::text(body[_type == "block" && style == "normal"]), "")[0...200], "")),\n  categories[]->{ _id, title },\n  author->{ name }\n }\n': POSTS_QUERY_RESULT
-    '\n  *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current)] | order(publishedAt desc) [0...5] { \n  _id,\n  title,\n  "slug": slug.current,\n  mainImage,\n  publishedAt,\n  "excerpt": coalesce(excerpt, array::join(string::split(pt::text(body[_type == "block" && style == "normal"]), "")[0...200], "")),\n  categories[]->{ _id, title },\n  author->{ name }\n }\n': LATEST_POSTS_QUERY_RESULT
-    '\n  *[_type == "category"] | order(title asc) { _id, title }\n': CATEGORIES_QUERY_RESULT
-    '\n  *[_type == "post" && !(_id in path("drafts.**")) && slug.current == $slug][0] {\n    title,\n    "slug": slug.current,\n    author->{ name, image },\n    mainImage,\n    categories[]->{ _id, title },\n    publishedAt,\n    body,\n    excerpt\n  }\n': POST_QUERY_RESULT
+    '\n  *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current)] | order(publishedAt desc) { \n  _id,\n  title,\n  "slug": slug.current,\n  mainImage,\n  "lqip": mainImage.asset->metadata.lqip,\n  publishedAt,\n  "excerpt": coalesce(excerpt, array::join(string::split(pt::text(body[_type == "block" && style == "normal"]), "")[0...200], "")),\n  categories[]->{ _id, title },\n  author->{ name }\n }\n': POSTS_QUERY_RESULT
+    '\n  *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current)] | order(publishedAt desc) [0...5] { \n  _id,\n  title,\n  "slug": slug.current,\n  mainImage,\n  "lqip": mainImage.asset->metadata.lqip,\n  publishedAt,\n  "excerpt": coalesce(excerpt, array::join(string::split(pt::text(body[_type == "block" && style == "normal"]), "")[0...200], "")),\n  categories[]->{ _id, title },\n  author->{ name }\n }\n': LATEST_POSTS_QUERY_RESULT
+    '\n  *[_type == "post" && !(_id in path("drafts.**")) && slug.current == $slug][0] {\n    _id,\n    title,\n    "slug": slug.current,\n    author->{ name, image },\n    mainImage,\n    "cover": mainImage.asset->metadata{ lqip, "width": dimensions.width, "height": dimensions.height },\n    categories[]->{ _id, title },\n    publishedAt,\n    _updatedAt,\n    body,\n    excerpt,\n    seo,\n    "previous": *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && publishedAt < ^.publishedAt]\n      | order(publishedAt desc)[0] { title, "slug": slug.current },\n    "next": *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && publishedAt > ^.publishedAt]\n      | order(publishedAt asc)[0] { title, "slug": slug.current },\n    "related": *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && _id != ^._id && count(categories[@._ref in ^.^.categories[]._ref]) > 0]\n      | order(publishedAt desc)[0...3] { \n  _id,\n  title,\n  "slug": slug.current,\n  mainImage,\n  "lqip": mainImage.asset->metadata.lqip,\n  publishedAt,\n  "excerpt": coalesce(excerpt, array::join(string::split(pt::text(body[_type == "block" && style == "normal"]), "")[0...200], "")),\n  categories[]->{ _id, title },\n  author->{ name }\n }\n  }\n': POST_QUERY_RESULT
     '\n  *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current)].slug.current\n': POST_SLUGS_QUERY_RESULT
     '\n  *[_type == "project" && !(_id in path("drafts.**"))] | order(coalesce(order, 999) asc, _createdAt desc) { \n  _id,\n  title,\n  "slug": slug.current,\n  description,\n  mainImage,\n  publishedAt,\n  github,\n  url,\n  featured,\n  status,\n  tech,\n  githubData\n }\n': PROJECTS_QUERY_RESULT
     '\n  *[_type == "project" && !(_id in path("drafts.**")) && slug.current == $slug][0] { \n  _id,\n  title,\n  "slug": slug.current,\n  description,\n  mainImage,\n  publishedAt,\n  github,\n  url,\n  featured,\n  status,\n  tech,\n  githubData\n, body, seo }\n': PROJECT_QUERY_RESULT
@@ -777,7 +895,10 @@ declare global {
     '\n  *[_type == "cv"][0].cvFile.asset->url\n': CV_URL_QUERY_RESULT
     '\n  *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current)] | order(publishedAt desc) {\n    title,\n    "slug": slug.current,\n    publishedAt,\n    _updatedAt,\n    "excerpt": coalesce(excerpt, array::join(string::split(pt::text(body[_type == "block" && style == "normal"]), "")[0...200], "")),\n    author->{ name },\n    "categories": categories[]->title,\n    "image": mainImage.asset->{ url, "mimeType": mimeType }\n  }\n': FEED_POSTS_QUERY_RESULT
     '\n  *[_type == "project" && defined(github)] { _id, title, github }\n': GITHUB_PROJECTS_QUERY_RESULT
-    '{\n  "posts": *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && seo.noIndex != true]\n    | order(publishedAt desc) { "slug": slug.current, _updatedAt },\n  "projects": *[_type == "project" && !(_id in path("drafts.**")) && defined(slug.current) && seo.noIndex != true]\n    { "slug": slug.current, _updatedAt }\n}': SITEMAP_QUERY_RESULT
+    '{\n  "posts": *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && seo.noIndex != true]\n    | order(publishedAt desc) { "slug": slug.current, _updatedAt },\n  "projects": *[_type == "project" && !(_id in path("drafts.**")) && defined(slug.current) && seo.noIndex != true]\n    { "slug": slug.current, _updatedAt },\n  "uses": *[_type == "uses" && _id == "uses" && count(sections) > 0][0]._updatedAt,\n  "now": *[_type == "now" && _id == "now" && count(body) > 0][0]._updatedAt\n}': SITEMAP_QUERY_RESULT
+    '{\n  "posts": *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current)] | order(publishedAt desc) {\n    _id, title, "slug": slug.current, "topics": categories[]->title\n  },\n  "projects": *[_type == "project" && !(_id in path("drafts.**"))] | order(coalesce(order, 999) asc, _createdAt desc) {\n    _id, title, "slug": slug.current, url, github\n  },\n  // Only whether a CV exists: the file itself is served from /resume.pdf.\n  "hasCv": defined(*[_type == "cv"][0].cvFile.asset),\n  // /uses and /now are only linked once they have published content.\n  "hasUses": count(*[_type == "uses" && _id == "uses"][0].sections) > 0,\n  "hasNow": count(*[_type == "now" && _id == "now"][0].body) > 0\n}': COMMAND_INDEX_QUERY_RESULT
+    '\n  *[_type == "uses" && _id == "uses"][0] {\n    _updatedAt,\n    intro,\n    sections[]{ _key, title, items[]{ _key, name, description, url, icon } }\n  }\n': USES_QUERY_RESULT
+    '\n  *[_type == "now" && _id == "now"][0] { _updatedAt, location, body }\n': NOW_QUERY_RESULT
   }
 }
 // Lets @sanity/client releases that predate the global registry read it too

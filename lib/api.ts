@@ -2,11 +2,12 @@ import "server-only"
 
 import { sanityFetch } from "@/sanity/lib/live"
 import {
-  CATEGORIES_QUERY,
+  COMMAND_INDEX_QUERY,
   CV_URL_QUERY,
   EDUCATION_QUERY,
   EXPERIENCES_QUERY,
   HOME_STATS_QUERY,
+  NOW_QUERY,
   LATEST_POSTS_QUERY,
   POST_QUERY,
   POST_SLUGS_QUERY,
@@ -15,9 +16,9 @@ import {
   PROJECT_SLUGS_QUERY,
   PROJECTS_QUERY,
   SKILLS_QUERY,
+  USES_QUERY,
 } from "@/sanity/lib/queries"
 import type {
-  CATEGORIES_QUERY_RESULT,
   EDUCATION_QUERY_RESULT,
   EXPERIENCES_QUERY_RESULT,
   POST_QUERY_RESULT,
@@ -25,6 +26,7 @@ import type {
   PROJECT_QUERY_RESULT,
   PROJECTS_QUERY_RESULT,
   SKILLS_QUERY_RESULT,
+  COMMAND_INDEX_QUERY_RESULT,
 } from "@/sanity.types"
 
 /**
@@ -34,7 +36,6 @@ import type {
  */
 
 export type PostCard = POSTS_QUERY_RESULT[number]
-export type Category = CATEGORIES_QUERY_RESULT[number]
 export type Post = NonNullable<POST_QUERY_RESULT>
 export type Project = PROJECTS_QUERY_RESULT[number]
 export type ProjectDetail = NonNullable<PROJECT_QUERY_RESULT>
@@ -49,11 +50,6 @@ export async function getPosts() {
 
 export async function getLatestPosts() {
   const { data } = await sanityFetch({ query: LATEST_POSTS_QUERY, stega: false })
-  return data
-}
-
-export async function getCategories() {
-  const { data } = await sanityFetch({ query: CATEGORIES_QUERY, stega: false })
   return data
 }
 
@@ -106,5 +102,22 @@ export async function getProjectSlugs() {
 
 export async function getHomeStats() {
   const { data } = await sanityFetch({ query: HOME_STATS_QUERY, stega: false })
+  return data
+}
+
+export type CommandIndex = COMMAND_INDEX_QUERY_RESULT
+
+export async function getCommandIndex() {
+  const { data } = await sanityFetch({ query: COMMAND_INDEX_QUERY, stega: false })
+  return data
+}
+
+export async function getUses() {
+  const { data } = await sanityFetch({ query: USES_QUERY, stega: false })
+  return data
+}
+
+export async function getNow() {
+  const { data } = await sanityFetch({ query: NOW_QUERY, stega: false })
   return data
 }

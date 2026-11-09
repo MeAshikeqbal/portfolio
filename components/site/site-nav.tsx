@@ -6,6 +6,8 @@ import { usePathname } from "next/navigation"
 import { useState } from "react"
 import { Container } from "@/components/dashboard/layout"
 import { ThemeToggle } from "@/components/theme-toggle"
+import type { CommandIndex } from "@/lib/api"
+import { CommandMenu } from "./command-menu"
 import { Button } from "@/components/ui/button"
 import { siteConfig } from "@/lib/site"
 import { cn } from "@/lib/utils"
@@ -16,7 +18,7 @@ function isActive(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(`${href}/`)
 }
 
-export function SiteNav() {
+export function SiteNav({ commandIndex }: { commandIndex?: CommandIndex }) {
   const pathname = usePathname()
   const [open, setOpen] = useState(false)
 
@@ -31,7 +33,7 @@ export function SiteNav() {
           itsashik<span className="text-muted-foreground">.dev</span>
         </Link>
 
-        <nav aria-label="Main" className="hidden items-center gap-1 md:flex">
+        <nav aria-label="Main" className="ml-auto hidden items-center gap-1 md:flex">
           {siteConfig.nav.map((item) => {
             const active = isActive(pathname, item.href)
             return (
@@ -50,20 +52,24 @@ export function SiteNav() {
               </Link>
             )
           })}
-          <ThemeToggle className="ml-2" />
         </nav>
 
-        <Button
-          variant="ghost"
-          size="icon"
-          className="md:hidden"
-          onClick={() => setOpen((value) => !value)}
-          aria-expanded={open}
-          aria-controls="mobile-menu"
-          aria-label="Toggle menu"
-        >
-          {open ? <X /> : <Menu />}
-        </Button>
+        <div className="flex items-center gap-2">
+          {/* A single palette instance for every screen size (one keyboard listener). */}
+          {commandIndex && <CommandMenu index={commandIndex} />}
+          <ThemeToggle className="hidden md:flex" />
+          <Button
+            variant="ghost"
+            size="icon"
+            className="md:hidden"
+            onClick={() => setOpen((value) => !value)}
+            aria-expanded={open}
+            aria-controls="mobile-menu"
+            aria-label="Toggle menu"
+          >
+            {open ? <X /> : <Menu />}
+          </Button>
+        </div>
       </Container>
 
       {open && (
