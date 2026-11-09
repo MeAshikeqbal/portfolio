@@ -144,3 +144,34 @@ export function githubRows<T extends { _id: string }>(docs: T[]): { rows: T[]; i
   }
   return { rows: [...rows.values()], ids: docs.map((doc) => doc._id) }
 }
+
+/**
+ * /now turns "stale" after this many days without an edit. Mirrors the site's
+ * `siteConfig.nowStaleAfterDays` (PR #140); import it from there once both have merged.
+ */
+export const NOW_STALE_AFTER_DAYS = 90
+
+export interface NowFreshness {
+  state: "unpublished" | "fresh" | "stale"
+  /** Whole days since the last published edit; null when unpublished. */
+  days: number | null
+  /** Short line for the dashboard row. */
+  label: string
+}
+
+/** How current the published /now page is, from its `_updatedAt` (null when unpublished). */
+export function nowFreshness(
+  updatedAt: string | null | undefined,
+  now = Date.now(),
+  staleAfterDays = NOW_STALE_AFTER_DAYS,
+): NowFreshness {
+  const time = updatedAt ? new Date(updatedAt).getTime() : NaN
+  if (Number.isNaN(time)) {
+    return { state: "unpublished", days: null, label: "Not published: /now is a 404" }
+  }
+  const days = Math.max(0, Math.floor((now - time) / 86_400_000))
+  const ago = days === 0 ? "today" : days === 1 ? "1 day ago" : `${days} days ago`
+  return days > staleAfterDays
+    ? { state: "stale", days, label: `Updated ${ago}: time for a new update` }
+    : { state: "fresh", days, label: `Updated ${ago}` }
+}

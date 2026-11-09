@@ -9,10 +9,28 @@ import { isMonochromeIcon } from "@/lib/icons"
 import { cn } from "@/lib/utils"
 
 type Uses = NonNullable<USES_QUERY_RESULT>
+type UsesSection = NonNullable<Uses["sections"]>[number]
+type UsesItem = NonNullable<UsesSection["items"]>[number]
+
+/**
+ * Sections worth showing: items without a name are dropped, then sections left empty.
+ * The page 404s when this is empty, so the rule lives in one place.
+ */
+export function visibleUsesSections(
+  uses: USES_QUERY_RESULT | null | undefined,
+): (UsesSection & { items: UsesItem[] })[] {
+  return (uses?.sections ?? [])
+    .map((section) => ({
+      ...section,
+      items: (section.items ?? []).filter((item) => item.name?.trim()),
+    }))
+    .filter((section) => section.items.length > 0)
+}
 
 /** The /uses page body: one panel per section, one row per item. */
 export function UsesView({ uses }: { uses: Uses }) {
-  const sections = (uses.sections ?? []).filter((section) => (section.items?.length ?? 0) > 0)
+  const sections = visibleUsesSections(uses)
+  const updated = formatDate(uses._updatedAt)
 
   return (
     <main>
@@ -23,16 +41,16 @@ export function UsesView({ uses }: { uses: Uses }) {
             title="Uses"
             description={uses.intro ?? "The hardware, software and services I rely on."}
           />
-          <p className="-mt-2 mb-8 label-caps">last updated · {formatDate(uses._updatedAt)}</p>
+          {updated && <p className="-mt-2 mb-8 label-caps">last updated · {updated}</p>}
           <div className="space-y-6">
             {sections.map((section) => (
               <Panel key={section._key}>
                 <PanelHeader
                   title={section.title}
-                  meta={<span>{section.items!.length} items</span>}
+                  meta={<span>{section.items.length} items</span>}
                 />
                 <ul className="divide-y">
-                  {section.items!.map((item) => (
+                  {section.items.map((item) => (
                     <li key={item._key} className="flex items-start gap-3 px-4 py-3">
                       {item.icon && (
                         <span

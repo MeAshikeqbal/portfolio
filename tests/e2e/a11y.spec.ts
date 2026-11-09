@@ -1,5 +1,6 @@
 import AxeBuilder from "@axe-core/playwright"
 import { expect, test, type Page, type TestInfo } from "@playwright/test"
+import { ABOUT_PAGES, ABOUT_PATHS } from "./about-state"
 
 /**
  * Accessibility audit (WCAG 2.1 AA rules).
@@ -14,6 +15,8 @@ const STRICT_PAGES = [
   "/projects/portfolio",
   "/styleguide",
   "/no-such-page",
+  // Only exist once published (scripts/about-state.mjs decides before the build).
+  ...(ABOUT_PAGES === "published" ? ABOUT_PATHS : []),
 ]
 
 async function violations(page: Page, testInfo: TestInfo, impacts: Set<string>) {

@@ -51,6 +51,9 @@ export const HEALTH_QUERY = `{
   "skillIcons": *[_type == "skills" && ${PUBLISHED} && defined(icon) && icon != ""]{ _id, _type, "title": name, icon }
 }`
 
+/** The published /now page's last edit (null while it's unpublished or has no body). */
+export const NOW_FRESHNESS_QUERY = `*[_type == "now" && _id == "now" && count(body) > 0][0]._updatedAt`
+
 /** Both versions of each project with a repo, so "Sync all" refreshes drafts too. */
 export const GITHUB_QUERY = `*[_type == "project" && defined(github) && !(_id in path("versions.**"))]
   | order(lower(title) asc){ _id, title, "syncedAt": githubData.syncedAt, "language": githubData.language }`

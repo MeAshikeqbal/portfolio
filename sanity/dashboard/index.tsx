@@ -3,7 +3,14 @@ import { Box, Container, Grid, Stack, Text } from "@sanity/ui"
 import { useCurrentUser, type Tool } from "sanity"
 
 import { MONO } from "./widget"
-import { GitHubWidget, HealthWidget, InboxWidget, OverviewWidget, RecentWidget } from "./widgets"
+import {
+  FreshnessWidget,
+  GitHubWidget,
+  HealthWidget,
+  InboxWidget,
+  OverviewWidget,
+  RecentWidget,
+} from "./widgets"
 
 /** Hover state for clickable rows and tiles (Sanity UI cards have no hover by default). */
 const ROW_HOVER_CSS = `
@@ -49,6 +56,7 @@ function Dashboard() {
             </Stack>
             <Stack gap={4}>
               <RecentWidget />
+              <FreshnessWidget />
               <GitHubWidget />
             </Stack>
           </Grid>
@@ -58,7 +66,7 @@ function Dashboard() {
   )
 }
 
-/** Studio home: overview counts, inbox, recently edited and content health. */
+/** Studio home: overview counts, inbox, recently edited, content health and freshness. */
 export const dashboardTool: Tool = {
   name: "home",
   title: "Home",

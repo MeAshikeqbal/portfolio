@@ -172,7 +172,7 @@ export const SITEMAP_QUERY = defineQuery(`{
     | order(publishedAt desc) { "slug": slug.current, _updatedAt },
   "projects": *[_type == "project" && ${published} && defined(slug.current) && seo.noIndex != true]
     { "slug": slug.current, _updatedAt },
-  "uses": *[_type == "uses" && _id == "uses" && count(sections) > 0][0]._updatedAt,
+  "uses": *[_type == "uses" && _id == "uses" && count(sections[count(items[defined(name) && name != ""]) > 0]) > 0][0]._updatedAt,
   "now": *[_type == "now" && _id == "now" && count(body) > 0][0]._updatedAt
 }`)
 
@@ -187,7 +187,9 @@ export const COMMAND_INDEX_QUERY = defineQuery(`{
   // Only whether a CV exists: the file itself is served from /resume.pdf.
   "hasCv": defined(*[_type == "cv"][0].cvFile.asset),
   // /uses and /now are only linked once they have published content.
-  "hasUses": count(*[_type == "uses" && _id == "uses"][0].sections) > 0,
+  // Same rule as the /uses page: at least one section with a named item. (GROQ can't trim,
+  // and the schema requires a name, so whitespace-only names aren't checked here.)
+  "hasUses": count(*[_type == "uses" && _id == "uses"][0].sections[count(items[defined(name) && name != ""]) > 0]) > 0,
   "hasNow": count(*[_type == "now" && _id == "now"][0].body) > 0
 }`)
 
