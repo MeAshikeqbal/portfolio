@@ -38,6 +38,8 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  // Shown in the system bar and footer next to the commit SHA.
+  env: { BUILD_TIME: new Date().toISOString() },
   images: {
     // Next 16 only serves listed qualities; keep in sync with `quality` props.
     qualities: [50, 60, 75],

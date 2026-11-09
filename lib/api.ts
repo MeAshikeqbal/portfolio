@@ -15,6 +15,7 @@ import {
   PROJECT_QUERY,
   PROJECT_SLUGS_QUERY,
   PROJECTS_QUERY,
+  SITE_STATUS_QUERY,
   SKILLS_QUERY,
   USES_QUERY,
 } from "@/sanity/lib/queries"
@@ -27,6 +28,7 @@ import type {
   PROJECTS_QUERY_RESULT,
   SKILLS_QUERY_RESULT,
   COMMAND_INDEX_QUERY_RESULT,
+  SITE_STATUS_QUERY_RESULT,
 } from "@/sanity.types"
 
 /**
@@ -102,6 +104,13 @@ export async function getProjectSlugs() {
 
 export async function getHomeStats() {
   const { data } = await sanityFetch({ query: HOME_STATS_QUERY, stega: false })
+  return data
+}
+
+export type SiteStatus = SITE_STATUS_QUERY_RESULT
+
+export async function getSiteStatus() {
+  const { data } = await sanityFetch({ query: SITE_STATUS_QUERY, stega: false })
   return data
 }
 

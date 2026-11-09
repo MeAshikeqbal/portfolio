@@ -1,6 +1,5 @@
 import Link from "next/link"
 import { Container } from "@/components/dashboard/layout"
-import { StatusDot } from "@/components/dashboard/status-dot"
 import { siteConfig } from "@/lib/site"
 
 const siteLinks = [
@@ -19,7 +18,7 @@ export function SiteFooter({
 }: {
   extraLinks?: { label: string; href: string }[]
 }) {
-  const sha = process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 7)
+  const fullSha = process.env.VERCEL_GIT_COMMIT_SHA
 
   return (
     <footer className="mt-auto border-t bg-surface">
@@ -36,9 +35,18 @@ export function SiteFooter({
           <span>
             © {new Date().getFullYear()} {siteConfig.name}
           </span>
-          <span className="flex items-center gap-2">
-            <StatusDot status="up" /> operational · build {sha ?? "local"}
-          </span>
+          {fullSha ? (
+            <a
+              href={`${siteConfig.repo}/commit/${fullSha}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="transition-colors hover:text-foreground"
+            >
+              build {fullSha.slice(0, 7)} ↗
+            </a>
+          ) : (
+            <span>build local</span>
+          )}
         </Container>
       </div>
     </footer>

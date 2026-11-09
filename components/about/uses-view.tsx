@@ -20,7 +20,6 @@ export function UsesView({ uses }: { uses: Uses }) {
         <Container className="max-w-4xl">
           <SectionHeader
             as="h1"
-            eyebrow="loadout"
             title="Uses"
             description={uses.intro ?? "The hardware, software and services I rely on."}
           />

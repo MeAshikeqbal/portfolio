@@ -7,7 +7,7 @@ import { SiteNav } from "@/components/site/site-nav"
 export default function NotFound() {
   return (
     <div className="flex min-h-screen flex-col">
-      <SystemBar status="warn" message="1 page not found" />
+      <SystemBar notice={{ status: "warn", label: "1 page not found" }} />
       <SiteNav />
       <div className="flex-1">
         <NotFoundPanel />

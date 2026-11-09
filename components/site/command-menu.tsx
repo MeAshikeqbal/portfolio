@@ -17,7 +17,7 @@ import {
 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useTheme } from "next-themes"
-import { useEffect, useState, type ReactNode } from "react"
+import { useEffect, useRef, useState, type ReactNode } from "react"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import {
@@ -42,12 +42,11 @@ function isTyping(target: EventTarget | null): boolean {
   return target.isContentEditable || ["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName)
 }
 
+/** Home-page sections without a page of their own (posts and projects have "All …" entries). */
 const sections = [
-  { label: "Projects", href: "/#services", keywords: ["services", "work"] },
-  { label: "Writing", href: "/#writing", keywords: ["incident log", "blog", "posts"] },
   { label: "Experience & education", href: "/#uptime", keywords: ["uptime", "cv", "history"] },
   { label: "Stack", href: "/#inventory", keywords: ["inventory", "skills", "tools"] },
-  { label: "Contact", href: "/#contact", keywords: ["ticket", "email", "message"] },
+  { label: "Contact", href: "/#contact", keywords: ["get in touch", "email", "message"] },
 ]
 
 /**
@@ -56,6 +55,11 @@ const sections = [
  */
 export function CommandMenu({ index, className }: { index: CommandIndex; className?: string }) {
   const [open, setOpen] = useState(false)
+  const openRef = useRef(false)
+  // The palette opens from a button or a shortcut, never a DialogTrigger, so Radix can't
+  // return focus on close by itself: remember where the user was and send them back there.
+  const returnFocus = useRef<HTMLElement | null>(null)
+  const trigger = useRef<HTMLButtonElement>(null)
   const router = useRouter()
   const { setTheme } = useTheme()
   const hydrated = useHydrated()
@@ -63,11 +67,27 @@ export function CommandMenu({ index, className }: { index: CommandIndex; classNa
   const modKey = hydrated && !/Mac|iPhone|iPad/.test(navigator.userAgent) ? "Ctrl" : "⌘"
 
   useEffect(() => {
+    openRef.current = open
+  }, [open])
+
+  function rememberFocus() {
+    const active = document.activeElement
+    returnFocus.current = active instanceof HTMLElement && active !== document.body ? active : null
+  }
+
+  function restoreFocus(event: Event) {
+    event.preventDefault()
+    const target = returnFocus.current?.isConnected ? returnFocus.current : trigger.current
+    target?.focus()
+  }
+
+  useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
       const shortcut = (event.key === "k" || event.key === "K") && (event.metaKey || event.ctrlKey)
       const slash = event.key === "/" && !event.metaKey && !event.ctrlKey && !isTyping(event.target)
       if (shortcut || slash) {
         event.preventDefault()
+        if (!openRef.current) rememberFocus()
         setOpen((value) => !value)
       }
     }
@@ -87,9 +107,13 @@ export function CommandMenu({ index, className }: { index: CommandIndex; classNa
   return (
     <>
       <Button
+        ref={trigger}
         variant="outline"
         size="sm"
-        onClick={() => setOpen(true)}
+        onClick={() => {
+          rememberFocus()
+          setOpen(true)
+        }}
         aria-label="Search and commands"
         aria-keyshortcuts="Control+K Meta+K /"
         className={cn("gap-2 text-muted-foreground", className)}
@@ -105,6 +129,7 @@ export function CommandMenu({ index, className }: { index: CommandIndex; classNa
       <CommandDialog
         open={open}
         onOpenChange={setOpen}
+        onCloseAutoFocus={restoreFocus}
         title="Search and commands"
         description="Jump to a page, post or project, or run an action."
       >

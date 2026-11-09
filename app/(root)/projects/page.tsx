@@ -21,7 +21,6 @@ export default async function ProjectsPage() {
         <Container>
           <SectionHeader
             as="h1"
-            eyebrow="services"
             title="Projects"
             description="Everything I've built and run. GitHub stats sync daily."
           />

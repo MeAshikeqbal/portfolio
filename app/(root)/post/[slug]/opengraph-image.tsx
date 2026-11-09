@@ -37,7 +37,7 @@ export default async function Image({ params }: { params: Promise<{ slug: string
   if (!post?.title) {
     return new ImageResponse(
       <OgFrame
-        eyebrow="incident log"
+        eyebrow="writing"
         title="Post not found"
         status={{ color: OG_COLORS.idle, label: "http 404" }}
       />,
@@ -45,11 +45,7 @@ export default async function Image({ params }: { params: Promise<{ slug: string
     )
   }
 
-  const eyebrow = [
-    "incident log",
-    formatDate(post.publishedAt),
-    `${readingTime(post.body)} min read`,
-  ]
+  const eyebrow = ["writing", formatDate(post.publishedAt), `${readingTime(post.body)} min read`]
     .filter(Boolean)
     .join(" · ")
 

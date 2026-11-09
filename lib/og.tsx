@@ -45,7 +45,7 @@ export function truncate(text: string, max: number): string {
 }
 
 interface OgFrameProps {
-  /** Mono caps line above the title, e.g. "incident log · Mar 10, 2026". */
+  /** Mono caps line above the title, e.g. "writing · Mar 10, 2026". */
   eyebrow: string
   title: string
   description?: string | null
@@ -72,11 +72,16 @@ export function OgFrame({ eyebrow, title, description, footer = [], status }: Og
       }}
     >
       <Bar>
-        <span style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <Dot color={status?.color ?? OG_COLORS.up} />
-          {status?.label ?? "all systems operational"}
-        </span>
-        <span>itsashik.dev</span>
+        {/* A status dot only when the card reports one; nothing is claimed by default. */}
+        {status ? (
+          <span style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <Dot color={status.color} />
+            {status.label}
+          </span>
+        ) : (
+          <span>itsashik.dev</span>
+        )}
+        {status ? <span>itsashik.dev</span> : <span />}
       </Bar>
 
       <div

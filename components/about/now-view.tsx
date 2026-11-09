@@ -15,7 +15,7 @@ export function NowView({ now }: { now: Now }) {
     <main>
       <Section className="pt-12 sm:pt-16">
         <Container className="max-w-3xl">
-          <SectionHeader as="h1" eyebrow="status update" title="Now" />
+          <SectionHeader as="h1" title="Now" />
           <div className="-mt-2 mb-8 flex flex-wrap items-center gap-3">
             <StatusPill status="info">updated {formatDate(now._updatedAt)}</StatusPill>
             {now.location && (
