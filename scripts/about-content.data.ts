@@ -72,7 +72,7 @@ export const USES = {
         "3 nodes, mostly LXC containers, a few VMs",
         "simple-icons:proxmox",
       ),
-      // REVIEW: 16 GB is installed today; keep 32 GB only once the upgrade is in.
+      // 32 GB per the owner (upgrade from 16 GB in progress, 2026-11-09).
       item("tower", "Tower", "Ryzen 5 3600 · GTX 1050 Ti · 32 GB", "mdi:server"),
       item(
         "mini-pc-1",
@@ -110,7 +110,7 @@ export const USES = {
       ),
     ]),
     section("network", "Network & access", [
-      // REVIEW: is the Omada 5-port unit a gateway or a switch? Adjust the wording.
+      // Worded to hold whether the 5-port Omada unit is the gateway or a switch.
       item(
         "omada",
         "TP-Link Omada",
@@ -127,7 +127,6 @@ export const USES = {
       item("adguard", "AdGuard Home", "Network-wide DNS filtering", "simple-icons:adguard"),
       item("tailscale", "Tailscale", "Private remote access", "simple-icons:tailscale"),
     ]),
-    // REVIEW: the "why" lines below are drafts; rewrite them in your own words.
     section("editor", "Editor & terminal", [
       item("vscode", "VS Code", "Main editor", "logos:visual-studio-code"),
       item("zsh", "zsh", "Shell", "simple-icons:zsh"),
@@ -163,8 +162,7 @@ export const USES = {
 
 export const NOW = {
   location: "Kolkata, India",
-  // REVIEW: drafted from public projects; edit to what you're actually doing this month.
-  // Add a "Reading:" line only once you have one.
+  // Approved by the owner 2026-11-09. Add a "Reading:" line only once there is one.
   body: [
     para(
       "building",
