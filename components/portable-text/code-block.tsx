@@ -5,12 +5,14 @@ interface CodeBlockProps {
   code: string
   language?: string | null
   filename?: string | null
+  /** 1-based line numbers to emphasise. */
+  highlightedLines?: number[] | null
 }
 
 /** Server-rendered, Shiki-highlighted code block with a header (filename/language) and copy button. */
-export async function CodeBlock({ code, language, filename }: CodeBlockProps) {
+export async function CodeBlock({ code, language, filename, highlightedLines }: CodeBlockProps) {
   const source = code.replace(/\n+$/, "")
-  const html = await highlight(source, language)
+  const html = await highlight(source, language, { highlightLines: highlightedLines ?? [] })
   const lang = resolveLanguage(language)
 
   return (

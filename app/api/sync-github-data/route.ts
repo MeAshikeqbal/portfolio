@@ -1,12 +1,8 @@
 import { timingSafeEqual } from "crypto"
 import { revalidatePath } from "next/cache"
 import { type NextRequest, NextResponse } from "next/server"
-import {
-  fetchGitHubData,
-  fetchOwnedPublicRepositories,
-  githubPatchFields,
-  normalizeRepoUrl,
-} from "@/lib/fetch-github-data"
+import { fetchOwnedPublicRepositories, normalizeRepoUrl } from "@/lib/fetch-github-data"
+import { syncProjects } from "@/lib/github-sync"
 import { GITHUB_PROJECTS_QUERY } from "@/sanity/lib/queries"
 import { writeClient } from "@/sanity/lib/write-client"
 
@@ -47,22 +43,9 @@ async function sync(req: NextRequest) {
     projects.flatMap((p) => (p.github ? [normalizeRepoUrl(p.github)] : [])),
   )
 
-  for (const project of projects) {
-    if (!project.github) continue
-    const githubData = await fetchGitHubData(project.github)
-    if (!githubData) {
-      errors.push(`No GitHub data for ${project.title ?? project._id}`)
-      continue
-    }
-    const fields = githubPatchFields(githubData)
-    try {
-      await writeClient.patch(project._id).setIfMissing({ githubData: {} }).set(fields).commit()
-      results.push(
-        `Updated ${project.title ?? project._id}${githubData.activity ? "" : " (commit stats pending)"}`,
-      )
-    } catch (error) {
-      errors.push(`Failed to update ${project.title ?? project._id}: ${String(error)}`)
-    }
+  for (const result of await syncProjects(projects)) {
+    if (result.ok) results.push(`${result.message} ${result.title}`)
+    else errors.push(`${result.title}: ${result.message}`)
   }
 
   for (const repo of await fetchOwnedPublicRepositories()) {

@@ -10,6 +10,9 @@ const ICON_SETS: Record<string, () => Promise<IconifyJSON>> = {
   ri: () => import("@iconify-json/ri/icons.json").then((m) => m.default as IconifyJSON),
 }
 
+/** Prefixes of the bundled sets, e.g. for limiting an icon search to icons the site can serve. */
+export const BUNDLED_ICON_SETS = Object.keys(ICON_SETS)
+
 /** Single-colour sets: rendered with `currentColor` so they follow the theme. */
 export const MONOCHROME_SETS = new Set(["mdi", "simple-icons", "ri"])
 

@@ -1,7 +1,9 @@
+import { PortableText } from "@portabletext/react"
 import type { Metadata } from "next"
 import { notFound } from "next/navigation"
 import type { ReactNode } from "react"
 import { DataList, DataRow } from "@/components/dashboard/data-list"
+import { portableTextComponents } from "@/components/portable-text/components"
 import { Container, GridBackdrop, Section } from "@/components/dashboard/layout"
 import { MetricGrid, MetricTile } from "@/components/dashboard/metric-tile"
 import { Panel, PanelBody, PanelHeader } from "@/components/dashboard/panel"
@@ -296,6 +298,15 @@ export default function StyleguidePage() {
           </div>
         </Block>
 
+        <Block id="rich-text" eyebrow="cms" title="Rich text">
+          <Panel>
+            <PanelHeader title="blockContent" meta={<span>posts, case studies, /now</span>} />
+            <div className="prose max-w-none p-6">
+              <PortableText value={RICH_TEXT_SAMPLE} components={portableTextComponents} />
+            </div>
+          </Panel>
+        </Block>
+
         <Block id="mockup" eyebrow="composition" title="Home page mockup (phase 4)">
           <HomeMockup />
         </Block>
@@ -303,6 +314,67 @@ export default function StyleguidePage() {
     </main>
   )
 }
+
+const span = (key: string, text: string, marks: string[] = []) => ({
+  _type: "span",
+  _key: key,
+  text,
+  marks,
+})
+
+/** Every block type the Studio's blockContent offers (sanity/schemaTypes/blockContentType.ts). */
+const RICH_TEXT_SAMPLE = [
+  { _type: "block", _key: "h", style: "h3", markDefs: [], children: [span("h1", "Heading 3")] },
+  {
+    _type: "block",
+    _key: "p",
+    style: "normal",
+    markDefs: [{ _type: "link", _key: "l", href: "/projects" }],
+    children: [
+      span("p1", "Paragraph with "),
+      span("p2", "strong", ["strong"]),
+      span("p3", ", "),
+      span("p4", "emphasis", ["em"]),
+      span("p5", ", "),
+      span("p6", "inline code", ["code"]),
+      span("p7", ", "),
+      span("p8", "strike-through", ["strike-through"]),
+      span("p9", " and a "),
+      span("p10", "relative link", ["l"]),
+      span("p11", "."),
+    ],
+  },
+  ...["Plan the change", "Back up the dataset", "Run the migration"].map((text, i) => ({
+    _type: "block",
+    _key: `n${i}`,
+    style: "normal",
+    listItem: "number",
+    level: 1,
+    markDefs: [],
+    children: [span(`n${i}s`, text)],
+  })),
+  {
+    _type: "code",
+    _key: "c",
+    language: "typescript",
+    filename: "sanity/lib/client.ts",
+    highlightedLines: [3],
+    code: 'import { createClient } from "next-sanity"\n\nexport const client = createClient({ apiVersion: "2026-11-01" })',
+  },
+  {
+    _type: "callout",
+    _key: "cn",
+    tone: "note",
+    text: "Callouts highlight a tip or an aside without breaking the flow of the text.",
+  },
+  {
+    _type: "callout",
+    _key: "cw",
+    tone: "warning",
+    title: "Before you start",
+    text: "Take a backup first: the migration deletes the originals once the copy is verified.",
+  },
+]
 
 function Block({
   id,
