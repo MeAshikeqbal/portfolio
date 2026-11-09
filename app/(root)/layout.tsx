@@ -2,11 +2,17 @@ import { BackToTop } from "@/components/back-to-top"
 import { SystemBar } from "@/components/dashboard/system-bar"
 import { SiteFooter } from "@/components/site/site-footer"
 import { SiteNav } from "@/components/site/site-nav"
+import { VisualEditing } from "next-sanity/visual-editing"
+import { draftMode } from "next/headers"
+import { DraftModeBanner } from "@/components/site/draft-mode-banner"
 import { getCommandIndex } from "@/lib/api"
 import { SanityLive } from "@/sanity/lib/live"
 
 export default async function SiteLayout({ children }: { children: React.ReactNode }) {
-  const commandIndex = await getCommandIndex()
+  const [commandIndex, { isEnabled: isDraftMode }] = await Promise.all([
+    getCommandIndex(),
+    draftMode(),
+  ])
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -21,10 +27,21 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
       <div id="main" className="flex-1">
         {children}
       </div>
-      <SiteFooter />
+      <SiteFooter
+        extraLinks={[
+          ...(commandIndex.hasUses ? [{ label: "Uses", href: "/uses" }] : []),
+          ...(commandIndex.hasNow ? [{ label: "Now", href: "/now" }] : []),
+        ]}
+      />
       <BackToTop />
       {/* Live content updates for the public site only (not the Studio or style guide). */}
-      <SanityLive />
+      <SanityLive includeDrafts={isDraftMode} />
+      {isDraftMode && (
+        <>
+          <VisualEditing />
+          <DraftModeBanner />
+        </>
+      )}
     </div>
   )
 }

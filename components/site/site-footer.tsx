@@ -13,7 +13,12 @@ const siteLinks = [
 
 const elsewhere = [...siteConfig.socialLinks, { label: "Source code", href: siteConfig.repo }]
 
-export function SiteFooter() {
+/** `extraLinks`: pages that only exist once they have content (e.g. /uses, /now). */
+export function SiteFooter({
+  extraLinks = [],
+}: {
+  extraLinks?: { label: string; href: string }[]
+}) {
   const sha = process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 7)
 
   return (
@@ -23,7 +28,7 @@ export function SiteFooter() {
           <p className="font-semibold">{siteConfig.name}</p>
           <p className="mt-2 text-sm text-muted-foreground">{siteConfig.tagline}</p>
         </div>
-        <FooterLinks title="site" links={siteLinks} />
+        <FooterLinks title="site" links={[...siteLinks, ...extraLinks]} />
         <FooterLinks title="elsewhere" links={elsewhere} external />
       </Container>
       <div className="border-t">
