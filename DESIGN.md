@@ -133,7 +133,7 @@ components:
 
 **Creative North Star: "The Homelab Status Page"**
 
-The site is presented as the status page of a small, well-run homelab. Projects are **services**, writing is the **incident log**, experience is **uptime**, and skills are the **inventory**. The ink is quiet and the hairlines thin. Every number on the page is real, coming from GitHub sync or the CMS, so the dashboard reads as an instrument rather than a costume.
+The site is presented as the status page of a small, well-run homelab. Projects are **services**, writing is the **log**, and skills are the **inventory**. The ink is quiet and the hairlines thin. Every number on the page is real, coming from GitHub sync or the CMS, so the dashboard reads as an instrument rather than a costume.
 
 The UI is monochrome on purpose. Neutral surfaces, near-black (or near-white) ink and 1px hairlines carry the structure. The only colour on the page is status, and the five status colours have fixed meanings. Because colour is that scarce, a single green dot is enough to say "live". Density is moderate, like a tidy admin console: compact rows, small mono labels and generous section breaks, so long-form reading is still comfortable.
 
@@ -247,7 +247,7 @@ Shadcn/ui on the monochrome tokens.
 - **Body:** 16px padding.
 
 ### Data list / service row (signature)
-Dense rows divided by hairlines. Each row has an optional status dot (only when the CMS sets one), a medium-weight title that wraps rather than truncates, a one-line muted description capped at about 80 characters, mono metadata, and a right-aligned tabular value or sparkline. Linked rows fill with `surface-2` on hover and focus; rows that leave the site carry an arrow and open in a new tab.
+Dense rows divided by hairlines. Each row has an optional status dot plus the status spelled out as the first item of its mono metadata, in that status's `-fg` colour (the dot alone never carries it). A medium-weight title wraps rather than truncates, a one-line muted description is capped at about 80 characters, and a right-aligned sparkline appears only when the series has activity. Project status is the CMS's intent checked against measurement: no push for 180 days reads **dormant** whatever the CMS says; only **active** is green, while maintained, dormant and archived are grey and told apart by the label. The home panel lists the six most recently pushed services. Linked rows fill with `surface-2` on hover and focus; rows that leave the site carry an arrow and open in a new tab.
 
 ### Writing log (signature)
 The home page's lead list. Each entry is one link: a mono date column (7.5rem from `sm`, with a "pinned" mark under the date for featured posts), a semibold 1.125–1.25rem title that is never cut off, an excerpt trimmed on a word boundary (about 160 characters, `text-pretty`), and mono tags. Three entries: pinned posts first, then the newest, skipping the post the hero already shows as "latest post".
