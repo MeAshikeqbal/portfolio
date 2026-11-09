@@ -64,3 +64,4 @@ public/Thumbs.db
 
 # scripts/about-content.ts dry-run snapshot (revisions + content hash)
 /scripts/.about-content.snapshot.json
+/scripts/.curation.snapshot.json
