@@ -16,6 +16,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.8,
     },
     { url: absoluteUrl("/projects"), changeFrequency: "monthly", priority: 0.8 },
+    ...(data.uses
+      ? [{ url: absoluteUrl("/uses"), lastModified: new Date(data.uses), priority: 0.5 }]
+      : []),
+    ...(data.now
+      ? [{ url: absoluteUrl("/now"), lastModified: new Date(data.now), priority: 0.5 }]
+      : []),
     ...data.projects.map((project) => ({
       url: absoluteUrl(`/projects/${encodeURIComponent(project.slug!)}`),
       lastModified: new Date(project._updatedAt),
