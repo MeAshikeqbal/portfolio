@@ -23,6 +23,8 @@ export async function GET(
         ? "public, max-age=31536000, immutable"
         : "public, max-age=300, s-maxage=300",
       "X-Content-Type-Options": "nosniff",
+      // Lets the Studio's content-health check tell a real icon from the fallback.
+      "X-Icon-Found": svg ? "1" : "0",
     },
   })
 }

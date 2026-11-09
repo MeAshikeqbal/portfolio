@@ -1,8 +1,10 @@
 "use server"
 
+import { randomUUID } from "node:crypto"
 import { headers } from "next/headers"
 import { contactSchema, HONEYPOT_FIELD } from "@/lib/contact-schema"
-import { writeClient } from "@/sanity/lib/write-client"
+import { buildMessageDocument } from "@/lib/inbox-message"
+import { inboxClient } from "@/sanity/lib/inbox-client"
 
 type Field = "name" | "email" | "message" | "turnstileToken"
 
@@ -71,12 +73,15 @@ export async function submitContact(
     }
   }
 
+  const { name, email, message } = parsed.data
+
+  // Messages go to the PRIVATE inbox dataset, never the public one (names and emails are
+  // personal data). They show up in the Studio's Inbox workspace.
   try {
-    const { name, email, message } = parsed.data
-    await writeClient.create({ _type: "contact", name, email, message })
+    await inboxClient.create(buildMessageDocument({ name, email, message }, { id: randomUUID() }))
     return { status: "success" }
   } catch (error) {
-    console.error("Error submitting contact form:", error)
+    console.error("Couldn't store contact message in the inbox dataset:", error)
     return {
       status: "error",
       message: "Couldn't send your message. Please try again later.",

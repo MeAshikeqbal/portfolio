@@ -40,20 +40,25 @@ export type BlockContent = Array<
         _type: "span"
         _key: string
       }>
-      style?: "normal" | "h1" | "h2" | "h3" | "h4" | "blockquote"
-      listItem?: "bullet"
-      markDefs?: Array<
-        | {
-            href?: string
-            _type: "link"
-            _key: string
-          }
-        | ({
-            _key: string
-          } & Code)
-      >
+      style?: "normal" | "h2" | "h3" | "h4" | "blockquote"
+      listItem?: "bullet" | "number"
+      markDefs?: Array<{
+        href?: string
+        _type: "link"
+        _key: string
+      }>
       level?: number
       _type: "block"
+      _key: string
+    }
+  | ({
+      _key: string
+    } & Code)
+  | {
+      tone?: "note" | "warning"
+      title?: string
+      text?: string
+      _type: "callout"
       _key: string
     }
   | {
@@ -62,6 +67,7 @@ export type BlockContent = Array<
       hotspot?: SanityImageHotspot
       crop?: SanityImageCrop
       alt?: string
+      caption?: string
       _type: "image"
       _key: string
     }
@@ -129,8 +135,27 @@ export type Skills = {
   _createdAt: string
   _updatedAt: string
   _rev: string
+  orderRank?: string
   name?: string
   icon?: string
+  category?:
+    | "languages"
+    | "frontend"
+    | "backend"
+    | "api-development"
+    | "database"
+    | "cloud"
+    | "devops"
+    | "cicd"
+    | "linux-infrastructure"
+    | "networking"
+    | "operating-systems"
+    | "self-hosting"
+    | "monitoring"
+    | "security"
+    | "testing"
+    | "ai-automation"
+    | "tools"
 }
 
 export type Project = {
@@ -139,14 +164,13 @@ export type Project = {
   _createdAt: string
   _updatedAt: string
   _rev: string
+  orderRank?: string
   title?: string
   slug?: Slug
   description?: string
   status?: "active" | "maintained" | "archived"
   featured?: boolean
-  order?: number
   tech?: Array<string>
-  body?: BlockContent
   mainImage?: {
     asset?: SanityImageAssetReference
     media?: unknown
@@ -155,10 +179,12 @@ export type Project = {
     alt?: string
     _type: "image"
   }
-  publishedAt?: string
-  github?: string
   url?: string
+  github?: string
+  publishedAt?: string
+  body?: BlockContent
   githubData?: {
+    syncedAt?: string
     stars?: number
     commits?: number
     license?: string
@@ -168,6 +194,7 @@ export type Project = {
     weeklyCommits?: Array<number>
   }
   seo?: Seo
+  githubSyncRequestedAt?: string
 }
 
 export type SanityImageCrop = {
@@ -229,36 +256,9 @@ export type Experiences = {
       _type: "image"
     }
     desc?: string
+    _type: "workExperience"
     _key: string
   }>
-}
-
-export type Contact = {
-  _id: string
-  _type: "contact"
-  _createdAt: string
-  _updatedAt: string
-  _rev: string
-  name?: string
-  email?: string
-  message?: string
-}
-
-export type Abouts = {
-  _id: string
-  _type: "abouts"
-  _createdAt: string
-  _updatedAt: string
-  _rev: string
-  title?: string
-  description?: string
-  imgUrl?: {
-    asset?: SanityImageAssetReference
-    media?: unknown
-    hotspot?: SanityImageHotspot
-    crop?: SanityImageCrop
-    _type: "image"
-  }
 }
 
 export type AuthorReference = {
@@ -283,8 +283,6 @@ export type Post = {
   _rev: string
   title?: string
   slug?: Slug
-  excerpt?: string
-  author?: AuthorReference
   mainImage?: {
     asset?: SanityImageAssetReference
     media?: unknown
@@ -293,14 +291,16 @@ export type Post = {
     alt?: string
     _type: "image"
   }
+  body?: BlockContent
+  excerpt?: string
+  publishedAt?: string
+  author?: AuthorReference
   categories?: Array<
     {
       _key: string
     } & CategoryReference
   >
-  publishedAt?: string
   featured?: boolean
-  body?: BlockContent
   seo?: Seo
 }
 
@@ -496,8 +496,6 @@ export type AllSanitySchemaTypes =
   | Slug
   | Education
   | Experiences
-  | Contact
-  | Abouts
   | AuthorReference
   | CategoryReference
   | Post
@@ -649,7 +647,7 @@ export type POST_SLUGS_QUERY_RESULT = Array<string | null>
 
 // Source: sanity/lib/queries.ts
 // Variable: PROJECTS_QUERY
-// Query: *[_type == "project" && !(_id in path("drafts.**"))] | order(coalesce(order, 999) asc, _createdAt desc) {   _id,  title,  "slug": slug.current,  description,  mainImage,  publishedAt,  github,  url,  featured,  status,  tech,  githubData }
+// Query: *[_type == "project" && !(_id in path("drafts.**"))] | order(orderRank asc, _createdAt desc) {   _id,  title,  "slug": slug.current,  description,  mainImage,  publishedAt,  github,  url,  featured,  status,  tech,  githubData }
 export type PROJECTS_QUERY_RESULT = Array<{
   _id: string
   title: string | null
@@ -670,6 +668,7 @@ export type PROJECTS_QUERY_RESULT = Array<{
   status: "active" | "archived" | "maintained" | null
   tech: Array<string> | null
   githubData: {
+    syncedAt?: string
     stars?: number
     commits?: number
     license?: string
@@ -703,6 +702,7 @@ export type PROJECT_QUERY_RESULT = {
   status: "active" | "archived" | "maintained" | null
   tech: Array<string> | null
   githubData: {
+    syncedAt?: string
     stars?: number
     commits?: number
     license?: string
@@ -733,7 +733,7 @@ export type HOME_STATS_QUERY_RESULT = {
 
 // Source: sanity/lib/queries.ts
 // Variable: SKILLS_QUERY
-// Query: *[_type == "skills"] | order(name asc) { _id, name, icon }
+// Query: *[_type == "skills"] | order(orderRank asc, name asc) { _id, name, icon }
 export type SKILLS_QUERY_RESULT = Array<{
   _id: string
   name: string | null
@@ -813,6 +813,16 @@ export type GITHUB_PROJECTS_QUERY_RESULT = Array<{
 }>
 
 // Source: sanity/lib/queries.ts
+// Variable: GITHUB_SYNC_REQUESTS_QUERY
+// Query: *[_type == "project" && _id in $ids] { _id, title, github, githubSyncRequestedAt }
+export type GITHUB_SYNC_REQUESTS_QUERY_RESULT = Array<{
+  _id: string
+  title: string | null
+  github: string | null
+  githubSyncRequestedAt: string | null
+}>
+
+// Source: sanity/lib/queries.ts
 // Variable: SITEMAP_QUERY
 // Query: {  "posts": *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && seo.noIndex != true]    | order(publishedAt desc) { "slug": slug.current, _updatedAt },  "projects": *[_type == "project" && !(_id in path("drafts.**")) && defined(slug.current) && seo.noIndex != true]    { "slug": slug.current, _updatedAt },  "uses": *[_type == "uses" && _id == "uses" && count(sections) > 0][0]._updatedAt,  "now": *[_type == "now" && _id == "now" && count(body) > 0][0]._updatedAt}
 export type SITEMAP_QUERY_RESULT = {
@@ -830,7 +840,7 @@ export type SITEMAP_QUERY_RESULT = {
 
 // Source: sanity/lib/queries.ts
 // Variable: COMMAND_INDEX_QUERY
-// Query: {  "posts": *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current)] | order(publishedAt desc) {    _id, title, "slug": slug.current, "topics": categories[]->title  },  "projects": *[_type == "project" && !(_id in path("drafts.**"))] | order(coalesce(order, 999) asc, _createdAt desc) {    _id, title, "slug": slug.current, url, github  },  // Only whether a CV exists: the file itself is served from /resume.pdf.  "hasCv": defined(*[_type == "cv"][0].cvFile.asset),  // /uses and /now are only linked once they have published content.  "hasUses": count(*[_type == "uses" && _id == "uses"][0].sections) > 0,  "hasNow": count(*[_type == "now" && _id == "now"][0].body) > 0}
+// Query: {  "posts": *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current)] | order(publishedAt desc) {    _id, title, "slug": slug.current, "topics": categories[]->title  },  "projects": *[_type == "project" && !(_id in path("drafts.**"))] | order(orderRank asc, _createdAt desc) {    _id, title, "slug": slug.current, url, github  },  // Only whether a CV exists: the file itself is served from /resume.pdf.  "hasCv": defined(*[_type == "cv"][0].cvFile.asset),  // /uses and /now are only linked once they have published content.  "hasUses": count(*[_type == "uses" && _id == "uses"][0].sections) > 0,  "hasNow": count(*[_type == "now" && _id == "now"][0].body) > 0}
 export type COMMAND_INDEX_QUERY_RESULT = {
   posts: Array<{
     _id: string
@@ -885,18 +895,19 @@ declare global {
     '\n  *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current)] | order(publishedAt desc) [0...5] { \n  _id,\n  title,\n  "slug": slug.current,\n  mainImage,\n  "lqip": mainImage.asset->metadata.lqip,\n  publishedAt,\n  "excerpt": coalesce(excerpt, array::join(string::split(pt::text(body[_type == "block" && style == "normal"]), "")[0...200], "")),\n  categories[]->{ _id, title },\n  author->{ name }\n }\n': LATEST_POSTS_QUERY_RESULT
     '\n  *[_type == "post" && !(_id in path("drafts.**")) && slug.current == $slug][0] {\n    _id,\n    title,\n    "slug": slug.current,\n    author->{ name, image },\n    mainImage,\n    "cover": mainImage.asset->metadata{ lqip, "width": dimensions.width, "height": dimensions.height },\n    categories[]->{ _id, title },\n    publishedAt,\n    _updatedAt,\n    body,\n    excerpt,\n    seo,\n    "previous": *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && publishedAt < ^.publishedAt]\n      | order(publishedAt desc)[0] { title, "slug": slug.current },\n    "next": *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && publishedAt > ^.publishedAt]\n      | order(publishedAt asc)[0] { title, "slug": slug.current },\n    "related": *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && _id != ^._id && count(categories[@._ref in ^.^.categories[]._ref]) > 0]\n      | order(publishedAt desc)[0...3] { \n  _id,\n  title,\n  "slug": slug.current,\n  mainImage,\n  "lqip": mainImage.asset->metadata.lqip,\n  publishedAt,\n  "excerpt": coalesce(excerpt, array::join(string::split(pt::text(body[_type == "block" && style == "normal"]), "")[0...200], "")),\n  categories[]->{ _id, title },\n  author->{ name }\n }\n  }\n': POST_QUERY_RESULT
     '\n  *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current)].slug.current\n': POST_SLUGS_QUERY_RESULT
-    '\n  *[_type == "project" && !(_id in path("drafts.**"))] | order(coalesce(order, 999) asc, _createdAt desc) { \n  _id,\n  title,\n  "slug": slug.current,\n  description,\n  mainImage,\n  publishedAt,\n  github,\n  url,\n  featured,\n  status,\n  tech,\n  githubData\n }\n': PROJECTS_QUERY_RESULT
+    '\n  *[_type == "project" && !(_id in path("drafts.**"))] | order(orderRank asc, _createdAt desc) { \n  _id,\n  title,\n  "slug": slug.current,\n  description,\n  mainImage,\n  publishedAt,\n  github,\n  url,\n  featured,\n  status,\n  tech,\n  githubData\n }\n': PROJECTS_QUERY_RESULT
     '\n  *[_type == "project" && !(_id in path("drafts.**")) && slug.current == $slug][0] { \n  _id,\n  title,\n  "slug": slug.current,\n  description,\n  mainImage,\n  publishedAt,\n  github,\n  url,\n  featured,\n  status,\n  tech,\n  githubData\n, body, seo }\n': PROJECT_QUERY_RESULT
     '\n  *[_type == "project" && !(_id in path("drafts.**")) && defined(slug.current)].slug.current\n': PROJECT_SLUGS_QUERY_RESULT
     '{\n  "posts": count(*[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current)]),\n  "projects": count(*[_type == "project" && !(_id in path("drafts.**"))]),\n  "commits": math::sum(*[_type == "project" && !(_id in path("drafts.**"))].githubData.commits),\n  "skills": count(*[_type == "skills"]),\n  "latestPost": *[_type == "post" && !(_id in path("drafts.**"))] | order(publishedAt desc)[0].publishedAt\n}': HOME_STATS_QUERY_RESULT
-    '\n  *[_type == "skills"] | order(name asc) { _id, name, icon }\n': SKILLS_QUERY_RESULT
+    '\n  *[_type == "skills"] | order(orderRank asc, name asc) { _id, name, icon }\n': SKILLS_QUERY_RESULT
     '\n  *[_type == "education"] | order(year desc) { _id, year, degree, school, schoolLogo, desc }\n': EDUCATION_QUERY_RESULT
     '\n  *[_type == "experiences"] | order(year desc) {\n    _id,\n    year,\n    works[]{ _key, name, company, copmanyLogo, desc }\n  }\n': EXPERIENCES_QUERY_RESULT
     '\n  *[_type == "cv"][0].cvFile.asset->url\n': CV_URL_QUERY_RESULT
     '\n  *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current)] | order(publishedAt desc) {\n    title,\n    "slug": slug.current,\n    publishedAt,\n    _updatedAt,\n    "excerpt": coalesce(excerpt, array::join(string::split(pt::text(body[_type == "block" && style == "normal"]), "")[0...200], "")),\n    author->{ name },\n    "categories": categories[]->title,\n    "image": mainImage.asset->{ url, "mimeType": mimeType }\n  }\n': FEED_POSTS_QUERY_RESULT
     '\n  *[_type == "project" && defined(github)] { _id, title, github }\n': GITHUB_PROJECTS_QUERY_RESULT
+    '\n  *[_type == "project" && _id in $ids] { _id, title, github, githubSyncRequestedAt }\n': GITHUB_SYNC_REQUESTS_QUERY_RESULT
     '{\n  "posts": *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && seo.noIndex != true]\n    | order(publishedAt desc) { "slug": slug.current, _updatedAt },\n  "projects": *[_type == "project" && !(_id in path("drafts.**")) && defined(slug.current) && seo.noIndex != true]\n    { "slug": slug.current, _updatedAt },\n  "uses": *[_type == "uses" && _id == "uses" && count(sections) > 0][0]._updatedAt,\n  "now": *[_type == "now" && _id == "now" && count(body) > 0][0]._updatedAt\n}': SITEMAP_QUERY_RESULT
-    '{\n  "posts": *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current)] | order(publishedAt desc) {\n    _id, title, "slug": slug.current, "topics": categories[]->title\n  },\n  "projects": *[_type == "project" && !(_id in path("drafts.**"))] | order(coalesce(order, 999) asc, _createdAt desc) {\n    _id, title, "slug": slug.current, url, github\n  },\n  // Only whether a CV exists: the file itself is served from /resume.pdf.\n  "hasCv": defined(*[_type == "cv"][0].cvFile.asset),\n  // /uses and /now are only linked once they have published content.\n  "hasUses": count(*[_type == "uses" && _id == "uses"][0].sections) > 0,\n  "hasNow": count(*[_type == "now" && _id == "now"][0].body) > 0\n}': COMMAND_INDEX_QUERY_RESULT
+    '{\n  "posts": *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current)] | order(publishedAt desc) {\n    _id, title, "slug": slug.current, "topics": categories[]->title\n  },\n  "projects": *[_type == "project" && !(_id in path("drafts.**"))] | order(orderRank asc, _createdAt desc) {\n    _id, title, "slug": slug.current, url, github\n  },\n  // Only whether a CV exists: the file itself is served from /resume.pdf.\n  "hasCv": defined(*[_type == "cv"][0].cvFile.asset),\n  // /uses and /now are only linked once they have published content.\n  "hasUses": count(*[_type == "uses" && _id == "uses"][0].sections) > 0,\n  "hasNow": count(*[_type == "now" && _id == "now"][0].body) > 0\n}': COMMAND_INDEX_QUERY_RESULT
     '\n  *[_type == "uses" && _id == "uses"][0] {\n    _updatedAt,\n    intro,\n    sections[]{ _key, title, items[]{ _key, name, description, url, icon } }\n  }\n': USES_QUERY_RESULT
     '\n  *[_type == "now" && _id == "now"][0] { _updatedAt, location, body }\n': NOW_QUERY_RESULT
   }

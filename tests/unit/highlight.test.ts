@@ -23,3 +23,11 @@ describe("highlight", () => {
     expect(html).not.toContain("<script>")
   })
 })
+
+describe("highlight with highlightLines", () => {
+  it("marks only the requested 1-based lines", async () => {
+    const html = await highlight("a\nb\nc", "text", { highlightLines: [2] })
+    const lines = [...html.matchAll(/<span class="line( highlighted)?"/g)].map((m) => Boolean(m[1]))
+    expect(lines).toEqual([false, true, false])
+  })
+})
