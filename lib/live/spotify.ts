@@ -55,6 +55,11 @@ function albumArt(track: SpotifyTrack): string | null {
   return safeUrl((small ?? images.at(-1))?.url, ["i.scdn.co"])
 }
 
+/**
+ * Builds the public activity from a Spotify track, keeping only allowlisted fields (name,
+ * artists, an open.spotify.com link, i.scdn.co art). The playback span is kept only while
+ * playing. Null when there's no track or it has no name.
+ */
 export function toSpotifyActivity(
   track: SpotifyTrack | null | undefined,
   state: SpotifyActivity["state"],

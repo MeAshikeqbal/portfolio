@@ -27,6 +27,11 @@ const slug = (ids: TraktIds | undefined) => {
   return value && /^[a-z0-9-]+$/.test(value) ? value : null
 }
 
+/**
+ * Builds the public activity from a Trakt watching or history entry (movie or episode only),
+ * with a trakt.tv link from a validated slug. The playback span is kept only while watching.
+ * Null for anything else, or when the title is missing.
+ */
 export function toTraktActivity(
   entry: TraktEntry | null | undefined,
   state: TraktActivity["state"],

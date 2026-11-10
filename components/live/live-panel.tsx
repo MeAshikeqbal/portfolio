@@ -12,6 +12,10 @@ import { traktLabel } from "./describe"
 import { PlaybackProgress } from "./playback-progress"
 import { hasActivity, useLiveActivity } from "./use-live-activity"
 
+/**
+ * One live row: a poster, album art or icon, then the status pill, the title (a link when
+ * there is one), an optional detail line and, while playing, the progress bar.
+ */
 function Row({
   icon,
   pill,

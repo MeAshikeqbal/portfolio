@@ -21,6 +21,7 @@ let pollTimer: ReturnType<typeof setInterval> | undefined
 let endTimer: ReturnType<typeof setTimeout> | undefined
 let inFlight = false
 
+/** Stores the latest answer and tells every subscribed component to re-read it. */
 function emit(next: State) {
   state = next
   for (const listener of listeners) listener()
@@ -37,6 +38,10 @@ function scheduleEndCheck(data: State) {
   if (delay > 0 && delay < LIVE_POLL_MS) endTimer = setTimeout(load, delay)
 }
 
+/**
+ * Fetches /api/now-playing once (skipped while a request is already out) and publishes the
+ * answer, or null on any failure. Drops the answer if every consumer unmounted meanwhile.
+ */
 async function load() {
   if (inFlight) return
   inFlight = true
@@ -55,6 +60,7 @@ async function load() {
   scheduleEndCheck(next)
 }
 
+/** Cancels both the minute poll and any pending end-of-track check. */
 function stop() {
   clearInterval(pollTimer)
   clearTimeout(endTimer)
@@ -68,6 +74,10 @@ function onVisibility() {
   pollTimer = setInterval(load, LIVE_POLL_MS)
 }
 
+/**
+ * `useSyncExternalStore` subscription: the first subscriber starts polling and watching tab
+ * visibility, the last one to leave stops both.
+ */
 function subscribe(listener: () => void) {
   listeners.add(listener)
   if (listeners.size === 1) {
