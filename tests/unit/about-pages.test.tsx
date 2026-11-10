@@ -16,6 +16,13 @@ vi.mock("next/navigation", () => ({
 type Uses = NonNullable<USES_QUERY_RESULT>
 type Now = NonNullable<NOW_QUERY_RESULT>
 
+/** The meta line's "updated <date>" item (the date is its own <time>). */
+const updatedItem = (date: string) => {
+  const item = screen.getByText(date, { selector: "time" }).parentElement!
+  expect(item).toHaveTextContent(`updated ${date}`)
+  return item
+}
+
 const paragraph = (text: string) => ({
   _type: "block" as const,
   _key: text.slice(0, 8),
@@ -64,7 +71,9 @@ describe("NowView", () => {
     render(
       <NowView
         now={{
-          _updatedAt: "2026-11-09T00:00:00Z",
+          _updatedAt: "2026-11-10T08:00:00Z",
+          updated: "2026-11-09",
+          archive: null,
           location: "Kolkata",
           body: [
             {
@@ -79,9 +88,45 @@ describe("NowView", () => {
       />,
     )
     expect(screen.getByRole("heading", { level: 1, name: "Now" })).toBeVisible()
-    expect(screen.getByText(/updated Nov 9, 2026/)).toBeVisible()
+    // The date the update was written, not the last edit.
+    expect(updatedItem("Nov 9, 2026")).toBeVisible()
     expect(screen.getByText("Kolkata")).toBeVisible()
     expect(within(screen.getByRole("article")).getByText("Rebuilding my homelab.")).toBeVisible()
+    expect(screen.getByRole("link", { name: "now page" })).toHaveAttribute(
+      "href",
+      "https://nownownow.com/about",
+    )
+    // No history yet: no section for it.
+    expect(screen.queryByRole("heading", { name: "Previous updates" })).toBeNull()
+  })
+
+  it("lists previous updates newest first, each opening to its full text", () => {
+    render(
+      <NowView
+        now={{
+          _updatedAt: "2026-11-10T08:00:00Z",
+          updated: "2026-11-10",
+          location: null,
+          body: [paragraph("The current update.")],
+          archive: [
+            { _key: "b", date: "2026-08-01", location: "Kolkata", body: [paragraph("Summer.")] },
+            { _key: "a", date: "2026-03-01", location: null, body: [paragraph("Spring.")] },
+            // Incomplete entries never render.
+            { _key: "x", date: null, location: null, body: [paragraph("Undated.")] },
+            { _key: "y", date: "2026-01-01", location: null, body: [] },
+          ],
+        }}
+      />,
+    )
+    const history = screen.getByRole("region", { name: "Previous updates" })
+    const items = within(history).getAllByRole("listitem")
+    expect(items).toHaveLength(2)
+    expect(items[0]).toHaveTextContent("Aug 1, 2026")
+    expect(items[1]).toHaveTextContent("Mar 1, 2026")
+    expect(items[0].querySelector("details")).not.toHaveAttribute("open")
+    expect(within(items[0]).getAllByText("Summer.").length).toBeGreaterThan(0)
+    expect(within(items[0]).getByText("Kolkata")).toBeInTheDocument()
+    expect(screen.queryByText("Undated.")).toBeNull()
   })
 })
 
@@ -140,31 +185,36 @@ describe("UsesSections with malformed content", () => {
 
 describe("NowView edge cases", () => {
   const now: Now = {
-    _updatedAt: "2026-11-01T00:00:00Z",
+    _updatedAt: "2026-11-05T00:00:00Z",
+    updated: "2026-11-01T00:00:00Z",
+    archive: null,
     location: null,
     body: [paragraph("Building things.")],
   }
 
-  it("shows a fresh update in the info state", () => {
+  it("says nothing about freshness while the update is recent", () => {
     render(<NowView now={now} today={new Date("2026-11-09T00:00:00Z")} />)
-    const pill = screen.getByText(/updated Nov 1, 2026/)
-    expect(pill).not.toHaveTextContent("stale")
+    expect(updatedItem("Nov 1, 2026")).toBeVisible()
+    expect(screen.queryByText("stale")).toBeNull()
   })
 
-  it("marks an update older than 90 days as stale", () => {
+  it("leads with a stale mark, in warn colour, once the update is older than 90 days", () => {
     render(<NowView now={now} today={new Date("2027-03-01T00:00:00Z")} />)
-    expect(screen.getByText(/updated Nov 1, 2026/)).toHaveTextContent("· stale")
+    const mark = screen.getByText("stale")
+    expect(mark).toHaveClass("text-status-warn-fg")
+    expect(mark.parentElement?.firstElementChild).toBe(mark)
   })
 
-  it.each([null, "garbage"])("hides the date when _updatedAt is %s", (updatedAt) => {
-    render(<NowView now={{ ...now, _updatedAt: updatedAt as string }} />)
+  it.each([null, "garbage"])("hides the date when updated is %s", (updated) => {
+    render(<NowView now={{ ...now, updated: updated as string }} />)
     expect(screen.queryByText(/updated/)).toBeNull()
     expect(screen.queryByText(/Invalid Date/)).toBeNull()
   })
 
   it("shows no location without one", () => {
-    const { container } = render(<NowView now={{ ...now, location: "  " }} />)
-    expect(container.querySelector(".lucide-map-pin")).toBeNull()
+    render(<NowView now={{ ...now, location: "  " }} />)
+    // The meta line holds only the date.
+    expect(updatedItem("Nov 1, 2026").parentElement?.children).toHaveLength(1)
   })
 
   it("ignores unknown block types in the body", () => {

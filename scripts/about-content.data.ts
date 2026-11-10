@@ -160,24 +160,76 @@ export const USES = {
   ] satisfies AboutSection[],
 }
 
+/** A paragraph with no bold lead-in. */
+function plain(key: string, text: string): AboutBlock {
+  return {
+    _key: key,
+    _type: "block",
+    style: "normal",
+    markDefs: [],
+    children: [{ _key: `${key}-text`, _type: "span", text, marks: [] }],
+  }
+}
+
+export interface AboutArchiveEntry {
+  _key: string
+  _type: "nowEntry"
+  date: string
+  location?: string
+  body: AboutBlock[]
+}
+
 export const NOW = {
+  updatedOn: "2026-11-11",
   location: "Kolkata, India",
-  // Approved by the owner 2026-11-09. Add a "Reading:" line only once there is one.
+  // A placeholder drawn from what's public and known (2026-11-11), in the nownownow shape:
+  // where I am, what I'm focused on, what I'm not doing. Ashik rewrites it in the Studio.
+  // Nothing private: no AI stack (it's gone), no storage gaps, no producr or Plane.
   body: [
-    para(
-      "building",
-      "Building:",
-      "this site, rebuilt on Next.js 16 and Sanity as a homelab-style dashboard, writing first.",
+    plain(
+      "where",
+      "I'm in Kolkata, building for the web and running my own infrastructure: a three-node Proxmox cluster at home that runs the services I use every day.",
     ),
     para(
-      "maintaining",
-      "Maintaining:",
-      "mc-status-page, get-a-date, menu and Arogify alongside it.",
+      "homelab",
+      "The homelab, in public:",
+      "every node already reports to this site every 30 seconds; next come incident history, 90-day availability and alerts when something goes down.",
     ),
     para(
-      "self-hosting",
-      "Self-hosting:",
-      "the services behind all of this, on a three-node Proxmox cluster at home.",
+      "writing",
+      "Writing:",
+      "a proper write-up for each project on this site: why I built it, how it runs, and the one problem that fought back.",
+    ),
+    para(
+      "not-doing",
+      "Not doing:",
+      "general tech essays. The log here is for things I've actually built, run and broken.",
     ),
   ] satisfies AboutBlock[],
+  // The first /now (approved 2026-11-09), kept as history.
+  archive: [
+    {
+      _key: "2026-11-09",
+      _type: "nowEntry",
+      date: "2026-11-09",
+      location: "Kolkata, India",
+      body: [
+        para(
+          "building",
+          "Building:",
+          "this site, rebuilt on Next.js 16 and Sanity as a homelab-style dashboard, writing first.",
+        ),
+        para(
+          "maintaining",
+          "Maintaining:",
+          "mc-status-page, get-a-date, menu and Arogify alongside it.",
+        ),
+        para(
+          "self-hosting",
+          "Self-hosting:",
+          "the services behind all of this, on a three-node Proxmox cluster at home.",
+        ),
+      ],
+    },
+  ] satisfies AboutArchiveEntry[],
 }

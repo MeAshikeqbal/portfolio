@@ -29,6 +29,8 @@ const args = new Set(process.argv.slice(2))
 const execute = args.has("--execute")
 const force = args.has("--force")
 const discardDrafts = args.has("--discard-drafts")
+// Publish /now alone, leaving Homecave (`uses`) exactly as the Studio has it.
+const nowOnly = args.has("--now-only")
 
 const DATA_FILE = path.join(process.cwd(), "scripts/about-content.data.ts")
 const SNAPSHOT_FILE = path.join(process.cwd(), "scripts/.about-content.snapshot.json")
@@ -67,8 +69,13 @@ function printContent() {
       )
     })
   })
-  console.log(`\n/now  location: ${NOW.location}`)
+  console.log(`\n/now  updated ${NOW.updatedOn} · ${NOW.location}`)
   for (const block of NOW.body) console.log(`  ${block.children.map((c) => c.text).join("")}`)
+  for (const entry of NOW.archive) {
+    console.log(`  [archive ${entry.date}]`)
+    for (const block of entry.body) console.log(`    ${block.children.map((c) => c.text).join("")}`)
+  }
+  if (nowOnly) console.log("\n--now-only: Homecave (uses) is left untouched.")
 }
 
 async function main() {
@@ -115,7 +122,9 @@ async function main() {
 
   const tx = client.transaction()
 
-  for (const draftId of ["drafts.uses", "drafts.now"] as const) {
+  for (const draftId of nowOnly
+    ? (["drafts.now"] as const)
+    : (["drafts.uses", "drafts.now"] as const)) {
     const rev = revisions[draftId]
     if (!rev) continue
     if (!discardDrafts) {
@@ -127,10 +136,11 @@ async function main() {
     console.log(`discard  ${draftId} (rev ${rev})`)
   }
 
-  const docs: { _id: "uses" | "now"; _type: string; fields: Record<string, unknown> }[] = [
+  const all: { _id: "uses" | "now"; _type: string; fields: Record<string, unknown> }[] = [
     { _id: "uses", _type: "uses", fields: USES },
     { _id: "now", _type: "now", fields: NOW },
   ]
+  const docs = all.filter((doc) => !nowOnly || doc._id === "now")
   for (const { _id, _type, fields } of docs) {
     const rev = revisions[_id]
     if (!rev) {

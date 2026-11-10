@@ -3,7 +3,6 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { pickNowPlaying } from "@/components/live/describe"
 import { LivePanelView } from "@/components/live/live-panel"
 import { NowPlayingBarItemView } from "@/components/live/now-playing-bar-item"
-import { PlaybackProgress } from "@/components/live/playback-progress"
 import {
   LIVE_POLL_MS,
   resetLiveActivityStore,
@@ -190,18 +189,25 @@ describe("NowPlayingBarItemView", () => {
   })
 })
 
-describe("PlaybackProgress", () => {
-  it("is a labelled progressbar with elapsed and total", () => {
-    render(<PlaybackProgress timing={span} label="Track progress" now={T0 + 30_000} />)
+describe("playback progress on /now", () => {
+  it("is the neutral meter, announced as a progress bar, with elapsed / total beside it", () => {
+    render(
+      <LivePanelView data={data({ spotify: spotify("playing") })} now={new Date(T0 + 30_000)} />,
+    )
     const bar = screen.getByRole("progressbar", { name: "Track progress" })
-    expect(bar).toHaveAttribute("aria-valuenow", "50")
+    expect(bar).toHaveAttribute("aria-valuenow", "90000")
+    expect(bar).toHaveAttribute("aria-valuemax", "180000")
     expect(bar).toHaveAttribute("aria-valuetext", "1:30 of 3:00")
-    expect(screen.getByText("1:30 / 3:00")).toBeVisible()
+    expect(screen.getAllByText("1:30 / 3:00")[0]).toBeVisible()
   })
 
-  it("renders nothing without a span", () => {
-    const { container } = render(<PlaybackProgress timing={NO_TIMING} label="x" now={T0} />)
-    expect(container).toBeEmptyDOMElement()
+  it("draws no bar and prints no time without a span", () => {
+    render(
+      <LivePanelView data={data({ spotify: spotify("playing", NO_TIMING) })} now={new Date(T0)} />,
+    )
+    expect(screen.queryByRole("progressbar")).toBeNull()
+    expect(screen.queryByText(/\d:\d\d \/ /)).toBeNull()
+    expect(screen.getAllByText("listening")[0]).toBeVisible()
   })
 
   it("appears on playing rows of the /now panel only", () => {

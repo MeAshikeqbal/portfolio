@@ -1,4 +1,5 @@
 import { LaunchIcon } from "@sanity/icons/Launch"
+import { ResetIcon } from "@sanity/icons/Reset"
 import { SyncIcon } from "@sanity/icons/Sync"
 import { useToast } from "@sanity/ui/toast"
 import { useState } from "react"
@@ -6,6 +7,8 @@ import { useClient, type DocumentActionComponent } from "sanity"
 
 import { sitePath } from "../presentation/paths"
 import { describeSync, requestGitHubSync } from "./request-github-sync"
+import { buildNewUpdateDraft, newUpdateBlocker, type PublishedNow } from "./now-update"
+import { todayIso } from "../schemaTypes/nowType"
 
 const API_VERSION = "2026-11-01"
 
@@ -56,6 +59,49 @@ export const SyncFromGitHubAction: DocumentActionComponent = ({ draft, published
         })
       } finally {
         setSyncing(false)
+        onComplete()
+      }
+    },
+  }
+}
+
+/**
+ * /now: moves the published update into "Previous updates" and dates a new draft today, so
+ * writing the next update never loses the last one. The draft starts as a copy of the old
+ * text; rewrite it, then publish.
+ */
+export const StartNowUpdateAction: DocumentActionComponent = ({ draft, published, onComplete }) => {
+  const client = useClient({ apiVersion: API_VERSION })
+  const toast = useToast()
+  const [busy, setBusy] = useState(false)
+  const today = todayIso()
+  const current = published as PublishedNow | null
+  const blocker = newUpdateBlocker(current, Boolean(draft), today)
+
+  return {
+    label: busy ? "Starting…" : "Start a new update",
+    icon: ResetIcon,
+    disabled: busy || blocker !== null,
+    title: blocker ?? "Archive the published update and start a new one dated today",
+    onHandle: async () => {
+      if (!current) return
+      setBusy(true)
+      try {
+        // createIfNotExists: if a draft appeared since this button rendered, nothing is lost.
+        await client.createIfNotExists(buildNewUpdateDraft(current, today) as never)
+        toast.push({
+          status: "success",
+          title: "New update started",
+          description: "The last one is under Previous updates. Rewrite the text, then publish.",
+        })
+      } catch (error) {
+        toast.push({
+          status: "error",
+          title: "Couldn't start a new update",
+          description: error instanceof Error ? error.message : String(error),
+        })
+      } finally {
+        setBusy(false)
         onComplete()
       }
     },

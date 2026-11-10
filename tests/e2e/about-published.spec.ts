@@ -8,6 +8,11 @@ test.describe("/now once published", () => {
     await page.goto("/now")
     await expect(page.getByRole("heading", { level: 1, name: "Now" })).toBeVisible()
     await expect(page.getByText(/^updated /)).toBeVisible()
+    // The nownownow credit lives in the header's description now.
+    await expect(page.getByRole("link", { name: "now page" })).toHaveAttribute(
+      "href",
+      "https://nownownow.com/about",
+    )
     const footer = page.locator("footer")
     for (const path of ABOUT_PATHS) {
       await expect(footer.locator(`a[href="${path}"]`)).toHaveCount(1)

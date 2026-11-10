@@ -202,5 +202,14 @@ export const USES_QUERY = defineQuery(`
 `)
 
 export const NOW_QUERY = defineQuery(`
-  *[_type == "now" && _id == "now"][0] { _updatedAt, location, body }
+  *[_type == "now" && _id == "now"][0] {
+    _updatedAt,
+    // The date the update was written; the last edit until that's set.
+    "updated": coalesce(updatedOn, _updatedAt),
+    location,
+    body,
+    "archive": archive[defined(date) && count(body) > 0] | order(date desc) {
+      _key, date, location, body
+    }
+  }
 `)

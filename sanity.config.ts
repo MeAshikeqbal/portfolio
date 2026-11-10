@@ -17,7 +17,7 @@ import { structure } from "./sanity/structure"
 import { inboxDatasetName } from "./sanity/inbox/dataset"
 import { inboxSchema } from "./sanity/inbox/schema"
 import { inboxStructure } from "./sanity/inbox/structure"
-import { OpenOnSiteAction, SyncFromGitHubAction } from "./sanity/actions"
+import { OpenOnSiteAction, StartNowUpdateAction, SyncFromGitHubAction } from "./sanity/actions"
 import { dashboardTool } from "./sanity/dashboard"
 import { isAdmin } from "./sanity/dashboard/logic"
 import { StudioLogo } from "./sanity/components/studio-logo"
@@ -82,6 +82,7 @@ export default defineConfig([
           ...actions,
           ...(TYPES_WITH_PAGES.has(schemaType) ? [OpenOnSiteAction] : []),
           ...(schemaType === "project" ? [SyncFromGitHubAction] : []),
+          ...(schemaType === "now" ? [StartNowUpdateAction] : []),
         ]
       },
     },
