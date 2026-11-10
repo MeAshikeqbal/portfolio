@@ -303,9 +303,7 @@ export function NodePanel({
                       className="rounded-full border px-2 py-0.5 font-mono text-xs text-muted-foreground tabular"
                     >
                       {category} {running === total ? running : `${running}/${total}`}
-                      {use && use.memGiB >= 0.1 && (
-                        <span> · {use.memGiB} GiB</span>
-                      )}
+                      {use && use.memGiB >= 0.1 && <span> · {use.memGiB} GiB</span>}
                     </li>
                   )
                 })}
