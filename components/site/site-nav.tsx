@@ -114,11 +114,20 @@ export function SiteNav({ commandIndex }: { commandIndex?: CommandIndex }) {
       </Container>
 
       {open && (
+        // Floats over the page instead of pushing it down. The page behind is dimmed, and a
+        // tap on it closes the menu (it sits inside the header, so the outside-tap check misses it).
+        <div
+          aria-hidden
+          onClick={() => setOpen(false)}
+          className="absolute inset-x-0 top-full h-dvh animate-in bg-background/70 duration-200 fade-in-0 md:hidden"
+        />
+      )}
+      {open && (
         <nav
           id="mobile-menu"
           aria-label="Main"
           // Opens with a short drop; closes instantly (any scroll or tap dismisses it).
-          className="animate-in border-t bg-background duration-200 fade-in-0 motion-safe:slide-in-from-top-2 md:hidden"
+          className="absolute inset-x-0 top-full animate-in border-y bg-background duration-200 fade-in-0 motion-safe:slide-in-from-top-2 md:hidden"
         >
           <Container className="flex flex-col gap-1 py-3">
             {siteConfig.nav.map((item) => {
