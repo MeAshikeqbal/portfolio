@@ -7,6 +7,7 @@ import importlib.util
 import json
 import os
 import sys
+import time
 import unittest
 from unittest import mock
 
@@ -106,6 +107,41 @@ class Host(unittest.TestCase):
         answers = {"/cluster/tasks": tasks, "/cluster/backup": jobs, "/cluster/resources": guests}
         with mock.patch.object(collect, "run", lambda args, timeout=20: json.dumps(answers[args[2]])):
             self.assertEqual(collect.backup(), {"at": 100500, "status": "warnings", "covered": 2, "total": 4})
+
+
+class Security(unittest.TestCase):
+    NOW = 1794300000  # 2026-11-10T09:20:00Z
+
+    def at(self, hours_ago):
+        return time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(self.NOW - hours_ago * 3600))
+
+    def test_counts_bans_and_attacks_by_kind_and_hour_without_any_ip(self):
+        decisions = ("id,source,ip,reason,action,country,as,events_count,expiration,simulated,alert_id\n"
+                     '1,crowdsec,203.0.113.9,crowdsecurity/http-probing,ban,US,"Example, Inc.",12,3h,false,7\n'
+                     "2,crowdsec,198.51.100.4,crowdsecurity/ssh-bf,captcha,DE,AS1,5,1h,false,8\n")
+        alerts = ("id,scope,value,reason,country,as,decisions,created_at,kind\n"
+                  f'7,Ip,203.0.113.9,crowdsecurity/http-probing,US,"Example, Inc.",ban:1,{self.at(0.5)},crowdsec\n'
+                  f"8,Ip,198.51.100.4,crowdsecurity/http-cve-2021-41773,DE,AS1,ban:1,{self.at(2.5)},crowdsec\n"
+                  f"9,Ip,198.51.100.5,crowdsecurity/http-generic-bf,DE,AS1,ban:1,{self.at(2.2)},crowdsec\n"
+                  f"10,Ip,198.51.100.6,crowdsecurity/http-crawl-non_statics,FR,AS2,ban:1,{self.at(30)},crowdsec\n")
+
+        def in_guest(kind, vmid, script, timeout=20):
+            return decisions if "decisions" in script else alerts
+
+        with mock.patch.object(collect, "in_guest", in_guest):
+            result = collect.security({"vm": 150}, self.NOW)
+        self.assertEqual(result["bans"], 1)  # the captcha isn't a ban
+        self.assertEqual(result["attacks24h"], 3)  # the 30h-old alert is out of the window
+        self.assertEqual(result["byKind"], {"probing": 1, "exploit": 1, "bruteforce": 1})
+        self.assertEqual(result["hourly"][23], 1)
+        self.assertEqual(result["hourly"][21], 2)
+        text = json.dumps(result)
+        for leak in ("203.0.113", "198.51.100", "Example", "US", "crowdsecurity", "cve"):
+            self.assertNotIn(leak, text)
+
+    def test_unreachable_crowdsec_is_left_out(self):
+        with mock.patch.object(collect, "in_guest", lambda *a, **k: None):
+            self.assertIsNone(collect.security({"vm": 150}, self.NOW))
 
 
 class Logs(unittest.TestCase):

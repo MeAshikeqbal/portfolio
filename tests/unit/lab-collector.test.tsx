@@ -249,3 +249,56 @@ describe("the lab collector (python, against fixture command output)", () => {
     expect(out).toBe("")
   })
 })
+
+describe("edge security (CrowdSec, unnamed)", () => {
+  const hourly = (n: number) => [...Array(23).fill(0), n]
+  const security = { bans: 2, attacks24h: 5, hourly: hourly(5), byKind: { probing: 4, exploit: 1 } }
+
+  it("accepts consistent counts and rejects anything else", () => {
+    const [node] = parseHeartbeat(withNode({ security }))!
+    expect(node.security).toEqual(security)
+    for (const bad of [
+      { ...security, hourly: hourly(4) }, // hours don't add up
+      { ...security, byKind: { probing: 5, exploit: 1 } }, // kinds don't add up
+      { ...security, byKind: { probing: 4, "crowdsecurity/http-cve": 1 } }, // scenario names
+      { ...security, hourly: [5] }, // not 24 hours
+      { ...security, bans: -1 },
+    ]) {
+      expect(parseHeartbeat(withNode({ security: bad }))).toBeNull()
+    }
+  })
+
+  it("passes only counts through, and shows them without naming the tool", () => {
+    const [node] = parseHeartbeat(
+      withNode({ security: { ...security, ips: ["203.0.113.9"], scenarios: ["http-cve"] } }),
+    )!
+    const status: LabStatus = {
+      nodes: [{ ...node, receivedAt: ago(1), history, availability24h: null }],
+    }
+    const text = JSON.stringify(toPublicStatus(status))
+    expect(text).not.toContain("203.0.113.9")
+    expect(text).not.toContain("http-cve")
+
+    render(<LabTodayView status={status} now={now} streams={null} />)
+    const today = screen.getByRole("region", { name: "today in the lab" })
+    expect(within(today).getByText("attacks detected").closest("div")).toHaveTextContent("5")
+    expect(within(today).getByText("2 banned now · 24h")).toBeVisible()
+    expect(within(today).getByText("probing 4 · exploits 1")).toBeVisible()
+    expect(within(today).getByRole("img", { name: /Attacks detected per hour/ })).toBeVisible()
+    expect(today).not.toHaveTextContent(/crowdsec/i)
+  })
+
+  it("says nothing about kinds on a quiet day", () => {
+    const quiet = { bans: 0, attacks24h: 0, hourly: hourly(0), byKind: {} }
+    const [node] = parseHeartbeat(withNode({ security: quiet }))!
+    render(
+      <LabTodayView
+        status={{ nodes: [{ ...node, receivedAt: ago(1), history, availability24h: null }] }}
+        now={now}
+        streams={null}
+      />,
+    )
+    expect(screen.getByText("none banned now · 24h")).toBeVisible()
+    expect(screen.queryByText("attack types · 24h")).toBeNull()
+  })
+})

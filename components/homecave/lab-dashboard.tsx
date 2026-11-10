@@ -443,8 +443,17 @@ export function LabDashboardView({
 }
 
 /** Client wrapper: seeded with the server snapshot, then kept fresh by the shared 30s poll. */
-export function LabDashboard({ initial, specs }: { initial: LabStatus | null; specs: NodeSpec[] }) {
-  const { status, now } = useLabStatus(initial)
+export function LabDashboard({
+  initial,
+  renderedAt,
+  specs,
+}: {
+  initial: LabStatus | null
+  /** When the server rendered `initial` (ISO), so hydration matches the cached HTML. */
+  renderedAt: string
+  specs: NodeSpec[]
+}) {
+  const { status, now } = useLabStatus(initial, renderedAt)
   const live = useLiveActivity()
   const streams = live === undefined ? undefined : (live?.jellyfin?.streams ?? null)
   return <LabDashboardView status={status ?? initial} now={now} specs={specs} streams={streams} />

@@ -22,12 +22,16 @@ Config: /etc/lab-collect.json (root, 0600). Every section is optional:
     "edge": {"vm": 150, "log": "/opt/traefik/logs/access.log"},     Traefik access log
     "dns": {"ct": 100, "log": "/opt/AdGuardHome/data/querylog.json"},
     "tdarr": {"ct": 107, "url": "http://localhost:8265"},
+    "security": {"vm": 150, "container": "crowdsec"},           CrowdSec (counts only)
     "wan": ["1.1.1.1", "8.8.8.8"],
     "gpu": true, "backup": true
   }
 Scrubs and temperatures are always collected. ZFS_LABELS comes from /etc/lab-heartbeat.env.
 """
 
+import calendar
+import csv
+import io
 import json
 import os
 import re
@@ -42,7 +46,7 @@ HOUR = 3600
 GUEST_PATH = "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 # Seconds between refreshes, per section; in between, the last value is reused.
 EVERY = {"temps": 60, "disk": 300, "scrubs": 900, "gpu": 60, "wan": 300, "backup": 900,
-         "edge": 60, "dns": 300, "media": 300, "storage": 300}
+         "edge": 60, "dns": 300, "media": 300, "storage": 300, "security": 300}
 SERVICE_NAME = re.compile(r"^[A-Za-z0-9][A-Za-z0-9 #,+_-]{0,47}$")
 
 
@@ -418,6 +422,56 @@ def tdarr(cfg):
     return {"savedGB": max(0, round(saved))}
 
 
+# Broad attack kinds from CrowdSec scenario names (first match wins); never the names themselves.
+ATTACK_KINDS = (
+    ("exploit", ("cve", "exploit", "backdoor", "sqli", "xss", "traversal", "sensitive-files",
+                 "wpconfig", "rce", "log4j", "spring4shell", "appsec", "vpatch", "lfi", "ssrf")),
+    ("bruteforce", ("-bf", "bf_", "bruteforce", "brute-force")),
+    ("crawler", ("crawl", "bad-user-agent", "scraper", "bot")),
+    ("probing", ("probing", "scan", "admin-interface", "open-proxy", "enum")),
+)
+
+
+def attack_kind(scenario):
+    name = scenario.lower()
+    for kind, needles in ATTACK_KINDS:
+        if any(n in name for n in needles):
+            return kind
+    return "other"
+
+
+def parse_csv(text):
+    return list(csv.DictReader(io.StringIO(text or "")))
+
+
+def security(cfg, now):
+    """Edge security from CrowdSec: active bans, alerts over 24h (hourly), by broad kind.
+    Reads its CSV inside the edge VM; IPs, countries and ASNs never leave this function."""
+    kind, vmid = ("vm", cfg["vm"]) if "vm" in cfg else ("ct", cfg["ct"])
+    container = cfg.get("container", "crowdsec")
+    decisions = in_guest(kind, vmid, f"docker exec {container} cscli decisions list -o raw", timeout=30)
+    alerts = in_guest(kind, vmid, f"docker exec {container} cscli alerts list --since 24h --limit 0 -o raw", timeout=30)
+    if decisions is None or alerts is None:
+        return None
+    bans = sum(1 for d in parse_csv(decisions) if d.get("action") == "ban")
+    hourly = [0] * 24
+    by_kind = {}
+    total = 0
+    for a in parse_csv(alerts):
+        try:
+            at = calendar.timegm(time.strptime(a.get("created_at", "")[:19], "%Y-%m-%dT%H:%M:%S"))
+        except ValueError:
+            continue
+        age = now - at
+        if not 0 <= age < 24 * HOUR:
+            continue
+        total += 1
+        hourly[23 - int(age // HOUR)] += 1
+        k = attack_kind(a.get("reason", ""))
+        by_kind[k] = by_kind.get(k, 0) + 1
+    return {"bans": bans, "attacks24h": total, "hourly": hourly, "byKind": by_kind}
+
+
 def cached(state, key, now, fn):
     """fn()'s value, refreshed at most every EVERY[key] seconds (kept in the state file)."""
     cache = state.setdefault("cache", {})
@@ -466,6 +520,8 @@ def main():
         sections["dns"] = lambda: dns(config["dns"], state, now)
     if config.get("tdarr"):
         sections["media"] = lambda: cached(state, "media", now, lambda: tdarr(config["tdarr"]))
+    if config.get("security"):
+        sections["security"] = lambda: cached(state, "security", now, lambda: security(config["security"], now))
     for key, fn in sections.items():
         try:
             value = fn()

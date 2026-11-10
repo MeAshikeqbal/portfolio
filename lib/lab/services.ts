@@ -1,5 +1,5 @@
 import { isNodeFresh } from "./freshness"
-import type { BackupStatus, LabNodeStatus, LabStatus } from "./types"
+import type { BackupStatus, LabCollected, LabNodeStatus, LabStatus } from "./types"
 import type { Status } from "@/lib/status"
 
 /**
@@ -49,6 +49,7 @@ export interface LabToday {
   /** Across every fresh node's pools: the oldest "last scrub" and the errors found. */
   scrubs: { oldestAt: number; errors: number; pools: number } | null
   containers: { ok: number; total: number } | null
+  security: NonNullable<LabCollected["security"]> | null
 }
 
 /** The cluster-wide numbers for the "Today in the lab" strip, from fresh reports only. */
@@ -65,6 +66,7 @@ export function labToday(status: LabStatus | null | undefined, now: Date): LabTo
     dns: pick(fresh, "dns")?.value ?? null,
     wan: pick(fresh, "wan")?.value ?? null,
     media: pick(fresh, "media")?.value ?? null,
+    security: pick(fresh, "security")?.value ?? null,
     backup: pick(fresh, "backup")?.value ?? null,
     scrubs: scrubs.length
       ? {

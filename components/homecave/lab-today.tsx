@@ -5,7 +5,7 @@ import { Panel, PanelHeader } from "@/components/dashboard/panel"
 import { Sparkline } from "@/components/dashboard/sparkline"
 import { formatCompact, formatPercent, formatRelative } from "@/lib/format"
 import { labToday } from "@/lib/lab/services"
-import type { BackupStatus, LabStatus } from "@/lib/lab/types"
+import { ATTACK_KINDS, type AttackKind, type BackupStatus, type LabStatus } from "@/lib/lab/types"
 import { STATUS_TEXT_CLASS, type Status } from "@/lib/status"
 import { Metric } from "./metric"
 
@@ -13,6 +13,14 @@ const BACKUP: Record<BackupStatus, { status: Status; label: string }> = {
   ok: { status: "up", label: "ok" },
   warnings: { status: "warn", label: "with warnings" },
   failed: { status: "down", label: "failed" },
+}
+
+const KIND_LABEL: Record<AttackKind, string> = {
+  probing: "probing",
+  exploit: "exploits",
+  bruteforce: "brute force",
+  crawler: "crawlers",
+  other: "other",
 }
 
 const ago = (epochSeconds: number, now: Date) =>
@@ -25,7 +33,7 @@ const Word = ({ status, children }: { status: Status; children: ReactNode }) => 
 
 /**
  * "Today in the lab": what the services are doing, measured inside the guests by the lab's
- * collector (edge traffic, DNS, internet, backups, scrubs, containers) plus Jellyfin's live
+ * collector (edge traffic and attacks, DNS, internet, backups, scrubs) plus Jellyfin's live
  * stream count. Hidden until the collector has reported; a missing reading shows "—".
  */
 export function LabTodayView({
@@ -39,8 +47,13 @@ export function LabTodayView({
   streams?: number | null
 }) {
   const today = labToday(status, now)
-  const { edge, dns, wan, media, backup, scrubs, containers } = today
-  if (!edge && !dns && !wan && !media && !backup && !scrubs && !containers) return null
+  const { edge, dns, wan, media, backup, scrubs, containers, security } = today
+  if (!edge && !dns && !wan && !media && !backup && !scrubs && !containers && !security) return null
+  const kinds = security
+    ? ATTACK_KINDS.map((k) => [KIND_LABEL[k], security.byKind[k] ?? 0] as const).filter(
+        ([, n]) => n > 0,
+      )
+    : []
 
   const rpm = (v: number) => (v < 10 ? v.toFixed(1).replace(/\.0$/, "") : String(Math.round(v)))
 
@@ -53,7 +66,7 @@ export function LabTodayView({
               today in the lab
             </h2>
           }
-          meta={<span>measured inside the guests</span>}
+          meta={<span className="hidden sm:inline">measured inside the guests</span>}
         />
         <dl className="grid grid-cols-2 gap-px bg-border lg:grid-cols-4">
           <Metric
@@ -145,26 +158,38 @@ export function LabTodayView({
             }
           />
           <Metric
-            label="containers"
-            value={containers ? `${containers.ok}/${containers.total}` : "—"}
-            hint={
-              containers ? (
-                <Word status={containers.ok === containers.total ? "up" : "warn"}>
-                  {containers.ok === containers.total
-                    ? "all healthy"
-                    : `${containers.total - containers.ok} not healthy`}
-                </Word>
-              ) : (
-                "not reported"
+            label="attacks detected"
+            value={security ? String(security.attacks24h) : "—"}
+            trend={
+              security && (
+                <Sparkline
+                  values={security.hourly}
+                  label="Attacks detected per hour, last 24 hours"
+                  width={64}
+                />
               )
+            }
+            hint={
+              security
+                ? `${security.bans === 0 ? "none" : security.bans} banned now · 24h`
+                : "not reported"
             }
           />
           <Metric
             label="space saved"
             value={media ? `${media.savedGB} GB` : "—"}
-            hint={media ? "by re-encoding on the GPU" : "not reported"}
+            hint={media ? "re-encoded on the GPU" : "not reported"}
           />
         </dl>
+        {kinds.length > 0 && (
+          // Broad kinds only: never which paths, apps or addresses were involved.
+          <p className="flex flex-wrap items-baseline gap-x-3 gap-y-1 border-t px-4 py-3 text-sm">
+            <span className="label-caps">attack types · 24h</span>
+            <span className="text-muted-foreground tabular">
+              {kinds.map(([label, n]) => `${label} ${n}`).join(" · ")}
+            </span>
+          </p>
+        )}
       </Panel>
     </section>
   )
