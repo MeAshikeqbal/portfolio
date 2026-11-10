@@ -18,17 +18,29 @@ function Row({
   href,
   detail,
   art,
+  poster,
 }: {
   icon: ReactNode
   pill: ReactNode
   title: string
   href?: string | null
   detail?: string | null
+  /** Square artwork (album covers). */
   art?: string | null
+  /** A 2:3 poster (movies and shows), same width as the artwork. */
+  poster?: string | null
 }) {
   return (
     <li className="flex items-center gap-3 px-4 py-3">
-      {art ? (
+      {poster ? (
+        <Image
+          src={poster}
+          alt=""
+          width={40}
+          height={60}
+          className="h-15 w-10 shrink-0 rounded object-cover ring-1 ring-border"
+        />
+      ) : art ? (
         <Image src={art} alt="" width={40} height={40} className="size-10 shrink-0 rounded" />
       ) : (
         <span className="grid size-10 shrink-0 place-items-center rounded bg-surface-2 text-muted-foreground [&_svg]:size-4.5">
@@ -86,6 +98,7 @@ export function LivePanelView({ data, now = new Date() }: { data: LiveActivity; 
         {trakt && (
           <Row
             icon={<Tv />}
+            poster={trakt.poster}
             pill={
               trakt.state === "watching" ? (
                 <StatusPill status="up" pulse>
@@ -125,6 +138,21 @@ export function LivePanelView({ data, now = new Date() }: { data: LiveActivity; 
           />
         )}
       </ul>
+      {trakt?.poster && (
+        // TMDB's terms: credit it wherever its images appear.
+        <p className="border-t px-4 py-2 text-xs text-muted-foreground">
+          Poster from{" "}
+          <a
+            href="https://www.themoviedb.org/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline underline-offset-2 hover:text-foreground"
+          >
+            TMDB
+          </a>
+          . This site uses the TMDB API but is not endorsed or certified by TMDB.
+        </p>
+      )}
     </Panel>
   )
 }

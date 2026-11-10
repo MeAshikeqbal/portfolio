@@ -57,6 +57,12 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "i.scdn.co",
       },
+      // Trakt posters (looked up on TMDB) on /now, also through /_next/image.
+      {
+        protocol: "https",
+        hostname: "image.tmdb.org",
+        pathname: "/t/p/w154/**",
+      },
     ],
   },
   async redirects() {

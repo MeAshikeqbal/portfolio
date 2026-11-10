@@ -29,6 +29,8 @@ export interface TraktActivity {
   year: number | null
   /** trakt.tv link, or null. */
   url: string | null
+  /** Poster on image.tmdb.org (looked up by the title's TMDB id), or null. */
+  poster: string | null
   /** When it was watched (ISO), for "last"; null while watching. */
   at: string | null
 }

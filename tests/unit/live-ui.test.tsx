@@ -24,6 +24,7 @@ const trakt = (state: TraktActivity["state"], at: string | null = null): TraktAc
   episode: 2,
   year: 2022,
   url: "https://trakt.tv/shows/the-show/seasons/1/episodes/2",
+  poster: null,
   at,
 })
 const jellyfin = (streams: number, transcode = 0) => ({
@@ -137,5 +138,27 @@ describe("labels and times", () => {
     expect(formatRelative("2026-11-01T12:00:00Z", now)).toBe("8d ago")
     expect(formatRelative("2026-08-01T12:00:00Z", now)).toBe("Aug 1, 2026")
     expect(formatRelative("nope", now)).toBeNull()
+  })
+})
+
+describe("Trakt posters", () => {
+  it("shows the poster with TMDB's credit, and the icon without one", () => {
+    const poster = "https://image.tmdb.org/t/p/w154/abc.jpg"
+    const { container, rerender } = render(
+      <LivePanelView
+        data={data({ trakt: { ...trakt("last", now.toISOString()), poster } })}
+        now={now}
+      />,
+    )
+    expect(container.querySelector("img")?.getAttribute("src")).toContain(
+      encodeURIComponent(poster),
+    )
+    expect(screen.getByRole("link", { name: "TMDB" })).toHaveAttribute(
+      "href",
+      "https://www.themoviedb.org/",
+    )
+    rerender(<LivePanelView data={data({ trakt: trakt("last", now.toISOString()) })} now={now} />)
+    expect(container.querySelector("img")).toBeNull()
+    expect(screen.queryByText(/TMDB/)).toBeNull()
   })
 })
