@@ -118,10 +118,9 @@ export function CommandMenu({ index, className }: { index: CommandIndex; classNa
         }}
         aria-label="Search and commands"
         aria-keyshortcuts="Control+K Meta+K /"
-        className={cn("gap-2 text-muted-foreground", className)}
+        className={cn("gap-2 px-2.5 text-muted-foreground hover:text-foreground", className)}
       >
         <Search />
-        <span className="hidden lg:inline">Search…</span>
         <KbdGroup className="hidden lg:inline-flex">
           <Kbd>{modKey}</Kbd>
           <Kbd>K</Kbd>

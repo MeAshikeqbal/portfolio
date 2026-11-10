@@ -1,8 +1,11 @@
+import Link from "next/link"
 import { LabBarItem } from "@/components/lab/lab-badges"
 import { formatDate } from "@/lib/format"
+import { siteConfig } from "@/lib/site"
 import { syncStatus, type Status } from "@/lib/status"
 import { cn } from "@/lib/utils"
 import { Container } from "./layout"
+import { RelativeTime } from "./relative-time"
 import { StatusDot } from "./status-dot"
 import { SyncIndicator } from "./sync-indicator"
 
@@ -17,39 +20,73 @@ interface SystemBarProps {
 }
 
 /**
- * Thin strip at the very top of the page. It only reports measured facts: the GitHub sync's
- * health (re-checked in the browser, so a stale static page can't keep showing green), the
- * homelab's state (once it has reported), the newest post, and the deployed build.
+ * One segment of the statusline. Every cell draws its own left hairline; the row starts 13px
+ * (border + padding) to the left inside a clipping box, so whichever cell is first on screen
+ * loses its hairline and lines up with the wordmark, even when earlier cells are hidden.
+ */
+const CELL = "shrink-0 items-center gap-2 border-l px-3"
+// The strip clips its overflow, so the focus ring is drawn inside the link.
+const CELL_LINK =
+  "transition-colors hover:text-foreground focus-visible:text-foreground focus-visible:-outline-offset-2"
+
+/**
+ * The statusline at the very top of the page, read like a terminal's: fixed cells split by
+ * hairlines. It only reports measured facts: the GitHub sync's health (re-checked in the
+ * browser, so a stale static page can't keep showing green), each homelab machine (once the
+ * lab has reported), the newest post, and the deployed build, which links to its commit.
  */
 export function SystemBar({ syncedAt, latestPostAt, notice, className }: SystemBarProps) {
-  const sha = process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 7)
+  const fullSha = process.env.VERCEL_GIT_COMMIT_SHA
   const builtOn = formatDate(process.env.BUILD_TIME)
-  const lastPost = formatDate(latestPostAt)
 
   return (
     // A labelled region, so the strip sits inside a landmark like the rest of the page.
     <section aria-label="Site status" className={cn("border-b bg-surface", className)}>
-      <Container className="flex h-8 items-center justify-between gap-4 label-caps">
-        <span className="flex min-w-0 items-center gap-3">
-          {notice && (
-            <span className="flex shrink-0 items-center gap-2">
-              <StatusDot status={notice.status} />
-              {notice.label}
-            </span>
+      <Container className="flex h-8 items-stretch label-caps">
+        <div className="flex min-w-0 overflow-hidden">
+          <div className="-ml-[13px] flex min-w-0 items-stretch">
+            {notice ? (
+              <span className={cn(CELL, "flex")}>
+                <StatusDot status={notice.status} />
+                {notice.label}
+              </span>
+            ) : (
+              <>
+                {syncedAt && (
+                  <SyncIndicator
+                    syncedAt={syncedAt}
+                    initial={syncStatus(syncedAt)}
+                    className={CELL}
+                  />
+                )}
+                <LabBarItem className={cn(CELL, CELL_LINK, "hidden md:flex")} />
+                {latestPostAt && (
+                  <Link
+                    href="/post"
+                    className={cn(CELL, CELL_LINK, syncedAt ? "hidden sm:flex" : "flex")}
+                  >
+                    log · <RelativeTime iso={latestPostAt} />
+                  </Link>
+                )}
+              </>
+            )}
+          </div>
+        </div>
+
+        <span className="ml-auto hidden shrink-0 items-center gap-1.5 border-l pl-3 sm:flex">
+          build
+          {fullSha ? (
+            <a
+              href={`${siteConfig.repo}/commit/${fullSha}`}
+              className={cn(CELL_LINK, "underline decoration-border underline-offset-4")}
+              title="This build's commit on GitHub"
+            >
+              {fullSha.slice(0, 7)}
+            </a>
+          ) : (
+            <span>local</span>
           )}
-          {!notice && syncedAt && (
-            <SyncIndicator syncedAt={syncedAt} initial={syncStatus(syncedAt)} />
-          )}
-          {!notice && <LabBarItem className="hidden md:flex" />}
-          {!notice && lastPost && (
-            <span className={cn("truncate", syncedAt && "hidden sm:inline")}>
-              last post · <time dateTime={latestPostAt ?? undefined}>{lastPost}</time>
-            </span>
-          )}
-        </span>
-        <span className="hidden shrink-0 sm:inline">
-          build {sha ?? "local"}
-          {builtOn && ` · ${builtOn}`}
+          {builtOn && <span>· {builtOn}</span>}
         </span>
       </Container>
     </section>

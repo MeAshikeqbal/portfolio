@@ -5,7 +5,7 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useEffect, useRef, useState } from "react"
 import { Container } from "@/components/dashboard/layout"
-import { ThemeToggle } from "@/components/theme-toggle"
+import { ThemeCycleButton, ThemeToggle } from "@/components/theme-toggle"
 import type { CommandIndex } from "@/lib/api"
 import { CommandMenu } from "./command-menu"
 import { Button } from "@/components/ui/button"
@@ -69,7 +69,8 @@ export function SiteNav({ commandIndex }: { commandIndex?: CommandIndex }) {
           itsashik<span className="text-muted-foreground">.dev</span>
         </Link>
 
-        <nav aria-label="Main" className="ml-auto hidden items-center gap-1 md:flex">
+        {/* Links fill the header's height so the active one's underline sits on its border. */}
+        <nav aria-label="Main" className="ml-auto hidden self-stretch md:flex">
           {siteConfig.nav.map((item) => {
             const active = isActive(pathname, item.href)
             return (
@@ -78,10 +79,11 @@ export function SiteNav({ commandIndex }: { commandIndex?: CommandIndex }) {
                 href={item.href}
                 aria-current={active ? "page" : undefined}
                 className={cn(
-                  "rounded-md px-3 py-1.5 text-sm transition-colors",
+                  "relative flex items-center rounded-md px-3 text-sm transition-colors",
+                  "after:absolute after:inset-x-3 after:-bottom-px after:h-px after:transition-colors",
                   active
-                    ? "bg-surface-2 text-foreground"
-                    : "text-muted-foreground hover:bg-surface-2 hover:text-foreground",
+                    ? "text-foreground after:bg-foreground"
+                    : "text-muted-foreground hover:text-foreground hover:after:bg-border-strong",
                 )}
               >
                 {item.label}
@@ -90,10 +92,12 @@ export function SiteNav({ commandIndex }: { commandIndex?: CommandIndex }) {
           })}
         </nav>
 
-        <div className="flex items-center gap-2">
+        <span aria-hidden className="hidden h-4 w-px bg-border md:block" />
+
+        <div className="flex items-center gap-1">
           {/* A single palette instance for every screen size (one keyboard listener). */}
           {commandIndex && <CommandMenu index={commandIndex} />}
-          <ThemeToggle className="hidden md:flex" />
+          <ThemeCycleButton className="hidden md:inline-flex" />
           <Button
             ref={toggle}
             variant="ghost"
