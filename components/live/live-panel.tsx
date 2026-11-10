@@ -9,6 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { formatRelative } from "@/lib/format"
 import type { LiveActivity } from "@/lib/live/types"
 import { traktLabel } from "./describe"
+import { PlaybackProgress } from "./playback-progress"
 import { hasActivity, useLiveActivity } from "./use-live-activity"
 
 function Row({
@@ -19,6 +20,7 @@ function Row({
   detail,
   art,
   poster,
+  progress,
 }: {
   icon: ReactNode
   pill: ReactNode
@@ -29,6 +31,8 @@ function Row({
   art?: string | null
   /** A 2:3 poster (movies and shows), same width as the artwork. */
   poster?: string | null
+  /** Playback progress under the text, while something is playing. */
+  progress?: ReactNode
 }) {
   return (
     <li className="flex items-center gap-3 px-4 py-3">
@@ -63,14 +67,17 @@ function Row({
           <p className="truncate font-medium">{title}</p>
         )}
         {detail && <p className="truncate text-sm text-muted-foreground">{detail}</p>}
+        {progress}
       </div>
     </li>
   )
 }
 
 /** The live rows; integrations that returned null are left out. */
-export function LivePanelView({ data, now = new Date() }: { data: LiveActivity; now?: Date }) {
+export function LivePanelView({ data, now }: { data: LiveActivity; now?: Date }) {
   const { spotify, trakt, jellyfin } = data
+  // A pinned `now` (tests) also pins playback progress; otherwise it ticks on its own.
+  const progressNow = now?.getTime()
   return (
     <Panel>
       <PanelHeader title="live" meta={<span>updates every minute</span>} />
@@ -93,6 +100,16 @@ export function LivePanelView({ data, now = new Date() }: { data: LiveActivity; 
             title={spotify.track}
             href={spotify.url}
             detail={spotify.artists}
+            progress={
+              spotify.state === "playing" && (
+                <PlaybackProgress
+                  timing={spotify}
+                  label="Track progress"
+                  now={progressNow}
+                  className="mt-2"
+                />
+              )
+            }
           />
         )}
         {trakt && (
@@ -113,6 +130,16 @@ export function LivePanelView({ data, now = new Date() }: { data: LiveActivity; 
             title={traktLabel(trakt)}
             href={trakt.url}
             detail={trakt.kind === "episode" && trakt.title !== trakt.show ? trakt.title : null}
+            progress={
+              trakt.state === "watching" && (
+                <PlaybackProgress
+                  timing={trakt}
+                  label={trakt.kind === "movie" ? "Movie progress" : "Episode progress"}
+                  now={progressNow}
+                  className="mt-2"
+                />
+              )
+            }
           />
         )}
         {jellyfin && (

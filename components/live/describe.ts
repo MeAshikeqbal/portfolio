@@ -58,3 +58,37 @@ export function pickLiveLine(data: LiveActivity | null | undefined): LiveLineCon
   last.sort((a, b) => (b.at ?? "").localeCompare(a.at ?? ""))
   return last[0] ?? null
 }
+
+export interface NowPlaying {
+  kind: "listening" | "watching"
+  /** "blue — yung kai", or "The Mentalist · S3E18". */
+  text: string
+  /** Playback span, when the source reports one. */
+  startedAt: string | null
+  endsAt: string | null
+}
+
+/**
+ * What's playing at this moment, for the statusline. Only live states: "last played" history
+ * never shows there. Same order as the hero line, so the two never disagree: listening first.
+ */
+export function pickNowPlaying(data: LiveActivity | null | undefined): NowPlaying | null {
+  const { spotify, trakt } = data ?? {}
+  if (spotify?.state === "playing") {
+    return {
+      kind: "listening",
+      text: spotify.artists ? `${spotify.track} — ${spotify.artists}` : spotify.track,
+      startedAt: spotify.startedAt,
+      endsAt: spotify.endsAt,
+    }
+  }
+  if (trakt?.state === "watching") {
+    return {
+      kind: "watching",
+      text: traktLabel(trakt),
+      startedAt: trakt.startedAt,
+      endsAt: trakt.endsAt,
+    }
+  }
+  return null
+}

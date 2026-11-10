@@ -1,5 +1,6 @@
 import Link from "next/link"
 import { LabBarItem } from "@/components/lab/lab-badges"
+import { NowPlayingBarItem } from "@/components/live/now-playing-bar-item"
 import { formatDate } from "@/lib/format"
 import { siteConfig } from "@/lib/site"
 import { syncStatus, type Status } from "@/lib/status"
@@ -33,7 +34,8 @@ const CELL_LINK =
  * The statusline at the very top of the page, read like a terminal's: fixed cells split by
  * hairlines. It only reports measured facts: the GitHub sync's health (re-checked in the
  * browser, so a stale static page can't keep showing green), each homelab machine (once the
- * lab has reported), the newest post, and the deployed build, which links to its commit.
+ * lab has reported), the newest post, what's playing right now (only while it is), and the
+ * deployed build, which links to its commit.
  */
 export function SystemBar({ syncedAt, latestPostAt, notice, className }: SystemBarProps) {
   const fullSha = process.env.VERCEL_GIT_COMMIT_SHA
@@ -68,6 +70,9 @@ export function SystemBar({ syncedAt, latestPostAt, notice, className }: SystemB
                     log · <RelativeTime iso={latestPostAt} />
                   </Link>
                 )}
+                {/* Only while something is playing, and only from lg: narrower bars have no room
+                    left for a title after the cells above (the hero's live line covers them). */}
+                <NowPlayingBarItem className={cn(CELL, CELL_LINK, "hidden lg:flex")} />
               </>
             )}
           </div>
