@@ -212,7 +212,13 @@ function SigningKey() {
             <p className="label-caps">Verify it yourself</p>
             <CopyButton text={verify} label="Copy commands" className="-my-1.5 -mr-2" />
           </div>
-          <pre className="mt-2 overflow-x-auto rounded-md bg-surface-2 px-3 py-2.5 font-mono text-xs leading-5">
+          {/* Scrolls sideways on phones, so it must be reachable by keyboard too. */}
+          <pre
+            tabIndex={0}
+            role="region"
+            aria-label="Commands to verify the signature"
+            className="mt-2 overflow-x-auto rounded-md bg-surface-2 px-3 py-2.5 font-mono text-xs leading-5"
+          >
             {verify}
           </pre>
         </div>

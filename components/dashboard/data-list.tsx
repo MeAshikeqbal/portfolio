@@ -20,6 +20,9 @@ interface DataRowProps {
   meta?: ReactNode[]
   /** Right-aligned value, e.g. a metric or a sparkline. */
   value?: ReactNode
+  /** A small plate before the title (artwork, an icon). It takes the dot's place, so the dot
+   * moves in front of the status word. Greyscale art turns to colour on row hover via `group`. */
+  leading?: ReactNode
   className?: string
 }
 
@@ -30,6 +33,7 @@ export function DataRow({
   description,
   meta = [],
   value,
+  leading,
   className,
 }: DataRowProps) {
   const external = Boolean(href && !href.startsWith("/"))
@@ -37,7 +41,14 @@ export function DataRow({
   // so the dot is only a scanning aid (and screen readers hear the word, once).
   const facts: ReactNode[] = status
     ? [
-        <span key="status" className={STATUS_TEXT_CLASS[status.status]}>
+        <span
+          key="status"
+          className={cn(
+            STATUS_TEXT_CLASS[status.status],
+            leading && "inline-flex items-center gap-1.5",
+          )}
+        >
+          {leading && <StatusDot status={status.status} pulse={status.status === "up"} />}
           {status.label}
         </span>,
         ...meta,
@@ -45,7 +56,7 @@ export function DataRow({
     : meta
   const body = (
     <>
-      {status && <StatusDot status={status.status} className="mt-1.5 sm:mt-0" />}
+      {leading ?? (status && <StatusDot status={status.status} className="mt-1.5 sm:mt-0" />)}
       <div className="min-w-0 flex-1">
         {/* Titles wrap rather than truncate: a cut-off name is no name at all. */}
         <div className="font-medium text-pretty">
@@ -87,7 +98,7 @@ export function DataRow({
   // Inset outline: rows live inside Panels, whose overflow-hidden would clip an outset ring.
   const linkClass = cn(
     rowClass,
-    "transition-colors hover:bg-surface-2 focus-visible:bg-surface-2 focus-visible:-outline-offset-2",
+    "group transition-colors hover:bg-surface-2 focus-visible:bg-surface-2 focus-visible:-outline-offset-2",
   )
   return (
     <li className={className}>

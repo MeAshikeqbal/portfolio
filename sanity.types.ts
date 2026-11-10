@@ -21,8 +21,16 @@ export type Now = {
   _createdAt: string
   _updatedAt: string
   _rev: string
+  updatedOn?: string
   location?: string
   body?: BlockContent
+  archive?: Array<{
+    date?: string
+    location?: string
+    body?: BlockContent
+    _type: "nowEntry"
+    _key: string
+  }>
 }
 
 export type SanityImageAssetReference = {
@@ -922,11 +930,18 @@ export type USES_QUERY_RESULT = {
 
 // Source: sanity/lib/queries.ts
 // Variable: NOW_QUERY
-// Query: *[_type == "now" && _id == "now"][0] { _updatedAt, location, body }
+// Query: *[_type == "now" && _id == "now"][0] {    _updatedAt,    // The date the update was written; the last edit until that's set.    "updated": coalesce(updatedOn, _updatedAt),    location,    body,    "archive": archive[defined(date) && count(body) > 0] | order(date desc) {      _key, date, location, body    }  }
 export type NOW_QUERY_RESULT = {
   _updatedAt: string
+  updated: string
   location: string | null
   body: BlockContent | null
+  archive: Array<{
+    _key: string
+    date: string | null
+    location: string | null
+    body: BlockContent | null
+  }> | null
 } | null
 
 // Query TypeMap
@@ -951,7 +966,7 @@ declare global {
     '{\n  "posts": *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && archived != true && seo.noIndex != true]\n    | order(publishedAt desc) { "slug": slug.current, _updatedAt },\n  "projects": *[_type == "project" && !(_id in path("drafts.**")) && defined(slug.current) && seo.noIndex != true]\n    { "slug": slug.current, _updatedAt },\n  "now": *[_type == "now" && _id == "now" && count(body) > 0][0]._updatedAt\n}': SITEMAP_QUERY_RESULT
     '{\n  "posts": *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && archived != true] | order(publishedAt desc) {\n    _id, title, "slug": slug.current, "topics": categories[]->title\n  },\n  "projects": *[_type == "project" && !(_id in path("drafts.**"))] | order(orderRank asc, _createdAt desc) {\n    _id, title, "slug": slug.current, url, github\n  },\n  // Only whether a CV exists: the file itself is served from /resume.pdf.\n  "hasCv": defined(*[_type == "cv"][0].cvFile.asset),\n  // /now is only linked once it has published content (Homecave always exists).\n  "hasNow": count(*[_type == "now" && _id == "now"][0].body) > 0\n}': COMMAND_INDEX_QUERY_RESULT
     '\n  *[_type == "uses" && _id == "uses"][0] {\n    _updatedAt,\n    intro,\n    sections[]{ _key, title, items[]{ _key, name, description, url, icon } }\n  }\n': USES_QUERY_RESULT
-    '\n  *[_type == "now" && _id == "now"][0] { _updatedAt, location, body }\n': NOW_QUERY_RESULT
+    '\n  *[_type == "now" && _id == "now"][0] {\n    _updatedAt,\n    // The date the update was written; the last edit until that\'s set.\n    "updated": coalesce(updatedOn, _updatedAt),\n    location,\n    body,\n    "archive": archive[defined(date) && count(body) > 0] | order(date desc) {\n      _key, date, location, body\n    }\n  }\n': NOW_QUERY_RESULT
   }
 }
 // Lets @sanity/client releases that predate the global registry read it too

@@ -56,11 +56,15 @@ describe("LivePanelView", () => {
         })}
       />,
     )
-    expect(screen.getByText("listening")).toBeVisible()
-    expect(screen.getByText("watching")).toBeVisible()
-    expect(screen.getByText("streaming")).toBeVisible()
-    expect(screen.getByText("3 people are watching on my Jellyfin")).toBeVisible()
-    expect(screen.getByText("2 direct play · 1 transcoding")).toBeVisible()
+    // Each status word is the first item of its row's metadata (rendered for phones and for
+    // wider screens; CSS picks one), in its status colour.
+    for (const word of ["listening", "watching", "streaming"]) {
+      const [first] = screen.getAllByText(word)
+      expect(first).toHaveClass("text-status-up-fg")
+    }
+    expect(screen.getByText("3 streams on my Jellyfin")).toBeVisible()
+    expect(screen.getAllByText("2 direct")[0]).toBeVisible()
+    expect(screen.getAllByText("1 transcoding")[0]).toBeVisible()
     expect(screen.getByRole("link", { name: /The Show · S1E2/ })).toHaveAttribute(
       "href",
       "https://trakt.tv/shows/the-show/seasons/1/episodes/2",
@@ -78,16 +82,20 @@ describe("LivePanelView", () => {
         })}
       />,
     )
-    expect(screen.getByText("last played · 2h ago")).toBeVisible()
-    expect(screen.getByText("last watched · 1d ago")).toBeVisible()
-    expect(screen.getByText("idle")).toBeVisible()
-    expect(screen.getByText("Nobody is watching on my Jellyfin")).toBeVisible()
+    expect(screen.getAllByText("last played")[0]).toHaveClass("text-status-idle-fg")
+    expect(screen.getAllByText("2h ago")[0]).toBeVisible()
+    expect(screen.getAllByText("last watched")[0]).toBeVisible()
+    expect(screen.getAllByText("1d ago")[0]).toBeVisible()
+    expect(screen.getAllByText("idle")[0]).toBeVisible()
+    expect(screen.getByText("Nothing playing on my Jellyfin")).toBeVisible()
+    // Nothing is playing, so nothing measures progress.
+    expect(screen.queryByRole("progressbar")).toBeNull()
   })
 
   it("leaves out integrations that returned nothing", () => {
     render(<LivePanelView now={now} data={data({ jellyfin: jellyfin(1) })} />)
     expect(screen.getAllByRole("listitem")).toHaveLength(1)
-    expect(screen.getByText("1 person is watching on my Jellyfin")).toBeVisible()
+    expect(screen.getByText("1 stream on my Jellyfin")).toBeVisible()
   })
 })
 

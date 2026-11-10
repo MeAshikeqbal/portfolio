@@ -1,183 +1,166 @@
 "use client"
 
-import { ArrowUpRight, Music, Server, Tv } from "lucide-react"
+import { Music, Server, Tv } from "lucide-react"
 import Image from "next/image"
 import type { ReactNode } from "react"
+import { DataList, DataRow } from "@/components/dashboard/data-list"
 import { Panel, PanelHeader } from "@/components/dashboard/panel"
-import { StatusPill } from "@/components/dashboard/status-pill"
 import { Skeleton } from "@/components/ui/skeleton"
 import { formatRelative } from "@/lib/format"
-import type { LiveActivity } from "@/lib/live/types"
+import type {
+  JellyfinActivity,
+  LiveActivity,
+  SpotifyActivity,
+  TraktActivity,
+} from "@/lib/live/types"
 import { traktLabel } from "./describe"
-import { PlaybackProgress } from "./playback-progress"
+import { PlaybackMeter, progressText, usePlaybackProgress } from "./playback-progress"
 import { hasActivity, useLiveActivity } from "./use-live-activity"
 
-/**
- * One live row: a poster, album art or icon, then the status pill, the title (a link when
- * there is one), an optional detail line and, while playing, the progress bar.
- */
-function Row({
-  icon,
-  pill,
-  title,
-  href,
-  detail,
+// Greyscale like every other image in a row (colour means status only); a linked row brings
+// its colour back on hover and focus.
+const ART =
+  "shrink-0 rounded-md object-cover ring-1 ring-border grayscale transition-[filter] duration-300 group-hover:grayscale-0 group-focus-visible:grayscale-0 motion-reduce:transition-none"
+
+/** The row's leading plate: album art (square), a poster (2:3), or the source's icon. */
+function Plate({
   art,
   poster,
-  progress,
+  icon,
 }: {
-  icon: ReactNode
-  pill: ReactNode
-  title: string
-  href?: string | null
-  detail?: string | null
-  /** Square artwork (album covers). */
   art?: string | null
-  /** A 2:3 poster (movies and shows), same width as the artwork. */
   poster?: string | null
-  /** Playback progress under the text, while something is playing. */
-  progress?: ReactNode
+  icon: ReactNode
 }) {
+  if (poster)
+    return <Image src={poster} alt="" width={32} height={48} className={`h-12 w-8 ${ART}`} />
+  if (art) return <Image src={art} alt="" width={32} height={32} className={`size-8 ${ART}`} />
   return (
-    <li className="flex items-center gap-3 px-4 py-3">
-      {poster ? (
-        <Image
-          src={poster}
-          alt=""
-          width={40}
-          height={60}
-          className="h-15 w-10 shrink-0 rounded object-cover ring-1 ring-border"
-        />
-      ) : art ? (
-        <Image src={art} alt="" width={40} height={40} className="size-10 shrink-0 rounded" />
-      ) : (
-        <span className="grid size-10 shrink-0 place-items-center rounded bg-surface-2 text-muted-foreground [&_svg]:size-4.5">
-          {icon}
-        </span>
-      )}
-      <div className="min-w-0 flex-1">
-        <div className="mb-0.5">{pill}</div>
-        {href ? (
-          <a
-            href={href}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex max-w-full items-center gap-1 font-medium hover:underline"
-          >
-            <span className="truncate">{title}</span>
-            <ArrowUpRight className="size-3.5 shrink-0 text-muted-foreground" aria-hidden />
-          </a>
-        ) : (
-          <p className="truncate font-medium">{title}</p>
-        )}
-        {detail && <p className="truncate text-sm text-muted-foreground">{detail}</p>}
-        {progress}
-      </div>
-    </li>
+    <span className="grid size-8 shrink-0 place-items-center rounded-md bg-icon-plate text-muted-foreground ring-1 ring-border [&_svg]:size-4">
+      {icon}
+    </span>
+  )
+}
+
+/** "28m ago", or nothing without a time. */
+const ago = (iso: string | null, now?: Date) => (iso ? formatRelative(iso, now) : null)
+
+function SpotifyRow({ spotify, now }: { spotify: SpotifyActivity; now?: Date }) {
+  const playing = spotify.state === "playing"
+  const progress = usePlaybackProgress(spotify, now?.getTime())
+  const when = playing ? (progress ? progressText(progress) : null) : ago(spotify.at, now)
+  return (
+    <DataRow
+      leading={<Plate art={spotify.art} icon={<Music />} />}
+      title={spotify.track}
+      href={spotify.url ?? undefined}
+      description={spotify.artists}
+      status={
+        playing ? { status: "up", label: "listening" } : { status: "idle", label: "last played" }
+      }
+      meta={
+        when
+          ? [
+              <span key="when" className="tabular">
+                {when}
+              </span>,
+            ]
+          : []
+      }
+      value={
+        playing && progress ? (
+          <PlaybackMeter progress={progress} label="Track progress" />
+        ) : undefined
+      }
+    />
+  )
+}
+
+function TraktRow({ trakt, now }: { trakt: TraktActivity; now?: Date }) {
+  const watching = trakt.state === "watching"
+  const progress = usePlaybackProgress(trakt, now?.getTime())
+  const when = watching ? (progress ? progressText(progress) : null) : ago(trakt.at, now)
+  const label = trakt.kind === "movie" ? "Movie progress" : "Episode progress"
+  return (
+    <DataRow
+      leading={<Plate poster={trakt.poster} icon={<Tv />} />}
+      title={traktLabel(trakt)}
+      href={trakt.url ?? undefined}
+      description={trakt.kind === "episode" && trakt.title !== trakt.show ? trakt.title : undefined}
+      status={
+        watching ? { status: "up", label: "watching" } : { status: "idle", label: "last watched" }
+      }
+      meta={
+        when
+          ? [
+              <span key="when" className="tabular">
+                {when}
+              </span>,
+            ]
+          : []
+      }
+      value={watching && progress ? <PlaybackMeter progress={progress} label={label} /> : undefined}
+    />
+  )
+}
+
+/** Counts only: who is watching what on the Jellyfin server stays private. */
+function JellyfinRow({ jellyfin }: { jellyfin: JellyfinActivity }) {
+  const { streams, direct, transcode } = jellyfin
+  return (
+    <DataRow
+      leading={<Plate icon={<Server />} />}
+      title={
+        streams === 0
+          ? "Nothing playing on my Jellyfin"
+          : `${streams} ${streams === 1 ? "stream" : "streams"} on my Jellyfin`
+      }
+      status={
+        streams > 0 ? { status: "up", label: "streaming" } : { status: "idle", label: "idle" }
+      }
+      meta={
+        streams > 0
+          ? [
+              <span key="direct" className="tabular">
+                {direct} direct
+              </span>,
+              <span key="transcode" className="tabular">
+                {transcode} transcoding
+              </span>,
+            ]
+          : []
+      }
+    />
   )
 }
 
 /** The live rows; integrations that returned null are left out. */
 export function LivePanelView({ data, now }: { data: LiveActivity; now?: Date }) {
   const { spotify, trakt, jellyfin } = data
-  // A pinned `now` (tests) also pins playback progress; otherwise it ticks on its own.
-  const progressNow = now?.getTime()
   return (
     <Panel>
-      <PanelHeader title="live" meta={<span>updates every minute</span>} />
-      <ul className="divide-y">
-        {spotify && (
-          <Row
-            icon={<Music />}
-            art={spotify.art}
-            pill={
-              spotify.state === "playing" ? (
-                <StatusPill status="up" pulse>
-                  listening
-                </StatusPill>
-              ) : (
-                <StatusPill status="idle">
-                  last played{spotify.at ? ` · ${formatRelative(spotify.at, now)}` : ""}
-                </StatusPill>
-              )
-            }
-            title={spotify.track}
-            href={spotify.url}
-            detail={spotify.artists}
-            progress={
-              spotify.state === "playing" && (
-                <PlaybackProgress
-                  timing={spotify}
-                  label="Track progress"
-                  now={progressNow}
-                  className="mt-2"
-                />
-              )
-            }
-          />
-        )}
-        {trakt && (
-          <Row
-            icon={<Tv />}
-            poster={trakt.poster}
-            pill={
-              trakt.state === "watching" ? (
-                <StatusPill status="up" pulse>
-                  watching
-                </StatusPill>
-              ) : (
-                <StatusPill status="idle">
-                  last watched{trakt.at ? ` · ${formatRelative(trakt.at, now)}` : ""}
-                </StatusPill>
-              )
-            }
-            title={traktLabel(trakt)}
-            href={trakt.url}
-            detail={trakt.kind === "episode" && trakt.title !== trakt.show ? trakt.title : null}
-            progress={
-              trakt.state === "watching" && (
-                <PlaybackProgress
-                  timing={trakt}
-                  label={trakt.kind === "movie" ? "Movie progress" : "Episode progress"}
-                  now={progressNow}
-                  className="mt-2"
-                />
-              )
-            }
-          />
-        )}
-        {jellyfin && (
-          <Row
-            icon={<Server />}
-            pill={
-              jellyfin.streams > 0 ? (
-                <StatusPill status="up">streaming</StatusPill>
-              ) : (
-                <StatusPill status="idle">idle</StatusPill>
-              )
-            }
-            title={
-              jellyfin.streams === 0
-                ? "Nobody is watching on my Jellyfin"
-                : `${jellyfin.streams} ${jellyfin.streams === 1 ? "person is" : "people are"} watching on my Jellyfin`
-            }
-            detail={
-              jellyfin.streams > 0
-                ? `${jellyfin.direct} direct play · ${jellyfin.transcode} transcoding`
-                : null
-            }
-          />
-        )}
-      </ul>
+      <PanelHeader
+        title={
+          <h2 id="now-live" className="text-foreground">
+            live
+          </h2>
+        }
+        meta={<span>updates every minute</span>}
+      />
+      <DataList>
+        {spotify && <SpotifyRow spotify={spotify} now={now} />}
+        {trakt && <TraktRow trakt={trakt} now={now} />}
+        {jellyfin && <JellyfinRow jellyfin={jellyfin} />}
+      </DataList>
       {trakt?.poster && (
         // TMDB's terms: credit it wherever its images appear.
-        <p className="border-t px-4 py-2 text-xs text-muted-foreground">
+        <p className="border-t px-4 py-2 text-xs text-pretty text-muted-foreground">
           Poster from{" "}
           <a
             href="https://www.themoviedb.org/"
             target="_blank"
             rel="noopener noreferrer"
-            className="underline underline-offset-2 hover:text-foreground"
+            className="underline decoration-border underline-offset-4 transition-colors hover:text-foreground hover:decoration-foreground"
           >
             TMDB
           </a>
@@ -192,12 +175,22 @@ export function LivePanelView({ data, now }: { data: LiveActivity; now?: Date })
 export function LivePanel() {
   const data = useLiveActivity()
   if (data === undefined) {
+    // The panel's own frame while the first answer is out, so nothing jumps when it lands.
     return (
-      <div aria-busy="true" aria-label="Loading live activity" className="space-y-2">
-        <Skeleton className="h-10 w-full" />
-        <Skeleton className="h-16 w-full" />
-        <Skeleton className="h-16 w-full" />
-      </div>
+      <Panel aria-busy="true" aria-label="Loading live activity">
+        <PanelHeader title="live" meta={<span>updates every minute</span>} />
+        <div className="divide-y">
+          {[0, 1, 2].map((i) => (
+            <div key={i} className="flex items-center gap-3 px-4 py-3">
+              <Skeleton className="size-8 shrink-0" />
+              <div className="flex-1 space-y-1.5">
+                <Skeleton className="h-4 w-40" />
+                <Skeleton className="h-3.5 w-24" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </Panel>
     )
   }
   if (!hasActivity(data)) return null

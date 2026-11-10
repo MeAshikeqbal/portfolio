@@ -1,8 +1,8 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import { Meter } from "@/components/dashboard/meter"
 import { formatDuration, progressAt, type Progress, type Timing } from "@/lib/live/progress"
-import { cn } from "@/lib/utils"
 
 /**
  * Playback progress, re-measured every second against the visitor's clock. `fixedNow` pins the
@@ -25,47 +25,25 @@ export const progressText = (p: Progress) =>
   `${formatDuration(p.elapsedMs)} / ${formatDuration(p.totalMs)}`
 
 /** "2:31 of 3:40", for screen readers. */
-const progressValueText = (p: Progress) =>
+export const progressValueText = (p: Progress) =>
   `${formatDuration(p.elapsedMs)} of ${formatDuration(p.totalMs)}`
 
 /**
- * A thin track with elapsed / total beside it, for a playing row on /now. Neutral ink only:
- * it's a measurement, not a status. Nothing renders without a usable start and end.
+ * Playback as the site's thin neutral meter (the same one storage rows use), announced as a
+ * progress bar. The elapsed / total time is printed beside it in the row, never only drawn,
+ * and on phones it's the only form shown.
  */
-export function PlaybackProgress({
-  timing,
-  label,
-  now,
-  className,
-}: {
-  timing: Timing
-  /** Accessible name, e.g. "Track progress". */
-  label: string
-  now?: number
-  className?: string
-}) {
-  const progress = usePlaybackProgress(timing, now)
-  if (!progress) return null
-  const percent = progress.fraction * 100
+export function PlaybackMeter({ progress, label }: { progress: Progress; label: string }) {
   return (
-    <div className={cn("flex items-center gap-2", className)}>
-      <div
-        role="progressbar"
-        aria-label={label}
-        aria-valuemin={0}
-        aria-valuemax={100}
-        aria-valuenow={Math.round(percent)}
-        aria-valuetext={progressValueText(progress)}
-        className="h-1 flex-1 overflow-hidden rounded-full bg-surface-2 ring-1 ring-border ring-inset"
-      >
-        <div
-          className="h-full rounded-full bg-foreground/60 transition-[width] duration-1000 ease-linear motion-reduce:transition-none"
-          style={{ width: `${percent}%` }}
-        />
-      </div>
-      <span className="shrink-0 font-mono text-xs text-muted-foreground tabular-nums">
-        {progressText(progress)}
-      </span>
-    </div>
+    // Phones put the row's facts under the title, which leaves the bar stranded on the right:
+    // there the printed time alone carries it.
+    <Meter
+      className="hidden sm:block"
+      role="progressbar"
+      value={progress.elapsedMs}
+      max={progress.totalMs}
+      label={label}
+      valueText={progressValueText(progress)}
+    />
   )
 }
