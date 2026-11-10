@@ -77,21 +77,33 @@ export function LabSummary(props: { className?: string }) {
   return <LabSummaryView {...props} status={status} now={now} />
 }
 
-/** "lab 3/3 up" in the system bar, linking to Homecave; hidden until the lab has reported. */
+/**
+ * "lab ●●● 3/3 up" in the statusline, one dot per machine, linking to Homecave; hidden until
+ * the lab has reported. The count is coloured only when something isn't up.
+ */
 export function LabBarItem({ className }: { className?: string }) {
   const { status, now } = useLabStatus()
   const summary = labSummary(status, now)
-  if (!summary) return null
+  if (!status || !summary) return null
   return (
-    <Link
-      href="/homecave"
-      className={cn(
-        "flex shrink-0 items-center gap-2 transition-colors hover:text-foreground",
-        className,
-      )}
-    >
-      <StatusDot status={summary.status} />
-      lab {summary.label}
+    <Link href="/homecave" className={cn("flex shrink-0 items-center gap-2", className)}>
+      lab
+      <span className="flex items-center gap-1">
+        {status.nodes.map((node) => {
+          const state = nodeState(node.name, status, now)
+          return state ? (
+            <StatusDot
+              key={node.name}
+              status={state.status}
+              label={`${node.name} ${state.label.split(" · ")[0]},`}
+              className="size-1.5"
+            />
+          ) : null
+        })}
+      </span>
+      <span className={cn(summary.status !== "up" && STATUS_TEXT_CLASS[summary.status])}>
+        {summary.label}
+      </span>
     </Link>
   )
 }

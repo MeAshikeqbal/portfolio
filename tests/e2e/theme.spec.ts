@@ -1,13 +1,25 @@
 import { expect, test, type Page } from "@playwright/test"
 
-/** Opens the mobile menu when the desktop nav is hidden, so the theme toggle is reachable. */
-async function revealThemeToggle(page: Page) {
-  const menu = page.getByRole("button", { name: "Toggle menu" })
-  if (await menu.isVisible()) await menu.click()
-}
+type Mode = "system" | "light" | "dark"
 
-function themeButton(page: Page, name: "System theme" | "Light theme" | "Dark theme") {
-  return page.getByRole("radio", { name }).locator("visible=true").first()
+/**
+ * Picks a theme the way a visitor would: the header's cycle button on desktop (clicked until
+ * it names the mode), or the three-way switch in the mobile menu.
+ */
+async function chooseTheme(page: Page, mode: Mode) {
+  const menu = page.getByRole("button", { name: "Toggle menu" })
+  if (await menu.isVisible()) {
+    if ((await menu.getAttribute("aria-expanded")) !== "true") await menu.click()
+    const label = `${mode[0].toUpperCase()}${mode.slice(1)} theme`
+    await page.getByRole("radio", { name: label }).locator("visible=true").first().click()
+    return
+  }
+  const cycle = page.getByRole("button", { name: /^Colour theme: / })
+  for (let i = 0; i < 3; i++) {
+    if ((await cycle.getAttribute("aria-label")) === `Colour theme: ${mode}`) return
+    await cycle.click()
+  }
+  await expect(cycle).toHaveAttribute("aria-label", `Colour theme: ${mode}`)
 }
 
 test.describe("theme", () => {
@@ -24,15 +36,13 @@ test.describe("theme", () => {
   test("the toggle overrides the system and persists across reloads", async ({ page }) => {
     await page.emulateMedia({ colorScheme: "light" })
     await page.goto("/")
-    await revealThemeToggle(page)
-    await themeButton(page, "Dark theme").click()
+    await chooseTheme(page, "dark")
     await expect(page.locator("html")).toHaveClass(/\bdark\b/)
 
     await page.reload()
     await expect(page.locator("html")).toHaveClass(/\bdark\b/)
 
-    await revealThemeToggle(page)
-    await themeButton(page, "System theme").click()
+    await chooseTheme(page, "system")
     await expect(page.locator("html")).not.toHaveClass(/\bdark\b/)
   })
 })

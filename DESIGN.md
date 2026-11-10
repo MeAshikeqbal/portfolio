@@ -121,10 +121,10 @@ components:
     textColor: "{colors.background}"
     rounded: "{rounded.full}"
   nav-link-active:
-    backgroundColor: "{colors.surface-2}"
     textColor: "{colors.ink}"
-    rounded: "{rounded.md}"
-    padding: "6px 12px"
+    borderBottom: "1px solid {colors.ink}"
+    padding: "0 12px"
+    height: "56px"
 ---
 
 # Design System: itsashik.dev
@@ -156,7 +156,7 @@ A grey, faintly cool monochrome, broken only by five signal colours with fixed m
 ### Neutral
 - **Paper Grey** (`background`): the page itself. Dark: oklch(0.145 0.004 286).
 - **Panel White** (`surface`): panels, tiles, the system bar. Dark: oklch(0.18 0.005 286).
-- **Rack Grey** (`surface-2`): hover and active backgrounds on rows and nav links, inline code chips, code block backgrounds. Dark: oklch(0.225 0.006 286).
+- **Rack Grey** (`surface-2`): hover and active backgrounds on rows, inline code chips, code block backgrounds. Dark: oklch(0.225 0.006 286).
 - **Muted Ink** (`muted-ink`): descriptions, metadata, labels, inactive nav. Dark: oklch(0.71 0.012 286).
 - **Hairline** (`hairline`) / **Strong Hairline** (`hairline-strong`): every border and divider, and input strokes (`hairline-strong`). The dot-grid backdrop uses `hairline-strong` at 60% opacity.
 
@@ -203,7 +203,17 @@ Each status follows one recipe. The dot is at least 3:1 against the surface. The
 
 There is a single centred column, at most 72rem (`max-w-6xl`), with 16px gutters on phones and 24px from `sm`. Sections stack vertically with 64px of vertical padding (80px from `sm`) and are separated by full-width hairlines (`border-t` / `border-b`), not by background changes. Anchored sections clear the sticky 56px header with `scroll-mt-20`.
 
-The page shell runs top to bottom: a 32px **system bar**, then a sticky **header** at 56px with an 80% background and a backdrop blur, then the sections, then the footer. The system bar reports only measured facts: the GitHub sync's health (a status dot re-judged in the browser against the visitor's clock, so a stale static page can't keep showing green; hidden until the sync has run), the newest post's date, and the build SHA and date from `sm` up. A page may pass one explicit notice (the 404 page says "1 page not found").
+The page shell runs top to bottom: a 32px **system bar**, then a sticky **header** at 56px with an 80% background and a backdrop blur, then the sections, then the footer.
+
+The system bar is a statusline: fixed mono cells split by 1px hairlines, the first flush with the wordmark below it, the build pinned right. It reports only measured facts, newest-first in importance:
+- **github**: "synced 2h ago", or "stale 3d ago" in warn text. The dot is re-judged in the browser against the visitor's clock, so a stale static page can't keep showing green; hidden until the sync has run.
+- **lab** (from `md`): one dot per machine, each with a screen-reader state, then "3/3 up", coloured only when something isn't up. Links to Homecave; hidden until the lab has reported.
+- **log** (from `sm`): the newest post's age, linking to the writing list.
+- **build** (from `sm`, right): the short SHA, linking to its commit, and the build date.
+
+Ages render as dates on the server and switch to "2h ago" after hydration (`RelativeTime`), so there is no hydration mismatch. A page may pass one explicit notice (the 404 page says "1 page not found"), which replaces the left cells.
+
+The header holds the wordmark, the nav links, a hairline divider, an icon-only search trigger (with the ⌘K hint from `lg`) and a single theme button that cycles system → light → dark. Nav links fill the header's height; the active one is ink with a 1px ink underline sitting on the header's bottom border, and hover previews it in strong hairline. The mobile menu keeps the three-way theme switch.
 
 The home page reads in priority order: hero, **Writing** (the lead section), Projects, Experience & education, Stack, Contact.
 
