@@ -9,7 +9,8 @@ export const OVERVIEW_QUERY = `{
   "posts": count(*[_type == "post" && ${PUBLISHED}]),
   "projects": count(*[_type == "project" && ${PUBLISHED}]),
   "skills": count(*[_type == "skills" && ${PUBLISHED}]),
-  "drafts": count(*[_id in path("drafts.**")])
+  "drafts": count(*[_id in path("drafts.**")]),
+  "postDates": *[_type == "post" && ${PUBLISHED} && defined(publishedAt)].publishedAt
 }`
 
 export interface OverviewResult {
@@ -17,6 +18,8 @@ export interface OverviewResult {
   projects: number
   skills: number
   drafts: number
+  /** Publish dates of published posts, for the cadence sparkline. */
+  postDates: string[]
 }
 
 /** Runs against the private inbox dataset. */
@@ -51,8 +54,12 @@ export const HEALTH_QUERY = `{
   "skillIcons": *[_type == "skills" && ${PUBLISHED} && defined(icon) && icon != ""]{ _id, _type, "title": name, icon }
 }`
 
-/** The published /now page's last edit (null while it's unpublished or has no body). */
-export const NOW_FRESHNESS_QUERY = `*[_type == "now" && _id == "now" && count(body) > 0][0]._updatedAt`
+/**
+ * When the published /now update was written (its last edit until `updatedOn` is set, as on the
+ * site); null while it's unpublished or has no body.
+ */
+const PUBLISHED_NOW = `*[_type == "now" && _id == "now" && count(body) > 0][0]`
+export const NOW_FRESHNESS_QUERY = `coalesce(${PUBLISHED_NOW}.updatedOn, ${PUBLISHED_NOW}._updatedAt)`
 
 /** Both versions of each project with a repo, so "Sync all" refreshes drafts too. */
 export const GITHUB_QUERY = `*[_type == "project" && defined(github) && !(_id in path("versions.**"))]
