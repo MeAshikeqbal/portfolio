@@ -1,4 +1,4 @@
-import { DesktopIcon } from "@sanity/icons/Desktop"
+import { HomecaveIcon } from "../components/icons"
 import { defineArrayMember, defineField, defineType } from "sanity"
 
 import { IconInput, validateIcon } from "../components/icon-input"
@@ -12,7 +12,7 @@ export const usesType = defineType({
   name: "uses",
   title: "Homecave",
   type: "document",
-  icon: DesktopIcon,
+  icon: HomecaveIcon,
   fields: [
     defineField({
       name: "intro",

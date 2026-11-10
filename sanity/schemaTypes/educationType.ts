@@ -1,4 +1,4 @@
-import { DocumentTextIcon } from "@sanity/icons/DocumentText"
+import { EducationIcon } from "../components/icons"
 import { defineField, defineType } from "sanity"
 
 import { yearRange } from "./validation"
@@ -7,7 +7,7 @@ export const educationType = defineType({
   name: "education",
   title: "Education",
   type: "document",
-  icon: DocumentTextIcon,
+  icon: EducationIcon,
   fields: [
     defineField({
       name: "year",

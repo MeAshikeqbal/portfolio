@@ -1,4 +1,4 @@
-import { BarChartIcon } from "@sanity/icons/BarChart"
+import { SkillIcon } from "../components/icons"
 import { orderRankField, orderRankOrdering } from "@sanity/orderable-document-list"
 import { defineField, defineType } from "sanity"
 
@@ -51,7 +51,7 @@ export const skillType = defineType({
   name: "skills",
   title: "Skills",
   type: "document",
-  icon: BarChartIcon,
+  icon: SkillIcon,
   orderings: [orderRankOrdering],
   fields: [
     orderRankField({ type: "skills" }),

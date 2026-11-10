@@ -21,8 +21,9 @@ import { OpenOnSiteAction, StartNowUpdateAction, SyncFromGitHubAction } from "./
 import { dashboardTool } from "./sanity/dashboard"
 import { isAdmin } from "./sanity/dashboard/logic"
 import { StudioLogo } from "./sanity/components/studio-logo"
+import { StudioNavbar } from "./sanity/components/statusline"
 import { studioTheme } from "./sanity/theme"
-import { InboxIcon, RssIcon } from "lucide-react"
+import { InboxWorkspaceIcon, SiteWorkspaceIcon } from "./sanity/components/icons"
 import { media } from "sanity-plugin-media"
 import { codeInput } from "@sanity/code-input"
 
@@ -30,11 +31,11 @@ import { codeInput } from "@sanity/code-input"
 const SINGLETONS = new Set(["cv", "uses", "now"])
 const SINGLETON_ACTIONS = new Set(["publish", "discardChanges", "restore"])
 
-/** Shared look for both workspaces. */
+/** Shared look for both workspaces: theme, wordmark and the statusline under the navbar. */
 const shared = {
   projectId,
   theme: studioTheme,
-  studio: { components: { logo: StudioLogo } },
+  studio: { components: { logo: StudioLogo, navbar: StudioNavbar } },
 }
 
 /**
@@ -49,7 +50,7 @@ export default defineConfig([
     name: "content",
     basePath: "/studio/content",
     title: "itsashik.dev",
-    icon: RssIcon,
+    icon: SiteWorkspaceIcon,
     dataset,
     schema,
     plugins: [
@@ -98,7 +99,7 @@ export default defineConfig([
     basePath: "/studio/inbox",
     title: "Inbox",
     subtitle: "Contact messages (private)",
-    icon: InboxIcon,
+    icon: InboxWorkspaceIcon,
     dataset: inboxDatasetName,
     schema: inboxSchema,
     plugins: [structureTool({ structure: inboxStructure, title: "Inbox" })],

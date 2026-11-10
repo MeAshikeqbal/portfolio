@@ -1,4 +1,4 @@
-import { HomeIcon } from "@sanity/icons/Home"
+import { HomeIcon } from "../components/icons"
 import { Box, Container, Grid, Stack, Text } from "@sanity/ui"
 import { useCurrentUser, type Tool } from "sanity"
 

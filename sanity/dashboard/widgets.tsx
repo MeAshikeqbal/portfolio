@@ -1,4 +1,4 @@
-import { SyncIcon } from "@sanity/icons/Sync"
+import { SyncIcon } from "../components/icons"
 import { Box, Button, Card, Grid, Stack, Text } from "@sanity/ui"
 import { useToast } from "@sanity/ui/toast"
 import { useEffect, useMemo, useState } from "react"

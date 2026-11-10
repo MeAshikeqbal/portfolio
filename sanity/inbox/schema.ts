@@ -1,4 +1,4 @@
-import { EnvelopeIcon } from "@sanity/icons/Envelope"
+import { MessageIcon } from "../components/icons"
 import { defineField, defineType } from "sanity"
 
 export const MESSAGE_STATUSES = [
@@ -15,7 +15,7 @@ export const messageType = defineType({
   name: "message",
   title: "Message",
   type: "document",
-  icon: EnvelopeIcon,
+  icon: MessageIcon,
   // Status changes apply immediately: no draft to publish just to mark a message read.
   liveEdit: true,
   fields: [

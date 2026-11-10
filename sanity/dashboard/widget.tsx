@@ -1,5 +1,5 @@
 import { Badge, Box, Button, Card, Flex, Spinner, Stack, Text } from "@sanity/ui"
-import { RefreshIcon } from "@sanity/icons/Refresh"
+import { RefreshIcon } from "../components/icons"
 import type { ReactNode } from "react"
 import { IntentLink, Link } from "sanity/router"
 

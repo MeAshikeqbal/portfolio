@@ -1,4 +1,4 @@
-import { DocumentTextIcon } from "@sanity/icons/DocumentText"
+import { ProjectIcon } from "../components/icons"
 import { orderRankField, orderRankOrdering } from "@sanity/orderable-document-list"
 import { defineArrayMember, defineField, defineType } from "sanity"
 
@@ -14,7 +14,7 @@ export const projectType = defineType({
   name: "project",
   title: "Project",
   type: "document",
-  icon: DocumentTextIcon,
+  icon: ProjectIcon,
   groups: [
     { name: "overview", title: "Overview", default: true },
     { name: "caseStudy", title: "Case study" },

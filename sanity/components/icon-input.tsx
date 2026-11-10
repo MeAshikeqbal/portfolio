@@ -1,4 +1,4 @@
-import { SearchIcon } from "@sanity/icons/Search"
+import { SearchIcon } from "./icons"
 import { Box, Button, Card, Flex, Grid, Spinner, Stack, Text, TextInput } from "@sanity/ui"
 import { useEffect, useState } from "react"
 import { set, type StringInputProps } from "sanity"

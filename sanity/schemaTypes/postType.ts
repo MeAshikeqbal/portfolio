@@ -1,4 +1,4 @@
-import { DocumentTextIcon } from "@sanity/icons/DocumentText"
+import { PostIcon } from "../components/icons"
 import { defineArrayMember, defineField, defineType } from "sanity"
 
 import { requiredAlt } from "./validation"
@@ -9,7 +9,7 @@ export const postType = defineType({
   name: "post",
   title: "Post",
   type: "document",
-  icon: DocumentTextIcon,
+  icon: PostIcon,
   groups: [
     { name: "content", title: "Content", default: true },
     { name: "meta", title: "Meta" },

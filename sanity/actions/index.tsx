@@ -1,6 +1,4 @@
-import { LaunchIcon } from "@sanity/icons/Launch"
-import { ResetIcon } from "@sanity/icons/Reset"
-import { SyncIcon } from "@sanity/icons/Sync"
+import { OpenIcon, ResetIcon, SyncIcon } from "../components/icons"
 import { useToast } from "@sanity/ui/toast"
 import { useState } from "react"
 import { useClient, type DocumentActionComponent } from "sanity"
@@ -18,7 +16,7 @@ export const OpenOnSiteAction: DocumentActionComponent = ({ type, published }) =
   const path = published ? sitePath(type, slug) : null
   return {
     label: "Open on site",
-    icon: LaunchIcon,
+    icon: OpenIcon,
     disabled: !path,
     title: path ? `Open ${path} in a new tab` : "Publish first: there's no live page yet",
     onHandle: () => {
