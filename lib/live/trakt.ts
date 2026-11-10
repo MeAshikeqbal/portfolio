@@ -2,11 +2,13 @@ import "server-only"
 
 import type { TraktActivity } from "./types"
 import { getJson, isoDate, num, str, type Env, type Fetch } from "./http"
+import { getTmdbPoster } from "./tmdb"
 
 const API = "https://api.trakt.tv"
 
 interface TraktIds {
   slug?: unknown
+  tmdb?: unknown
 }
 interface TraktEntry {
   type?: unknown
@@ -41,6 +43,7 @@ export function toTraktActivity(
       episode: null,
       year: num(entry.movie?.year),
       url: movieSlug ? `https://trakt.tv/movies/${movieSlug}` : null,
+      poster: null,
       at,
     }
   }
@@ -65,11 +68,36 @@ export function toTraktActivity(
           : showSlug
             ? `https://trakt.tv/shows/${showSlug}`
             : null,
+      poster: null,
       at,
     }
   }
 
   return null
+}
+
+/** The title's TMDB id and kind (the show's for an episode), for the poster lookup. */
+export function tmdbRef(
+  entry: TraktEntry | null | undefined,
+): { kind: "movie" | "tv"; id: number } | null {
+  const ids =
+    entry?.type === "movie" ? entry.movie?.ids : entry?.type === "episode" ? entry.show?.ids : null
+  const id = num(ids?.tmdb)
+  return id !== null && Number.isInteger(id) && id > 0
+    ? { kind: entry?.type === "movie" ? "movie" : "tv", id }
+    : null
+}
+
+/** Adds the poster when TMDB is configured; the activity is unchanged otherwise. */
+async function withPoster(
+  activity: TraktActivity | null,
+  entry: TraktEntry | null | undefined,
+  env: Env,
+  fetchImpl: Fetch,
+): Promise<TraktActivity | null> {
+  const ref = tmdbRef(entry)
+  if (!activity || !ref) return activity
+  return { ...activity, poster: await getTmdbPoster(ref.kind, ref.id, env, fetchImpl) }
 }
 
 /**
@@ -94,9 +122,10 @@ export async function getTraktActivity(
   const watching = await getJson<TraktEntry>(fetchImpl, `${base}/watching`, { headers })
   if (watching?.data) {
     const activity = toTraktActivity(watching.data, "watching")
-    if (activity) return activity
+    if (activity) return withPoster(activity, watching.data, env, fetchImpl)
   }
 
   const history = await getJson<TraktEntry[]>(fetchImpl, `${base}/history?limit=1`, { headers })
-  return Array.isArray(history?.data) ? toTraktActivity(history.data[0], "last") : null
+  const last = Array.isArray(history?.data) ? history.data[0] : null
+  return withPoster(toTraktActivity(last, "last"), last, env, fetchImpl)
 }
