@@ -50,7 +50,7 @@ when it's under 3 minutes old:
 | Edge | requests/min, % 5xx over 2h | counts new lines in the reverse proxy's access log |
 | DNS | queries and % blocked over up to 24h | counts new lines in AdGuard's query log |
 | Media | GB saved by re-encoding | Tdarr's local statistics API |
-| Security | IPs banned now, attacks over 24h (hourly) and their broad kinds (probing, exploit, brute force, crawler, other) | CrowdSec's `cscli` inside the edge VM; IPs, countries, ASNs and scenario names never leave the collector, and the site never names the tool |
+| Security | requests checked over 24h (hourly; backfilled once from the proxy's access log), blocklist size by kind, IPs banned by its own detections, attacks over 24h (hourly) by broad kind (probing, exploit, brute force, crawler, other) | CrowdSec's `cscli` inside the edge VM; IPs, countries, ASNs and scenario names never leave the collector, and the site never names the tool |
 
 Log counting is incremental (by byte offset, in `/var/lib/lab-collect/state.json`), so lines,
 paths, client IPs and domains are never read twice and never leave the collector. Slow probes
@@ -67,7 +67,7 @@ Config `/etc/lab-collect.json` (root, 600), per node; every section is optional:
  "edge": {"vm": 150, "log": "/opt/traefik/logs/access.log"},
  "dns": {"ct": 100, "log": "/opt/AdGuardHome/data/querylog.json"},
  "tdarr": {"ct": 107, "url": "http://localhost:8265"},
- "security": {"vm": 150, "container": "crowdsec"},
+ "security": {"vm": 150, "container": "crowdsec", "log": "/opt/traefik/logs/access.log"},
  "wan": ["1.1.1.1", "8.8.8.8"], "gpu": true, "backup": true}
 ```
 Service names must match the Homecave rows in the Studio (that's where the badges go).
