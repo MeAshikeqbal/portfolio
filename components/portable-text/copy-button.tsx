@@ -5,7 +5,21 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 
-export function CopyButton({ text, className }: { text: string; className?: string }) {
+interface CopyButtonProps {
+  text: string
+  /** What gets copied, as an action ("Copy code", "Copy fingerprint"). */
+  label?: string
+  /** Show the label next to the icon instead of only as the accessible name. */
+  showLabel?: boolean
+  className?: string
+}
+
+export function CopyButton({
+  text,
+  label = "Copy code",
+  showLabel = false,
+  className,
+}: CopyButtonProps) {
   const [copied, setCopied] = useState(false)
 
   async function copy() {
@@ -18,17 +32,20 @@ export function CopyButton({ text, className }: { text: string; className?: stri
     }
   }
 
+  const current = copied ? "Copied" : label
+
   return (
     <Button
       type="button"
       variant="ghost"
-      size="icon-sm"
+      size={showLabel ? "sm" : "icon-sm"}
       onClick={copy}
-      aria-label={copied ? "Copied" : "Copy code"}
-      title={copied ? "Copied" : "Copy code"}
+      aria-label={showLabel ? undefined : current}
+      title={showLabel ? undefined : current}
       className={cn("text-muted-foreground hover:text-foreground", className)}
     >
-      {copied ? <Check /> : <Copy />}
+      {copied ? <Check aria-hidden /> : <Copy aria-hidden />}
+      {showLabel && <span aria-live="polite">{current}</span>}
     </Button>
   )
 }

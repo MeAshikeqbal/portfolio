@@ -27,6 +27,11 @@ export const siteConfig = {
     label: string
   } | null,
   repo: "https://github.com/MeAshikeqbal/portfolio",
+  /**
+   * The PGP key that signs the footer's identity statement. The trust anchor: tests fail unless
+   * lib/pgp.generated.ts carries this key and a signature from it (scripts/sign-identity.ts).
+   */
+  pgpFingerprint: "0102BDE6DEE8C792E6917D05FA0D3AE3EB0E3762",
   /** /now shows an amber "stale" pill once its last edit is older than this. */
   nowStaleAfterDays: 90,
   socials,

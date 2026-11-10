@@ -8,3 +8,6 @@ package-lock.json
 sanity.types.ts
 schema.json
 *.md
+
+# Written by scripts/sign-identity.ts
+lib/pgp.generated.ts
