@@ -36,7 +36,7 @@ export async function Hero() {
         <div>
           <div className="flex items-center gap-4 sm:gap-5">
             <Image
-              src="/me.jpeg"
+              src="/me-2026.jpg"
               alt=""
               width={72}
               height={72}

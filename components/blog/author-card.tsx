@@ -15,7 +15,7 @@ export function AuthorCard({ name }: { name?: string | null }) {
     <Panel>
       <div className="flex flex-col gap-5 p-5 sm:flex-row sm:items-center sm:gap-6 sm:p-6">
         <Image
-          src="/me.jpeg"
+          src="/me-2026.jpg"
           alt=""
           width={64}
           height={64}
