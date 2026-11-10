@@ -30,6 +30,9 @@ describe("getSpotifyActivity", () => {
       url: "https://open.spotify.com/track/song",
       art: "https://i.scdn.co/image/64",
       at: null,
+      // No progress_ms/duration_ms in this response, so no bar.
+      startedAt: null,
+      endsAt: null,
     })
     expect(calls[1].init?.headers).toMatchObject({ authorization: "Bearer access" })
   })

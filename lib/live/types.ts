@@ -15,6 +15,12 @@ export interface SpotifyActivity {
   art: string | null
   /** When it was played (ISO), for "last"; null while playing. */
   at: string | null
+  /**
+   * While playing: when it started and when it will end (ISO), for a progress bar. Absolute
+   * times, so the response can sit in the CDN without the progress going stale. Null otherwise.
+   */
+  startedAt: string | null
+  endsAt: string | null
 }
 
 export interface TraktActivity {
@@ -33,6 +39,12 @@ export interface TraktActivity {
   poster: string | null
   /** When it was watched (ISO), for "last"; null while watching. */
   at: string | null
+  /**
+   * While playing: when it started and when it will end (ISO), for a progress bar. Absolute
+   * times, so the response can sit in the CDN without the progress going stale. Null otherwise.
+   */
+  startedAt: string | null
+  endsAt: string | null
 }
 
 export interface JellyfinActivity {

@@ -14,6 +14,8 @@ const spotify = (state: SpotifyActivity["state"], at: string | null = null): Spo
   url: "https://open.spotify.com/track/x",
   art: null,
   at,
+  startedAt: null,
+  endsAt: null,
 })
 const trakt = (state: TraktActivity["state"], at: string | null = null): TraktActivity => ({
   state,
@@ -26,6 +28,8 @@ const trakt = (state: TraktActivity["state"], at: string | null = null): TraktAc
   url: "https://trakt.tv/shows/the-show/seasons/1/episodes/2",
   poster: null,
   at,
+  startedAt: null,
+  endsAt: null,
 })
 const jellyfin = (streams: number, transcode = 0) => ({
   streams,

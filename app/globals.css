@@ -397,3 +397,32 @@ html[data-transition="theme"]::view-transition-new(root) {
     transition: opacity 150ms ease-out;
   }
 }
+
+/*
+ * Statusline now-playing: a title too long for its cell scrolls. The track holds two copies,
+ * so moving it by half loops seamlessly. Pauses on hover/focus; the component never starts it
+ * under reduced motion, and the rule below backs that up.
+ */
+.marquee-track {
+  animation: marquee var(--marquee-duration, 12s) linear infinite;
+}
+
+.group:hover .marquee-track,
+.group:focus-visible .marquee-track {
+  animation-play-state: paused;
+}
+
+@keyframes marquee {
+  from {
+    translate: 0 0;
+  }
+  to {
+    translate: -50% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track {
+    animation: none;
+  }
+}

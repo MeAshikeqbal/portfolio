@@ -2,6 +2,7 @@ import "server-only"
 
 import type { TraktActivity } from "./types"
 import { getJson, isoDate, num, str, type Env, type Fetch } from "./http"
+import { NO_TIMING, timing, type Timing } from "./progress"
 import { getTmdbPoster } from "./tmdb"
 
 const API = "https://api.trakt.tv"
@@ -13,6 +14,9 @@ interface TraktIds {
 interface TraktEntry {
   type?: unknown
   watched_at?: unknown
+  /** /watching only: when the check-in or scrobble started and when Trakt expects it to end. */
+  started_at?: unknown
+  expires_at?: unknown
   movie?: { title?: unknown; year?: unknown; ids?: TraktIds }
   show?: { title?: unknown; year?: unknown; ids?: TraktIds }
   episode?: { title?: unknown; season?: unknown; number?: unknown }
@@ -23,12 +27,18 @@ const slug = (ids: TraktIds | undefined) => {
   return value && /^[a-z0-9-]+$/.test(value) ? value : null
 }
 
+/**
+ * Builds the public activity from a Trakt watching or history entry (movie or episode only),
+ * with a trakt.tv link from a validated slug. The playback span is kept only while watching.
+ * Null for anything else, or when the title is missing.
+ */
 export function toTraktActivity(
   entry: TraktEntry | null | undefined,
   state: TraktActivity["state"],
 ): TraktActivity | null {
   if (!entry) return null
   const at = state === "last" ? isoDate(entry.watched_at) : null
+  const playback: Timing = state === "watching" ? traktTiming(entry) : NO_TIMING
 
   if (entry.type === "movie") {
     const title = str(entry.movie?.title)
@@ -45,6 +55,7 @@ export function toTraktActivity(
       url: movieSlug ? `https://trakt.tv/movies/${movieSlug}` : null,
       poster: null,
       at,
+      ...playback,
     }
   }
 
@@ -70,10 +81,20 @@ export function toTraktActivity(
             : null,
       poster: null,
       at,
+      ...playback,
     }
   }
 
   return null
+}
+
+/** The watching entry's span, straight from Trakt's own start and expiry times. */
+function traktTiming(entry: TraktEntry): Timing {
+  const ms = (value: unknown) => {
+    const iso = isoDate(value)
+    return iso ? Date.parse(iso) : null
+  }
+  return timing(ms(entry.started_at), ms(entry.expires_at))
 }
 
 /** The title's TMDB id and kind (the show's for an episode), for the poster lookup. */

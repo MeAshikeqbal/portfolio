@@ -2,6 +2,7 @@ import "server-only"
 
 import type { SpotifyActivity } from "./types"
 import { getJson, isoDate, num, safeUrl, str, type Env, type Fetch } from "./http"
+import { NO_TIMING, timing, type Timing } from "./progress"
 
 const TOKEN_URL = "https://accounts.spotify.com/api/token"
 const API = "https://api.spotify.com/v1/me/player"
@@ -11,6 +12,7 @@ interface SpotifyTrack {
   artists?: { name?: unknown }[]
   album?: { images?: { url?: unknown; width?: unknown }[] }
   external_urls?: { spotify?: unknown }
+  duration_ms?: unknown
 }
 
 let cachedToken: { value: string; expiresAt: number } | null = null
@@ -53,10 +55,16 @@ function albumArt(track: SpotifyTrack): string | null {
   return safeUrl((small ?? images.at(-1))?.url, ["i.scdn.co"])
 }
 
+/**
+ * Builds the public activity from a Spotify track, keeping only allowlisted fields (name,
+ * artists, an open.spotify.com link, i.scdn.co art). The playback span is kept only while
+ * playing. Null when there's no track or it has no name.
+ */
 export function toSpotifyActivity(
   track: SpotifyTrack | null | undefined,
   state: SpotifyActivity["state"],
   at: string | null,
+  playback: Timing = NO_TIMING,
 ): SpotifyActivity | null {
   const name = str(track?.name)
   if (!track || !name) return null
@@ -68,7 +76,22 @@ export function toSpotifyActivity(
     url: safeUrl(track.external_urls?.spotify, ["open.spotify.com"]),
     art: albumArt(track),
     at: state === "playing" ? null : at,
+    ...(state === "playing" ? playback : NO_TIMING),
   }
+}
+
+/**
+ * When the current track started and will end, from how far in it is right now. Measured
+ * against the server's clock at fetch time; a pause or seek shows up on the next poll.
+ */
+export function spotifyTiming(progressMs: unknown, durationMs: unknown, nowMs: number): Timing {
+  const progress = num(progressMs)
+  const duration = num(durationMs)
+  if (progress === null || duration === null || progress < 0 || progress > duration) {
+    return NO_TIMING
+  }
+  const start = nowMs - progress
+  return timing(start, start + duration)
 }
 
 /**
@@ -89,6 +112,7 @@ export async function getSpotifyActivity(
   const current = await getJson<{
     is_playing?: unknown
     timestamp?: unknown
+    progress_ms?: unknown
     currently_playing_type?: unknown
     item?: SpotifyTrack | null
   }>(fetchImpl, `${API}/currently-playing`, { headers })
@@ -98,6 +122,9 @@ export async function getSpotifyActivity(
       current.data.item,
       playing ? "playing" : "last",
       isoDate(current.data.timestamp),
+      playing
+        ? spotifyTiming(current.data.progress_ms, current.data.item.duration_ms, Date.now())
+        : NO_TIMING,
     )
     if (activity) return activity
   }

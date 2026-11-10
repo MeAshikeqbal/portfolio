@@ -35,6 +35,9 @@ describe("getTraktActivity", () => {
       url: "https://trakt.tv/shows/the-show/seasons/1/episodes/1",
       poster: null,
       at: null,
+      // No started_at/expires_at in this entry, so no bar.
+      startedAt: null,
+      endsAt: null,
     })
     expect(calls[0].init?.headers).toMatchObject({
       "trakt-api-key": "client",
