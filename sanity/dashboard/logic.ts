@@ -13,7 +13,7 @@ export const TYPE_LABELS: Record<string, string> = {
   experiences: "Experience",
   education: "Education",
   cv: "CV",
-  uses: "Uses",
+  uses: "Homecave",
   now: "Now",
 }
 

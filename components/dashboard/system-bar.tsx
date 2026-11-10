@@ -1,3 +1,4 @@
+import { LabBarItem } from "@/components/lab/lab-badges"
 import { formatDate } from "@/lib/format"
 import { syncStatus, type Status } from "@/lib/status"
 import { cn } from "@/lib/utils"
@@ -18,7 +19,7 @@ interface SystemBarProps {
 /**
  * Thin strip at the very top of the page. It only reports measured facts: the GitHub sync's
  * health (re-checked in the browser, so a stale static page can't keep showing green), the
- * newest post, and the deployed build.
+ * homelab's state (once it has reported), the newest post, and the deployed build.
  */
 export function SystemBar({ syncedAt, latestPostAt, notice, className }: SystemBarProps) {
   const sha = process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 7)
@@ -39,6 +40,7 @@ export function SystemBar({ syncedAt, latestPostAt, notice, className }: SystemB
           {!notice && syncedAt && (
             <SyncIndicator syncedAt={syncedAt} initial={syncStatus(syncedAt)} />
           )}
+          {!notice && <LabBarItem className="hidden md:flex" />}
           {!notice && lastPost && (
             <span className={cn("truncate", syncedAt && "hidden sm:inline")}>
               last post · <time dateTime={latestPostAt ?? undefined}>{lastPost}</time>

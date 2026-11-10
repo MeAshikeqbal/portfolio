@@ -1,23 +1,16 @@
 import { readLabStatus } from "@/lib/lab/store"
-import type { LabStatus } from "@/lib/lab/types"
+import { toPublicStatus } from "@/lib/lab/public"
 
 export const dynamic = "force-dynamic"
 
 /**
- * The last homelab heartbeat for the hero and /uses: public machine names, online, uptime and
- * when it arrived (freshness is judged in the browser). `null` until the lab has reported.
- * CDN-cached for a minute; the lab only reports every five.
+ * The homelab's live status for Homecave, the hero and the system bar: per node its latest
+ * anonymized report, 24h of 15-minute buckets and 24h availability. `null` until the lab has
+ * reported. CDN-cached for 30 seconds (the agents report every 30).
  */
 export async function GET() {
-  const stored = await readLabStatus()
-  // Allowlist: never pass through anything else the store might hold.
-  const body: LabStatus | null = stored
-    ? {
-        nodes: stored.nodes.map(({ name, online, uptime }) => ({ name, online, uptime })),
-        receivedAt: stored.receivedAt,
-      }
-    : null
-  return Response.json(body, {
-    headers: { "cache-control": "public, s-maxage=60, stale-while-revalidate=60" },
+  const status = await readLabStatus()
+  return Response.json(status ? toPublicStatus(status) : null, {
+    headers: { "cache-control": "public, s-maxage=30, stale-while-revalidate=30" },
   })
 }

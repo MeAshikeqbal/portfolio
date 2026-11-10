@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest"
 import { HomelabList } from "@/components/home/homelab-list"
 
 describe("HomelabList", () => {
-  it("renders named items and links to the full setup", () => {
+  it("renders named items and links to the live dashboard", () => {
     render(
       <HomelabList
         items={[
@@ -17,7 +17,10 @@ describe("HomelabList", () => {
     expect(screen.getAllByRole("listitem")).toHaveLength(2)
     expect(screen.getByText("Proxmox VE cluster")).toBeVisible()
     expect(screen.queryByText("nameless")).toBeNull()
-    expect(screen.getByRole("link", { name: "full setup" })).toHaveAttribute("href", "/uses")
+    expect(screen.getByRole("link", { name: "live dashboard" })).toHaveAttribute(
+      "href",
+      "/homecave",
+    )
   })
 
   it("renders nothing without named items", () => {

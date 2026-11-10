@@ -3,10 +3,14 @@ import { defineArrayMember, defineField, defineType } from "sanity"
 
 import { IconInput, validateIcon } from "../components/icon-input"
 
-/** Singleton behind /uses: the hardware, software and services you use. */
+/**
+ * Singleton behind /homecave (formerly /uses; the type keeps its name so no data moves): the
+ * page intro, the "Homelab" rows whose names match the lab's public node names (their
+ * descriptions are the spec lines), and the self-hosted and setup sections.
+ */
 export const usesType = defineType({
   name: "uses",
-  title: "Uses",
+  title: "Homecave",
   type: "document",
   icon: DesktopIcon,
   fields: [
@@ -20,7 +24,7 @@ export const usesType = defineType({
       name: "sections",
       type: "array",
       description: "Groups such as Hardware, Homelab, Editor & terminal, Services.",
-      validation: (rule) => rule.min(1).error("Add at least one section to publish /uses."),
+      validation: (rule) => rule.min(1).error("Add at least one section to publish Homecave."),
       of: [
         defineArrayMember({
           name: "usesSection",
@@ -69,5 +73,5 @@ export const usesType = defineType({
       ],
     }),
   ],
-  preview: { prepare: () => ({ title: "Uses" }) },
+  preview: { prepare: () => ({ title: "Homecave" }) },
 })

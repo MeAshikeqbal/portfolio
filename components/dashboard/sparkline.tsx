@@ -6,13 +6,21 @@ interface SparklineProps {
   label: string
   width?: number
   height?: number
+  /** A fixed scale (e.g. [0, 100] for percentages) instead of fitting the series' own range. */
+  domain?: readonly [number, number]
   className?: string
 }
 
 /** Builds the SVG path for a series scaled into the box. Exported for tests. */
-export function sparklinePoints(values: readonly number[], width: number, height: number, pad = 3) {
-  const min = Math.min(...values)
-  const max = Math.max(...values)
+export function sparklinePoints(
+  values: readonly number[],
+  width: number,
+  height: number,
+  pad = 3,
+  domain?: readonly [number, number],
+) {
+  const min = domain ? domain[0] : Math.min(...values)
+  const max = domain ? domain[1] : Math.max(...values)
   const span = max - min
   const step = (width - pad * 2) / (values.length - 1)
   return values.map((value, i) => ({
@@ -27,10 +35,17 @@ export function sparklinePoints(values: readonly number[], width: number, height
  * is foreground. Status colours are reserved for state and never used here.
  * Server-rendered SVG with a text summary (no hover layer at this size).
  */
-export function Sparkline({ values, label, width = 96, height = 24, className }: SparklineProps) {
+export function Sparkline({
+  values,
+  label,
+  width = 96,
+  height = 24,
+  domain,
+  className,
+}: SparklineProps) {
   if (values.length < 2) return null
 
-  const points = sparklinePoints(values, width, height)
+  const points = sparklinePoints(values, width, height, 3, domain)
   const d = points
     .map((p, i) => `${i === 0 ? "M" : "L"}${p.x.toFixed(2)} ${p.y.toFixed(2)}`)
     .join(" ")

@@ -17,7 +17,8 @@ function readState(): "published" | "unpublished" {
 
 export const ABOUT_PAGES = readState()
 
-export const ABOUT_PATHS = ["/uses", "/now"] as const
+/** Pages that only exist once published (/homecave always exists). */
+export const ABOUT_PATHS = ["/now"] as const
 
 /** The exact sitemap entry for a path, so e.g. a post slug "now-playing" never matches "/now". */
 export function sitemapLoc(path: string): string {

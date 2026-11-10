@@ -1,5 +1,5 @@
 /**
- * Checks for the /uses and /now seed content (scripts/about-content.data.ts), shared by the
+ * Checks for the Homecave and /now seed content (scripts/about-content.data.ts), shared by the
  * publish script and its unit test. Returns human-readable problems; empty means publishable.
  */
 import { renderIconSvg } from "../lib/icons"

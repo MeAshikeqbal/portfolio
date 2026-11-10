@@ -6,13 +6,14 @@ const siteLinks = [
   { label: "Home", href: "/" },
   { label: "Projects", href: "/projects" },
   { label: "Writing", href: "/post" },
+  { label: "Homecave", href: "/homecave" },
   { label: "RSS feed", href: "/rss.xml" },
   { label: "Sitemap", href: "/sitemap.xml" },
 ]
 
 const elsewhere = [...siteConfig.socialLinks, { label: "Source code", href: siteConfig.repo }]
 
-/** `extraLinks`: pages that only exist once they have content (e.g. /uses, /now). */
+/** `extraLinks`: pages that only exist once they have content (e.g. /now). */
 export function SiteFooter({
   extraLinks = [],
 }: {

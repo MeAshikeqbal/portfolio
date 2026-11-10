@@ -32,16 +32,17 @@ Downloading the résumé (`/resume.pdf`) is not one of the goals, but the hero k
 
 - Readers mostly land on a single post or project page rather than the home page, often from a feed, a search, or GitHub.
 - Ashik writes and edits all content in the Sanity Studio embedded at `/studio`, which has two workspaces: `content` (public) and `inbox` (private contact submissions). Project stats sync from GitHub every day and can also be synced on demand from the Studio.
-- Routes: home (`/`), writing (`/post`, `/post/[slug]`), projects (`/projects`, `/projects/[slug]`), `/uses`, `/now`, `/resume.pdf`, `/rss.xml`, and a ⌘K command palette.
+- Routes: home (`/`), writing (`/post`, `/post/[slug]`), projects (`/projects`, `/projects/[slug]`), `/homecave` (the live homelab dashboard; `/uses` redirects there), `/now`, `/resume.pdf`, `/rss.xml`, and a ⌘K command palette.
 
 ## Capabilities and Constraints
 
 - **Stack (incumbent):** Next.js 16 App Router (static prerendering), React 19, TypeScript, Sanity 6, Tailwind CSS 4, shadcn/ui on Radix, Shiki, `next/og`, Vercel hosting. Pages are static and revalidate when content is published.
-- **Content comes from Sanity:** posts, projects, experience, education, skills, CV, `/uses`, `/now`. Copy belongs in the CMS rather than in code, except site-wide identity, which lives in `lib/site.ts`.
+- **Content comes from Sanity:** posts, projects, experience, education, skills, CV, Homecave copy, `/now`. Copy belongs in the CMS rather than in code, except site-wide identity, which lives in `lib/site.ts`.
 - **GitHub sync:** projects carry stars, primary language, last push, past-year commits and a 12-week activity series.
 - **Availability badge:** configured in `lib/site.ts` as `up` / `warn` / `idle`, or `null` to hide it (hidden since 2026-11-09). When shown, it is the node panel's status.
 - **Home page writing:** posts marked **featured** in the Studio come first, then the newest; three in all.
-- **Homelab panel:** the hero lists up to five items from the section of `/uses` whose title starts with "Homelab". It stays hidden until that section exists.
+- **Homelab panel:** the hero lists up to five items from the Homecave "Homelab" section, with measured up/down badges once the lab reports. It stays hidden until that section exists.
+- **Homecave:** `/homecave` is the homelab, live. A signed heartbeat from each Proxmox node every 30s reports CPU, memory, load, network, uptime, storage with ZFS health, and guests by category. Everything is anonymized in the lab before it's sent: public names and rounded numbers only, with no hostnames, IPs, versions or guest names. There are 24h trends and availability. Up is green only when measured: silent nodes read "no data", or "down" when a peer sees them offline.
 - **GitHub sync status:** the system bar shows the sync's health only once it has run, and re-judges its age in the visitor's browser.
 - **Contact form:** protected by Cloudflare Turnstile; submissions go to the private `inbox` dataset.
 - **Security:** strict security headers and a CSP. Third-party scripts and assets have to fit inside them.

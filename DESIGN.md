@@ -253,7 +253,23 @@ Dense rows divided by hairlines. Each row has an optional status dot plus the st
 The home page's lead list. Each entry is one link: a mono date column (7.5rem from `sm`, with a "pinned" mark under the date for featured posts), a semibold 1.125–1.25rem title that is never cut off, an excerpt trimmed on a word boundary (about 160 characters, `text-pretty`), and mono tags. Three entries: pinned posts first, then the newest, skipping the post the hero already shows as "latest post".
 
 ### Node panel (signature)
-The hero's instrument. Header "node · itsashik", with the availability pill as its status when one is configured (currently off). Below it, only real facts: the latest post (a link), the homelab machines from the "Homelab" section of /uses when present, and counts (posts, projects, and commits/yr once the GitHub sync has written them). Machines named in the lab's signed heartbeat (scripts/lab-heartbeat) show their measured state on the right (`up · 12d` green, `down` red), and the header carries the summary (`3/3 up`; amber when some are down), which is all phones see. A heartbeat older than 10 minutes, judged by the visitor's clock, turns every state grey `no data`; before the first heartbeat nothing is shown.
+The hero's instrument. Header "node · itsashik", with the availability pill as its status when one is configured (currently off). Below it, only real facts: the latest post (a link), the homelab machines from the Homecave "Homelab" section when present, and counts (posts, projects, and commits/yr once the GitHub sync has written them). Machines named in the lab's signed heartbeat (scripts/lab-heartbeat) show their measured state on the right (`up · 12d` green, `down` red), and the header carries the summary (`3/3 up`; amber when some are down), which is all phones see. A node's state is judged per node in the visitor's browser: green only for its own report younger than two intervals (about 90s), red `down` when it's silent and a fresh peer sees it offline, grey `no data` otherwise. Before the first heartbeat nothing is shown.
+
+### Homecave dashboard (signature)
+`/homecave`, the homelab as an instrument.
+- **Verdict strip** (replaces any overview panel): one line at 20–24px semibold, such as "3/3 nodes up · 4/4 pools healthy · 16/19 guests running". Node and pool counts wear their status colour; the guest count stays ink, because it's a count, not a state. Separators trail their item, so a wrapped line never starts with a dot. Under it, in label-caps: "updated 20s ago · reports every 30s", led by "2 of 3 reporting" when a node is silent. A polite live region announces the cluster state.
+- **Node panels** (3 columns from `xl`), each its own `section` named by an h2 with the public name. Each has:
+  - the compact measured badge on the right (`up`, `down`, `no data`); uptime lives in its own metric, never repeated in the pill;
+  - the measured CPU model and cores/threads, with the Studio's role line under it (role, not specs: the dashboard measures CPU and memory);
+  - a flat 2×2 metric grid inside the panel (never nested cards), drawn with `gap-px` on a border-coloured grid so the hairlines are single: CPU, memory, network in and uptime;
+  - values in tabular figures, with a small unit after a real space for rates and bytes ("641 KB/s"); "5%" and "6d" stay whole;
+  - short hints (load to 2 decimals, swap, out-rate, 24h availability) and 64px sparklines in neutral ink. CPU and memory trends use a fixed 0–100% scale, so a quiet machine looks quiet.
+  - guests running/total, with category chips (mono, hairline, neutral).
+
+  **Not up:** the last readings stay visible but muted (55% opacity, greyscale) under a "last seen 10m ago" note in the header, and uptime shows "—". A down node adds one sentence above its readings.
+- **Storage:** its own section (h2). One list of pools (largest first) and the off-site backup store. Each row has its health as a status word (grey `no data` when its node is stale, backups included), used/total in normal-case binary units and %, and a thin neutral **meter** (the value is always printed beside it) whose name includes the node ("VM disks on Tower, used").
+- **Privacy note** directly under the dashboard, at 65ch: what the page doesn't show, and that the lab connects outward only.
+- **Below:** "What runs here" (Self-hosted, Network & access) in two columns, then **Desk & tools** (editor, desk, paid services) collapsed in a native `details`, its summary an h2 with the section names in label-caps.
 
 ### Metric tile
 A `label-caps` label above a 1.5rem semibold tabular value, with an optional sparkline at the right and a 12px muted hint. It is built as a description list (`dl` / `dt` / `dd`).

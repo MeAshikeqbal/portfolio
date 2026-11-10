@@ -14,6 +14,7 @@ const STRICT_PAGES = [
   "/projects",
   "/projects/portfolio",
   "/styleguide",
+  "/homecave",
   "/no-such-page",
   // Only exist once published (scripts/about-state.mjs decides before the build).
   ...(ABOUT_PAGES === "published" ? ABOUT_PATHS : []),

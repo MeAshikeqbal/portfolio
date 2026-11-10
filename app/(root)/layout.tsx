@@ -28,12 +28,7 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
       <div id="main" className="flex-1">
         {children}
       </div>
-      <SiteFooter
-        extraLinks={[
-          ...(commandIndex.hasUses ? [{ label: "Uses", href: "/uses" }] : []),
-          ...(commandIndex.hasNow ? [{ label: "Now", href: "/now" }] : []),
-        ]}
-      />
+      <SiteFooter extraLinks={[...(commandIndex.hasNow ? [{ label: "Now", href: "/now" }] : [])]} />
       <BackToTop />
       {/* Live content updates for the public site only (not the Studio or style guide). */}
       <SanityLive includeDrafts={isDraftMode} />

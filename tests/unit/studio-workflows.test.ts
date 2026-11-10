@@ -7,7 +7,7 @@ describe("sitePath", () => {
   it.each([
     ["post", "hello", "/post/hello"],
     ["project", "bluebox", "/projects/bluebox"],
-    ["uses", undefined, "/uses"],
+    ["uses", undefined, "/homecave"],
     ["now", undefined, "/now"],
     ["post", undefined, null],
     ["skills", "x", null],

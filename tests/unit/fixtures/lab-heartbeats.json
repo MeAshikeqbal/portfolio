@@ -1,0 +1,189 @@
+{
+  "Tower": {
+    "v": 2,
+    "node": {
+      "name": "Tower",
+      "online": true,
+      "uptime": 543600,
+      "interval": 30,
+      "cpu": {
+        "pct": 5,
+        "model": "Ryzen 5 3600",
+        "cores": 6,
+        "threads": 12
+      },
+      "load": [0.6, 0.98, 1.0],
+      "mem": {
+        "pct": 79,
+        "totalGiB": 15.5
+      },
+      "swap": {
+        "pct": 54,
+        "totalGiB": 3.9
+      },
+      "net": {
+        "inKBps": 641,
+        "outKBps": 89
+      },
+      "guests": {
+        "running": 7,
+        "total": 7,
+        "byCategory": {
+          "media": [2, 2],
+          "home": [1, 1],
+          "apps": [2, 2],
+          "storage": [1, 1],
+          "network": [1, 1]
+        }
+      }
+    },
+    "storage": [
+      {
+        "label": "Off-site backups",
+        "usedGiB": 15,
+        "totalGiB": 65,
+        "health": null,
+        "kind": "backup"
+      },
+      {
+        "label": "VM disks",
+        "usedGiB": 73,
+        "totalGiB": 450,
+        "health": "ONLINE",
+        "kind": "pool"
+      },
+      {
+        "label": "Bulk storage",
+        "usedGiB": 2580,
+        "totalGiB": 3597,
+        "health": "ONLINE",
+        "kind": "pool"
+      }
+    ],
+    "peers": [
+      {
+        "name": "Mini PC #1",
+        "online": true
+      },
+      {
+        "name": "Mini PC #2",
+        "online": true
+      }
+    ]
+  },
+  "Mini PC #1": {
+    "v": 2,
+    "node": {
+      "name": "Mini PC #1",
+      "online": true,
+      "uptime": 2480400,
+      "interval": 30,
+      "cpu": {
+        "pct": 0,
+        "model": "Core i3-6100",
+        "cores": 2,
+        "threads": 4
+      },
+      "load": [0.94, 0.52, 0.33],
+      "mem": {
+        "pct": 54,
+        "totalGiB": 23.4
+      },
+      "swap": {
+        "pct": 0,
+        "totalGiB": 0.0
+      },
+      "net": {
+        "inKBps": 27,
+        "outKBps": 24
+      },
+      "guests": {
+        "running": 6,
+        "total": 8,
+        "byCategory": {
+          "network": [3, 3],
+          "security": [1, 1],
+          "apps": [2, 2],
+          "home": [0, 1],
+          "other": [0, 1]
+        }
+      }
+    },
+    "storage": [
+      {
+        "label": "VM disks",
+        "usedGiB": 36,
+        "totalGiB": 110,
+        "health": "ONLINE",
+        "kind": "pool"
+      }
+    ],
+    "peers": [
+      {
+        "name": "Tower",
+        "online": true
+      },
+      {
+        "name": "Mini PC #2",
+        "online": true
+      }
+    ]
+  },
+  "Mini PC #2": {
+    "v": 2,
+    "node": {
+      "name": "Mini PC #2",
+      "online": true,
+      "uptime": 518400,
+      "interval": 30,
+      "cpu": {
+        "pct": 0,
+        "model": "Core i5-6500T",
+        "cores": 4,
+        "threads": 4
+      },
+      "load": [0.08, 0.09, 0.16],
+      "mem": {
+        "pct": 37,
+        "totalGiB": 15.5
+      },
+      "swap": {
+        "pct": 0,
+        "totalGiB": 0.0
+      },
+      "net": {
+        "inKBps": 18,
+        "outKBps": 13
+      },
+      "guests": {
+        "running": 3,
+        "total": 4,
+        "byCategory": {
+          "apps": [1, 1],
+          "media": [1, 1],
+          "network": [1, 1],
+          "other": [0, 1]
+        }
+      }
+    },
+    "storage": [
+      {
+        "label": "VM disks",
+        "usedGiB": 17,
+        "totalGiB": 895,
+        "health": "ONLINE",
+        "kind": "pool"
+      }
+    ],
+    "peers": [
+      {
+        "name": "Tower",
+        "online": true
+      },
+      {
+        "name": "Mini PC #1",
+        "online": true
+      }
+    ]
+  }
+}
