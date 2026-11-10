@@ -22,7 +22,7 @@ Config: /etc/lab-collect.json (root, 0600). Every section is optional:
     "edge": {"vm": 150, "log": "/opt/traefik/logs/access.log"},     Traefik access log
     "dns": {"ct": 100, "log": "/opt/AdGuardHome/data/querylog.json"},
     "tdarr": {"ct": 107, "url": "http://localhost:8265"},
-    "security": {"vm": 150, "container": "crowdsec"},           CrowdSec (counts only)
+    "security": {"vm": 150, "container": "crowdsec", "log": "/opt/traefik/logs/access.log"},
     "wan": ["1.1.1.1", "8.8.8.8"],
     "gpu": true, "backup": true
   }
@@ -444,19 +444,97 @@ def parse_csv(text):
     return list(csv.DictReader(io.StringIO(text or "")))
 
 
-def security(cfg, now):
-    """Edge security from CrowdSec: active bans, alerts over 24h (hourly), by broad kind.
-    Reads its CSV inside the edge VM; IPs, countries and ASNs never leave this function."""
+def blocklist_kind(reason):
+    """Community blocklist categories ("http:bruteforce", "ssh:exploit", "generic:scan")."""
+    if ":" in reason and "/" not in reason:
+        tail = reason.split(":", 1)[1]
+        return {"bruteforce": "bruteforce", "exploit": "exploit", "scan": "probing",
+                "crawl": "crawler"}.get(tail, "other")
+    return attack_kind(reason)
+
+
+def hourly_series(buckets, now):
+    """24 hourly sums, oldest first, ending with the current hour."""
+    hour = int(now // HOUR * HOUR)
+    return [buckets.get(str(hour - (23 - i) * HOUR), 0) for i in range(24)]
+
+
+def seed_hours(kind, vmid, log, now):
+    """Hourly request counts for the last 24h from an access log and its newest archive."""
+    script = (f"f={log}; g=$(ls -t $f-*.gz 2>/dev/null | head -1); "
+              "{ [ -n \"$g\" ] && zcat \"$g\"; cat \"$f\"; } | awk '{print substr($4,2,14)}' | sort | uniq -c")
+    out = in_guest(kind, vmid, script, timeout=60)
+    if out is None:
+        return None
+    first = int(now // HOUR * HOUR) - 23 * HOUR
+    hours = {}
+    for line in out.splitlines():
+        parts = line.split()
+        if len(parts) != 2:
+            continue
+        try:  # "10/Nov/2026:08", logged in UTC
+            at = calendar.timegm(time.strptime(parts[1], "%d/%b/%Y:%H"))
+        except ValueError:
+            continue
+        if first <= at <= now:
+            hours[str(at)] = hours.get(str(at), 0) + int(parts[0])
+    return hours
+
+
+def security(cfg, now, state):
+    """Edge security from CrowdSec, reduced to counts here: IPs blocked (community blocklist,
+    by kind) and banned by its own detections, requests the bouncer checked (hourly), and
+    attacks it detected over 24h (hourly, by kind). IPs, countries, ASNs and scenario names
+    never leave this function."""
     kind, vmid = ("vm", cfg["vm"]) if "vm" in cfg else ("ct", cfg["ct"])
     container = cfg.get("container", "crowdsec")
-    decisions = in_guest(kind, vmid, f"docker exec {container} cscli decisions list -o raw", timeout=30)
+    metrics = in_guest(kind, vmid, f"docker exec {container} cscli metrics -o json", timeout=30)
     alerts = in_guest(kind, vmid, f"docker exec {container} cscli alerts list --since 24h --limit 0 -o raw", timeout=30)
-    if decisions is None or alerts is None:
+    if metrics is None or alerts is None:
         return None
-    bans = sum(1 for d in parse_csv(decisions) if d.get("action") == "ban")
+    try:
+        m = json.loads(metrics)
+    except ValueError:
+        return None
+
+    bans, blocked, block_kinds = 0, 0, {}
+    for reason, origins in (m.get("decisions") or {}).items():
+        for origin, actions in origins.items():
+            n = int(sum(v for a, v in actions.items() if a == "ban"))
+            if origin in ("crowdsec", "cscli"):
+                bans += n
+            else:  # CAPI (community blocklist) and console lists
+                blocked += n
+                k = blocklist_kind(reason)
+                block_kinds[k] = block_kinds.get(k, 0) + n
+
+    # Requests checked: the bouncers' decision lookups, a counter that resets on restart.
+    total = sum(int(c) for routes in (m.get("lapi-bouncer") or {}).values()
+                for methods in routes.values() for c in methods.values())
+    s = state.setdefault("security", {})
+    last = s.get("checked")
+    s["checked"] = total
+    buckets = s.setdefault("hours", {})
+    if not s.get("seeded") and cfg.get("log"):
+        # Once: the last 24h of hourly request counts from the proxy's access log (every public
+        # route goes through the bouncer, one lookup per request), so the trend starts full.
+        seeded = seed_hours(kind, vmid, cfg["log"], now)
+        if seeded is not None:
+            buckets.clear()
+            buckets.update(seeded)
+            s["seeded"] = True
+            last = None  # the log already covers up to now
+    if last is not None:
+        delta = total - last if total >= last else total
+        hour = str(int(now // HOUR * HOUR))
+        buckets[hour] = buckets.get(hour, 0) + delta
+    for key in sorted(buckets, key=int)[:-24]:
+        del buckets[key]
+    checked_hourly = hourly_series(buckets, now)
+
     hourly = [0] * 24
     by_kind = {}
-    total = 0
+    attacks = 0
     for a in parse_csv(alerts):
         try:
             at = calendar.timegm(time.strptime(a.get("created_at", "")[:19], "%Y-%m-%dT%H:%M:%S"))
@@ -465,11 +543,15 @@ def security(cfg, now):
         age = now - at
         if not 0 <= age < 24 * HOUR:
             continue
-        total += 1
+        attacks += 1
         hourly[23 - int(age // HOUR)] += 1
         k = attack_kind(a.get("reason", ""))
         by_kind[k] = by_kind.get(k, 0) + 1
-    return {"bans": bans, "attacks24h": total, "hourly": hourly, "byKind": by_kind}
+    return {
+        "bans": bans, "attacks24h": attacks, "hourly": hourly, "byKind": by_kind,
+        "blocklist": {"total": blocked, "byKind": block_kinds},
+        "checked24h": sum(checked_hourly), "checkedHourly": checked_hourly,
+    }
 
 
 def cached(state, key, now, fn):
@@ -521,7 +603,7 @@ def main():
     if config.get("tdarr"):
         sections["media"] = lambda: cached(state, "media", now, lambda: tdarr(config["tdarr"]))
     if config.get("security"):
-        sections["security"] = lambda: cached(state, "security", now, lambda: security(config["security"], now))
+        sections["security"] = lambda: cached(state, "security", now, lambda: security(config["security"], now, state))
     for key, fn in sections.items():
         try:
             value = fn()

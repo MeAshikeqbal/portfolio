@@ -174,7 +174,9 @@ describe("today in the lab", () => {
     const today = screen.getByRole("region", { name: "today in the lab" })
     expect(within(today).getByText("with warnings")).toHaveClass("text-status-warn-fg")
     expect(within(today).getByText("no errors")).toHaveClass("text-status-up-fg")
-    expect(within(today).getByText("space saved").closest("div")).toHaveTextContent("304 GB")
+    // Containers are back in the strip; the media savings tile is gone.
+    expect(within(today).getByText("containers").closest("div")).toHaveTextContent("46/46")
+    expect(within(today).queryByText("space saved")).toBeNull()
     expect(within(today).getByText("on Jellyfin, now")).toBeVisible()
     expect(within(today).getByText("2")).toBeVisible()
     // DNS hasn't reported yet in these fixtures (AdGuard flushes its log in batches).
@@ -281,8 +283,9 @@ describe("edge security (CrowdSec, unnamed)", () => {
 
     render(<LabTodayView status={status} now={now} streams={null} />)
     const today = screen.getByRole("region", { name: "today in the lab" })
+    // Without request counts (an older collector), the tile falls back to attacks.
     expect(within(today).getByText("attacks detected").closest("div")).toHaveTextContent("5")
-    expect(within(today).getByText("2 banned now · 24h")).toBeVisible()
+    expect(within(today).getByText("2 banned here · 24h")).toBeVisible()
     expect(within(today).getByText("probing 4 · exploits 1")).toBeVisible()
     expect(within(today).getByRole("img", { name: /Attacks detected per hour/ })).toBeVisible()
     expect(today).not.toHaveTextContent(/crowdsec/i)
@@ -298,7 +301,48 @@ describe("edge security (CrowdSec, unnamed)", () => {
         streams={null}
       />,
     )
-    expect(screen.getByText("none banned now · 24h")).toBeVisible()
-    expect(screen.queryByText("attack types · 24h")).toBeNull()
+    expect(screen.getByText("24h")).toBeVisible()
+    expect(screen.queryByText("detected here · 24h")).toBeNull()
+  })
+
+  it("leads with requests checked (it moves), the blocklist under it", () => {
+    const checkedHourly = [...Array(22).fill(100), 2552, 697]
+    const full = {
+      bans: 0,
+      attacks24h: 0,
+      hourly: hourly(0),
+      byKind: {},
+      blocklist: {
+        total: 3719,
+        byKind: { bruteforce: 2228, exploit: 889, probing: 496, crawler: 106 },
+      },
+      checked24h: 2200 + 2552 + 697,
+      checkedHourly,
+    }
+    const [node] = parseHeartbeat(withNode({ security: full }))!
+    expect(node.security).toEqual(full)
+    for (const bad of [
+      { ...full, checked24h: 1 }, // hours don't add up
+      { ...full, blocklist: { ...full.blocklist, total: 1 } }, // kinds don't add up
+      { ...full, checkedHourly: [1] },
+    ]) {
+      expect(parseHeartbeat(withNode({ security: bad }))).toBeNull()
+    }
+    render(
+      <LabTodayView
+        status={{ nodes: [{ ...node, receivedAt: ago(1), history, availability24h: null }] }}
+        now={now}
+        streams={null}
+      />,
+    )
+    const tile = screen.getByText("security checks").closest("div")!
+    expect(tile).toHaveTextContent("5.4K")
+    expect(within(tile).getByText("3.7K blocklisted · 24h")).toBeVisible()
+    expect(
+      within(tile).getByRole("img", { name: /Requests checked for known attackers/ }),
+    ).toBeVisible()
+    expect(
+      screen.getByText("brute force 2,228 · exploits 889 · probing 496 · crawlers 106"),
+    ).toBeVisible()
   })
 })
