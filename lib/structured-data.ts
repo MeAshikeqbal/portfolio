@@ -15,7 +15,7 @@ export function personSchema(): Thing {
     "@id": PERSON_ID,
     name: siteConfig.name,
     url: siteConfig.url,
-    image: absoluteUrl("/me.jpeg"),
+    image: absoluteUrl("/me-2026.jpg"),
     jobTitle: siteConfig.role,
     description: siteConfig.tagline,
     sameAs: siteConfig.socialLinks.map((link) => link.href),
