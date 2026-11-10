@@ -10,8 +10,10 @@ test.describe("live activity without credentials", () => {
   })
 
   test("the hero shows no live line", async ({ page }) => {
+    // Listen before navigating: the poll can answer before goto() resolves.
+    const answered = page.waitForResponse((r) => r.url().endsWith("/api/now-playing"))
     await page.goto("/")
-    await page.waitForResponse((r) => r.url().endsWith("/api/now-playing"))
+    await answered
     await expect(page.locator('#home a[href="/now#live"]')).toHaveCount(0)
   })
 })

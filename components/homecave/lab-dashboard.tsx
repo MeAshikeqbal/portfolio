@@ -304,7 +304,7 @@ export function NodePanel({
                     >
                       {category} {running === total ? running : `${running}/${total}`}
                       {use && use.memGiB >= 0.1 && (
-                        <span className="text-muted-foreground/70"> · {use.memGiB} GiB</span>
+                        <span> · {use.memGiB} GiB</span>
                       )}
                     </li>
                   )

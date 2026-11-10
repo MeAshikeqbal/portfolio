@@ -5,7 +5,7 @@
 import { renderIconSvg } from "../lib/icons"
 import type { AboutBlock, AboutSection } from "./about-content.data"
 
-/** The hero reads the first section titled "Homelab…" and shows up to five of its items. */
+/** The hero reads the first section titled "Homelab…": up to five items, of which it lists the machines. */
 export const HOMELAB_ITEMS = 5
 /** The hero truncates descriptions on one line; past this they get cut on a phone. */
 export const HOMELAB_DESCRIPTION_MAX = 45
