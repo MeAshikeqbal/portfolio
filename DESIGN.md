@@ -300,7 +300,7 @@ Fully rounded, 4px × 10px, mono 12px, with a hairline border. Inactive chips ar
 4px corners, 36px tall, a strong-hairline stroke, a transparent fill (30% input tint in dark mode) and muted-ink placeholders. Focus shows a 3px ring at 50%. Invalid fields get a destructive border and ring.
 
 ### Navigation
-The wordmark `itsashik.dev` in mono, with ".dev" in muted ink. Desktop links are 14px muted-ink pills that get a `surface-2` fill on hover and when active (`aria-current="page"`). Hash links are never marked active. On mobile, a ghost menu button opens a full-width panel with 16px links and a theme row. The ⌘K command palette is available on every screen size.
+The wordmark `itsashik.dev` in mono, with ".dev" in muted ink. Desktop links are 14px muted ink and fill the header's 56px height. The active one (`aria-current="page"`) turns ink with a 1px ink underline sitting on the header's bottom hairline; hover turns the text ink and previews the underline in `hairline-strong`. Hash links are never marked active. On mobile, a ghost menu button opens a full-width panel with 16px links and a theme row. The ⌘K command palette is available on every screen size.
 
 ### Section header
 A plain-language headline ("Writing", "Get in touch") with no label above it, an optional description up to about 65ch, and optional actions on the right: 14px medium links with an icon (an arrow, or RSS), padded to 44px tall.
