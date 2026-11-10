@@ -63,8 +63,8 @@ function para(key: string, lead: string, text: string): AboutBlock {
 export const USES = {
   intro: "My homelab, live: a three-node Proxmox cluster at home, and what runs on it.",
   sections: [
-    // The hero shows the first five items of this section, so keep it to exactly five,
-    // with short descriptions (the hero truncates past ~45 characters).
+    // The hero lists the machines from this section (names matching the lab's), so keep
+    // their descriptions short roles (about 40 characters); the rest show on Homecave.
     section("homelab", "Homelab", [
       item(
         "proxmox-cluster",

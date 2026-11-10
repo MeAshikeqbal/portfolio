@@ -8,11 +8,17 @@ import { HomelabList } from "@/components/home/homelab-list"
 import { LiveLine } from "@/components/home/live-line"
 import { Button } from "@/components/ui/button"
 import { getCvUrl, getHomeStats } from "@/lib/api"
+import { readLabStatus } from "@/lib/lab/store"
 import { formatCompact, formatDate } from "@/lib/format"
 import { siteConfig } from "@/lib/site"
 
 export async function Hero() {
-  const [cvUrl, stats] = await Promise.all([getCvUrl(), getHomeStats()])
+  const [cvUrl, stats, lab] = await Promise.all([
+    getCvUrl(),
+    getHomeStats(),
+    // Only the machines' names, to pick the rows; cached for an hour (names rarely change).
+    readLabStatus(process.env, fetch, { revalidate: 3600 }),
+  ])
   const { availability } = siteConfig
   const latest = stats.latestPost?.slug && stats.latestPost.title ? stats.latestPost : null
 
@@ -65,16 +71,17 @@ export async function Hero() {
         </div>
 
         <Panel>
-          <PanelHeader
-            title="node · itsashik"
-            meta={
-              availability && (
+          {/* Only when there's something to say: no decorative "node" header. */}
+          {availability && (
+            <PanelHeader
+              title="availability"
+              meta={
                 <StatusPill status={availability.status} pulse={availability.status === "up"}>
                   {availability.label}
                 </StatusPill>
-              )
-            }
-          />
+              }
+            />
+          )}
 
           {latest && (
             <Link
@@ -100,7 +107,7 @@ export async function Hero() {
             </Link>
           )}
 
-          <HomelabList items={stats.homelab} />
+          <HomelabList items={stats.homelab} machines={lab?.nodes.map((n) => n.name)} />
           <LiveLine />
 
           <dl

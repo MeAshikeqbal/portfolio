@@ -17,8 +17,13 @@ export function LiveLineView({ line }: { line: LiveLineContent }) {
         pulse={line.status === "up"}
         label={line.status === "up" ? "Now:" : "Earlier:"}
       />
-      <span className="shrink-0 label-caps">{line.verb}</span>
-      <span className="truncate text-muted-foreground">{line.text}</span>
+      {/* A sentence, not another label: "Jellyfin · 1 stream right now". */}
+      <span className="min-w-0 truncate">
+        <span className="font-medium">
+          {line.verb.charAt(0).toUpperCase() + line.verb.slice(1)}
+        </span>
+        <span className="text-muted-foreground"> · {line.text}</span>
+      </span>
     </Link>
   )
 }

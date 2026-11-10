@@ -136,3 +136,24 @@ export function LabServiceBadge({
   const state = status === undefined ? initial : serviceState(name, status, now)
   return <LabServiceBadgeView state={state} className={cn("mt-1", className)} />
 }
+
+/** The hero's per-machine dot, with its state for screen readers. Nothing for unknown names. */
+export function LabNodeDot({ name }: { name: string }) {
+  const { status, now } = useLabStatus()
+  const state = nodeState(name, status, now)
+  // Read before the name: "up: Tower …". Uptime stays on Homecave.
+  return state ? (
+    <StatusDot status={state.status} label={`${state.label.split(" · ")[0]}:`} />
+  ) : null
+}
+
+/**
+ * The state as a word, only when a machine isn't up, so trouble is never colour alone.
+ * Healthy rows stay quiet; the "3/3 up" summary above them carries the words.
+ */
+export function LabNodeTrouble({ name }: { name: string }) {
+  const { status, now } = useLabStatus()
+  const state = nodeState(name, status, now)
+  if (!state || state.state === "up") return null
+  return <span className={cn("label-caps", STATUS_TEXT_CLASS[state.status])}>{state.label}</span>
+}

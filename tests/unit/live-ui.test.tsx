@@ -121,7 +121,8 @@ describe("pickLiveLine", () => {
   it("renders as a link to the /now panel", () => {
     render(<LiveLineView line={pickLiveLine(data({ spotify: spotify("playing") }))!} />)
     expect(screen.getByRole("link")).toHaveAttribute("href", "/now#live")
-    expect(screen.getByText("Song · Artist")).toBeVisible()
+    // One sentence, not a label: "Listening to · Song · Artist".
+    expect(screen.getByRole("link")).toHaveTextContent("Listening to · Song · Artist")
   })
 })
 
