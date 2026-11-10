@@ -15,7 +15,8 @@
     "backup": "node scripts/backup.mjs",
     "typegen": "node -e \"require('fs').rmSync('schema.json',{force:true})\" && sanity schema extract --workspace content --path schema.json && sanity typegen generate",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "studio:tokens": "sanity exec scripts/studio-tokens.ts && prettier --write sanity/theme/tokens.generated.ts"
   },
   "dependencies": {
     "@iconify-json/logos": "^1.2.19",
@@ -61,6 +62,7 @@
     "@axe-core/playwright": "^4.14.0",
     "@iconify/types": "^2.0.0",
     "@playwright/test": "^1.65.0",
+    "@sanity/color": "^3.0.9",
     "@tailwindcss/postcss": "^4.3.5",
     "@tailwindcss/typography": "^0.5.20",
     "@testing-library/dom": "^10.4.2",
