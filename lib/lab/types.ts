@@ -75,13 +75,19 @@ export interface LabCollected {
   media?: { savedGB: number }
   /**
    * Edge security (the reverse proxy's intrusion detection): IPs banned right now, attacks
-   * detected over 24h with an hourly breakdown (oldest first), and their broad kinds.
+   * detected over 24h with an hourly breakdown (oldest first), and their broad kinds; plus
+   * the shared blocklist's size and the requests checked against it.
    */
   security?: {
     bans: number
     attacks24h: number
     hourly: number[]
     byKind: Partial<Record<AttackKind, number>>
+    /** Known-bad IPs blocked from shared blocklists, by kind. */
+    blocklist?: { total: number; byKind: Partial<Record<AttackKind, number>> }
+    /** Requests the bouncer checked over 24h, and per hour (oldest first). */
+    checked24h?: number
+    checkedHourly?: number[]
   }
 }
 

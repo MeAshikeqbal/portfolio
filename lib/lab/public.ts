@@ -80,6 +80,18 @@ export function toPublicStatus(status: LabStatus): LabStatus {
           attacks24h: n.security.attacks24h,
           hourly: [...n.security.hourly],
           byKind: Object.fromEntries(Object.entries(n.security.byKind).map(([k, v]) => [k, v])),
+          ...(n.security.blocklist && {
+            blocklist: {
+              total: n.security.blocklist.total,
+              byKind: Object.fromEntries(
+                Object.entries(n.security.blocklist.byKind).map(([k, v]) => [k, v]),
+              ),
+            },
+          }),
+          ...(n.security.checkedHourly && {
+            checked24h: n.security.checked24h,
+            checkedHourly: [...n.security.checkedHourly],
+          }),
         },
       }),
       receivedAt: n.receivedAt,

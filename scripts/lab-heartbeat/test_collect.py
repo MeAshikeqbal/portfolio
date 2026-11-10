@@ -115,33 +115,79 @@ class Security(unittest.TestCase):
     def at(self, hours_ago):
         return time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(self.NOW - hours_ago * 3600))
 
-    def test_counts_bans_and_attacks_by_kind_and_hour_without_any_ip(self):
-        decisions = ("id,source,ip,reason,action,country,as,events_count,expiration,simulated,alert_id\n"
-                     '1,crowdsec,203.0.113.9,crowdsecurity/http-probing,ban,US,"Example, Inc.",12,3h,false,7\n'
-                     "2,crowdsec,198.51.100.4,crowdsecurity/ssh-bf,captcha,DE,AS1,5,1h,false,8\n")
+    METRICS = json.dumps({
+        "decisions": {
+            "http:bruteforce": {"CAPI": {"ban": 1775}},
+            "ssh:bruteforce": {"CAPI": {"ban": 453}},
+            "http:scan": {"CAPI": {"ban": 476}},
+            "http:crawl": {"CAPI": {"ban": 106}},
+            "http:exploit": {"CAPI": {"ban": 881}},
+            "crowdsecurity/http-probing": {"crowdsec": {"ban": 1, "captcha": 2}},
+        },
+        "lapi-bouncer": {"traefik-bouncer@172.18.0.3": {"/v1/decisions": {"GET": 15000}}},
+    })
+
+    def test_counts_blocklist_bans_attacks_and_requests_without_any_ip(self):
         alerts = ("id,scope,value,reason,country,as,decisions,created_at,kind\n"
                   f'7,Ip,203.0.113.9,crowdsecurity/http-probing,US,"Example, Inc.",ban:1,{self.at(0.5)},crowdsec\n'
                   f"8,Ip,198.51.100.4,crowdsecurity/http-cve-2021-41773,DE,AS1,ban:1,{self.at(2.5)},crowdsec\n"
                   f"9,Ip,198.51.100.5,crowdsecurity/http-generic-bf,DE,AS1,ban:1,{self.at(2.2)},crowdsec\n"
                   f"10,Ip,198.51.100.6,crowdsecurity/http-crawl-non_statics,FR,AS2,ban:1,{self.at(30)},crowdsec\n")
+        metrics = [self.METRICS]
 
         def in_guest(kind, vmid, script, timeout=20):
-            return decisions if "decisions" in script else alerts
+            return metrics[0] if "metrics" in script else alerts
 
+        state = {}
         with mock.patch.object(collect, "in_guest", in_guest):
-            result = collect.security({"vm": 150}, self.NOW)
-        self.assertEqual(result["bans"], 1)  # the captcha isn't a ban
+            first = collect.security({"vm": 150}, self.NOW, state)
+            metrics[0] = self.METRICS.replace("15000", "15120")
+            result = collect.security({"vm": 150}, self.NOW + 300, state)
+        self.assertEqual(first["checked24h"], 0)  # the first run only learns the counter
+        self.assertEqual(result["checked24h"], 120)
+        self.assertEqual(result["checkedHourly"][23], 120)
+        self.assertEqual(result["blocklist"], {"total": 3691, "byKind": {
+            "bruteforce": 2228, "probing": 476, "crawler": 106, "exploit": 881}})
+        self.assertEqual(result["bans"], 1)  # captchas aren't bans
         self.assertEqual(result["attacks24h"], 3)  # the 30h-old alert is out of the window
         self.assertEqual(result["byKind"], {"probing": 1, "exploit": 1, "bruteforce": 1})
         self.assertEqual(result["hourly"][23], 1)
         self.assertEqual(result["hourly"][21], 2)
         text = json.dumps(result)
-        for leak in ("203.0.113", "198.51.100", "Example", "US", "crowdsecurity", "cve"):
+        for leak in ("203.0.113", "198.51.100", "Example", "US", "crowdsecurity", "cve", "traefik"):
             self.assertNotIn(leak, text)
+
+    def test_backfills_the_trend_once_from_the_access_log(self):
+        def hour(h_ago):
+            return time.strftime("%d/%b/%Y:%H", time.gmtime(self.NOW - h_ago * 3600))
+        counts = f"  12 {hour(0)}\n 300 {hour(5)}\n 999 {hour(30)}\n   7 garbage\n"
+        calls = []
+
+        def in_guest(kind, vmid, script, timeout=20):
+            calls.append(script)
+            if "uniq -c" in script:
+                return counts
+            return self.METRICS if "metrics" in script else ""
+
+        state = {}
+        with mock.patch.object(collect, "in_guest", in_guest):
+            result = collect.security({"vm": 150, "log": "/x/access.log"}, self.NOW, state)
+            collect.security({"vm": 150, "log": "/x/access.log"}, self.NOW + 300, state)
+        self.assertEqual(result["checkedHourly"][23], 12)
+        self.assertEqual(result["checkedHourly"][18], 300)
+        self.assertEqual(result["checked24h"], 312)  # the 30h-old hour is outside
+        self.assertEqual(sum("uniq -c" in c for c in calls), 1)  # only once
+
+    def test_a_restarted_counter_counts_from_zero(self):
+        state = {"security": {"checked": 5000, "hours": {}}}
+        with mock.patch.object(collect, "in_guest",
+                               lambda k, v, script, timeout=20: self.METRICS.replace("15000", "40") if "metrics" in script else ""):
+            result = collect.security({"vm": 150}, self.NOW, state)
+        self.assertEqual(result["checked24h"], 40)
 
     def test_unreachable_crowdsec_is_left_out(self):
         with mock.patch.object(collect, "in_guest", lambda *a, **k: None):
-            self.assertIsNone(collect.security({"vm": 150}, self.NOW))
+            self.assertIsNone(collect.security({"vm": 150}, self.NOW, {}))
 
 
 class Logs(unittest.TestCase):

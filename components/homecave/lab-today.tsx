@@ -33,7 +33,7 @@ const Word = ({ status, children }: { status: Status; children: ReactNode }) => 
 
 /**
  * "Today in the lab": what the services are doing, measured inside the guests by the lab's
- * collector (edge traffic and attacks, DNS, internet, backups, scrubs) plus Jellyfin's live
+ * collector (edge traffic and security, DNS, internet, backups, scrubs, containers) plus Jellyfin's live
  * stream count. Hidden until the collector has reported; a missing reading shows "—".
  */
 export function LabTodayView({
@@ -47,13 +47,16 @@ export function LabTodayView({
   streams?: number | null
 }) {
   const today = labToday(status, now)
-  const { edge, dns, wan, media, backup, scrubs, containers, security } = today
-  if (!edge && !dns && !wan && !media && !backup && !scrubs && !containers && !security) return null
-  const kinds = security
-    ? ATTACK_KINDS.map((k) => [KIND_LABEL[k], security.byKind[k] ?? 0] as const).filter(
-        ([, n]) => n > 0,
-      )
-    : []
+  const { edge, dns, wan, backup, scrubs, containers, security } = today
+  if (!edge && !dns && !wan && !backup && !scrubs && !containers && !security) return null
+  // "brute force 2,228 · exploits 889", largest first, skipping empty kinds.
+  const describe = (byKind: Partial<Record<AttackKind, number>> | undefined) =>
+    ATTACK_KINDS.map((k) => [KIND_LABEL[k], byKind?.[k] ?? 0] as const)
+      .filter(([, n]) => n > 0)
+      .sort((a, b) => b[1] - a[1])
+      .map(([label, n]) => `${label} ${n.toLocaleString("en-US")}`)
+  const blocked = describe(security?.blocklist?.byKind)
+  const detected = describe(security?.byKind)
 
   const rpm = (v: number) => (v < 10 ? v.toFixed(1).replace(/\.0$/, "") : String(Math.round(v)))
 
@@ -157,38 +160,67 @@ export function LabTodayView({
               )
             }
           />
+          {/* Requests checked moves with traffic every hour; the blocklist is the context. */}
           <Metric
-            label="attacks detected"
-            value={security ? String(security.attacks24h) : "—"}
+            label={security && !security.checkedHourly ? "attacks detected" : "security checks"}
+            value={security ? formatCompact(security.checked24h ?? security.attacks24h) : "—"}
             trend={
               security && (
                 <Sparkline
-                  values={security.hourly}
-                  label="Attacks detected per hour, last 24 hours"
+                  values={security.checkedHourly ?? security.hourly}
+                  label={
+                    security.checkedHourly
+                      ? "Requests checked for known attackers per hour, last 24 hours"
+                      : "Attacks detected per hour, last 24 hours"
+                  }
                   width={64}
                 />
               )
             }
             hint={
               security
-                ? `${security.bans === 0 ? "none" : security.bans} banned now · 24h`
+                ? [
+                    security.blocklist && `${formatCompact(security.blocklist.total)} blocklisted`,
+                    security.bans > 0 && `${security.bans} banned here`,
+                    "24h",
+                  ]
+                    .filter(Boolean)
+                    .join(" · ")
                 : "not reported"
             }
           />
           <Metric
-            label="space saved"
-            value={media ? `${media.savedGB} GB` : "—"}
-            hint={media ? "re-encoded on the GPU" : "not reported"}
+            label="containers"
+            value={containers ? `${containers.ok}/${containers.total}` : "—"}
+            hint={
+              containers ? (
+                <Word status={containers.ok === containers.total ? "up" : "warn"}>
+                  {containers.ok === containers.total
+                    ? "all healthy"
+                    : `${containers.total - containers.ok} not healthy`}
+                </Word>
+              ) : (
+                "not reported"
+              )
+            }
           />
         </dl>
-        {kinds.length > 0 && (
+        {(blocked.length > 0 || detected.length > 0) && (
           // Broad kinds only: never which paths, apps or addresses were involved.
-          <p className="flex flex-wrap items-baseline gap-x-3 gap-y-1 border-t px-4 py-3 text-sm">
-            <span className="label-caps">attack types · 24h</span>
-            <span className="text-muted-foreground tabular">
-              {kinds.map(([label, n]) => `${label} ${n}`).join(" · ")}
-            </span>
-          </p>
+          <div className="flex flex-col gap-1 border-t px-4 py-3 text-sm sm:flex-row sm:flex-wrap sm:gap-x-6">
+            {blocked.length > 0 && (
+              <p className="flex flex-wrap items-baseline gap-x-3">
+                <span className="label-caps">blocklist</span>
+                <span className="text-muted-foreground tabular">{blocked.join(" · ")}</span>
+              </p>
+            )}
+            {detected.length > 0 && (
+              <p className="flex flex-wrap items-baseline gap-x-3">
+                <span className="label-caps">detected here · 24h</span>
+                <span className="text-muted-foreground tabular">{detected.join(" · ")}</span>
+              </p>
+            )}
+          </div>
         )}
       </Panel>
     </section>

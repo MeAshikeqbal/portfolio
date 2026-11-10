@@ -151,15 +151,38 @@ function parseCollected(n: Record<string, unknown>): LabCollected {
     const attacks24h = int(sec.attacks24h, 0, 10_000_000)
     const hourly = list(sec.hourly, 24).map((v) => int(v, 0, 10_000_000))
     if (hourly.length !== 24) fail()
-    const byKind: Partial<Record<(typeof ATTACK_KINDS)[number], number>> = {}
-    for (const [key, value] of Object.entries(obj(sec.byKind))) {
-      if (!(ATTACK_KINDS as readonly string[]).includes(key)) fail()
-      byKind[key as (typeof ATTACK_KINDS)[number]] = int(value, 0, 10_000_000)
+    const kinds = (v: unknown) => {
+      const byKind: Partial<Record<(typeof ATTACK_KINDS)[number], number>> = {}
+      for (const [key, value] of Object.entries(obj(v))) {
+        if (!(ATTACK_KINDS as readonly string[]).includes(key)) fail()
+        byKind[key as (typeof ATTACK_KINDS)[number]] = int(value, 0, 100_000_000)
+      }
+      return byKind
     }
-    // The three views of the same 24h must agree.
+    const byKind = kinds(sec.byKind)
+    // Each total and its breakdowns describe the same thing, so they must agree.
     const sum = (xs: number[]) => xs.reduce((a, b) => a + b, 0)
     if (sum(hourly) !== attacks24h || sum(Object.values(byKind)) !== attacks24h) fail()
-    out.security = { bans: int(sec.bans, 0, 10_000_000), attacks24h, hourly, byKind }
+    const security: NonNullable<LabCollected["security"]> = {
+      bans: int(sec.bans, 0, 10_000_000),
+      attacks24h,
+      hourly,
+      byKind,
+    }
+    if (sec.blocklist !== undefined) {
+      const b = obj(sec.blocklist)
+      const blocklist = { total: int(b.total, 0, 100_000_000), byKind: kinds(b.byKind) }
+      if (sum(Object.values(blocklist.byKind)) !== blocklist.total) fail()
+      security.blocklist = blocklist
+    }
+    if (sec.checked24h !== undefined || sec.checkedHourly !== undefined) {
+      const checked24h = int(sec.checked24h, 0, 1_000_000_000)
+      const checkedHourly = list(sec.checkedHourly, 24).map((v) => int(v, 0, 1_000_000_000))
+      if (checkedHourly.length !== 24 || sum(checkedHourly) !== checked24h) fail()
+      security.checked24h = checked24h
+      security.checkedHourly = checkedHourly
+    }
+    out.security = security
   }
   return out
 }
