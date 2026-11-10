@@ -39,10 +39,15 @@ describe("Homecave and /now seed content", () => {
     expect(storage?.description).not.toMatch(/mirror|raid|parity|redundan/i)
   })
 
-  it("keeps /now about more than the homelab and leaves Reading out", () => {
+  it("follows nownownow (says what's not being done) and leaves Reading out", () => {
     const text = NOW.body.map((block) => block.children.map((c) => c.text).join("")).join("\n")
-    expect(text).toMatch(/Building:/)
+    expect(text).toMatch(/Not doing:/)
     expect(text).not.toMatch(/Reading:/)
+  })
+
+  it("keeps the first /now as history, older than the current update", () => {
+    expect(NOW.archive.map((entry) => entry.date)).toEqual(["2026-11-09"])
+    expect(NOW.archive[0].date < NOW.updatedOn).toBe(true)
   })
 })
 
@@ -151,7 +156,7 @@ describe("validateAboutContent edge cases from review", () => {
         ]
       }),
     )
-    expect(problems).toContainEqual(expect.stringMatching(/now\.building\.link: looks like a IPv4/))
+    expect(problems).toContainEqual(expect.stringMatching(/now\.where\.link: looks like a IPv4/))
   })
 
   it("forbids links in the first section even under another key", async () => {

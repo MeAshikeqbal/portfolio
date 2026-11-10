@@ -42,7 +42,12 @@ const DOMAIN =
 
 export interface AboutContent {
   uses: { intro: string; sections: AboutSection[] }
-  now: { location: string; body: AboutBlock[] }
+  now: {
+    location: string
+    body: AboutBlock[]
+    updatedOn?: string
+    archive?: { _key: string; date: string; location?: string; body: AboutBlock[] }[]
+  }
 }
 
 /** Every public string, labelled with where it lives. */
@@ -58,11 +63,20 @@ function publicStrings({ uses, now }: AboutContent): { where: string; text: stri
     }
   }
   out.push({ where: "now.location", text: now.location })
-  for (const block of now.body) {
-    for (const child of block.children) out.push({ where: `now.${block._key}`, text: child.text })
-    for (const mark of block.markDefs ?? []) {
-      out.push({ where: `now.${block._key}.link`, text: mark.href })
+  const blocks = (prefix: string, body: AboutBlock[]) => {
+    for (const block of body) {
+      for (const child of block.children)
+        out.push({ where: `${prefix}.${block._key}`, text: child.text })
+      for (const mark of block.markDefs ?? []) {
+        out.push({ where: `${prefix}.${block._key}.link`, text: mark.href })
+      }
     }
+  }
+  blocks("now", now.body)
+  for (const entry of now.archive ?? []) {
+    if (entry.location)
+      out.push({ where: `now.archive.${entry._key}.location`, text: entry.location })
+    blocks(`now.archive.${entry._key}`, entry.body)
   }
   return out
 }
@@ -130,6 +144,20 @@ export async function validateAboutContent(content: AboutContent): Promise<strin
   }
 
   if (now.body.length === 0) problems.push("now.body is empty")
+  const isDate = (value: string) => /^\d{4}-\d{2}-\d{2}$/.test(value)
+  if (now.updatedOn !== undefined && !isDate(now.updatedOn)) {
+    problems.push(`now.updatedOn "${now.updatedOn}" isn't YYYY-MM-DD`)
+  }
+  for (const entry of now.archive ?? []) {
+    if (!isDate(entry.date)) problems.push(`now.archive "${entry._key}" has no YYYY-MM-DD date`)
+    if (entry.body.length === 0) problems.push(`now.archive "${entry._key}" is empty`)
+    if (now.updatedOn && entry.date > now.updatedOn) {
+      problems.push(`now.archive "${entry._key}" is newer than the current update`)
+    }
+  }
+  for (const key of duplicateKeys((now.archive ?? []).map((e) => e._key))) {
+    problems.push(`duplicate now.archive _key "${key}"`)
+  }
   for (const key of duplicateKeys(now.body.map((b) => b._key))) {
     problems.push(`duplicate now block _key "${key}"`)
   }
