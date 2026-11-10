@@ -74,6 +74,14 @@ export function toPublicStatus(status: LabStatus): LabStatus {
         dns: { queries: n.dns.queries, blockedPct: n.dns.blockedPct, hours: n.dns.hours },
       }),
       ...(n.media && { media: { savedGB: n.media.savedGB } }),
+      ...(n.security && {
+        security: {
+          bans: n.security.bans,
+          attacks24h: n.security.attacks24h,
+          hourly: [...n.security.hourly],
+          byKind: Object.fromEntries(Object.entries(n.security.byKind).map(([k, v]) => [k, v])),
+        },
+      }),
       receivedAt: n.receivedAt,
       history: {
         t: [...n.history.t],

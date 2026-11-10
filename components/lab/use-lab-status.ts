@@ -34,13 +34,19 @@ function start() {
   timer = setInterval(load, POLL_MS)
 }
 
-export function useLabStatus(initial?: LabStatus | null): {
+export function useLabStatus(
+  initial?: LabStatus | null,
+  /** When the server rendered `initial` (ISO). The first render uses it as "now", so relative
+   * times ("updated 20s ago") hydrate exactly as the cached HTML says; the first poll (sent
+   * on mount) moves the clock on. */
+  renderedAt?: string,
+): {
   status: LabStatus | null | undefined
   now: Date
 } {
   // A server snapshot seeds the first render; the shared cache is seeded in the effect below.
   const [status, setStatus] = useState<LabStatus | null | undefined>(latest ?? initial)
-  const [now, setNow] = useState(() => new Date())
+  const [now, setNow] = useState(() => (renderedAt ? new Date(renderedAt) : new Date()))
 
   useEffect(() => {
     const listener: Listener = (value) => {

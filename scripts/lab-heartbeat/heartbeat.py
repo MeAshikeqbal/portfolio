@@ -39,7 +39,7 @@ import urllib.request
 INTERVAL = 30
 COLLECT = "/run/lab-collect/collect.json"
 # Sections the root collector may contribute; anything else in its file is ignored.
-COLLECT_KEYS = ("services", "containers", "temps", "gpu", "scrubs", "backup", "wan", "edge", "dns", "media")
+COLLECT_KEYS = ("services", "containers", "temps", "gpu", "scrubs", "backup", "wan", "edge", "dns", "media", "security")
 CATEGORIES = {"media", "network", "storage", "security", "home", "apps", "other"}
 GIB = 1024**3
 

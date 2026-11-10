@@ -36,6 +36,10 @@ export interface LabStorage {
   kind: "pool" | "backup"
 }
 
+/** Broad kinds of attack the edge security sees (never the scenario names). */
+export const ATTACK_KINDS = ["probing", "exploit", "bruteforce", "crawler", "other"] as const
+export type AttackKind = (typeof ATTACK_KINDS)[number]
+
 /** How a nightly backup round ended (worst across the cluster's nodes). */
 export const BACKUP_STATUS = ["ok", "warnings", "failed"] as const
 export type BackupStatus = (typeof BACKUP_STATUS)[number]
@@ -69,6 +73,16 @@ export interface LabCollected {
   dns?: { queries: number; blockedPct: number; hours: number }
   /** Disk space the media re-encoder has saved. */
   media?: { savedGB: number }
+  /**
+   * Edge security (the reverse proxy's intrusion detection): IPs banned right now, attacks
+   * detected over 24h with an hourly breakdown (oldest first), and their broad kinds.
+   */
+  security?: {
+    bans: number
+    attacks24h: number
+    hourly: number[]
+    byKind: Partial<Record<AttackKind, number>>
+  }
 }
 
 /** One node's latest report. Everything beyond name/online/uptime is optional (v1 lab). */

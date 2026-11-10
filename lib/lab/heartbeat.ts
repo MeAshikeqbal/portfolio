@@ -2,6 +2,7 @@ import "server-only"
 
 import { createHmac, timingSafeEqual } from "node:crypto"
 import {
+  ATTACK_KINDS,
   BACKUP_STATUS,
   CATEGORIES,
   POOL_HEALTH,
@@ -144,6 +145,21 @@ function parseCollected(n: Record<string, unknown>): LabCollected {
   }
   if (n.media !== undefined) {
     out.media = { savedGB: int(obj(n.media).savedGB, 0, 10_000_000) }
+  }
+  if (n.security !== undefined) {
+    const sec = obj(n.security)
+    const attacks24h = int(sec.attacks24h, 0, 10_000_000)
+    const hourly = list(sec.hourly, 24).map((v) => int(v, 0, 10_000_000))
+    if (hourly.length !== 24) fail()
+    const byKind: Partial<Record<(typeof ATTACK_KINDS)[number], number>> = {}
+    for (const [key, value] of Object.entries(obj(sec.byKind))) {
+      if (!(ATTACK_KINDS as readonly string[]).includes(key)) fail()
+      byKind[key as (typeof ATTACK_KINDS)[number]] = int(value, 0, 10_000_000)
+    }
+    // The three views of the same 24h must agree.
+    const sum = (xs: number[]) => xs.reduce((a, b) => a + b, 0)
+    if (sum(hourly) !== attacks24h || sum(Object.values(byKind)) !== attacks24h) fail()
+    out.security = { bans: int(sec.bans, 0, 10_000_000), attacks24h, hourly, byKind }
   }
   return out
 }

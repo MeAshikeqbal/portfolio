@@ -45,7 +45,7 @@ export function HomecaveView({ uses, lab }: { uses: USES_QUERY_RESULT; lab: LabS
               "My homelab, live: a three-node Proxmox cluster at home, and what runs on it."
             }
           />
-          <LabDashboard initial={lab} specs={specs} />
+          <LabDashboard initial={lab} renderedAt={renderedAt.toISOString()} specs={specs} />
           {/* The privacy note sits with the numbers it qualifies, not at the foot of the page. */}
           <p className="mt-4 max-w-[65ch] text-sm text-pretty text-muted-foreground">
             <span className="font-medium text-foreground">What this doesn&apos;t show.</span> Each
