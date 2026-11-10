@@ -121,7 +121,7 @@ const status = (overrides: Partial<LabNodeStatus>[] = []): LabStatus => ({
     uptime: 540_000,
     interval: 30,
     receivedAt: new Date(now.getTime() - 20_000).toISOString(),
-    history: { t: [], cpu: [], mem: [], netIn: [], netOut: [] },
+    history: { t: [], cpu: [], mem: [], netIn: [], netOut: [], temp: [], gpu: [], edge: [] },
     availability24h: null,
     ...o,
   })),
@@ -262,7 +262,7 @@ describe("public status (the allowlist on the way out)", () => {
       {
         ...(parseHeartbeat(v2)![0] as LabNodeStatus),
         receivedAt: now.toISOString(),
-        history: { t: [], cpu: [], mem: [], netIn: [], netOut: [] },
+        history: { t: [], cpu: [], mem: [], netIn: [], netOut: [], temp: [], gpu: [], edge: [] },
         availability24h: 99.9,
         ...({ hostname: "pve", vmids: [104, 156], tags: "producr", ip: "192.168.1.10" } as object),
       },

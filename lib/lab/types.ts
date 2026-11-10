@@ -36,8 +36,43 @@ export interface LabStorage {
   kind: "pool" | "backup"
 }
 
+/** How a nightly backup round ended (worst across the cluster's nodes). */
+export const BACKUP_STATUS = ["ok", "warnings", "failed"] as const
+export type BackupStatus = (typeof BACKUP_STATUS)[number]
+
+/**
+ * Readings from the lab's root collector, carried in a node's report when they're fresh.
+ * Services use the public names already on Homecave; everything else is a count or a number.
+ */
+export interface LabCollected {
+  /** Named public services on this node: up means running (and healthy, where checked). */
+  services?: { name: string; up: boolean }[]
+  /** Docker containers on this node's guests that are running and not unhealthy. */
+  containers?: { ok: number; total: number }
+  temps?: { cpuC: number | null; diskC: number | null }
+  gpu?: {
+    utilPct: number
+    memUsedMiB: number
+    memTotalMiB: number
+    tempC: number
+    encoders: number
+  }
+  /** Last ZFS scrub per public pool label (epoch seconds) and the errors it found. */
+  scrubs?: { label: string; at: number; errors: number }[]
+  /** The latest nightly backup round and how many guests the jobs cover. */
+  backup?: { at: number; status: BackupStatus; covered: number; total: number }
+  /** Internet latency to the nearest public resolver, and packet loss. */
+  wan?: { rttMs: number | null; lossPct: number }
+  /** Requests through the public reverse proxy, and the share that were server errors. */
+  edge?: { rpm: number; errPct: number }
+  /** DNS queries over the last `hours` (up to 24) and the share blocked. */
+  dns?: { queries: number; blockedPct: number; hours: number }
+  /** Disk space the media re-encoder has saved. */
+  media?: { savedGB: number }
+}
+
 /** One node's latest report. Everything beyond name/online/uptime is optional (v1 lab). */
-export interface LabNode {
+export interface LabNode extends LabCollected {
   /** Public name, matching a Homecave node ("Tower", "Mini PC #1"). */
   name: string
   online: boolean
@@ -55,6 +90,8 @@ export interface LabNode {
     total: number
     byCategory: Partial<Record<Category, [running: number, total: number]>>
   }
+  /** CPU (% of this node) and memory used by running guests, per category. */
+  resources?: Partial<Record<Category, { cpuPct: number; memGiB: number }>>
   storage?: LabStorage[]
   /** How this node sees its cluster peers (lets a silent node be shown as down). */
   peers?: { name: string; online: boolean }[]
@@ -67,6 +104,10 @@ export interface LabHistory {
   mem: (number | null)[]
   netIn: (number | null)[]
   netOut: (number | null)[]
+  /** CPU package °C, GPU utilisation % and edge requests/min, where the node reports them. */
+  temp: (number | null)[]
+  gpu: (number | null)[]
+  edge: (number | null)[]
 }
 
 export interface LabNodeStatus extends LabNode {

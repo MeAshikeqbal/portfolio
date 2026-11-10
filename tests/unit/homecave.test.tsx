@@ -7,7 +7,7 @@ import type { LabNodeStatus, LabStatus } from "@/lib/lab/types"
 
 const now = new Date("2026-11-10T12:00:00Z")
 const ago = (s: number) => new Date(now.getTime() - s * 1000).toISOString()
-const empty = { t: [], cpu: [], mem: [], netIn: [], netOut: [] }
+const empty = { t: [], cpu: [], mem: [], netIn: [], netOut: [], temp: [], gpu: [], edge: [] }
 const specs: NodeSpec[] = [
   { name: "Proxmox VE cluster", description: "3 nodes" },
   { name: "Tower", description: "GTX 1050 Ti" },

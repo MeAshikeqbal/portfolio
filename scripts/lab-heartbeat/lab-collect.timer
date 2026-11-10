@@ -1,0 +1,10 @@
+[Unit]
+Description=Homecave collector every 60 seconds
+
+[Timer]
+OnBootSec=45s
+OnUnitActiveSec=60s
+AccuracySec=5s
+
+[Install]
+WantedBy=timers.target

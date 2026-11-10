@@ -11,7 +11,7 @@ const node = (name: string, receivedAt: string, extra = {}) => ({
   uptime: 90_000,
   interval: 30,
   receivedAt,
-  history: { t: [], cpu: [], mem: [], netIn: [], netOut: [] },
+  history: { t: [], cpu: [], mem: [], netIn: [], netOut: [], temp: [], gpu: [], edge: [] },
   availability24h: null,
   ...extra,
 })

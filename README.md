@@ -105,6 +105,10 @@ tests/unit, tests/e2e
   report every 30s to `/api/lab-heartbeat`. Reports are stored in Upstash: the latest per node,
   plus 24h of 5-minute samples, one Lua `EVAL` per write. `/api/lab-status` serves them,
   re-allowlisted. The page is server-rendered every 30s and kept fresh in the browser.
+  - A root collector on each node (`collect.py`, every 60s, local only) adds what the
+    read-only token can't see: named public services up/down (badges on the self-hosted and
+    network rows), container health, temperatures, GPU, scrubs, backups, WAN, edge traffic,
+    DNS and media savings, all reduced to public names and counts before the sender signs them.
   - Its copy comes from the *Homecave* singleton (Sanity type `uses`): the intro; the
     "Homelab" rows, whose names match the lab's public node names and whose descriptions
     become the node spec lines; and the self-hosted and setup sections.

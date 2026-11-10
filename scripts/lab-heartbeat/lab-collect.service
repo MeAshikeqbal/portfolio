@@ -1,0 +1,17 @@
+[Unit]
+Description=Collect the Homecave service and host readings (local only, never sends)
+After=pve-cluster.service pve-guests.service
+
+[Service]
+Type=oneshot
+# For ZFS_LABELS; the collector never reads or uses the secrets in it.
+EnvironmentFile=/etc/lab-heartbeat.env
+ExecStart=/usr/local/bin/lab-collect
+# Root: it has to look inside guests (pct exec / qm guest exec). Output is anonymized here.
+RuntimeDirectory=lab-collect
+RuntimeDirectoryMode=0755
+RuntimeDirectoryPreserve=yes
+StateDirectory=lab-collect
+Nice=10
+IOSchedulingClass=idle
+TimeoutStartSec=50

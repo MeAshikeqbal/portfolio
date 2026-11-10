@@ -2,6 +2,8 @@ import { ChevronRight } from "lucide-react"
 import { isHomelab, UsesSections, visibleUsesSections } from "@/components/about/uses-view"
 import { Container, Section } from "@/components/dashboard/layout"
 import { SectionHeader } from "@/components/dashboard/section-header"
+import { LabServiceBadge } from "@/components/lab/lab-badges"
+import { serviceState } from "@/lib/lab/services"
 import type { LabStatus } from "@/lib/lab/types"
 import type { USES_QUERY_RESULT } from "@/sanity.types"
 import { cn } from "@/lib/utils"
@@ -25,6 +27,11 @@ export function HomecaveView({ uses, lab }: { uses: USES_QUERY_RESULT; lab: LabS
   const rest = sections.filter((s) => s !== homelab)
   const labSections = rest.filter((s) => isLabSection(s.title))
   const deskSections = rest.filter((s) => !isLabSection(s.title))
+  // Server-side first answer for each service badge (same snapshot the dashboard renders).
+  const renderedAt = new Date()
+  const badge = (name: string) => (
+    <LabServiceBadge name={name} initial={serviceState(name, lab, renderedAt)} />
+  )
 
   return (
     <main>
@@ -61,6 +68,7 @@ export function HomecaveView({ uses, lab }: { uses: USES_QUERY_RESULT; lab: LabS
                 />
                 <UsesSections
                   sections={labSections}
+                  badge={badge}
                   className="grid items-start gap-6 space-y-0 lg:grid-cols-2"
                 />
               </>

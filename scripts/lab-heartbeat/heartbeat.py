@@ -18,6 +18,10 @@ Config: environment (systemd EnvironmentFile=/etc/lab-heartbeat.env, mode 600):
   NODE_SELF=pve            optional; defaults to this machine's short hostname
   PVE_API_URL=https://localhost:8006   PVE_CA=/etc/pve/pve-root-ca.pem   (optional)
 
+Also merges the root collector's readings (/run/lab-collect/collect.json, see collect.py) when
+they're under 3 minutes old: named public services up/down, container health, temperatures,
+GPU, scrubs, backups, WAN, edge and DNS counts, media savings.
+
 Never sent: hostnames, IPs, guest names/vmids/tags, pool names, versions, serials, CPU flags.
 """
 
@@ -33,6 +37,9 @@ import time
 import urllib.request
 
 INTERVAL = 30
+COLLECT = "/run/lab-collect/collect.json"
+# Sections the root collector may contribute; anything else in its file is ignored.
+COLLECT_KEYS = ("services", "containers", "temps", "gpu", "scrubs", "backup", "wan", "edge", "dns", "media")
 CATEGORIES = {"media", "network", "storage", "security", "home", "apps", "other"}
 GIB = 1024**3
 
@@ -110,9 +117,10 @@ def build(self_host, names):
     except Exception:
         pass
 
-    # Guests: counts by public category only.
+    # Guests: counts by public category only, plus what each category uses (running guests).
     categories = env_map("GUEST_CATEGORIES")
-    by_cat, running, total = {}, 0, 0
+    by_cat, running, total, use = {}, 0, 0, {}
+    threads = max(1, node["cpu"]["threads"])
     for g in api("/cluster/resources?type=vm"):
         if g.get("node") != self_host or g.get("template"):
             continue
@@ -122,7 +130,15 @@ def build(self_host, names):
         r, t = by_cat.get(cat, [0, 0])
         by_cat[cat] = [r + up, t + 1]
         running, total = running + up, total + 1
+        if up:
+            u = use.setdefault(cat, [0.0, 0])
+            u[0] += float(g.get("cpu", 0)) * float(g.get("maxcpu", 0))
+            u[1] += int(g.get("mem", 0))
     node["guests"] = {"running": running, "total": total, "byCategory": by_cat}
+    node["resources"] = {
+        cat: {"cpuPct": round(min(100, cpu / threads * 100), 1), "memGiB": round(mem / GIB, 1)}
+        for cat, (cpu, mem) in use.items()
+    }
 
     # Storage: mapped stores on this node (+ shared ones once, from REPORT_SHARED), with ZFS health.
     labels, zfs_labels = env_map("STORAGE_LABELS"), env_map("ZFS_LABELS")
@@ -160,7 +176,20 @@ def build(self_host, names):
         for n in api("/cluster/resources?type=node")
         if n.get("node") != self_host and n.get("node") in names
     ]
+    node.update(collected())
     return {"v": 2, "node": node, "storage": storage, "peers": peers}
+
+
+def collected():
+    """The root collector's latest readings, if it ran in the last 3 minutes (else nothing)."""
+    try:
+        with open(COLLECT) as f:
+            data = json.load(f)
+    except (OSError, ValueError):
+        return {}
+    if not isinstance(data, dict) or time.time() - float(data.get("at", 0)) > 180:
+        return {}
+    return {k: data[k] for k in COLLECT_KEYS if k in data}
 
 
 def main():

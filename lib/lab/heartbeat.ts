@@ -1,7 +1,15 @@
 import "server-only"
 
 import { createHmac, timingSafeEqual } from "node:crypto"
-import { CATEGORIES, POOL_HEALTH, type Category, type LabNode, type LabStorage } from "./types"
+import {
+  BACKUP_STATUS,
+  CATEGORIES,
+  POOL_HEALTH,
+  type Category,
+  type LabCollected,
+  type LabNode,
+  type LabStorage,
+} from "./types"
 
 /** Heartbeats are a couple of KB at most; anything bigger is not ours. */
 export const MAX_BODY_BYTES = 8192
@@ -9,9 +17,12 @@ export const MAX_BODY_BYTES = 8192
 export const MAX_SKEW_SECONDS = 300
 export const MAX_NODES = 8
 const MAX_STORAGE = 16
+const MAX_SERVICES = 24
 
 /** Public names only: letters, digits, spaces and a little punctuation. No dots, colons or slashes. */
 const NAME = /^[A-Za-z0-9][A-Za-z0-9 #_-]{0,31}$/
+/** Public service names may also hold commas and plus signs ("Sonarr, Radarr, Lidarr"). */
+const SERVICE_NAME = /^[A-Za-z0-9][A-Za-z0-9 #,+_-]{0,47}$/
 /** A short CPU model ("Ryzen 5 3600", "Core i3-6100"): no vendors' (R)/(TM), clocks or versions. */
 const CPU_MODEL = /^[A-Za-z][A-Za-z0-9 -]{1,31}$/
 
@@ -49,6 +60,93 @@ const num = (v: unknown, min: number, max: number, digits = 0): number => {
 const int = (v: unknown, min: number, max: number) => num(v, min, max, 0)
 const name = (v: unknown): string => (typeof v === "string" && NAME.test(v) ? v : fail())
 const bool = (v: unknown): boolean => (typeof v === "boolean" ? v : fail())
+const orNull = <T>(v: unknown, parse: (v: unknown) => T): T | null =>
+  v === null || v === undefined ? null : parse(v)
+const list = (v: unknown, max: number): unknown[] =>
+  Array.isArray(v) && v.length <= max ? v : fail()
+/** Epoch seconds between 2020 and 2100. */
+const epoch = (v: unknown) => int(v, 1_577_836_800, 4_102_444_800)
+
+/** The root collector's sections, each optional and bounded; a bad one rejects the report. */
+function parseCollected(n: Record<string, unknown>): LabCollected {
+  const out: LabCollected = {}
+  if (n.services !== undefined) {
+    out.services = list(n.services, MAX_SERVICES).map((v) => {
+      const s = obj(v)
+      if (typeof s.name !== "string" || !SERVICE_NAME.test(s.name)) fail()
+      return { name: s.name as string, up: bool(s.up) }
+    })
+    if (new Set(out.services.map((s) => s.name)).size !== out.services.length) fail()
+  }
+  if (n.containers !== undefined) {
+    const c = obj(n.containers)
+    const ok = int(c.ok, 0, 10_000)
+    const total = int(c.total, 0, 10_000)
+    if (ok > total) fail()
+    out.containers = { ok, total }
+  }
+  if (n.temps !== undefined) {
+    const t = obj(n.temps)
+    out.temps = {
+      cpuC: orNull(t.cpuC, (v) => int(v, 0, 150)),
+      diskC: orNull(t.diskC, (v) => int(v, 0, 100)),
+    }
+  }
+  if (n.gpu !== undefined) {
+    const g = obj(n.gpu)
+    const memTotalMiB = int(g.memTotalMiB, 1, 1_000_000)
+    const memUsedMiB = int(g.memUsedMiB, 0, memTotalMiB)
+    out.gpu = {
+      utilPct: int(g.utilPct, 0, 100),
+      memUsedMiB,
+      memTotalMiB,
+      tempC: int(g.tempC, 0, 150),
+      encoders: int(g.encoders, 0, 64),
+    }
+  }
+  if (n.scrubs !== undefined) {
+    out.scrubs = list(n.scrubs, MAX_STORAGE).map((v) => {
+      const s = obj(v)
+      return { label: name(s.label), at: epoch(s.at), errors: int(s.errors, 0, 1e9) }
+    })
+  }
+  if (n.backup !== undefined) {
+    const b = obj(n.backup)
+    if (!(BACKUP_STATUS as readonly unknown[]).includes(b.status)) fail()
+    const covered = int(b.covered, 0, 10_000)
+    const total = int(b.total, 0, 10_000)
+    if (covered > total) fail()
+    out.backup = {
+      at: epoch(b.at),
+      status: b.status as (typeof BACKUP_STATUS)[number],
+      covered,
+      total,
+    }
+  }
+  if (n.wan !== undefined) {
+    const w = obj(n.wan)
+    out.wan = {
+      rttMs: orNull(w.rttMs, (v) => num(v, 0, 10_000, 1)),
+      lossPct: int(w.lossPct, 0, 100),
+    }
+  }
+  if (n.edge !== undefined) {
+    const e = obj(n.edge)
+    out.edge = { rpm: num(e.rpm, 0, 10_000_000, 1), errPct: num(e.errPct, 0, 100, 1) }
+  }
+  if (n.dns !== undefined) {
+    const d = obj(n.dns)
+    out.dns = {
+      queries: int(d.queries, 0, 1e9),
+      blockedPct: num(d.blockedPct, 0, 100, 1),
+      hours: int(d.hours, 1, 24),
+    }
+  }
+  if (n.media !== undefined) {
+    out.media = { savedGB: int(obj(n.media).savedGB, 0, 10_000_000) }
+  }
+  return out
+}
 
 function parseStorage(v: unknown): LabStorage {
   const s = obj(v)
@@ -114,7 +212,19 @@ function parseNode(v: unknown): LabNode {
     if (running > total) fail()
     node.guests = { running, total, byCategory }
   }
-  return node
+  if (n.resources !== undefined) {
+    const resources: NonNullable<LabNode["resources"]> = {}
+    for (const [key, value] of Object.entries(obj(n.resources))) {
+      if (!(CATEGORIES as readonly string[]).includes(key)) fail()
+      const r = obj(value)
+      resources[key as Category] = {
+        cpuPct: num(r.cpuPct, 0, 100, 1),
+        memGiB: num(r.memGiB, 0, 100_000, 1),
+      }
+    }
+    node.resources = resources
+  }
+  return { ...node, ...parseCollected(n) }
 }
 
 /**

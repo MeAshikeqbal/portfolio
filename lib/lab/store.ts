@@ -113,8 +113,14 @@ interface Sample {
   m?: number | null
   i?: number | null
   o?: number | null
+  /** CPU °C, GPU %, edge requests/min (only from nodes that report them). */
+  tc?: number | null
+  g?: number | null
+  e?: number | null
   u: 0 | 1
 }
+
+const SERIES = ["c", "m", "i", "o", "tc", "g", "e"] as const
 
 /**
  * Stores one heartbeat. `nodes` are the reporting node(s); peers a v2 node sees offline get
@@ -139,6 +145,9 @@ export async function writeHeartbeat(
       m: node.mem?.pct ?? null,
       i: node.net?.inKBps ?? null,
       o: node.net?.outKBps ?? null,
+      ...(node.temps?.cpuC != null && { tc: node.temps.cpuC }),
+      ...(node.gpu && { g: node.gpu.utilPct }),
+      ...(node.edge && { e: node.edge.rpm }),
       u: node.online ? 1 : 0,
     },
   }))
@@ -178,12 +187,14 @@ export function summarizeHistory(
   const end = now.getTime()
   const start = end - DAY_MS
   const count = DAY_MS / BUCKET_MS
-  const buckets = Array.from({ length: count }, () => ({
-    c: [] as number[],
-    m: [] as number[],
-    i: [] as number[],
-    o: [] as number[],
-  }))
+  const buckets = Array.from(
+    { length: count },
+    () =>
+      Object.fromEntries(SERIES.map((k) => [k, [] as number[]])) as Record<
+        (typeof SERIES)[number],
+        number[]
+      >,
+  )
   let up = 0
   let seen = 0
   for (const s of samples) {
@@ -191,7 +202,7 @@ export function summarizeHistory(
     seen += 1
     up += s.u
     const b = buckets[Math.min(count - 1, Math.floor((s.t - start) / BUCKET_MS))]
-    for (const key of ["c", "m", "i", "o"] as const) {
+    for (const key of SERIES) {
       const v = s[key]
       if (typeof v === "number") b[key].push(v)
     }
@@ -205,6 +216,9 @@ export function summarizeHistory(
       mem: buckets.map((b) => avg(b.m)),
       netIn: buckets.map((b) => avg(b.i)),
       netOut: buckets.map((b) => avg(b.o)),
+      temp: buckets.map((b) => avg(b.tc)),
+      gpu: buckets.map((b) => avg(b.g)),
+      edge: buckets.map((b) => avg(b.e)),
     },
     // An hour of samples before claiming a percentage.
     availability24h: seen >= 12 ? Math.round((up / seen) * 1000) / 10 : null,

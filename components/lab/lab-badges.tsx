@@ -3,8 +3,9 @@
 import Link from "next/link"
 import { StatusDot } from "@/components/dashboard/status-dot"
 import { labSummary, nodeState } from "@/lib/lab/freshness"
+import { serviceState } from "@/lib/lab/services"
 import type { LabStatus } from "@/lib/lab/types"
-import { STATUS_TEXT_CLASS } from "@/lib/status"
+import { STATUS_TEXT_CLASS, type Status } from "@/lib/status"
 import { cn } from "@/lib/utils"
 import { useLabStatus } from "./use-lab-status"
 
@@ -93,4 +94,45 @@ export function LabBarItem({ className }: { className?: string }) {
       lab {summary.label}
     </Link>
   )
+}
+
+/** A named service's measured state as dot + word ("up", "down", "no data"). */
+export function LabServiceBadgeView({
+  state,
+  className,
+}: {
+  state: { status: Status; label: string } | null
+  className?: string
+}) {
+  if (!state) return null
+  return (
+    <span
+      className={cn(
+        "inline-flex shrink-0 items-center gap-1.5 label-caps",
+        STATUS_TEXT_CLASS[state.status],
+        className,
+      )}
+    >
+      <StatusDot status={state.status} className="size-1.5" />
+      {state.label}
+    </span>
+  )
+}
+
+/**
+ * A Homecave service row's live badge. `initial` is the server's answer for the same snapshot,
+ * so the first paint matches; the shared 30s poll takes over from there.
+ */
+export function LabServiceBadge({
+  name,
+  initial,
+  className,
+}: {
+  name: string
+  initial: { status: Status; label: string } | null
+  className?: string
+}) {
+  const { status, now } = useLabStatus()
+  const state = status === undefined ? initial : serviceState(name, status, now)
+  return <LabServiceBadgeView state={state} className={cn("mt-1", className)} />
 }
