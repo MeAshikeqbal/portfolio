@@ -61,7 +61,11 @@ const nextConfig: NextConfig = {
   },
   async redirects() {
     // Short, shareable alias for the CV served at /resume.pdf.
-    return [{ source: "/resume", destination: "/resume.pdf", permanent: false }]
+    return [
+      { source: "/resume", destination: "/resume.pdf", permanent: false },
+      // /uses became Homecave, the live homelab dashboard (its setup sections live there too).
+      { source: "/uses", destination: "/homecave", permanent: true },
+    ]
   },
   async headers() {
     return [

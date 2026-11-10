@@ -253,7 +253,22 @@ Dense rows divided by hairlines. Each row has an optional status dot plus the st
 The home page's lead list. Each entry is one link: a mono date column (7.5rem from `sm`, with a "pinned" mark under the date for featured posts), a semibold 1.125–1.25rem title that is never cut off, an excerpt trimmed on a word boundary (about 160 characters, `text-pretty`), and mono tags. Three entries: pinned posts first, then the newest, skipping the post the hero already shows as "latest post".
 
 ### Node panel (signature)
-The hero's instrument. Header "node · itsashik", with the availability pill as its status when one is configured (currently off). Below it, only real facts: the latest post (a link), the homelab machines from the "Homelab" section of /uses when present, and counts (posts, projects, and commits/yr once the GitHub sync has written them). Machines named in the lab's signed heartbeat (scripts/lab-heartbeat) show their measured state on the right (`up · 12d` green, `down` red), and the header carries the summary (`3/3 up`; amber when some are down), which is all phones see. A heartbeat older than 10 minutes, judged by the visitor's clock, turns every state grey `no data`; before the first heartbeat nothing is shown.
+The hero's instrument. Header "node · itsashik", with the availability pill as its status when one is configured (currently off). Below it, only real facts: the latest post (a link), the homelab machines from the Homecave "Homelab" section when present, and counts (posts, projects, and commits/yr once the GitHub sync has written them). Machines named in the lab's signed heartbeat (scripts/lab-heartbeat) show their measured state on the right (`up · 12d` green, `down` red), and the header carries the summary (`3/3 up`; amber when some are down), which is all phones see. A node's state is judged per node in the visitor's browser: green only for its own report younger than two intervals (about 90s), red `down` when it's silent and a fresh peer sees it offline, grey `no data` otherwise. Before the first heartbeat nothing is shown.
+
+### Homecave dashboard (signature)
+`/homecave`, the homelab as an instrument.
+- **Header:** the cluster summary (`3/3 up`) and "updated 20s ago · reports every 30s".
+- **Overview:** any Homelab rows that aren't nodes (e.g. the cluster), as plain rows.
+- **Node panels** (3 columns from `xl`). Each has:
+  - the public name, with its measured badge on the right;
+  - the measured CPU model and cores/threads, with the Studio spec line under it;
+  - a flat 2×2 metric grid inside the panel (never nested cards): CPU, memory, network and uptime;
+  - values in tabular figures with small units, hints (load, swap, out-rate, 24h availability) and 64px sparklines in neutral ink;
+  - guests running/total, with category chips (mono, hairline, neutral).
+
+  A stale node shows "as of HH:MM UTC". A down node replaces its metrics with a sentence.
+- **Storage:** one list of pools (largest first) and the off-site backup store. Each row has its health as a status word (grey `no data` when stale), used/total and %, and a thin neutral **meter** (the value is always printed beside it).
+- **Below:** the Studio's self-hosted and setup sections, then a "What this page doesn't show" note explaining the anonymization.
 
 ### Metric tile
 A `label-caps` label above a 1.5rem semibold tabular value, with an optional sparkline at the right and a 12px muted hint. It is built as a description list (`dl` / `dt` / `dd`).

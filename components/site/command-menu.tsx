@@ -13,6 +13,7 @@ import {
   Moon,
   Rss,
   Search,
+  Server,
   Sun,
 } from "lucide-react"
 import { useRouter } from "next/navigation"
@@ -150,15 +151,13 @@ export function CommandMenu({ index, className }: { index: CommandIndex; classNa
             <Item icon={<FileText />} onSelect={() => go("/post")} keywords={["blog"]}>
               All posts
             </Item>
-            {index.hasUses && (
-              <Item
-                icon={<Monitor />}
-                onSelect={() => go("/uses")}
-                keywords={["setup", "gear", "tools"]}
-              >
-                Uses
-              </Item>
-            )}
+            <Item
+              icon={<Server />}
+              onSelect={() => go("/homecave")}
+              keywords={["homelab", "uses", "setup", "status", "proxmox"]}
+            >
+              Homecave
+            </Item>
             {index.hasNow && (
               <Item icon={<Clock />} onSelect={() => go("/now")} keywords={["status", "currently"]}>
                 Now

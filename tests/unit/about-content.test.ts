@@ -20,7 +20,7 @@ function variant(change: (draft: AboutContent) => void): AboutContent {
   return draft
 }
 
-describe("/uses and /now seed content", () => {
+describe("Homecave and /now seed content", () => {
   it("passes every publishing check", async () => {
     expect(await validateAboutContent(content)).toEqual([])
   })

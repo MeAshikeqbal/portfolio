@@ -40,6 +40,7 @@ export const siteConfig = {
   nav: [
     { label: "Writing", href: "/post" },
     { label: "Projects", href: "/projects" },
+    { label: "Homecave", href: "/homecave" },
     { label: "Contact", href: "/#contact" },
   ],
 } as const

@@ -16,9 +16,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.8,
     },
     { url: absoluteUrl("/projects"), changeFrequency: "monthly", priority: 0.8 },
-    ...(data.uses
-      ? [{ url: absoluteUrl("/uses"), lastModified: new Date(data.uses), priority: 0.5 }]
-      : []),
+    // Always there: the live homelab dashboard (its Sanity copy only adds context).
+    { url: absoluteUrl("/homecave"), changeFrequency: "daily", priority: 0.6 },
     ...(data.now
       ? [{ url: absoluteUrl("/now"), lastModified: new Date(data.now), priority: 0.5 }]
       : []),

@@ -16,7 +16,7 @@ export const resolve: PresentationPluginOptions["resolve"] = {
   mainDocuments: defineDocuments([
     { route: "/post/:slug", filter: `_type == "post" && slug.current == $slug` },
     { route: "/projects/:slug", filter: `_type == "project" && slug.current == $slug` },
-    { route: "/uses", filter: `_type == "uses" && _id == "uses"` },
+    { route: "/homecave", filter: `_type == "uses" && _id == "uses"` },
     { route: "/now", filter: `_type == "now" && _id == "now"` },
   ]),
   locations: {
@@ -46,7 +46,7 @@ export const resolve: PresentationPluginOptions["resolve"] = {
     education: defineLocations({ locations: [home] }),
     experiences: defineLocations({ locations: [home] }),
     cv: defineLocations({ locations: [home] }),
-    uses: defineLocations({ locations: [{ title: "Uses", href: "/uses" }] }),
+    uses: defineLocations({ locations: [{ title: "Homecave", href: "/homecave" }] }),
     now: defineLocations({ locations: [{ title: "Now", href: "/now" }] }),
   },
 }

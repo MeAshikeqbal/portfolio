@@ -1,13 +1,12 @@
 import { render, screen, within } from "@testing-library/react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import NowPage from "@/app/(root)/now/page"
-import UsesPage from "@/app/(root)/uses/page"
 import { NowView } from "@/components/about/now-view"
-import { UsesView } from "@/components/about/uses-view"
-import { getNow, getUses } from "@/lib/api"
+import { UsesSections, visibleUsesSections } from "@/components/about/uses-view"
+import { getNow } from "@/lib/api"
 import type { NOW_QUERY_RESULT, USES_QUERY_RESULT } from "@/sanity.types"
 
-vi.mock("@/lib/api", () => ({ getUses: vi.fn(), getNow: vi.fn() }))
+vi.mock("@/lib/api", () => ({ getNow: vi.fn() }))
 vi.mock("next/navigation", () => ({
   notFound: () => {
     throw new Error("NEXT_NOT_FOUND")
@@ -25,41 +24,36 @@ const paragraph = (text: string) => ({
   children: [{ _type: "span" as const, _key: "s", text, marks: [] }],
 })
 
-describe("UsesView", () => {
+describe("UsesSections", () => {
   it("renders sections and items, linking items that have a URL", () => {
-    render(
-      <UsesView
-        uses={{
-          _updatedAt: "2026-11-01T00:00:00Z",
-          intro: "My setup.",
-          sections: [
+    const sections = visibleUsesSections({
+      _updatedAt: "2026-11-01T00:00:00Z",
+      intro: "My setup.",
+      sections: [
+        {
+          _key: "s1",
+          title: "Self-hosted",
+          items: [
             {
-              _key: "s1",
-              title: "Homelab",
-              items: [
-                {
-                  _key: "i1",
-                  name: "Proxmox",
-                  description: "Hypervisor",
-                  url: "https://proxmox.com",
-                  icon: "simple-icons:proxmox",
-                },
-                { _key: "i2", name: "Raspberry Pi", description: null, url: null, icon: null },
-              ],
+              _key: "i1",
+              name: "Proxmox",
+              description: "Hypervisor",
+              url: "https://proxmox.com",
+              icon: "simple-icons:proxmox",
             },
-            { _key: "s2", title: "Empty section", items: [] },
+            { _key: "i2", name: "Raspberry Pi", description: null, url: null, icon: null },
           ],
-        }}
-      />,
-    )
-    expect(screen.getByRole("heading", { level: 1, name: "Uses" })).toBeVisible()
-    expect(screen.getByText("My setup.")).toBeVisible()
-    expect(screen.getByText("Nov 1, 2026", { exact: false })).toBeVisible()
+        },
+        { _key: "s2", title: "Empty section", items: [] },
+      ],
+    })
+    render(<UsesSections sections={sections} badge={(name) => <span>badge:{name}</span>} />)
     expect(screen.getByRole("link", { name: /Proxmox/ })).toHaveAttribute(
       "href",
       "https://proxmox.com",
     )
     expect(screen.getByText("Raspberry Pi").tagName).toBe("P")
+    expect(screen.getByText("badge:Raspberry Pi")).toBeVisible()
     // Empty sections are skipped.
     expect(screen.queryByText("Empty section")).toBeNull()
   })
@@ -91,34 +85,31 @@ describe("NowView", () => {
   })
 })
 
-describe("UsesView with malformed content", () => {
+describe("UsesSections with malformed content", () => {
   const base: Uses = { _updatedAt: "2026-11-01T00:00:00Z", intro: null, sections: [] }
 
   it("drops nameless items and sections left empty", () => {
-    render(
-      <UsesView
-        uses={{
-          ...base,
-          sections: [
-            {
-              _key: "s1",
-              title: "Desk",
-              items: [
-                { _key: "a", name: "Keyboard", description: null, url: null, icon: null },
-                { _key: "b", name: "  ", description: "blank", url: null, icon: null },
-                { _key: "c", name: null, description: "missing", url: null, icon: null },
-              ],
-            },
-            {
-              _key: "s2",
-              title: "Only nameless",
-              items: [{ _key: "d", name: null, description: null, url: null, icon: null }],
-            },
-            { _key: "s3", title: "Null items", items: null },
+    const sections = visibleUsesSections({
+      ...base,
+      sections: [
+        {
+          _key: "s1",
+          title: "Desk",
+          items: [
+            { _key: "a", name: "Keyboard", description: null, url: null, icon: null },
+            { _key: "b", name: "  ", description: "blank", url: null, icon: null },
+            { _key: "c", name: null, description: "missing", url: null, icon: null },
           ],
-        }}
-      />,
-    )
+        },
+        {
+          _key: "s2",
+          title: "Only nameless",
+          items: [{ _key: "d", name: null, description: null, url: null, icon: null }],
+        },
+        { _key: "s3", title: "Null items", items: null },
+      ],
+    })
+    render(<UsesSections sections={sections} />)
     expect(screen.getByText("Keyboard")).toBeVisible()
     expect(screen.getByText("1 items")).toBeVisible()
     expect(screen.queryByText("blank")).toBeNull()
@@ -127,43 +118,23 @@ describe("UsesView with malformed content", () => {
   })
 
   it("renders an unknown icon without crashing", () => {
-    render(
-      <UsesView
-        uses={{
-          ...base,
-          sections: [
-            {
-              _key: "s",
-              title: "Homelab",
-              items: [
-                { _key: "i", name: "Box", description: null, url: null, icon: "nope:missing" },
-              ],
-            },
-          ],
-        }}
-      />,
-    )
+    const sections = visibleUsesSections({
+      ...base,
+      sections: [
+        {
+          _key: "s",
+          title: "Network",
+          items: [{ _key: "i", name: "Box", description: null, url: null, icon: "nope:missing" }],
+        },
+      ],
+    })
+    render(<UsesSections sections={sections} />)
     expect(screen.getByText("Box")).toBeVisible()
   })
 
-  it.each([null, "not a date"])("hides the date when _updatedAt is %s", (updatedAt) => {
-    render(
-      <UsesView
-        uses={{
-          ...base,
-          _updatedAt: updatedAt as string,
-          sections: [
-            {
-              _key: "s",
-              title: "Desk",
-              items: [{ _key: "i", name: "Mouse", description: null, url: null, icon: null }],
-            },
-          ],
-        }}
-      />,
-    )
-    expect(screen.queryByText(/last updated/)).toBeNull()
-    expect(screen.queryByText(/Invalid Date/)).toBeNull()
+  it("treats null content as no sections", () => {
+    expect(visibleUsesSections(null)).toEqual([])
+    expect(visibleUsesSections({ ...base, sections: null })).toEqual([])
   })
 })
 
@@ -213,50 +184,9 @@ describe("NowView edge cases", () => {
   })
 })
 
-describe("the /uses and /now pages", () => {
+describe("the /now page", () => {
   beforeEach(() => {
-    vi.mocked(getUses).mockReset()
     vi.mocked(getNow).mockReset()
-  })
-
-  it.each([
-    ["unpublished", null],
-    ["without sections", { _updatedAt: "2026-11-01T00:00:00Z", intro: null, sections: null }],
-    [
-      "with only empty sections",
-      {
-        _updatedAt: "2026-11-01T00:00:00Z",
-        intro: null,
-        sections: [
-          { _key: "a", title: "Empty", items: [] },
-          { _key: "b", title: "Null", items: null },
-          {
-            _key: "c",
-            title: "Nameless",
-            items: [{ _key: "i", name: null, description: null, url: null, icon: null }],
-          },
-        ],
-      },
-    ],
-  ])("/uses 404s when %s", async (_, uses) => {
-    vi.mocked(getUses).mockResolvedValue(uses as USES_QUERY_RESULT)
-    await expect(UsesPage()).rejects.toThrow("NEXT_NOT_FOUND")
-  })
-
-  it("/uses renders once a section has a named item", async () => {
-    vi.mocked(getUses).mockResolvedValue({
-      _updatedAt: "2026-11-01T00:00:00Z",
-      intro: null,
-      sections: [
-        {
-          _key: "a",
-          title: "Desk",
-          items: [{ _key: "i", name: "Mouse", description: null, url: null, icon: null }],
-        },
-      ],
-    })
-    render(await UsesPage())
-    expect(screen.getByText("Mouse")).toBeVisible()
   })
 
   it.each([

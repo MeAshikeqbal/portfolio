@@ -99,20 +99,29 @@ tests/unit, tests/e2e
   search and warns when a name doesn't exist.
 - **Rich text** has code blocks (language, filename, highlighted lines), note/warning
   callouts, numbered lists and inline code. `/styleguide` shows every block type.
-- **Open on site** (⋯ menu) opens a published post, project, `/uses` or `/now` in a new tab.
-- **`/uses` and `/now`** are singletons under *Personal Info* in the Studio. Each page stays
-  a 404, and isn't linked from the footer, ⌘K palette or sitemap, until it has published
-  content (`/uses` needs a section with a named item). The hero's *homelab* list shows the
-  first five items of the first `/uses` section whose title starts with "Homelab". `/now`
-  turns its date pill amber once it hasn't been edited for `siteConfig.nowStaleAfterDays`.
-- **Seeding `/uses` and `/now`.** The content lives in `scripts/about-content.data.ts` and is
+- **Open on site** (⋯ menu) opens a published post, project, Homecave or `/now` in a new tab.
+- **Homecave** (`/homecave`, formerly `/uses`, which now redirects) is the live homelab
+  dashboard. Each Proxmox node's agent (`scripts/lab-heartbeat/`) posts a signed, anonymized
+  report every 30s to `/api/lab-heartbeat`. Reports are stored in Upstash: the latest per node,
+  plus 24h of 5-minute samples, one Lua `EVAL` per write. `/api/lab-status` serves them,
+  re-allowlisted. The page is server-rendered every 30s and kept fresh in the browser.
+  - Its copy comes from the *Homecave* singleton (Sanity type `uses`): the intro; the
+    "Homelab" rows, whose names match the lab's public node names and whose descriptions
+    become the node spec lines; and the self-hosted and setup sections.
+  - The hero's *homelab* list shows the first five Homelab rows, with measured badges.
+  - Env vars: `LAB_HEARTBEAT_SECRET`, plus Upstash (`UPSTASH_REDIS_REST_*` or `KV_REST_API_*`).
+- **`/now`** is a singleton under *Personal Info*. It stays a 404, and isn't linked from the
+  footer, ⌘K palette or sitemap, until it has published content. It turns its date pill amber
+  once it hasn't been edited for `siteConfig.nowStaleAfterDays`.
+- **Seeding Homecave and `/now`.** The content lives in `scripts/about-content.data.ts` and is
   published by a revision-aware script (dry run by default; `--execute` refuses while
   `// REVIEW:` comments remain or if anything changed in Sanity since the dry run):
   `npx sanity exec scripts/about-content.ts --with-user-token [-- --execute]`.
   `scripts/about-content.validate.ts` rejects IPs, hostnames, ports and versions in the copy.
-- **E2E and publication state.** Tests expect `ABOUT_PAGES=published|unpublished`, decided
-  before the build by `export $(node scripts/about-state.mjs)` (uncached Sanity API). CI does
-  this automatically and picks `lighthouserc.published.json` once the pages are live.
+- **E2E and publication state.** Tests expect `ABOUT_PAGES=published|unpublished` (whether
+  `/now` is live), decided before the build by `export $(node scripts/about-state.mjs)`
+  (uncached Sanity API). CI does this automatically and picks `lighthouserc.published.json`
+  once `/now` is live. Homecave is always audited.
 - **Draft previews.** Open *Presentation* in the Studio to edit with a live preview of the
   real site, drafts included. This needs `SANITY_API_READ_TOKEN` (a Viewer token).
 - **Availability badge.** The hero badge comes from `siteConfig.availability` in `lib/site.ts`:

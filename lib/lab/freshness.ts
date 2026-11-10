@@ -1,16 +1,21 @@
 import type { Status } from "@/lib/status"
-import type { LabNode, LabStatus } from "./types"
+import type { LabNodeStatus, LabStatus } from "./types"
 
-/** The lab reports every 5 minutes; past 10 without one, nothing is claimed. */
-export const LAB_FRESH_MINUTES = 10
+/**
+ * A node is fresh while its latest heartbeat is younger than two intervals plus slack: 90s for
+ * the 30s agents, about 10 minutes for the original 5-minute lab script.
+ */
+export function freshWindowMs(node: Pick<LabNodeStatus, "interval">): number {
+  return ((node.interval ?? 300) * 2 + 30) * 1000
+}
 
-export function isFresh(status: LabStatus | null | undefined, now: Date): boolean {
-  if (!status) return false
-  const received = Date.parse(status.receivedAt)
+export function isNodeFresh(node: LabNodeStatus | undefined, now: Date): boolean {
+  if (!node) return false
+  const received = Date.parse(node.receivedAt)
   if (Number.isNaN(received)) return false
   const age = now.getTime() - received
   // A clock slightly ahead of ours still counts; one far ahead is not trusted.
-  return age <= LAB_FRESH_MINUTES * 60_000 && age >= -5 * 60_000
+  return age <= freshWindowMs(node) && age >= -5 * 60_000
 }
 
 /** "12d", "5h", "40m": uptime as a short machine-style figure. */
@@ -20,26 +25,53 @@ export function formatUptime(seconds: number): string {
   return `${Math.max(1, Math.floor(seconds / 60))}m`
 }
 
-/** One machine's measured state. Green only for a fresh heartbeat that says it's online. */
-export function nodeStatus(
-  node: LabNode | undefined,
-  fresh: boolean,
-): { status: Status; label: string } | null {
+export type NodeState = { status: Status; label: string; state: "up" | "down" | "stale" }
+
+/**
+ * One machine's measured state:
+ * - **up** when its own fresh heartbeat says it's online (green, the only green);
+ * - **down** when it's silent or reports offline and a fresh peer sees it offline (red);
+ * - **no data** otherwise: we can't tell, so we don't claim anything (grey).
+ * Null when the lab has never mentioned this name.
+ */
+export function nodeState(
+  name: string,
+  status: LabStatus | null | undefined,
+  now: Date,
+): NodeState | null {
+  const node = status?.nodes.find((n) => n.name === name)
   if (!node) return null
-  if (!fresh) return { status: "idle", label: "no data" }
-  return node.online
-    ? { status: "up", label: `up · ${formatUptime(node.uptime)}` }
-    : { status: "down", label: "down" }
+  const fresh = isNodeFresh(node, now)
+  if (fresh && node.online) {
+    return { status: "up", label: `up · ${formatUptime(node.uptime)}`, state: "up" }
+  }
+  const peerSaysDown = (status?.nodes ?? []).some(
+    (peer) =>
+      peer.name !== name &&
+      isNodeFresh(peer, now) &&
+      peer.peers?.some((p) => p.name === name && !p.online),
+  )
+  if ((fresh && !node.online) || peerSaysDown)
+    return { status: "down", label: "down", state: "down" }
+  return { status: "idle", label: "no data", state: "stale" }
 }
 
-/** "3/3 up", "2/3 up" (warn) or "no data", for the panel header. */
+/** "3/3 up", "2/3 up" (amber), "0/3 up" (red) or "no data", for headers and the system bar. */
 export function labSummary(
   status: LabStatus | null | undefined,
-  fresh: boolean,
+  now: Date,
 ): { status: Status; label: string } | null {
   if (!status || status.nodes.length === 0) return null
-  if (!fresh) return { status: "idle", label: "no data" }
-  const up = status.nodes.filter((node) => node.online).length
+  const states = status.nodes.map((n) => nodeState(n.name, status, now)?.state)
+  const up = states.filter((s) => s === "up").length
+  const known = states.filter((s) => s === "up" || s === "down").length
+  if (known === 0) return { status: "idle", label: "no data" }
   const total = status.nodes.length
   return { status: up === total ? "up" : up === 0 ? "down" : "warn", label: `${up}/${total} up` }
+}
+
+/** The newest heartbeat time across nodes (for "updated 20s ago"). */
+export function lastReceived(status: LabStatus | null | undefined): string | null {
+  const times = (status?.nodes ?? []).map((n) => n.receivedAt).sort()
+  return times.at(-1) ?? null
 }

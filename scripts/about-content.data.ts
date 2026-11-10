@@ -1,5 +1,5 @@
 /**
- * Content for the /uses and /now singletons, published by scripts/about-content.ts.
+ * Content for the Homecave (Sanity type `uses`) and /now singletons, published by scripts/about-content.ts.
  *
  * Facts come from the owner and from the live homelab (read 2026-11-09). Wording is public:
  * scripts/about-content.validate.ts rejects IPs, hostnames, ports, versions and anything else

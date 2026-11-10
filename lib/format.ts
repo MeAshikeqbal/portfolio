@@ -90,3 +90,22 @@ export function formatRelative(
   const days = Math.round(hours / 24)
   return days <= 30 ? `${days}d ago` : formatDate(iso)
 }
+
+/** GiB as "512 GiB" or "3.6 TiB" (binary units, as ZFS and Proxmox count). */
+export function formatBytes(gib: number): string {
+  if (!Number.isFinite(gib) || gib < 0) return "—"
+  return gib >= 1024 ? `${(gib / 1024).toFixed(1)} TiB` : `${Math.round(gib)} GiB`
+}
+
+/** KB/s as "840 KB/s" or "2.4 MB/s". */
+export function formatRate(kBps: number): string {
+  if (!Number.isFinite(kBps) || kBps < 0) return "—"
+  return kBps >= 1024 ? `${(kBps / 1024).toFixed(1)} MB/s` : `${Math.round(kBps)} KB/s`
+}
+
+/** 0.997 → "99.7%", 1 → "100%". */
+export function formatPercent(value: number, digits = 1): string {
+  if (!Number.isFinite(value)) return "—"
+  const fixed = value.toFixed(digits)
+  return `${fixed.endsWith(".0") ? fixed.slice(0, -2) : fixed}%`
+}

@@ -1,5 +1,5 @@
 /**
- * Publishes the /uses and /now singletons from scripts/about-content.data.ts.
+ * Publishes the Homecave (`uses`) and /now singletons from scripts/about-content.data.ts.
  *
  *   npx sanity exec scripts/about-content.ts --with-user-token                 # dry run
  *   npx sanity exec scripts/about-content.ts --with-user-token -- --execute    # publish
@@ -56,7 +56,7 @@ async function currentRevisions(): Promise<Revisions> {
 }
 
 function printContent() {
-  console.log(`\n/uses  intro: ${USES.intro}`)
+  console.log(`\nhomecave  intro: ${USES.intro}`)
   USES.sections.forEach((section, index) => {
     console.log(`\n  ## ${section.title}`)
     section.items.forEach((item, i) => {

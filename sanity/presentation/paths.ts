@@ -6,7 +6,7 @@ export function sitePath(type: string, slug?: string | null): string | null {
     case "project":
       return slug ? `/projects/${slug}` : null
     case "uses":
-      return "/uses"
+      return "/homecave"
     case "now":
       return "/now"
     default:

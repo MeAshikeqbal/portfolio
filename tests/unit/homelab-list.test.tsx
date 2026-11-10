@@ -17,7 +17,7 @@ describe("HomelabList", () => {
     expect(screen.getAllByRole("listitem")).toHaveLength(2)
     expect(screen.getByText("Proxmox VE cluster")).toBeVisible()
     expect(screen.queryByText("nameless")).toBeNull()
-    expect(screen.getByRole("link", { name: "full setup" })).toHaveAttribute("href", "/uses")
+    expect(screen.getByRole("link", { name: "full setup" })).toHaveAttribute("href", "/homecave")
   })
 
   it("renders nothing without named items", () => {

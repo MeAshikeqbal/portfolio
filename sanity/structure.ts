@@ -75,9 +75,9 @@ export const structure: StructureResolver = (S, context) =>
                 .title("CV/Resume")
                 .icon(FiFile)
                 .child(S.editor().id("cv").schemaType("cv").documentId("cv")),
-              // Singletons behind /uses and /now
+              // Singletons behind /homecave (its copy: intro, node specs, setup) and /now
               S.listItem()
-                .title("Uses")
+                .title("Homecave")
                 .icon(FiMonitor)
                 .child(S.editor().id("uses").schemaType("uses").documentId("uses")),
               S.listItem()
