@@ -33,12 +33,15 @@ export function isHomelab(title: string | null | undefined): boolean {
 export function UsesSections({
   sections,
   badge,
+  className,
 }: {
   sections: VisibleSection[]
   badge?: (name: string) => ReactNode
+  /** The wrapper's layout; stacked by default. */
+  className?: string
 }) {
   return (
-    <div className="space-y-6">
+    <div className={cn("space-y-6", className)}>
       {sections.map((section) => (
         <Panel key={section._key}>
           <PanelHeader title={section.title} meta={<span>{section.items.length} items</span>} />
@@ -71,7 +74,7 @@ export function UsesSections({
                     <p className="font-medium">{item.name}</p>
                   )}
                   {item.description && (
-                    <p className="text-sm text-muted-foreground">{item.description}</p>
+                    <p className="text-sm text-pretty text-muted-foreground">{item.description}</p>
                   )}
                 </div>
                 {badge && item.name && badge(item.name)}

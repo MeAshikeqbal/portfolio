@@ -257,18 +257,19 @@ The hero's instrument. Header "node · itsashik", with the availability pill as 
 
 ### Homecave dashboard (signature)
 `/homecave`, the homelab as an instrument.
-- **Header:** the cluster summary (`3/3 up`) and "updated 20s ago · reports every 30s".
-- **Overview:** any Homelab rows that aren't nodes (e.g. the cluster), as plain rows.
-- **Node panels** (3 columns from `xl`). Each has:
-  - the public name, with its measured badge on the right;
-  - the measured CPU model and cores/threads, with the Studio spec line under it;
-  - a flat 2×2 metric grid inside the panel (never nested cards): CPU, memory, network and uptime;
-  - values in tabular figures with small units, hints (load, swap, out-rate, 24h availability) and 64px sparklines in neutral ink;
+- **Verdict strip** (replaces any overview panel): one line at 20–24px semibold, such as "3/3 nodes up · 4/4 pools healthy · 16/19 guests running". Node and pool counts wear their status colour; the guest count stays ink, because it's a count, not a state. Separators trail their item, so a wrapped line never starts with a dot. Under it, in label-caps: "updated 20s ago · reports every 30s", led by "2 of 3 reporting" when a node is silent. A polite live region announces the cluster state.
+- **Node panels** (3 columns from `xl`), each its own `section` named by an h2 with the public name. Each has:
+  - the compact measured badge on the right (`up`, `down`, `no data`); uptime lives in its own metric, never repeated in the pill;
+  - the measured CPU model and cores/threads, with the Studio's role line under it (role, not specs: the dashboard measures CPU and memory);
+  - a flat 2×2 metric grid inside the panel (never nested cards), drawn with `gap-px` on a border-coloured grid so the hairlines are single: CPU, memory, network in and uptime;
+  - values in tabular figures, with a small unit after a real space for rates and bytes ("641 KB/s"); "5%" and "6d" stay whole;
+  - short hints (load to 2 decimals, swap, out-rate, 24h availability) and 64px sparklines in neutral ink. CPU and memory trends use a fixed 0–100% scale, so a quiet machine looks quiet.
   - guests running/total, with category chips (mono, hairline, neutral).
 
-  A stale node shows "as of HH:MM UTC". A down node replaces its metrics with a sentence.
-- **Storage:** one list of pools (largest first) and the off-site backup store. Each row has its health as a status word (grey `no data` when stale), used/total and %, and a thin neutral **meter** (the value is always printed beside it).
-- **Below:** the Studio's self-hosted and setup sections, then a "What this page doesn't show" note explaining the anonymization.
+  **Not up:** the last readings stay visible but muted (55% opacity, greyscale) under a "last seen 10m ago" note in the header, and uptime shows "—". A down node adds one sentence above its readings.
+- **Storage:** its own section (h2). One list of pools (largest first) and the off-site backup store. Each row has its health as a status word (grey `no data` when its node is stale, backups included), used/total in normal-case binary units and %, and a thin neutral **meter** (the value is always printed beside it) whose name includes the node ("VM disks on Tower, used").
+- **Privacy note** directly under the dashboard, at 65ch: what the page doesn't show, and that the lab connects outward only.
+- **Below:** "What runs here" (Self-hosted, Network & access) in two columns, then **Desk & tools** (editor, desk, paid services) collapsed in a native `details`, its summary an h2 with the section names in label-caps.
 
 ### Metric tile
 A `label-caps` label above a 1.5rem semibold tabular value, with an optional sparkline at the right and a 12px muted hint. It is built as a description list (`dl` / `dt` / `dd`).

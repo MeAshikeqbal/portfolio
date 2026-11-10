@@ -7,7 +7,15 @@ test.describe("Homecave", () => {
   test("renders, and is in the nav, footer and sitemap", async ({ page, request, isMobile }) => {
     await page.goto("/homecave")
     await expect(page.getByRole("heading", { level: 1, name: "Homecave" })).toBeVisible()
-    await expect(page.getByRole("heading", { name: "What this page doesn't show" })).toBeVisible()
+    // The privacy note sits right under the dashboard, whatever the lab's state.
+    await expect(page.getByText(/the lab connects outward only/)).toBeVisible()
+    // The desk setup (from the Studio) is collapsed until asked for.
+    const desk = page.locator("details").filter({ hasText: "Desk & tools" })
+    if (await desk.count()) {
+      await expect(desk).not.toHaveAttribute("open")
+      await desk.locator("summary").click()
+      await expect(desk).toHaveAttribute("open")
+    }
     if (!isMobile) {
       const link = page
         .getByRole("navigation", { name: "Main" })
@@ -26,9 +34,9 @@ test.describe("Homecave", () => {
     expect(new URL(response.headers()["location"], "http://x").pathname).toBe("/homecave")
   })
 
-  test("the hero's 'full setup' link and the command menu lead there", async ({ page }) => {
+  test("the hero's 'live dashboard' link and the command menu lead there", async ({ page }) => {
     await page.goto("/")
-    const setup = page.locator("#home").getByRole("link", { name: "full setup" })
+    const setup = page.locator("#home").getByRole("link", { name: "live dashboard" })
     if (await setup.count()) await expect(setup).toHaveAttribute("href", "/homecave")
     await page.keyboard.press("Control+k")
     const dialog = page.getByRole("dialog", { name: "Search and commands" })

@@ -13,15 +13,19 @@ export function LabNodeBadgeView({
   name,
   status,
   now,
+  compact = false,
   className,
 }: {
   name: string
   status: LabStatus | null | undefined
   now: Date
+  /** Just the state word ("up"), for places that show uptime on their own. */
+  compact?: boolean
   className?: string
 }) {
   const state = nodeState(name, status, now)
   if (!state) return null
+  const label = compact ? state.label.split(" · ")[0] : state.label
   return (
     <span
       className={cn(
@@ -31,7 +35,7 @@ export function LabNodeBadgeView({
       )}
     >
       <StatusDot status={state.status} className="size-1.5" />
-      {state.label}
+      {label}
     </span>
   )
 }

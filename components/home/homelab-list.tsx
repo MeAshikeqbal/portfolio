@@ -29,7 +29,7 @@ export function HomelabList({ items }: { items: HomelabItem[] | null | undefined
           href="/homecave"
           className="-my-3.5 -mr-2 inline-flex min-h-11 items-center px-2 transition-colors hover:text-foreground focus-visible:-outline-offset-2"
         >
-          full setup
+          live dashboard
         </Link>
       </div>
       {/* Phones get the header and its link only, so the hero stays inside the first screen

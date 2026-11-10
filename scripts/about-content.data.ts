@@ -61,7 +61,7 @@ function para(key: string, lead: string, text: string): AboutBlock {
 }
 
 export const USES = {
-  intro: "The machines, software and services behind my work and my homelab.",
+  intro: "My homelab, live: a three-node Proxmox cluster at home, and what runs on it.",
   sections: [
     // The hero shows the first five items of this section, so keep it to exactly five,
     // with short descriptions (the hero truncates past ~45 characters).
@@ -72,8 +72,8 @@ export const USES = {
         "3 nodes, mostly LXC containers, a few VMs",
         "simple-icons:proxmox",
       ),
-      // 32 GB per the owner (upgrade from 16 GB in progress, 2026-11-09).
-      item("tower", "Tower", "Ryzen 5 3600 · GTX 1050 Ti · 32 GB", "mdi:server"),
+      // Role line only: the dashboard shows the measured CPU and memory (16 GB installed today).
+      item("tower", "Tower", "GTX 1050 Ti · media and NVR", "mdi:server"),
       item(
         "mini-pc-1",
         "Mini PC #1",
