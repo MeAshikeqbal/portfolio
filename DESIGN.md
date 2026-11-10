@@ -314,6 +314,13 @@ Motion explains continuity, state or feedback; nothing animates just because it 
 ### Post sign-off
 Every post ends with an author card (a panel with portrait, "Written by …", the tagline, then **Follow via RSS** as the primary button, **Get in touch** outlined and **GitHub** ghost), then the older/newer link and **related entries**, ranked by rare shared topics. An archived post shows an idle-tinted note under its meta row ("Archived: kept for reference…") and is noindex.
 
+### Footer: signature block (signature)
+The page signs off the way a signed email does. The left column is Ashik's identity statement set as the real clearsigned PGP message it is (the same bytes are served at `/identity.asc`): the armor lines and `Hash:` header in 11px mono muted ink, then, behind a 1px hairline rule, the name (semibold), the tagline (sans, muted) and a label/value list of the places that are Ashik's (site, GitHub, LinkedIn, X, source) as hairline-underlined mono links. The base64 signature collapses into a native `details`, showing its first line truncated. Phones drop the `https://` from display only; the copy and `/identity.asc` keep the signed text exact.
+
+The right column is a panel, "pgp key", whose header status is the key's **validity**, measured from the key and re-judged in the browser: green "valid until …", amber in the last 60 days ("expires in 23d"), red "expired …". The body holds the fingerprint in gpg's two rows of five groups (the long key ID, the last four groups, in ink; the rest muted) with a copy button, the algorithm and creation date, a "Verify it yourself" block (`curl -sL itsashik.dev/pgp.asc | gpg --import`, then `… /identity.asc | gpg --verify`) with a copy button, and links to `/pgp.asc` and `/identity.asc`.
+
+Under a hairline: the site links in a single 14px row, and `© year · build sha ↗` in label-caps on the right. The statement's text comes from `lib/identity.ts`; `scripts/sign-identity.ts` signs it on Ashik's machine and writes `lib/pgp.generated.ts`, and unit tests fail if the signed text, the key or its expiry drift from the code.
+
 ### Project cover fallback
 A project without a cover image shows a thum.io screenshot of its live site in the same frame, captioned in mono ("live site · host").
 
