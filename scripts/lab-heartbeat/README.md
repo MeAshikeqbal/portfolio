@@ -21,6 +21,8 @@ Public names and rounded numbers, nothing else:
 | Guests | running/total **per category** (`media, network, storage, security, home, apps, other`), never names or ids |
 | Storage | per **label** (never pool names): used/total GiB, ZFS health. Shared stores (off-site backups) come from one node only |
 | Peers | the other nodes' online flags, by public name |
+| Resources | CPU % (of the node) and memory GiB used by running guests, **per category** |
+| Collector (optional) | see below |
 
 **Never sent:** hostnames, IPs, guest names, vmids or tags, pool names or layout, kernel or PVE versions, CPU flags, or serials.
 
@@ -29,6 +31,48 @@ Check this yourself at any time without sending anything:
 ```sh
 set -a; . /etc/lab-heartbeat.env; DRY_RUN=1 /usr/local/bin/lab-heartbeat
 ```
+
+## The collector (inside the guests)
+The read-only token can't see inside containers, so `collect.py` runs as **root** on a 60s timer
+and never sends anything itself. It runs a fixed set of read-only checks and writes an
+already-anonymized `/run/lab-collect/collect.json`, which the sender merges into its next report
+when it's under 3 minutes old:
+
+| Section | What's sent | How it's measured |
+|---|---|---|
+| Services | `{name, up}` for the public names in its config only | `systemctl is-active`, `docker ps`, `pidof` inside the guest (`lxc-attach` / `qm guest exec`); a stopped guest is down, a failed check is left out |
+| Containers | healthy/total across the configured guests | `docker ps`; finished one-shot jobs (`Exited (0)`) aren't counted; private containers only add to the counts |
+| Temperatures | CPU package °C, hottest disk °C | hwmon (`k10temp`/`coretemp`), `smartctl -n standby` (never wakes a disk) |
+| GPU | utilisation %, VRAM, encoder sessions, °C | `nvidia-smi` |
+| Scrubs | per public pool label: last scrub date, errors | `zpool status` |
+| Backups | last nightly round: when, worst status, guests covered/total | `pvesh` tasks and backup jobs |
+| WAN | latency to the fastest public resolver, % loss | 5 pings each |
+| Edge | requests/min, % 5xx over 2h | counts new lines in the reverse proxy's access log |
+| DNS | queries and % blocked over up to 24h | counts new lines in AdGuard's query log |
+| Media | GB saved by re-encoding | Tdarr's local statistics API |
+
+Log counting is incremental (by byte offset, in `/var/lib/lab-collect/state.json`), so lines,
+paths, client IPs and domains are never read twice and never leave the collector. Slow probes
+are refreshed less often (backups and scrubs every 15 min, disk temperature, WAN and Tdarr
+every 5).
+
+Config `/etc/lab-collect.json` (root, 600), per node; every section is optional:
+```json
+{"services": [{"name": "Jellyfin", "ct": 104, "systemd": "jellyfin"},
+              {"name": "Traefik", "vm": 150, "docker": ["traefik"]},
+              {"name": "AdGuard Home", "ct": 100, "process": "AdGuardHome"},
+              {"name": "Proxmox Backup Server", "storage": "pbs-sea"}],
+ "docker": ["ct:106", "vm:150"],
+ "edge": {"vm": 150, "log": "/opt/traefik/logs/access.log"},
+ "dns": {"ct": 100, "log": "/opt/AdGuardHome/data/querylog.json"},
+ "tdarr": {"ct": 107, "url": "http://localhost:8265"},
+ "wan": ["1.1.1.1", "8.8.8.8"], "gpu": true, "backup": true}
+```
+Service names must match the Homecave rows in the Studio (that's where the badges go).
+Install: `install -m 755 collect.py /usr/local/bin/lab-collect`, copy `lab-collect.service` and
+`.timer`, `systemctl enable --now lab-collect.timer`. Check it with
+`set -a; . /etc/lab-heartbeat.env; DRY_RUN=1 /usr/local/bin/lab-collect` (prints, sends nothing).
+Tests: `python3 -I test_collect.py`.
 
 ## Install (on every node)
 

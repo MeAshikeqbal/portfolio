@@ -1,6 +1,6 @@
 "use client"
 
-import type { ReactNode } from "react"
+import type { ComponentProps } from "react"
 import { DataList, DataRow } from "@/components/dashboard/data-list"
 import { Meter } from "@/components/dashboard/meter"
 import { Panel, PanelHeader } from "@/components/dashboard/panel"
@@ -8,6 +8,9 @@ import { Sparkline } from "@/components/dashboard/sparkline"
 import { StatusPill } from "@/components/dashboard/status-pill"
 import { LabNodeBadgeView } from "@/components/lab/lab-badges"
 import { useLabStatus } from "@/components/lab/use-lab-status"
+import { useLiveActivity } from "@/components/live/use-live-activity"
+import { LabTodayView } from "./lab-today"
+import { Metric } from "./metric"
 import { formatBytes, formatPercent, formatRate, formatRelative } from "@/lib/format"
 import { formatUptime, isNodeFresh, labSummary, lastReceived, nodeState } from "@/lib/lab/freshness"
 import type { LabNodeStatus, LabStatus, LabStorage } from "@/lib/lab/types"
@@ -26,48 +29,14 @@ const HEALTH: Record<string, { status: Status; label: string }> = {
 }
 
 const PERCENT: readonly [number, number] = [0, 100]
+/** CPU temperatures on a fixed 20-100°C scale, so a steady machine reads flat. */
+const TEMPERATURE: readonly [number, number] = [20, 100]
 
 /** Values only, gaps dropped: the sparkline draws what was measured. */
 const series = (values: (number | null)[] | undefined) =>
   (values ?? []).filter((v): v is number => typeof v === "number")
 
 const slug = (name: string) => `node-${name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`
-
-/** "641 KB/s" → the number at full size, the unit small after a real space; "6%" and "6d" stay whole. */
-function WithUnit({ text }: { text: string }) {
-  const match = /^([\d.,]+)\s+(.+)$/.exec(text)
-  if (!match) return <>{text}</>
-  return (
-    <>
-      {match[1]} <span className="text-xs font-normal text-muted-foreground">{match[2]}</span>
-    </>
-  )
-}
-
-function Metric({
-  label,
-  value,
-  hint,
-  trend,
-}: {
-  label: string
-  value: ReactNode
-  hint?: ReactNode
-  trend?: ReactNode
-}) {
-  return (
-    <div className="flex min-w-0 flex-col gap-1 bg-surface px-4 py-3">
-      <dt className="label-caps">{label}</dt>
-      <dd className="flex items-end justify-between gap-3">
-        <span className="text-xl leading-none font-semibold tracking-tight whitespace-nowrap tabular">
-          {typeof value === "string" ? <WithUnit text={value} /> : value}
-        </span>
-        {trend}
-      </dd>
-      {hint && <dd className="truncate text-xs text-muted-foreground tabular">{hint}</dd>}
-    </div>
-  )
-}
 
 /** The whole cluster in one line: what an engineer wants to know in two seconds. */
 export function LabVerdict({ status, now }: { status: LabStatus; now: Date }) {
@@ -133,6 +102,109 @@ export function LabVerdict({ status, now }: { status: LabStatus; now: Date }) {
   )
 }
 
+type Tile = ComponentProps<typeof Metric>
+
+/** A node's metric tiles: the four every node has, then temperature and GPU where reported. */
+function nodeTiles(node: LabNodeStatus, live: boolean): Tile[] {
+  const tiles: Tile[] = []
+  if (node.cpu) {
+    tiles.push({
+      label: "cpu",
+      value: formatPercent(node.cpu.pct, 0),
+      hint: node.load && `load ${node.load.map((v) => v.toFixed(2)).join(" · ")}`,
+      trend: (
+        <Sparkline
+          values={series(node.history.cpu)}
+          domain={PERCENT}
+          label={`${node.name} CPU %, last 24 hours`}
+          width={64}
+        />
+      ),
+    })
+  }
+  if (node.mem) {
+    tiles.push({
+      label: "memory",
+      value: formatPercent(node.mem.pct, 0),
+      hint: [
+        `of ${node.mem.totalGiB} GiB`,
+        node.swap && node.swap.totalGiB > 0 && `swap ${node.swap.pct}%`,
+      ]
+        .filter(Boolean)
+        .join(" · "),
+      trend: (
+        <Sparkline
+          values={series(node.history.mem)}
+          domain={PERCENT}
+          label={`${node.name} memory %, last 24 hours`}
+          width={64}
+        />
+      ),
+    })
+  }
+  if (node.net) {
+    tiles.push({
+      label: "network in",
+      value: formatRate(node.net.inKBps),
+      // The 24h peak is in the trend's text summary; the hint stays short enough not to clip.
+      hint: `out ${formatRate(node.net.outKBps)}`,
+      trend: (
+        <Sparkline
+          values={series(node.history.netIn)}
+          label={`${node.name} inbound KB/s, last 24 hours`}
+          width={64}
+        />
+      ),
+    })
+  }
+  tiles.push({
+    label: "uptime",
+    value: live ? formatUptime(node.uptime) : "—",
+    hint:
+      node.availability24h !== null
+        ? `${formatPercent(node.availability24h)} up · 24h`
+        : "availability after 1h",
+  })
+  if (node.temps && (node.temps.cpuC !== null || node.temps.diskC !== null)) {
+    tiles.push({
+      label: "temperature",
+      value: node.temps.cpuC !== null ? `${node.temps.cpuC}°C` : "—",
+      hint: node.temps.diskC !== null ? `cpu · hottest disk ${node.temps.diskC}°C` : "cpu",
+      trend: (
+        <Sparkline
+          values={series(node.history.temp)}
+          domain={TEMPERATURE}
+          label={`${node.name} CPU °C, last 24 hours`}
+          width={64}
+        />
+      ),
+    })
+  }
+  if (node.gpu) {
+    const gib = (mib: number) => (mib / 1024).toFixed(1).replace(/\.0$/, "")
+    tiles.push({
+      label: "gpu",
+      value: formatPercent(node.gpu.utilPct, 0),
+      hint: [
+        `vram ${gib(node.gpu.memUsedMiB)}/${gib(node.gpu.memTotalMiB)} GiB`,
+        node.gpu.encoders > 0 && `${node.gpu.encoders} encoding`,
+        `${node.gpu.tempC}°C`,
+      ]
+        .filter(Boolean)
+        .join(" · "),
+      trend: (
+        <Sparkline
+          values={series(node.history.gpu)}
+          domain={PERCENT}
+          label={`${node.name} GPU %, last 24 hours`}
+          width={64}
+        />
+      ),
+    })
+  }
+  return tiles
+}
+
 /** One machine: measured state, hardware, live metrics with 24h trends, guests. */
 export function NodePanel({
   node,
@@ -151,11 +223,9 @@ export function NodePanel({
     node.cpu?.model,
     node.cpu && `${node.cpu.cores} cores / ${node.cpu.threads} threads`,
   ].filter(Boolean)
-  const cpu = series(node.history.cpu)
-  const mem = series(node.history.mem)
-  const netIn = series(node.history.netIn)
   const categories = Object.entries(node.guests?.byCategory ?? {}).filter(([, v]) => v && v[1] > 0)
   const id = slug(node.name)
+  const tiles = nodeTiles(node, live)
 
   return (
     <section aria-labelledby={id} className="flex min-w-0">
@@ -192,65 +262,14 @@ export function NodePanel({
           )}
           aria-label={live ? undefined : `${node.name}, last readings`}
         >
-          {node.cpu && (
+          {tiles.map((tile, i) => (
+            // An odd tile out spans the row, so the grid never shows an empty cell.
             <Metric
-              label="cpu"
-              value={formatPercent(node.cpu.pct, 0)}
-              hint={node.load && `load ${node.load.map((v) => v.toFixed(2)).join(" · ")}`}
-              trend={
-                <Sparkline
-                  values={cpu}
-                  domain={PERCENT}
-                  label={`${node.name} CPU %, last 24 hours`}
-                  width={64}
-                />
-              }
+              key={tile.label}
+              {...tile}
+              className={cn(i === tiles.length - 1 && tiles.length % 2 === 1 && "col-span-2")}
             />
-          )}
-          {node.mem && (
-            <Metric
-              label="memory"
-              value={formatPercent(node.mem.pct, 0)}
-              hint={[
-                `of ${node.mem.totalGiB} GiB`,
-                node.swap && node.swap.totalGiB > 0 && `swap ${node.swap.pct}%`,
-              ]
-                .filter(Boolean)
-                .join(" · ")}
-              trend={
-                <Sparkline
-                  values={mem}
-                  domain={PERCENT}
-                  label={`${node.name} memory %, last 24 hours`}
-                  width={64}
-                />
-              }
-            />
-          )}
-          {node.net && (
-            <Metric
-              label="network in"
-              value={formatRate(node.net.inKBps)}
-              // The 24h peak is in the trend's text summary; the hint stays short enough not to clip.
-              hint={`out ${formatRate(node.net.outKBps)}`}
-              trend={
-                <Sparkline
-                  values={netIn}
-                  label={`${node.name} inbound KB/s, last 24 hours`}
-                  width={64}
-                />
-              }
-            />
-          )}
-          <Metric
-            label="uptime"
-            value={live ? formatUptime(node.uptime) : "—"}
-            hint={
-              node.availability24h !== null
-                ? `${formatPercent(node.availability24h)} up · 24h`
-                : "24h availability after an hour of data"
-            }
-          />
+          ))}
         </dl>
         {node.guests && (
           <div className={cn("space-y-2 px-4 py-3", !live && "opacity-55")}>
@@ -259,17 +278,37 @@ export function NodePanel({
                 {node.guests.running}/{node.guests.total}
               </span>{" "}
               <span className="text-muted-foreground">guests running</span>
+              {node.containers && node.containers.total > 0 && (
+                <>
+                  <span className="text-muted-foreground"> · </span>
+                  <span
+                    className={cn(
+                      "font-medium tabular",
+                      live && node.containers.ok < node.containers.total && STATUS_TEXT_CLASS.warn,
+                    )}
+                  >
+                    {node.containers.ok}/{node.containers.total}
+                  </span>{" "}
+                  <span className="text-muted-foreground">containers healthy</span>
+                </>
+              )}
             </p>
             {categories.length > 0 && (
               <ul aria-label={`${node.name} guests by category`} className="flex flex-wrap gap-1.5">
-                {categories.map(([category, [running, total]]) => (
-                  <li
-                    key={category}
-                    className="rounded-full border px-2 py-0.5 font-mono text-xs text-muted-foreground tabular"
-                  >
-                    {category} {running === total ? running : `${running}/${total}`}
-                  </li>
-                ))}
+                {categories.map(([category, [running, total]]) => {
+                  const use = node.resources?.[category as keyof typeof node.resources]
+                  return (
+                    <li
+                      key={category}
+                      className="rounded-full border px-2 py-0.5 font-mono text-xs text-muted-foreground tabular"
+                    >
+                      {category} {running === total ? running : `${running}/${total}`}
+                      {use && use.memGiB >= 0.1 && (
+                        <span className="text-muted-foreground/70"> · {use.memGiB} GiB</span>
+                      )}
+                    </li>
+                  )
+                })}
               </ul>
             )}
           </div>
@@ -351,10 +390,13 @@ export function LabDashboardView({
   status,
   now,
   specs,
+  streams,
 }: {
   status: LabStatus | null | undefined
   now: Date
   specs: NodeSpec[]
+  /** Jellyfin streams now (undefined while loading, null when not connected). */
+  streams?: number | null
 }) {
   const nodes = [...(status?.nodes ?? [])].sort((a, b) => {
     // The Studio's Homelab order first (Tower, Mini PC #1, …), then the rest by name.
@@ -397,6 +439,7 @@ export function LabDashboardView({
         ))}
       </div>
       <StoragePanel status={status} now={now} />
+      <LabTodayView status={status} now={now} streams={streams} />
     </div>
   )
 }
@@ -404,5 +447,7 @@ export function LabDashboardView({
 /** Client wrapper: seeded with the server snapshot, then kept fresh by the shared 30s poll. */
 export function LabDashboard({ initial, specs }: { initial: LabStatus | null; specs: NodeSpec[] }) {
   const { status, now } = useLabStatus(initial)
-  return <LabDashboardView status={status ?? initial} now={now} specs={specs} />
+  const live = useLiveActivity()
+  const streams = live === undefined ? undefined : (live?.jellyfin?.streams ?? null)
+  return <LabDashboardView status={status ?? initial} now={now} specs={specs} streams={streams} />
 }

@@ -1,0 +1,371 @@
+{
+  "tower": {
+    "v": 2,
+    "node": {
+      "name": "Tower",
+      "online": true,
+      "uptime": 568800,
+      "interval": 30,
+      "cpu": {
+        "pct": 8,
+        "model": "Ryzen 5 3600",
+        "cores": 6,
+        "threads": 12
+      },
+      "load": [1.57, 2.41, 1.88],
+      "mem": {
+        "pct": 80,
+        "totalGiB": 15.5
+      },
+      "swap": {
+        "pct": 78,
+        "totalGiB": 3.9
+      },
+      "net": {
+        "inKBps": 748,
+        "outKBps": 512
+      },
+      "guests": {
+        "running": 7,
+        "total": 7,
+        "byCategory": {
+          "media": [2, 2],
+          "home": [1, 1],
+          "apps": [2, 2],
+          "storage": [1, 1],
+          "network": [1, 1]
+        }
+      },
+      "resources": {
+        "media": {
+          "cpuPct": 0.1,
+          "memGiB": 0.6
+        },
+        "home": {
+          "cpuPct": 3.7,
+          "memGiB": 3.2
+        },
+        "apps": {
+          "cpuPct": 0.3,
+          "memGiB": 3.2
+        },
+        "storage": {
+          "cpuPct": 0.0,
+          "memGiB": 0.1
+        },
+        "network": {
+          "cpuPct": 0.1,
+          "memGiB": 0.9
+        }
+      },
+      "services": [
+        {
+          "name": "Jellyfin",
+          "up": true
+        },
+        {
+          "name": "Frigate",
+          "up": true
+        },
+        {
+          "name": "Tdarr",
+          "up": true
+        },
+        {
+          "name": "RustFS",
+          "up": true
+        },
+        {
+          "name": "Traefik",
+          "up": true
+        },
+        {
+          "name": "Proxmox Backup Server",
+          "up": true
+        }
+      ],
+      "containers": {
+        "ok": 9,
+        "total": 9
+      },
+      "temps": {
+        "cpuC": 60,
+        "diskC": 46
+      },
+      "gpu": {
+        "utilPct": 12,
+        "memUsedMiB": 431,
+        "memTotalMiB": 4096,
+        "tempC": 56,
+        "encoders": 0
+      },
+      "scrubs": [
+        {
+          "label": "Bulk storage",
+          "at": 1794090115,
+          "errors": 0
+        },
+        {
+          "label": "VM disks",
+          "at": 1794077699,
+          "errors": 0
+        }
+      ],
+      "backup": {
+        "at": 1794290923,
+        "status": "ok",
+        "covered": 17,
+        "total": 19
+      },
+      "edge": {
+        "rpm": 0.0,
+        "errPct": 0.0
+      },
+      "media": {
+        "savedGB": 304
+      }
+    },
+    "storage": [
+      {
+        "label": "Off-site backups",
+        "usedGiB": 15,
+        "totalGiB": 65,
+        "health": null,
+        "kind": "backup"
+      },
+      {
+        "label": "VM disks",
+        "usedGiB": 75,
+        "totalGiB": 450,
+        "health": "ONLINE",
+        "kind": "pool"
+      },
+      {
+        "label": "Bulk storage",
+        "usedGiB": 2573,
+        "totalGiB": 3597,
+        "health": "ONLINE",
+        "kind": "pool"
+      }
+    ],
+    "peers": [
+      {
+        "name": "Mini PC #2",
+        "online": true
+      },
+      {
+        "name": "Mini PC #1",
+        "online": true
+      }
+    ]
+  },
+  "mini1": {
+    "v": 2,
+    "node": {
+      "name": "Mini PC #1",
+      "online": true,
+      "uptime": 2502000,
+      "interval": 30,
+      "cpu": {
+        "pct": 9,
+        "model": "Core i3-6100",
+        "cores": 2,
+        "threads": 4
+      },
+      "load": [0.39, 0.33, 0.25],
+      "mem": {
+        "pct": 55,
+        "totalGiB": 23.4
+      },
+      "swap": {
+        "pct": 0,
+        "totalGiB": 0.0
+      },
+      "net": {
+        "inKBps": 78,
+        "outKBps": 77
+      },
+      "guests": {
+        "running": 6,
+        "total": 8,
+        "byCategory": {
+          "network": [3, 3],
+          "security": [1, 1],
+          "apps": [2, 2],
+          "home": [0, 1],
+          "other": [0, 1]
+        }
+      },
+      "resources": {
+        "network": {
+          "cpuPct": 0.5,
+          "memGiB": 2.6
+        },
+        "security": {
+          "cpuPct": 0.0,
+          "memGiB": 0.0
+        },
+        "apps": {
+          "cpuPct": 2.4,
+          "memGiB": 5.6
+        }
+      },
+      "services": [
+        {
+          "name": "AdGuard Home",
+          "up": true
+        },
+        {
+          "name": "NPMplus",
+          "up": true
+        },
+        {
+          "name": "Vaultwarden",
+          "up": true
+        },
+        {
+          "name": "TP-Link Omada",
+          "up": true
+        }
+      ],
+      "containers": {
+        "ok": 21,
+        "total": 21
+      },
+      "temps": {
+        "cpuC": 52,
+        "diskC": 48
+      },
+      "scrubs": [
+        {
+          "label": "VM disks",
+          "at": 1794077758,
+          "errors": 0
+        }
+      ],
+      "wan": {
+        "rttMs": 10.4,
+        "lossPct": 0
+      }
+    },
+    "storage": [
+      {
+        "label": "VM disks",
+        "usedGiB": 36,
+        "totalGiB": 110,
+        "health": "ONLINE",
+        "kind": "pool"
+      }
+    ],
+    "peers": [
+      {
+        "name": "Tower",
+        "online": true
+      },
+      {
+        "name": "Mini PC #2",
+        "online": true
+      }
+    ]
+  },
+  "mini2": {
+    "v": 2,
+    "node": {
+      "name": "Mini PC #2",
+      "online": true,
+      "uptime": 543600,
+      "interval": 30,
+      "cpu": {
+        "pct": 7,
+        "model": "Core i5-6500T",
+        "cores": 4,
+        "threads": 4
+      },
+      "load": [0.44, 0.3, 0.25],
+      "mem": {
+        "pct": 37,
+        "totalGiB": 15.5
+      },
+      "swap": {
+        "pct": 0,
+        "totalGiB": 0.0
+      },
+      "net": {
+        "inKBps": 28,
+        "outKBps": 13
+      },
+      "guests": {
+        "running": 3,
+        "total": 4,
+        "byCategory": {
+          "apps": [1, 1],
+          "media": [1, 1],
+          "network": [1, 1],
+          "other": [0, 1]
+        }
+      },
+      "resources": {
+        "apps": {
+          "cpuPct": 0.3,
+          "memGiB": 0.2
+        },
+        "media": {
+          "cpuPct": 2.3,
+          "memGiB": 1.9
+        },
+        "network": {
+          "cpuPct": 0.1,
+          "memGiB": 0.0
+        }
+      },
+      "services": [
+        {
+          "name": "Sonarr, Radarr, Lidarr",
+          "up": true
+        },
+        {
+          "name": "Homarr",
+          "up": true
+        },
+        {
+          "name": "Tailscale",
+          "up": true
+        }
+      ],
+      "containers": {
+        "ok": 16,
+        "total": 16
+      },
+      "temps": {
+        "cpuC": 46,
+        "diskC": 46
+      },
+      "scrubs": [
+        {
+          "label": "VM disks",
+          "at": 1794077702,
+          "errors": 0
+        }
+      ]
+    },
+    "storage": [
+      {
+        "label": "VM disks",
+        "usedGiB": 17,
+        "totalGiB": 895,
+        "health": "ONLINE",
+        "kind": "pool"
+      }
+    ],
+    "peers": [
+      {
+        "name": "Mini PC #1",
+        "online": true
+      },
+      {
+        "name": "Tower",
+        "online": true
+      }
+    ]
+  }
+}

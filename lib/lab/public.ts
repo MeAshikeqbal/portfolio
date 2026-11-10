@@ -36,7 +36,44 @@ export function toPublicStatus(status: LabStatus): LabStatus {
           kind: s.kind,
         })),
       }),
+      ...(n.resources && {
+        resources: Object.fromEntries(
+          Object.entries(n.resources).map(([k, v]) => [
+            k,
+            { cpuPct: v!.cpuPct, memGiB: v!.memGiB },
+          ]),
+        ),
+      }),
       ...(n.peers && { peers: n.peers.map((p) => ({ name: p.name, online: p.online })) }),
+      ...(n.services && { services: n.services.map((s) => ({ name: s.name, up: s.up })) }),
+      ...(n.containers && { containers: { ok: n.containers.ok, total: n.containers.total } }),
+      ...(n.temps && { temps: { cpuC: n.temps.cpuC, diskC: n.temps.diskC } }),
+      ...(n.gpu && {
+        gpu: {
+          utilPct: n.gpu.utilPct,
+          memUsedMiB: n.gpu.memUsedMiB,
+          memTotalMiB: n.gpu.memTotalMiB,
+          tempC: n.gpu.tempC,
+          encoders: n.gpu.encoders,
+        },
+      }),
+      ...(n.scrubs && {
+        scrubs: n.scrubs.map((s) => ({ label: s.label, at: s.at, errors: s.errors })),
+      }),
+      ...(n.backup && {
+        backup: {
+          at: n.backup.at,
+          status: n.backup.status,
+          covered: n.backup.covered,
+          total: n.backup.total,
+        },
+      }),
+      ...(n.wan && { wan: { rttMs: n.wan.rttMs, lossPct: n.wan.lossPct } }),
+      ...(n.edge && { edge: { rpm: n.edge.rpm, errPct: n.edge.errPct } }),
+      ...(n.dns && {
+        dns: { queries: n.dns.queries, blockedPct: n.dns.blockedPct, hours: n.dns.hours },
+      }),
+      ...(n.media && { media: { savedGB: n.media.savedGB } }),
       receivedAt: n.receivedAt,
       history: {
         t: [...n.history.t],
@@ -44,6 +81,9 @@ export function toPublicStatus(status: LabStatus): LabStatus {
         mem: [...n.history.mem],
         netIn: [...n.history.netIn],
         netOut: [...n.history.netOut],
+        temp: [...(n.history.temp ?? [])],
+        gpu: [...(n.history.gpu ?? [])],
+        edge: [...(n.history.edge ?? [])],
       },
       availability24h: n.availability24h,
     })),
