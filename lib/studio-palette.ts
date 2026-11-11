@@ -85,14 +85,15 @@ function statusRamp(light: ThemeTokens, dark: ThemeTokens, status: string): Ramp
   const dotL = oklch(light[`status-${status}`])
   const fgL = oklch(light[`status-${status}-fg`])
   const fgD = oklch(dark[`status-${status}-fg`])
+  const dotD = oklch(dark[`status-${status}`])
   const softD = oklch(dark[`status-${status}-soft`])
   return {
     "50": hex({ ...softL, l: 0.985, c: softL.c / 2 }),
     "100": hex(softL), // light badge / pill background
-    "200": hex(mix(softL, fgD, 1 / 3)),
-    "300": hex(mix(softL, fgD, 2 / 3)),
-    "400": hex(fgD), // dark text
-    "500": hex(dotL), // dot
+    "200": hex(mix(softL, fgD, 1 / 2)),
+    "300": hex(fgD), // dark text
+    "400": hex(dotD), // dark dot (and, for info, the dark focus ring)
+    "500": hex(dotL), // light dot
     "600": hex(fgL), // light text
     "700": hex(mix(fgL, softD, 1 / 3)),
     "800": hex(mix(fgL, softD, 2 / 3)),

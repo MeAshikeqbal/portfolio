@@ -30,6 +30,16 @@ export function sparklinePoints(
   }))
 }
 
+/** SVG path data through the points. Shared with the Studio's sparkline. */
+export function sparklinePath(points: readonly { x: number; y: number }[]): string {
+  return points.map((p, i) => `${i === 0 ? "M" : "L"}${p.x.toFixed(2)} ${p.y.toFixed(2)}`).join(" ")
+}
+
+/** The accessible summary: range and peak. Shared with the Studio's sparkline. */
+export function sparklineSummary(label: string, values: readonly number[]): string {
+  return `${label}: from ${values[0]} to ${values[values.length - 1]}, peak ${Math.max(...values)}`
+}
+
 /**
  * A tiny trend line for stat tiles and rows. The trend is muted ink and the latest point
  * is foreground. Status colours are reserved for state and never used here.
@@ -46,11 +56,9 @@ export function Sparkline({
   if (values.length < 2) return null
 
   const points = sparklinePoints(values, width, height, 3, domain)
-  const d = points
-    .map((p, i) => `${i === 0 ? "M" : "L"}${p.x.toFixed(2)} ${p.y.toFixed(2)}`)
-    .join(" ")
+  const d = sparklinePath(points)
   const last = points[points.length - 1]
-  const summary = `${label}: from ${values[0]} to ${values[values.length - 1]}, peak ${Math.max(...values)}`
+  const summary = sparklineSummary(label, values)
 
   return (
     <svg

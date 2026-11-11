@@ -1,7 +1,8 @@
-import type { CSSProperties, ReactNode } from "react"
+import type { ComponentType, CSSProperties, ReactNode } from "react"
 import { useColorSchemeValue } from "sanity"
 
 import type { Status } from "../../lib/status"
+import { MONO } from "../theme/fonts"
 import { tokens } from "../theme/tokens.generated"
 
 /**
@@ -11,7 +12,7 @@ import { tokens } from "../theme/tokens.generated"
  * visible word or a screen-reader label.
  */
 
-export const MONO = "var(--font-geist-mono), ui-monospace, SFMono-Regular, monospace"
+export { MONO }
 
 /** The site's `label-caps`: mono, 11px, tracked, uppercase. For labels and metadata only. */
 export const LABEL_CAPS: CSSProperties = {
@@ -85,17 +86,25 @@ export function StatusWord({ status, children }: { status: Status; children: Rea
   return <span style={{ color: t[`status-${status}-fg`] }}>{children}</span>
 }
 
+const mediaCache = new Map<string, ComponentType>()
+
 /**
  * A status dot as list-preview media (`preview.prepare` → `media`), labelled for screen readers.
- * Returns a component so it can be used from .ts schema files.
+ * Returns a component so it can be used from .ts schema files; one stable component per status
+ * and label, so re-running prepare doesn't remount the media.
  */
-export function statusMedia(status: Status, label: string) {
-  function StatusMedia() {
-    return (
+export function statusMedia(status: Status, label: string): ComponentType {
+  const key = `${status}:${label}`
+  let media = mediaCache.get(key)
+  if (!media) {
+    const StatusMedia = () => (
       <span style={{ display: "grid", placeItems: "center", width: "100%", height: "100%" }}>
         <StatusDot status={status} label={label} />
       </span>
     )
+    StatusMedia.displayName = `StatusMedia(${key})`
+    media = StatusMedia
+    mediaCache.set(key, media)
   }
-  return StatusMedia
+  return media
 }

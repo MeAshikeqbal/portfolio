@@ -18,10 +18,12 @@ import {
  */
 const rowHoverCss = (fill: string) => `
 a:hover > .studio-dashboard-row, a:focus-visible > .studio-dashboard-row,
-.studio-dashboard-row:has(> .studio-dashboard-tile-link:hover),
-.studio-dashboard-row:has(> .studio-dashboard-tile-link:focus-visible) {
+.studio-dashboard-row:has(.studio-dashboard-tile-link:hover),
+.studio-dashboard-row:has(.studio-dashboard-tile-link:focus-visible) {
   background: ${fill} !important;
 }
+.studio-overview-wrap { container-type: inline-size; }
+@container (min-width: 40rem) { .studio-overview { --overview-columns: 4; } }
 .studio-dashboard-tile-link:focus-visible {
   outline: 2px solid var(--card-focus-ring-color);
   outline-offset: -2px;
