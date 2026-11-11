@@ -1,5 +1,8 @@
 import { defineField, defineType } from "sanity"
 
+import { withCharCount } from "../components/char-count-input"
+import { COPY_LIMITS } from "./validation"
+
 /** Per-document SEO overrides. Anything left empty falls back to the document's own fields. */
 export const seoType = defineType({
   name: "seo",
@@ -11,14 +14,19 @@ export const seoType = defineType({
       name: "title",
       type: "string",
       description: "Overrides the page title in search results and social cards.",
-      validation: (rule) => rule.max(70).warning("Titles over 70 characters get truncated."),
+      components: { input: withCharCount(COPY_LIMITS.seoTitle) },
+      validation: (rule) =>
+        rule.max(COPY_LIMITS.seoTitle).warning("Titles over 70 characters get truncated."),
     }),
     defineField({
       name: "description",
       type: "text",
       rows: 3,
+      components: { input: withCharCount(COPY_LIMITS.seoDescription) },
       validation: (rule) =>
-        rule.max(160).warning("Descriptions over 160 characters get truncated."),
+        rule
+          .max(COPY_LIMITS.seoDescription)
+          .warning("Descriptions over 160 characters get truncated."),
     }),
     defineField({
       name: "ogImage",

@@ -68,39 +68,42 @@ export function OverviewWidget() {
     <Widget title="Overview" onRefresh={refresh} loading={loading} error={error}>
       {data && (
         // A flat grid with single hairlines: 1px gaps over a border-coloured background.
-        <dl
-          style={{
-            margin: 0,
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(10rem, 1fr))",
-            gap: 1,
-            background: t.border,
-            border: `1px solid ${t.border}`,
-            borderRadius: 4,
-            overflow: "hidden",
-          }}
-        >
-          <MetricTile
-            label="Posts"
-            value={data.posts}
-            href={list(LISTS.posts)}
-            trend={<Sparkline values={cadence} label="Posts published per month, last 12 months" />}
-            hint="per month, last 12"
-          />
-          <MetricTile label="Projects" value={data.projects} href={list(LISTS.projects)} />
-          <MetricTile label="Skills" value={data.skills} href={list(LISTS.skills)} />
-          <MetricTile
-            label="Drafts"
-            value={data.drafts}
-            hint={
-              data.drafts > 0 ? (
-                <StatusWord status="warn">unpublished changes</StatusWord>
-              ) : (
-                "nothing pending"
-              )
-            }
-          />
-        </dl>
+        <div className="studio-overview-wrap">
+          <dl
+            className="studio-overview"
+            style={{
+              margin: 0,
+              display: "grid",
+              // 2 or 4 columns, never 3: four tiles then never leave an empty, grey cell.
+              gridTemplateColumns: "repeat(var(--overview-columns, 2), minmax(0, 1fr))",
+              gap: 1,
+              background: t.border,
+              border: `1px solid ${t.border}`,
+              borderRadius: 4,
+              overflow: "hidden",
+            }}
+          >
+            <MetricTile
+              label="Posts"
+              value={data.posts}
+              href={list(LISTS.posts)}
+              trend={
+                <Sparkline values={cadence} label="Posts published per month, last 12 months" />
+              }
+              hint="per month, last 12"
+            />
+            <MetricTile label="Projects" value={data.projects} href={list(LISTS.projects)} />
+            <MetricTile label="Skills" value={data.skills} href={list(LISTS.skills)} />
+            <MetricTile
+              label="Drafts"
+              value={data.drafts}
+              hint={
+                // A count, not a state: no colour, as in the statusline.
+                data.drafts > 0 ? "unpublished changes" : "nothing pending"
+              }
+            />
+          </dl>
+        </div>
       )}
     </Widget>
   )

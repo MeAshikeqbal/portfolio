@@ -1,7 +1,8 @@
 import { PostIcon } from "../components/icons"
 import { defineArrayMember, defineField, defineType } from "sanity"
 
-import { requiredAlt } from "./validation"
+import { withCharCount } from "../components/char-count-input"
+import { COPY_LIMITS, requiredAlt } from "./validation"
 
 const dateFormat = new Intl.DateTimeFormat("en-US", { dateStyle: "medium" })
 
@@ -55,8 +56,14 @@ export const postType = defineType({
       rows: 3,
       group: "meta",
       description:
-        "Short summary for cards, feeds and search results. Defaults to the start of the post.",
-      validation: (rule) => rule.max(200),
+        "Short summary for the writing log, feeds and search results. Defaults to the start of the post.",
+      components: { input: withCharCount(COPY_LIMITS.postExcerpt) },
+      validation: (rule) => [
+        rule.max(200),
+        rule
+          .max(COPY_LIMITS.postExcerpt)
+          .warning("The writing log trims excerpts to about 160 characters, at a word."),
+      ],
     }),
     defineField({
       name: "publishedAt",
@@ -123,11 +130,12 @@ export const postType = defineType({
       category1: "categories.1.title",
       media: "mainImage",
       archived: "archived",
+      featured: "featured",
     },
-    prepare: ({ title, publishedAt, category0, category1, media, archived }) => ({
+    prepare: ({ title, publishedAt, category0, category1, media, archived, featured }) => ({
       title,
       subtitle: [
-        archived ? "Archived" : null,
+        archived ? "archived" : featured ? "pinned" : null,
         publishedAt ? dateFormat.format(new Date(publishedAt)) : "No date",
         [category0, category1].filter(Boolean).join(", "),
       ]

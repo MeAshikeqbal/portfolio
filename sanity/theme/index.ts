@@ -1,5 +1,6 @@
 import { buildTheme, type ThemeColorStatesTokens, type ThemeColorTokens } from "@sanity/ui/theme"
 
+import { MONO, SANS } from "./fonts"
 import { palette } from "./tokens.generated"
 
 /**
@@ -8,7 +9,8 @@ import { palette } from "./tokens.generated"
  *
  * How it maps: `palette` (generated from app/globals.css by `npm run studio:tokens`) puts the
  * site's exact tokens on the tints Sanity UI reads, e.g. gray/200 is the light hairline and
- * gray/800 the dark one, green/100 / 600 / 500 are status-up's soft tint, text and dot. The
+ * gray/800 the dark one; green/100 · 600 · 500 are status-up's light soft tint, text and dot, and
+ * green/900 · 300 · 400 the dark ones. The
  * `color` overrides below re-point the few roles whose default tint isn't the site's choice.
  * Token values are [light, dark].
  *
@@ -32,16 +34,16 @@ const color: ThemeColorTokens = {
     "*": {
       // Info blue for focus and links (the site's ring and prose links).
       focusRing: ["blue/500", "blue/400"],
-      link: { fg: ["blue/600", "blue/400"] },
+      link: { fg: ["blue/600", "blue/300"] },
       // Status pills: soft tint, -fg text, dot (StatusPill on the site).
-      badge: { "*": { bg: ["100", "900"], fg: ["600", "400"], dot: ["500", "500"] } },
+      badge: { "*": { bg: ["100", "900"], fg: ["600", "300"], dot: ["500", "400"] } },
     },
     default: {
       fg: ["900", "100"],
       muted: { fg: ["600", "400"] },
     },
-    positive: { badge: { "*": { bg: ["100", "900"], fg: ["600", "400"] } } },
-    caution: { badge: { "*": { bg: ["100", "900"], fg: ["600", "400"] } } },
+    positive: { badge: { "*": { bg: ["100", "900"], fg: ["600", "300"] } } },
+    caution: { badge: { "*": { bg: ["100", "900"], fg: ["600", "300"] } } },
   },
   button: {
     default: {
@@ -83,9 +85,6 @@ const color: ThemeColorTokens = {
     default: { selected: { _hue: "gray", bg: ["900", "100"], border: ["900", "100"] } },
   },
 }
-
-const SANS = "var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif"
-const MONO = "var(--font-geist-mono), ui-monospace, SFMono-Regular, monospace"
 
 const fontsBase = buildTheme().fonts
 

@@ -31,6 +31,8 @@ function useStatuslineData(): { data: StatuslineData; now: Date } {
 
   useEffect(() => {
     let cancelled = false
+    // The interval and a tab becoming visible can overlap; only the newest load may land.
+    let latest = 0
     const content = client.withConfig({ dataset: contentDataset })
     const inbox = client.withConfig({ dataset: inboxDatasetName })
 
@@ -38,6 +40,7 @@ function useStatuslineData(): { data: StatuslineData; now: Date } {
     const settle = <T,>(promise: Promise<T>) => promise.catch(() => undefined)
 
     async function load() {
+      const id = ++latest
       const [counts, unread, lab] = await Promise.all([
         settle(
           content.fetch<{ syncedAt: string | null; drafts: number }>(
@@ -53,7 +56,7 @@ function useStatuslineData(): { data: StatuslineData; now: Date } {
           ),
         ),
       ])
-      if (cancelled) return
+      if (cancelled || id !== latest) return
       setState({
         data: { syncedAt: counts?.syncedAt, drafts: counts?.drafts, unread, lab },
         now: new Date(),

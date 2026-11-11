@@ -5,9 +5,9 @@ import { set, type StringInputProps } from "sanity"
 
 import { BUNDLED_ICON_SETS, iconUrl } from "../../lib/icons"
 import { iconExists } from "../lib/icon-check"
+import { MONO } from "../theme/fonts"
 
 const SEARCH_URL = "https://api.iconify.design/search"
-const MONO = "var(--font-geist-mono), ui-monospace, monospace"
 
 /** Icons render as <img>, where `currentColor` is black: show them on a light tile in both themes. */
 function IconTile({ name, size = 32 }: { name: string; size?: number }) {

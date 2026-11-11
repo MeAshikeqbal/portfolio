@@ -2,10 +2,14 @@ import { Box, Button, Card, Flex, Spinner, Stack, Text } from "@sanity/ui"
 import { Fragment, type ReactNode } from "react"
 import { IntentLink, Link } from "sanity/router"
 
-import { sparklinePoints } from "../../components/dashboard/sparkline"
+import {
+  sparklinePath,
+  sparklinePoints,
+  sparklineSummary,
+} from "../../components/dashboard/sparkline"
 import type { Status } from "../../lib/status"
 import { RefreshIcon } from "../components/icons"
-import { LABEL_CAPS, MONO, StatusDot, StatusWord, useSiteTokens } from "../components/status"
+import { LABEL_CAPS, StatusDot, StatusWord, useSiteTokens } from "../components/status"
 
 /**
  * Dashboard primitives in the site's language (DESIGN.md "Panel", "Data list", "Metric tile",
@@ -170,7 +174,10 @@ export function MetricTile({
   value: ReactNode
   hint?: ReactNode
   trend?: ReactNode
-  /** Studio path the whole tile opens (a stretched link, so dt/dd stay valid). */
+  /**
+   * Studio path the whole tile opens: a link inside the dd, stretched over the tile (the div is
+   * its positioned ancestor), so the dl only ever holds div > dt + dd.
+   */
   href?: string
 }) {
   const t = useSiteTokens()
@@ -179,16 +186,16 @@ export function MetricTile({
       className="studio-dashboard-row"
       style={{ background: t.surface, padding: 16, height: "100%", position: "relative" }}
     >
-      {href && (
-        <Link
-          href={href}
-          aria-label={`Open ${label.toLowerCase()}`}
-          className="studio-dashboard-tile-link"
-          style={{ position: "absolute", inset: 0, zIndex: 1 }}
-        />
-      )}
       <dt style={{ ...LABEL_CAPS, color: t["muted-foreground"] }}>{label}</dt>
       <dd style={{ margin: "8px 0 0" }}>
+        {href && (
+          <Link
+            href={href}
+            aria-label={`Open ${label.toLowerCase()}`}
+            className="studio-dashboard-tile-link"
+            style={{ position: "absolute", inset: 0, zIndex: 1 }}
+          />
+        )}
         <Flex align="flex-end" justify="space-between" gap={3}>
           <span
             style={{
@@ -239,11 +246,9 @@ export function Sparkline({
   const t = useSiteTokens()
   if (values.length < 2) return null
   const points = sparklinePoints(values, width, height)
-  const d = points
-    .map((p, i) => `${i === 0 ? "M" : "L"}${p.x.toFixed(2)} ${p.y.toFixed(2)}`)
-    .join(" ")
+  const d = sparklinePath(points)
   const last = points[points.length - 1]
-  const summary = `${label}: from ${values[0]} to ${values[values.length - 1]}, peak ${Math.max(...values)}`
+  const summary = sparklineSummary(label, values)
   return (
     <svg role="img" aria-label={summary} width={width} height={height} style={{ flexShrink: 0 }}>
       <path
@@ -278,5 +283,3 @@ export function HrefLink({ href, children }: { href: string; children: ReactNode
     </Link>
   )
 }
-
-export { MONO }
