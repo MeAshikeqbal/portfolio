@@ -18,6 +18,12 @@ import { inboxDatasetName } from "./sanity/inbox/dataset"
 import { inboxSchema } from "./sanity/inbox/schema"
 import { inboxStructure } from "./sanity/inbox/structure"
 import { OpenOnSiteAction, StartNowUpdateAction, SyncFromGitHubAction } from "./sanity/actions"
+import {
+  MessageStateBadge,
+  NowStaleBadge,
+  PostStateBadge,
+  ProjectStatusBadge,
+} from "./sanity/badges"
 import { dashboardTool } from "./sanity/dashboard"
 import { isAdmin } from "./sanity/dashboard/logic"
 import { StudioLogo } from "./sanity/components/studio-logo"
@@ -86,6 +92,13 @@ export default defineConfig([
           ...(schemaType === "now" ? [StartNowUpdateAction] : []),
         ]
       },
+      // The site's status vocabulary in the editor header (see sanity/badges/logic.ts).
+      badges: (prev, { schemaType }) => [
+        ...prev,
+        ...(schemaType === "project" ? [ProjectStatusBadge] : []),
+        ...(schemaType === "post" ? [PostStateBadge] : []),
+        ...(schemaType === "now" ? [NowStaleBadge] : []),
+      ],
     },
     // Home dashboard first (the Studio opens on the first tool); Vision for admins only.
     tools: (prev, { currentUser }) => [
@@ -106,6 +119,8 @@ export default defineConfig([
     document: {
       // Messages come from the contact form only.
       newDocumentOptions: () => [],
+      badges: (prev, { schemaType }) =>
+        schemaType === "message" ? [...prev, MessageStateBadge] : prev,
     },
   },
 ])

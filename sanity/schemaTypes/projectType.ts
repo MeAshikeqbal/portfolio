@@ -2,7 +2,9 @@ import { ProjectIcon } from "../components/icons"
 import { orderRankField, orderRankOrdering } from "@sanity/orderable-document-list"
 import { defineArrayMember, defineField, defineType } from "sanity"
 
-import { requiredAlt } from "./validation"
+import { withCharCount } from "../components/char-count-input"
+import { COPY_LIMITS, requiredAlt } from "./validation"
+import { projectStatus } from "../../lib/status"
 
 const STATUS_TITLES: Record<string, string> = {
   active: "Active",
@@ -43,10 +45,14 @@ export const projectType = defineType({
       type: "text",
       rows: 3,
       group: "overview",
-      description: "One or two sentences for cards and search results.",
+      description:
+        "One or two sentences. Home page rows show one line (about 80 characters); project cards show three.",
+      components: { input: withCharCount(COPY_LIMITS.projectDescription) },
       validation: (rule) => [
         rule.required(),
-        rule.max(300).warning("Cards show about 300 characters; the rest is cut off."),
+        rule
+          .max(COPY_LIMITS.projectDescription)
+          .warning("Home page rows cut this off after one line, about 80 characters."),
       ],
     }),
     defineField({
@@ -165,11 +171,17 @@ export const projectType = defineType({
       status: "status",
       featured: "featured",
       language: "githubData.language",
+      pushedAt: "githubData.pushedAt",
       media: "mainImage",
     },
-    prepare: ({ title, status, featured, language, media }) => ({
+    // The status word first, judged exactly as the site judges it (dormant after 180 days).
+    prepare: ({ title, status, featured, language, pushedAt, media }) => ({
       title,
-      subtitle: [featured ? "★ Featured" : null, STATUS_TITLES[status] ?? status, language]
+      subtitle: [
+        projectStatus({ status, githubData: { pushedAt } })?.label ?? "no status",
+        featured ? "featured" : null,
+        language,
+      ]
         .filter(Boolean)
         .join(" · "),
       media,

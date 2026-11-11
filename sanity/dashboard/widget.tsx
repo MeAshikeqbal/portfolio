@@ -1,11 +1,28 @@
-import { Badge, Box, Button, Card, Flex, Spinner, Stack, Text } from "@sanity/ui"
-import { RefreshIcon } from "../components/icons"
-import type { ReactNode } from "react"
+import { Box, Button, Card, Flex, Spinner, Stack, Text } from "@sanity/ui"
+import { Fragment, type ReactNode } from "react"
 import { IntentLink, Link } from "sanity/router"
 
-const MONO = "var(--font-geist-mono), ui-monospace, monospace"
+import {
+  sparklinePath,
+  sparklinePoints,
+  sparklineSummary,
+} from "../../components/dashboard/sparkline"
+import type { Status } from "../../lib/status"
+import { RefreshIcon } from "../components/icons"
+import { LABEL_CAPS, StatusDot, StatusWord, useSiteTokens } from "../components/status"
 
-/** Shared panel chrome for dashboard widgets: mono caps title, optional meta and refresh. */
+/**
+ * Dashboard primitives in the site's language (DESIGN.md "Panel", "Data list", "Metric tile",
+ * "Sparkline"): flat 6px panels with a hairline, label-caps headers, dense rows whose status is a
+ * word (with its dot) leading the mono metadata, never a coloured badge alone.
+ */
+
+/** A status shown as a dot plus its word, e.g. `{ status: "warn", label: "draft" }`. */
+export interface RowStatus {
+  status: Status
+  label: string
+}
+
 export function Widget({
   title,
   meta,
@@ -21,30 +38,22 @@ export function Widget({
   error?: Error
   children: ReactNode
 }) {
+  const t = useSiteTokens()
   return (
-    <Card radius={3} border style={{ overflow: "hidden" }}>
+    <Card as="section" radius={3} border style={{ overflow: "hidden" }}>
       <Flex
         align="center"
         justify="space-between"
-        paddingX={3}
-        paddingY={2}
-        style={{ borderBottom: "1px solid var(--card-border-color)", minHeight: 41 }}
+        gap={3}
+        paddingLeft={3}
+        paddingRight={2}
+        style={{ borderBottom: `1px solid ${t.border}`, minHeight: 40 }}
       >
-        <Text
-          as="h2"
-          size={0}
-          muted
-          weight="medium"
-          style={{ fontFamily: MONO, letterSpacing: "0.08em", textTransform: "uppercase" }}
-        >
+        <h2 style={{ ...LABEL_CAPS, margin: 0, fontWeight: 400, color: t["muted-foreground"] }}>
           {title}
-        </Text>
-        <Flex align="center" gap={2}>
-          {meta && (
-            <Text size={0} muted style={{ fontFamily: MONO }}>
-              {meta}
-            </Text>
-          )}
+        </h2>
+        <Flex align="center" gap={1}>
+          {meta && <span style={{ ...LABEL_CAPS, color: t["muted-foreground"] }}>{meta}</span>}
           {onRefresh && (
             <Button
               icon={RefreshIcon}
@@ -61,8 +70,9 @@ export function Widget({
       <Box padding={2}>
         {error ? (
           <Box padding={2}>
-            <Text size={1} style={{ color: "var(--card-badge-critical-dot-color)" }}>
-              Couldn&apos;t load: {error.message}
+            <Text size={1}>
+              <StatusWord status="down">Couldn&apos;t load</StatusWord>
+              <span style={{ color: t["muted-foreground"] }}>: {error.message}</span>
             </Text>
           </Box>
         ) : loading ? (
@@ -89,20 +99,34 @@ export function Empty({ children }: { children: ReactNode }) {
   )
 }
 
-/** One list row: primary text, secondary line, optional badge and right-aligned meta. */
+/**
+ * One data row: a medium title and a one-line muted subtitle on the left; on the right the mono
+ * metadata, led by the status word (in its -fg colour, dot beside it) when there is one.
+ */
 export function Row({
   title,
   subtitle,
-  badge,
+  status,
   meta,
 }: {
   title: ReactNode
   subtitle?: ReactNode
-  badge?: { label: string; tone: "primary" | "positive" | "caution" | "critical" | "default" }
+  status?: RowStatus
   meta?: ReactNode
 }) {
+  const t = useSiteTokens()
+  const items = [
+    status && (
+      <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+        <StatusDot status={status.status} size={6} />
+        <StatusWord status={status.status}>{status.label}</StatusWord>
+      </span>
+    ),
+    meta,
+  ].filter(Boolean)
+
   return (
-    <Card padding={2} radius={2} tone="inherit" className="studio-dashboard-row">
+    <Box padding={2} className="studio-dashboard-row" style={{ borderRadius: 4 }}>
       <Flex align="center" gap={3}>
         <Stack gap={2} flex={1} style={{ minWidth: 0 }}>
           <Text size={1} weight="medium" textOverflow="ellipsis">
@@ -114,22 +138,133 @@ export function Row({
             </Text>
           )}
         </Stack>
-        {badge && (
-          <Badge tone={badge.tone} fontSize={0}>
-            {badge.label}
-          </Badge>
-        )}
-        {meta && (
-          <Text size={0} muted style={{ fontFamily: MONO, whiteSpace: "nowrap" }}>
-            {meta}
-          </Text>
+        {items.length > 0 && (
+          <span
+            style={{
+              ...LABEL_CAPS,
+              color: t["muted-foreground"],
+              whiteSpace: "nowrap",
+              fontVariantNumeric: "tabular-nums",
+              display: "inline-flex",
+              alignItems: "center",
+            }}
+          >
+            {items.map((item, i) => (
+              <Fragment key={i}>
+                {i > 0 && <span style={{ padding: "0 6px" }}>·</span>}
+                {item}
+              </Fragment>
+            ))}
+          </span>
         )}
       </Flex>
-    </Card>
+    </Box>
   )
 }
 
-const LINK_STYLE = { color: "inherit", textDecoration: "none", display: "block", borderRadius: 6 }
+/** A metric tile (dt/dd): label-caps label, a 1.5rem semibold tabular value, optional trend. */
+export function MetricTile({
+  label,
+  value,
+  hint,
+  trend,
+  href,
+}: {
+  label: string
+  value: ReactNode
+  hint?: ReactNode
+  trend?: ReactNode
+  /**
+   * Studio path the whole tile opens: a link inside the dd, stretched over the tile (the div is
+   * its positioned ancestor), so the dl only ever holds div > dt + dd.
+   */
+  href?: string
+}) {
+  const t = useSiteTokens()
+  return (
+    <div
+      className="studio-dashboard-row"
+      style={{ background: t.surface, padding: 16, height: "100%", position: "relative" }}
+    >
+      <dt style={{ ...LABEL_CAPS, color: t["muted-foreground"] }}>{label}</dt>
+      <dd style={{ margin: "8px 0 0" }}>
+        {href && (
+          <Link
+            href={href}
+            aria-label={`Open ${label.toLowerCase()}`}
+            className="studio-dashboard-tile-link"
+            style={{ position: "absolute", inset: 0, zIndex: 1 }}
+          />
+        )}
+        <Flex align="flex-end" justify="space-between" gap={3}>
+          <span
+            style={{
+              fontSize: 24,
+              lineHeight: 1,
+              fontWeight: 600,
+              letterSpacing: "-0.025em",
+              fontVariantNumeric: "tabular-nums",
+              color: t.foreground,
+            }}
+          >
+            {value}
+          </span>
+          {trend}
+        </Flex>
+        {hint && (
+          <div
+            style={{
+              marginTop: 6,
+              fontSize: 12,
+              lineHeight: "16px",
+              color: t["muted-foreground"],
+            }}
+          >
+            {hint}
+          </div>
+        )}
+      </dd>
+    </div>
+  )
+}
+
+/**
+ * The site's sparkline: muted-ink trend, latest point in ink, a text summary as its accessible
+ * name. Neutral only: status colours are never series colours.
+ */
+export function Sparkline({
+  values,
+  label,
+  width = 96,
+  height = 24,
+}: {
+  values: readonly number[]
+  label: string
+  width?: number
+  height?: number
+}) {
+  const t = useSiteTokens()
+  if (values.length < 2) return null
+  const points = sparklinePoints(values, width, height)
+  const d = sparklinePath(points)
+  const last = points[points.length - 1]
+  const summary = sparklineSummary(label, values)
+  return (
+    <svg role="img" aria-label={summary} width={width} height={height} style={{ flexShrink: 0 }}>
+      <path
+        d={d}
+        fill="none"
+        stroke={t["muted-foreground"]}
+        strokeWidth={1.25}
+        strokeLinejoin="round"
+        strokeLinecap="round"
+      />
+      <circle cx={last.x} cy={last.y} r={2} fill={t.foreground} />
+    </svg>
+  )
+}
+
+const LINK_STYLE = { color: "inherit", textDecoration: "none", display: "block", borderRadius: 4 }
 
 /** Row that opens a document in the current workspace. */
 export function DocLink({ id, type, children }: { id: string; type: string; children: ReactNode }) {
@@ -148,5 +283,3 @@ export function HrefLink({ href, children }: { href: string; children: ReactNode
     </Link>
   )
 }
-
-export { MONO }

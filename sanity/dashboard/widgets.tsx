@@ -1,9 +1,12 @@
-import { SyncIcon } from "../components/icons"
-import { Box, Button, Card, Grid, Stack, Text } from "@sanity/ui"
+import { Box, Button, Text } from "@sanity/ui"
 import { useToast } from "@sanity/ui/toast"
 import { useEffect, useMemo, useState } from "react"
 import { useClient, useWorkspace } from "sanity"
 import { Link } from "sanity/router"
+
+import { syncStatus } from "../../lib/status"
+import { SyncIcon } from "../components/icons"
+import { StatusWord, useSiteTokens } from "../components/status"
 
 import { describeSync, requestGitHubSync } from "../actions/request-github-sync"
 import { iconExists } from "../lib/icon-check"
@@ -13,6 +16,7 @@ import {
   githubRows,
   publishedId,
   healthIssues,
+  monthlyCounts,
   nowFreshness,
   snippet,
   timeAgo,
@@ -33,7 +37,16 @@ import {
   type OverviewResult,
 } from "./queries"
 import { useStudioQuery } from "./use-studio-query"
-import { DocLink, Empty, HrefLink, MONO, Row, Widget } from "./widget"
+import {
+  DocLink,
+  Empty,
+  HrefLink,
+  MetricTile,
+  Row,
+  Sparkline,
+  Widget,
+  type RowStatus,
+} from "./widget"
 
 /** Structure paths (see sanity/structure.ts) for the overview tiles. */
 const INBOX_PATH = "/studio/inbox"
@@ -46,58 +59,52 @@ const LISTS = {
 
 export function OverviewWidget() {
   const { basePath } = useWorkspace()
+  const t = useSiteTokens()
   const { data, error, loading, refresh } = useStudioQuery<OverviewResult>(OVERVIEW_QUERY)
-
-  const tiles: { label: string; value?: number; path?: string; tone?: "caution" }[] = [
-    { label: "Posts", value: data?.posts, path: LISTS.posts },
-    { label: "Projects", value: data?.projects, path: LISTS.projects },
-    { label: "Skills", value: data?.skills, path: LISTS.skills },
-    {
-      label: "Unpublished drafts",
-      value: data?.drafts,
-      tone: data?.drafts ? "caution" : undefined,
-    },
-  ]
+  const cadence = useMemo(() => monthlyCounts(data?.postDates ?? [], new Date()), [data])
+  const list = (path: string) => `${basePath}/structure/${path}`
 
   return (
     <Widget title="Overview" onRefresh={refresh} loading={loading} error={error}>
-      <Grid gridTemplateColumns={[2, 2, 4]} gap={2}>
-        {tiles.map((tile) => {
-          const body = (
-            <Card
-              padding={3}
-              radius={2}
-              border
-              tone={tile.tone ?? "default"}
-              className="studio-dashboard-row"
-            >
-              <Stack gap={3}>
-                <Text
-                  size={4}
-                  weight="semibold"
-                  style={{ fontFamily: MONO, fontVariantNumeric: "tabular-nums" }}
-                >
-                  {tile.value ?? "–"}
-                </Text>
-                <Text size={1} muted>
-                  {tile.label}
-                </Text>
-              </Stack>
-            </Card>
-          )
-          return tile.path ? (
-            <Link
-              key={tile.label}
-              href={`${basePath}/structure/${tile.path}`}
-              style={{ color: "inherit", textDecoration: "none" }}
-            >
-              {body}
-            </Link>
-          ) : (
-            <Box key={tile.label}>{body}</Box>
-          )
-        })}
-      </Grid>
+      {data && (
+        // A flat grid with single hairlines: 1px gaps over a border-coloured background.
+        <div className="studio-overview-wrap">
+          <dl
+            className="studio-overview"
+            style={{
+              margin: 0,
+              display: "grid",
+              // 2 or 4 columns, never 3: four tiles then never leave an empty, grey cell.
+              gridTemplateColumns: "repeat(var(--overview-columns, 2), minmax(0, 1fr))",
+              gap: 1,
+              background: t.border,
+              border: `1px solid ${t.border}`,
+              borderRadius: 4,
+              overflow: "hidden",
+            }}
+          >
+            <MetricTile
+              label="Posts"
+              value={data.posts}
+              href={list(LISTS.posts)}
+              trend={
+                <Sparkline values={cadence} label="Posts published per month, last 12 months" />
+              }
+              hint="per month, last 12"
+            />
+            <MetricTile label="Projects" value={data.projects} href={list(LISTS.projects)} />
+            <MetricTile label="Skills" value={data.skills} href={list(LISTS.skills)} />
+            <MetricTile
+              label="Drafts"
+              value={data.drafts}
+              hint={
+                // A count, not a state: no colour, as in the statusline.
+                data.drafts > 0 ? "unpublished changes" : "nothing pending"
+              }
+            />
+          </dl>
+        </div>
+      )}
     </Widget>
   )
 }
@@ -121,7 +128,7 @@ export function InboxWidget() {
             <Row
               title={message.name || "Anonymous"}
               subtitle={snippet(message.message)}
-              badge={message.status === "unread" ? { label: "New", tone: "primary" } : undefined}
+              status={message.status === "unread" ? { status: "info", label: "unread" } : undefined}
               meta={timeAgo(message.receivedAt)}
             />
           </HrefLink>
@@ -130,7 +137,7 @@ export function InboxWidget() {
         <Empty>No messages.</Empty>
       )}
       <Box paddingX={2} paddingTop={2}>
-        <Text size={1}>
+        <Text size={1} weight="medium">
           <Link href={INBOX_PATH}>Open inbox →</Link>
         </Text>
       </Box>
@@ -154,7 +161,7 @@ export function RecentWidget() {
             <Row
               title={item.title}
               subtitle={TYPE_LABELS[item.type] ?? item.type}
-              badge={item.draft ? { label: "Draft", tone: "caution" } : undefined}
+              status={item.draft ? { status: "warn", label: "draft" } : undefined}
               meta={timeAgo(item.updatedAt)}
             />
           </DocLink>
@@ -207,7 +214,15 @@ export function HealthWidget() {
   return (
     <Widget
       title="Content health"
-      meta={issues ? (issues.length ? `${issues.length} to fix` : "all good") : undefined}
+      meta={
+        issues ? (
+          issues.length ? (
+            <StatusWord status="warn">{issues.length} to fix</StatusWord>
+          ) : (
+            <StatusWord status="up">all good</StatusWord>
+          )
+        ) : undefined
+      }
       onRefresh={refresh}
       loading={loading || (Boolean(data) && !issues)}
       error={error}
@@ -218,7 +233,7 @@ export function HealthWidget() {
             <Row
               title={issue.title}
               subtitle={issue.problem}
-              badge={{ label: TYPE_LABELS[issue.type] ?? issue.type, tone: "default" }}
+              meta={(TYPE_LABELS[issue.type] ?? issue.type).toLowerCase()}
             />
           </DocLink>
         ))
@@ -227,6 +242,15 @@ export function HealthWidget() {
       )}
     </Widget>
   )
+}
+
+/** Each project's last sync, judged like the site's statusline (stale after 36h). */
+function githubRowStatus(syncedAt: string | null): RowStatus {
+  const sync = syncStatus(syncedAt)
+  if (!sync) return { status: "idle", label: "not synced" }
+  return sync.status === "up"
+    ? { status: "up", label: "synced" }
+    : { status: "warn", label: "stale" }
 }
 
 export function GitHubWidget() {
@@ -260,7 +284,7 @@ export function GitHubWidget() {
   return (
     <Widget
       title="GitHub sync"
-      meta="daily at 03:00 UTC"
+      meta="daily · 03:00 utc"
       onRefresh={refresh}
       loading={loading}
       error={error}
@@ -271,7 +295,8 @@ export function GitHubWidget() {
             <Row
               title={row.title || "Untitled"}
               subtitle={row.language ?? undefined}
-              meta={row.syncedAt ? `synced ${timeAgo(row.syncedAt)}` : "not synced yet"}
+              status={githubRowStatus(row.syncedAt)}
+              meta={row.syncedAt ? timeAgo(row.syncedAt) : undefined}
             />
           </DocLink>
         ))
@@ -294,11 +319,11 @@ export function GitHubWidget() {
   )
 }
 
-const FRESHNESS_BADGE = {
-  fresh: { label: "Fresh", tone: "positive" },
-  stale: { label: "Stale", tone: "caution" },
-  unpublished: { label: "Unpublished", tone: "default" },
-} as const
+const FRESHNESS_STATUS: Record<"fresh" | "stale" | "unpublished", RowStatus> = {
+  fresh: { status: "up", label: "fresh" },
+  stale: { status: "warn", label: "stale" },
+  unpublished: { status: "idle", label: "unpublished" },
+}
 
 /** How long since /now was last updated; turns to a warning once it's stale. */
 export function FreshnessWidget() {
@@ -308,7 +333,11 @@ export function FreshnessWidget() {
   return (
     <Widget title="Freshness" onRefresh={refresh} loading={loading} error={error}>
       <DocLink id="now" type="now">
-        <Row title="Now page" subtitle={freshness.label} badge={FRESHNESS_BADGE[freshness.state]} />
+        <Row
+          title="Now page"
+          subtitle={freshness.label}
+          status={FRESHNESS_STATUS[freshness.state]}
+        />
       </DocLink>
     </Widget>
   )

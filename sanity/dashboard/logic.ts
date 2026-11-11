@@ -3,6 +3,8 @@
  * unit-tested).
  */
 
+import { siteConfig } from "../../lib/site"
+
 /** Document types shown in "Recently edited", with the label used in the list. */
 export const TYPE_LABELS: Record<string, string> = {
   post: "Post",
@@ -145,11 +147,8 @@ export function githubRows<T extends { _id: string }>(docs: T[]): { rows: T[]; i
   return { rows: [...rows.values()], ids: docs.map((doc) => doc._id) }
 }
 
-/**
- * /now turns "stale" after this many days without an edit. Mirrors the site's
- * `siteConfig.nowStaleAfterDays` (PR #140); import it from there once both have merged.
- */
-export const NOW_STALE_AFTER_DAYS = 90
+/** /now turns "stale" after this many days, the same rule as the site's /now page. */
+export const NOW_STALE_AFTER_DAYS = siteConfig.nowStaleAfterDays
 
 export interface NowFreshness {
   state: "unpublished" | "fresh" | "stale"
@@ -159,7 +158,10 @@ export interface NowFreshness {
   label: string
 }
 
-/** How current the published /now page is, from its `_updatedAt` (null when unpublished). */
+/**
+ * How current the published /now page is, from the date its update was written (`updatedOn`,
+ * falling back to the last edit, as on the site); null when unpublished.
+ */
 export function nowFreshness(
   updatedAt: string | null | undefined,
   now = Date.now(),
@@ -174,4 +176,24 @@ export function nowFreshness(
   return days > staleAfterDays
     ? { state: "stale", days, label: `Updated ${ago}: time for a new update` }
     : { state: "fresh", days, label: `Updated ${ago}` }
+}
+
+/**
+ * Posts per calendar month (UTC) for the last `months` months, oldest first, the current month
+ * last. Dates outside the window or unparseable are ignored.
+ */
+export function monthlyCounts(
+  dates: (string | null | undefined)[],
+  now: Date,
+  months = 12,
+): number[] {
+  const counts = new Array<number>(months).fill(0)
+  const end = now.getUTCFullYear() * 12 + now.getUTCMonth()
+  for (const iso of dates) {
+    const date = iso ? new Date(iso) : null
+    if (!date || Number.isNaN(date.getTime())) continue
+    const index = months - 1 - (end - (date.getUTCFullYear() * 12 + date.getUTCMonth()))
+    if (index >= 0 && index < months) counts[index] += 1
+  }
+  return counts
 }
