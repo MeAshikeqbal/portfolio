@@ -1,5 +1,8 @@
-import { EnvelopeIcon } from "@sanity/icons/Envelope"
 import { defineField, defineType } from "sanity"
+
+import { MessageIcon } from "../components/icons"
+import { statusMedia } from "../components/status"
+import { snippet } from "../dashboard/logic"
 
 export const MESSAGE_STATUSES = [
   { title: "Unread", value: "unread" },
@@ -15,7 +18,7 @@ export const messageType = defineType({
   name: "message",
   title: "Message",
   type: "document",
-  icon: EnvelopeIcon,
+  icon: MessageIcon,
   // Status changes apply immediately: no draft to publish just to mark a message read.
   liveEdit: true,
   fields: [
@@ -46,19 +49,23 @@ export const messageType = defineType({
       receivedAt: "receivedAt",
       message: "message",
     },
+    // A data row: unread messages lead with an info dot; the state is also the first word.
     prepare: ({ name, email, status, receivedAt, message }) => ({
-      title: `${status === "unread" ? "● " : ""}${name ?? "Unknown"} <${email ?? "?"}>`,
+      title: `${name ?? "Unknown"} <${email ?? "?"}>`,
+      // An absolute date: Sanity only re-runs prepare when a field changes, so "2m ago" would freeze.
       subtitle: [
+        status,
         receivedAt
           ? new Date(receivedAt).toLocaleString("en-US", {
               dateStyle: "medium",
               timeStyle: "short",
             })
           : null,
-        typeof message === "string" ? message.slice(0, 80) : null,
+        snippet(message, 80) || null,
       ]
         .filter(Boolean)
         .join(" · "),
+      media: statusMedia(status === "unread" ? "info" : "idle", status ?? "no status"),
     }),
   },
 })

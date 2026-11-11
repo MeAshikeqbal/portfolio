@@ -1,6 +1,4 @@
-import { CodeBlockIcon } from "@sanity/icons/CodeBlock"
-import { ImageIcon } from "@sanity/icons/Image"
-import { InfoOutlineIcon } from "@sanity/icons/InfoOutline"
+import { CalloutIcon, CodeBlockIcon, ImageIcon } from "../components/icons"
 import { defineArrayMember, defineField, defineType } from "sanity"
 
 /**
@@ -95,7 +93,7 @@ export const blockContentType = defineType({
       type: "object",
       name: "callout",
       title: "Callout",
-      icon: InfoOutlineIcon,
+      icon: CalloutIcon,
       fields: [
         defineField({
           name: "tone",

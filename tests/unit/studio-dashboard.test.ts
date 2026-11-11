@@ -5,6 +5,7 @@ import {
   dedupeRecent,
   healthIssues,
   isAdmin,
+  monthlyCounts,
   NOW_STALE_AFTER_DAYS,
   nowFreshness,
   publishedId,
@@ -129,5 +130,32 @@ describe("nowFreshness", () => {
 
   it("matches the site's threshold", () => {
     expect(NOW_STALE_AFTER_DAYS).toBe(90)
+  })
+})
+
+describe("monthlyCounts", () => {
+  const now = new Date("2026-11-11T08:00:00Z")
+
+  it("buckets posts by UTC month, oldest first and this month last", () => {
+    const counts = monthlyCounts(
+      [
+        "2026-11-01T00:00:00Z",
+        "2026-11-10T00:00:00Z",
+        "2026-10-31T23:59:00Z",
+        "2025-12-15T00:00:00Z",
+      ],
+      now,
+    )
+    expect(counts).toHaveLength(12)
+    expect(counts[11]).toBe(2) // November 2026
+    expect(counts[10]).toBe(1) // October 2026
+    expect(counts[0]).toBe(1) // December 2025
+    expect(counts.reduce((a, b) => a + b)).toBe(4)
+  })
+
+  it("ignores posts outside the window and bad dates", () => {
+    expect(
+      monthlyCounts(["2025-11-30T00:00:00Z", "2027-01-01T00:00:00Z", null, "nope"], now),
+    ).toEqual(new Array(12).fill(0))
   })
 })

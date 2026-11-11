@@ -1,15 +1,16 @@
-import { Box, Flex, Text } from "@sanity/ui"
+import { Flex, Text } from "@sanity/ui"
 import type { LogoProps } from "sanity"
 
-/** Navbar brand: the site's mono wordmark with a live status dot. */
+import { MONO } from "./status"
+
+/**
+ * Navbar brand: the site's mono wordmark, ".dev" in muted ink. No status dot: nothing here is
+ * measured (the statusline under the navbar carries the real state).
+ */
 export function StudioLogo(props: LogoProps) {
   return (
-    <Flex align="center" gap={2} paddingX={2} title={props.title}>
-      <Box
-        style={{ width: 8, height: 8, borderRadius: 999, background: "#2fa85a", flexShrink: 0 }}
-        aria-hidden
-      />
-      <Text size={1} weight="semibold" style={{ fontFamily: "var(--font-geist-mono), monospace" }}>
+    <Flex align="center" paddingX={2} title={props.title}>
+      <Text size={1} weight="semibold" style={{ fontFamily: MONO }}>
         itsashik<span style={{ opacity: 0.55 }}>.dev</span>
       </Text>
     </Flex>

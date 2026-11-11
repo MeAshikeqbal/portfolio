@@ -1,18 +1,20 @@
 import { orderableDocumentListDeskItem } from "@sanity/orderable-document-list"
 import type { StructureResolver } from "sanity/structure"
 import {
-  FiFileText,
-  FiUser,
-  FiTag,
-  FiBriefcase,
-  FiBook,
-  FiInfo,
-  FiCode,
-  FiAward,
-  FiFile,
-  FiMonitor,
-  FiClock,
-} from "react-icons/fi"
+  AuthorIcon,
+  BlogIcon,
+  CategoryIcon,
+  CvIcon,
+  EducationIcon,
+  ExperienceIcon,
+  HomecaveIcon,
+  NowIcon,
+  PersonalIcon,
+  PortfolioIcon,
+  PostIcon,
+  ProjectIcon,
+  SkillIcon,
+} from "./components/icons"
 
 export const structure: StructureResolver = (S, context) =>
   S.list()
@@ -21,21 +23,21 @@ export const structure: StructureResolver = (S, context) =>
       // Blog section
       S.listItem()
         .title("Blog")
-        .icon(FiFileText)
+        .icon(BlogIcon)
         .child(
           S.list()
             .title("Blog")
             .items([
-              S.documentTypeListItem("post").title("Posts").icon(FiFileText),
-              S.documentTypeListItem("category").title("Categories").icon(FiTag),
-              S.documentTypeListItem("author").title("Authors").icon(FiUser),
+              S.documentTypeListItem("post").title("Posts").icon(PostIcon),
+              S.documentTypeListItem("category").title("Categories").icon(CategoryIcon),
+              S.documentTypeListItem("author").title("Authors").icon(AuthorIcon),
             ]),
         ),
 
       // Portfolio section
       S.listItem()
         .title("Portfolio")
-        .icon(FiBriefcase)
+        .icon(PortfolioIcon)
         .child(
           S.list()
             .title("Portfolio")
@@ -45,7 +47,7 @@ export const structure: StructureResolver = (S, context) =>
                 type: "project",
                 id: "project",
                 title: "Projects",
-                icon: FiCode,
+                icon: ProjectIcon,
                 S,
                 context,
               }),
@@ -53,7 +55,7 @@ export const structure: StructureResolver = (S, context) =>
                 type: "skills",
                 id: "skills",
                 title: "Skills",
-                icon: FiAward,
+                icon: SkillIcon,
                 S,
                 context,
               }),
@@ -63,26 +65,26 @@ export const structure: StructureResolver = (S, context) =>
       // Personal Info section
       S.listItem()
         .title("Personal Info")
-        .icon(FiInfo)
+        .icon(PersonalIcon)
         .child(
           S.list()
             .title("Personal Info")
             .items([
-              S.documentTypeListItem("experiences").title("Work Experience").icon(FiBriefcase),
-              S.documentTypeListItem("education").title("Education").icon(FiBook),
+              S.documentTypeListItem("experiences").title("Work Experience").icon(ExperienceIcon),
+              S.documentTypeListItem("education").title("Education").icon(EducationIcon),
               // CV as a singleton document
               S.listItem()
                 .title("CV/Resume")
-                .icon(FiFile)
+                .icon(CvIcon)
                 .child(S.editor().id("cv").schemaType("cv").documentId("cv")),
               // Singletons behind /homecave (its copy: intro, node specs, setup) and /now
               S.listItem()
                 .title("Homecave")
-                .icon(FiMonitor)
+                .icon(HomecaveIcon)
                 .child(S.editor().id("uses").schemaType("uses").documentId("uses")),
               S.listItem()
                 .title("Now")
-                .icon(FiClock)
+                .icon(NowIcon)
                 .child(S.editor().id("now").schemaType("now").documentId("now")),
             ]),
         ),

@@ -20,3 +20,18 @@ export function yearRangeError(value: string): string | null {
 
 export const yearRange = (rule: StringRule) =>
   rule.required().custom((value) => (value ? (yearRangeError(value) ?? true) : true))
+
+/**
+ * Where the site trims or clamps copy (DESIGN.md), so the Studio can warn before it happens:
+ * a live counter (sanity/components/char-count-input.tsx) plus a `.warning()` rule, never an
+ * error, so long copy can still be published.
+ */
+export const COPY_LIMITS = {
+  /** Home page service rows clamp the description to one line, about 80 characters. */
+  projectDescription: 80,
+  /** The writing log trims excerpts to about 160 characters on a word boundary. */
+  postExcerpt: 160,
+  /** Search results cut titles at about 70 and descriptions at about 160 characters. */
+  seoTitle: 70,
+  seoDescription: 160,
+} as const

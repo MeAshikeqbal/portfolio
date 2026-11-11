@@ -38,8 +38,12 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
-  // Shown in the system bar and footer next to the commit SHA.
-  env: { BUILD_TIME: new Date().toISOString() },
+  // Shown in the system bar and footer next to the commit SHA. BUILD_SHA is the same commit for
+  // client code (the Studio statusline), where VERCEL_GIT_COMMIT_SHA isn't available.
+  env: {
+    BUILD_TIME: new Date().toISOString(),
+    BUILD_SHA: process.env.VERCEL_GIT_COMMIT_SHA ?? "",
+  },
   images: {
     // Next 16 only serves listed qualities; keep in sync with `quality` props.
     qualities: [50, 60, 75],

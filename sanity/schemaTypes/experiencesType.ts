@@ -1,4 +1,4 @@
-import { CaseIcon } from "@sanity/icons/Case"
+import { ExperienceIcon } from "../components/icons"
 import { defineArrayMember, defineField, defineType } from "sanity"
 
 import { yearRange } from "./validation"
@@ -8,7 +8,7 @@ export const experiencesType = defineType({
   name: "experiences",
   title: "Experiences",
   type: "document",
-  icon: CaseIcon,
+  icon: ExperienceIcon,
   fields: [
     defineField({
       name: "year",
