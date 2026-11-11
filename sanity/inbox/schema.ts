@@ -1,5 +1,8 @@
-import { MessageIcon } from "../components/icons"
 import { defineField, defineType } from "sanity"
+
+import { MessageIcon } from "../components/icons"
+import { statusMedia } from "../components/status"
+import { snippet, timeAgo } from "../dashboard/logic"
 
 export const MESSAGE_STATUSES = [
   { title: "Unread", value: "unread" },
@@ -46,19 +49,13 @@ export const messageType = defineType({
       receivedAt: "receivedAt",
       message: "message",
     },
+    // A data row: unread messages lead with an info dot; the state is also the first word.
     prepare: ({ name, email, status, receivedAt, message }) => ({
-      title: `${status === "unread" ? "● " : ""}${name ?? "Unknown"} <${email ?? "?"}>`,
-      subtitle: [
-        receivedAt
-          ? new Date(receivedAt).toLocaleString("en-US", {
-              dateStyle: "medium",
-              timeStyle: "short",
-            })
-          : null,
-        typeof message === "string" ? message.slice(0, 80) : null,
-      ]
+      title: `${name ?? "Unknown"} <${email ?? "?"}>`,
+      subtitle: [status, receivedAt ? timeAgo(receivedAt) : null, snippet(message, 80) || null]
         .filter(Boolean)
         .join(" · "),
+      media: statusMedia(status === "unread" ? "info" : "idle", status ?? "no status"),
     }),
   },
 })

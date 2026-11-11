@@ -84,3 +84,18 @@ export function StatusWord({ status, children }: { status: Status; children: Rea
   const t = useSiteTokens()
   return <span style={{ color: t[`status-${status}-fg`] }}>{children}</span>
 }
+
+/**
+ * A status dot as list-preview media (`preview.prepare` → `media`), labelled for screen readers.
+ * Returns a component so it can be used from .ts schema files.
+ */
+export function statusMedia(status: Status, label: string) {
+  function StatusMedia() {
+    return (
+      <span style={{ display: "grid", placeItems: "center", width: "100%", height: "100%" }}>
+        <StatusDot status={status} label={label} />
+      </span>
+    )
+  }
+  return StatusMedia
+}
