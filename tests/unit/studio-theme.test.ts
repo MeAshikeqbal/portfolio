@@ -65,6 +65,19 @@ describe.each(["light", "dark"] as const)("%s Studio theme", (scheme) => {
     }
   })
 
+  it("draws badge dots in this scheme's status colour, as on the site", () => {
+    const site = { positive: "up", caution: "warn", critical: "down", primary: "info" } as const
+    for (const [tone, status] of Object.entries(site)) {
+      const dot = colors.badge[tone as keyof typeof site].dot
+      const other = scheme === "light" ? "dark" : "light"
+      // Sanity's blend shifts it a little, but it must be this scheme's dot, not the other's.
+      expect(ratio(dot, tokens[scheme][`status-${status}`]), tone).toBeLessThan(
+        ratio(dot, tokens[other][`status-${status}`]),
+      )
+      expect(ratio(dot, tokens[scheme][`status-${status}`]), tone).toBeLessThan(1.2)
+    }
+  })
+
   it("shows a visible focus ring and readable inputs", () => {
     expect(ratio(colors.focusRing, pane)).toBeGreaterThanOrEqual(3)
     const input = colors.input.default.enabled

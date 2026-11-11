@@ -1,4 +1,4 @@
-import { ClockIcon } from "@sanity/icons/Clock"
+import { NowIcon } from "../components/icons"
 import { defineArrayMember, defineField, defineType } from "sanity"
 
 /** Today as YYYY-MM-DD in the editor's time zone (Sanity `date` fields have no time). */
@@ -16,7 +16,7 @@ export const nowType = defineType({
   name: "now",
   title: "Now",
   type: "document",
-  icon: ClockIcon,
+  icon: NowIcon,
   fieldsets: [
     {
       name: "history",

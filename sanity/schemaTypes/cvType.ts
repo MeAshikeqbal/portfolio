@@ -1,4 +1,4 @@
-import { FileText } from "lucide-react"
+import { CvIcon } from "../components/icons"
 import { defineField, defineType } from "sanity"
 
 /** Singleton: the résumé PDF served at /resume.pdf. */
@@ -6,7 +6,7 @@ export const cvType = defineType({
   name: "cv",
   title: "CV",
   type: "document",
-  icon: FileText,
+  icon: CvIcon,
   fields: [
     defineField({
       name: "cvFile",

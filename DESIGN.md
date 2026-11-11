@@ -333,6 +333,16 @@ Only where the visitor actually waits: a link preview screenshot from thum.io (a
 ### Index pages
 `/post` and `/projects` share one frame: full-width container, an H1 with a one-line description, a "Search posts / Search projects" field with an "N of M posts / projects" count, chip filter rows, then the content (a log panel of rows for posts, a grid of project panels for projects). Empty results use the same panel message.
 
+### Sanity Studio
+`/studio` reads as the back office of the same instrument: the same tokens, voice and rules, adapted to Sanity UI.
+- **Theme:** `npm run studio:tokens` turns `app/globals.css` into a Sanity UI palette (`sanity/theme/tokens.generated.ts`). It puts each token on the tint Sanity reads for that role: gray/200 is the light hairline; green/100 · 600 · 500 are status-up's light soft tint, text and dot, and green/900 · 300 · 400 the dark ones. `tests/unit/studio-theme.test.ts` fails on drift and checks contrast on the built theme in both schemes. Publish and other primary buttons are inverted ink, and so are selected list items. Blue is only the focus ring and links. Radii run 2 / 4 / 6 / 10.
+- **Overlays float, panes don't:** menus, popovers and tooltips keep Sanity's soft shadow along with dialogs, because they float over editing surfaces. Panes, cards and fields stay flat with hairlines.
+- **Statusline:** under the navbar in both workspaces, the system bar's rules in mono cells: `github · synced 2h ago` (amber when stale), `lab · 3/3 up` with a dot per machine, `inbox · 2 unread`, `3 drafts` (a count, so no colour) and the build SHA. Each cell is hidden until its data exists.
+- **Home dashboard:** a plain greeting H1 with no kicker, metric tiles in a single-hairline grid with a posts-per-month sparkline, and panels of data rows whose status word and dot lead the mono metadata.
+- **Badges and previews:** the editor header carries the site's status words: project `active` / `maintained` / `dormant` / `archived` (judged by `projectStatus`, so the CMS and the page agree), post `pinned` / `archived`, /now `stale`, and message `unread` / `archived`. Idle states are grey. List previews lead their subtitle with the same word. Unread messages lead with an info dot.
+- **Copy counters:** fields the site trims show a mono "72 / 80" counter that turns amber past the limit (project description 80, post excerpt 160, SEO title 70 and description 160, all in `COPY_LIMITS`). These are warnings, never errors.
+- **Icons:** lucide, as on the site, via `sanity/components/icons.tsx` (1em, stroke 1.75).
+
 ## Do's and Don'ts
 
 ### Do:
