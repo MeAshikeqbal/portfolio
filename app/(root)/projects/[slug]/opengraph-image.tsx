@@ -1,9 +1,16 @@
 import { ImageResponse } from "next/og"
 import { getProject, getProjectSlugs } from "@/lib/api"
-import { OG_COLORS, OG_CONTENT_TYPE, OG_SIZE, OgFrame, ogFonts } from "@/lib/og"
+import {
+  OG_COLORS,
+  OG_CONTENT_TYPE,
+  OG_STATUS_COLORS,
+  OG_SIZE,
+  OgFrame,
+  ogFonts,
+  sanityOgImage,
+} from "@/lib/og"
 import { siteConfig } from "@/lib/site"
 import { projectStatus } from "@/lib/status"
-import { urlFor } from "@/sanity/lib/image"
 
 export const alt = `Project by ${siteConfig.name}`
 export const size = OG_SIZE
@@ -15,23 +22,13 @@ export async function generateStaticParams() {
   return slugs.map((slug) => ({ slug }))
 }
 
-const STATUS_COLORS = { up: OG_COLORS.up, info: OG_COLORS.info, idle: OG_COLORS.idle } as const
-
 export default async function Image({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
   const project = await getProject(slug)
   const fonts = await ogFonts()
 
   if (project?.seo?.ogImage?.asset) {
-    return new ImageResponse(
-      <img
-        src={urlFor(project.seo.ogImage).width(size.width).height(size.height).url()}
-        width={size.width}
-        height={size.height}
-        alt=""
-      />,
-      { ...size, fonts },
-    )
+    return sanityOgImage(project.seo.ogImage, fonts)
   }
 
   if (!project?.title) {
@@ -61,14 +58,7 @@ export default async function Image({ params }: { params: Promise<{ slug: string
       title={project.title}
       description={project.description}
       footer={footer}
-      status={
-        status && status.status in STATUS_COLORS
-          ? {
-              color: STATUS_COLORS[status.status as keyof typeof STATUS_COLORS],
-              label: status.label,
-            }
-          : undefined
-      }
+      status={status ? { color: OG_STATUS_COLORS[status.status], label: status.label } : undefined}
     />,
     { ...size, fonts },
   )

@@ -1,12 +1,15 @@
 import { readFile } from "node:fs/promises"
 import { join } from "node:path"
+import { ImageResponse } from "next/og"
 import type { ReactNode } from "react"
 import { siteConfig } from "@/lib/site"
+import type { Status } from "@/lib/status"
+import { urlFor } from "@/sanity/lib/image"
 
 /**
  * Shared frame for generated Open Graph images (`opengraph-image.tsx` routes).
  * Satori can't read CSS variables, so colours are the hex values of the dark-theme tokens
- * in app/globals.css (recompute them if those tokens change).
+ * in app/globals.css (tests/unit/og.test.ts fails if they drift).
  */
 export const OG_SIZE = { width: 1200, height: 630 }
 export const OG_CONTENT_TYPE = "image/png"
@@ -18,9 +21,20 @@ export const OG_COLORS = {
   muted: "#a0a1a9",
   border: "#262629",
   up: "#3cc96a",
+  warn: "#f5af20",
+  down: "#fc5855",
   info: "#53a3f2",
   idle: "#7f7f86",
 } as const
+
+/** The dot colour for each status, as on the site. */
+export const OG_STATUS_COLORS: Record<Status, string> = {
+  up: OG_COLORS.up,
+  warn: OG_COLORS.warn,
+  down: OG_COLORS.down,
+  info: OG_COLORS.info,
+  idle: OG_COLORS.idle,
+}
 
 /** Geist (OFL-licensed, vendored in assets/fonts) loaded for Satori. */
 export async function ogFonts() {
@@ -35,6 +49,23 @@ export async function ogFonts() {
     { name: "Geist", data: semibold, weight: 600 as const, style: "normal" as const },
     { name: "Geist Mono", data: mono, weight: 400 as const, style: "normal" as const },
   ]
+}
+
+type OgFonts = Awaited<ReturnType<typeof ogFonts>>
+
+/** A social image set in a document's SEO settings, cropped to the card size. */
+export function sanityOgImage(image: Parameters<typeof urlFor>[0], fonts: OgFonts) {
+  return new ImageResponse(
+    // Satori renders plain <img> only; next/image doesn't apply inside an ImageResponse.
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src={urlFor(image).width(OG_SIZE.width).height(OG_SIZE.height).url()}
+      width={OG_SIZE.width}
+      height={OG_SIZE.height}
+      alt=""
+    />,
+    { ...OG_SIZE, fonts },
+  )
 }
 
 /** Trims to `max` characters on a word boundary, adding an ellipsis. */

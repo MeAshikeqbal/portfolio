@@ -1,4 +1,5 @@
 import { expect, test, type Page } from "@playwright/test"
+import { siteConfig } from "../../lib/site"
 import { ABOUT_PAGES, ABOUT_PATHS } from "./about-state"
 
 async function structuredData(page: Page) {
@@ -15,11 +16,18 @@ async function ogImage(page: Page): Promise<string> {
 }
 
 test.describe("seo", () => {
+  // Each section's index has its own card; details have one per document.
+  const sectionPages = [
+    "/post",
+    "/projects",
+    "/homecave",
+    ...(ABOUT_PAGES === "published" ? ABOUT_PATHS : []),
+  ]
   const sharePages = [
     "/",
+    ...sectionPages,
     "/post/why-i-started-self-hosting-ai-at-home",
     "/projects/portfolio",
-    ...(ABOUT_PAGES === "published" ? ABOUT_PATHS : []),
   ]
   for (const path of sharePages) {
     test(`${path} has a generated 1200×630 share image`, async ({ page, request }) => {
@@ -33,6 +41,24 @@ test.describe("seo", () => {
       await expect(page.locator('meta[name="twitter:card"]')).toHaveAttribute(
         "content",
         "summary_large_image",
+      )
+    })
+  }
+
+  for (const path of sharePages.filter((p) => p !== "/")) {
+    test(`${path} shares its own title, URL and card, not the site's`, async ({ page }) => {
+      await page.goto(path)
+      const meta = (property: string) =>
+        page.locator(`meta[property="${property}"]`).getAttribute("content")
+      expect(await meta("og:url")).toBe(new URL(path, siteConfig.url).toString())
+      expect(await meta("og:title")).not.toBe(siteConfig.title)
+      expect(await meta("og:site_name")).toBe(`${siteConfig.name} Portfolio`)
+      expect(await page.locator('meta[name="twitter:title"]').getAttribute("content")).toBe(
+        await meta("og:title"),
+      )
+      // The image comes from this route's own opengraph-image, not the root's default card.
+      expect(new URL(await ogImage(page), "http://x").pathname).toMatch(
+        new RegExp(`^${path}/opengraph-image`),
       )
     })
   }

@@ -4,12 +4,13 @@ import { PostsBrowser, PostsBrowserView } from "@/components/blog/posts-browser"
 import { Container, Section } from "@/components/dashboard/layout"
 import { SectionHeader } from "@/components/dashboard/section-header"
 import { getPosts } from "@/lib/api"
+import { pageMetadata } from "@/lib/metadata"
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "Writing",
   description: "Notes on building, breaking and fixing things, by Ashik Eqbal.",
-  alternates: { canonical: "/post" },
-}
+  path: "/post",
+})
 
 export default async function PostsPage() {
   const posts = await getPosts()
