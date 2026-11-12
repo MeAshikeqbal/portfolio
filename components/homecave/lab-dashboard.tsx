@@ -1,31 +1,29 @@
 "use client"
 
+import { Camera } from "lucide-react"
 import type { ComponentProps } from "react"
 import { DataList, DataRow } from "@/components/dashboard/data-list"
 import { Meter } from "@/components/dashboard/meter"
 import { Panel, PanelHeader } from "@/components/dashboard/panel"
 import { Sparkline } from "@/components/dashboard/sparkline"
 import { StatusPill } from "@/components/dashboard/status-pill"
+import { Button } from "@/components/ui/button"
 import { LabNodeBadgeView } from "@/components/lab/lab-badges"
 import { useLabStatus } from "@/components/lab/use-lab-status"
 import { useLiveActivity } from "@/components/live/use-live-activity"
 import { LabTodayView } from "./lab-today"
 import { Metric } from "./metric"
 import { formatBytes, formatPercent, formatRate, formatRelative } from "@/lib/format"
-import { formatUptime, isNodeFresh, labSummary, lastReceived, nodeState } from "@/lib/lab/freshness"
-import type { LabNodeStatus, LabStatus, LabStorage } from "@/lib/lab/types"
-import { STATUS_TEXT_CLASS, type Status } from "@/lib/status"
+import { formatUptime, nodeState } from "@/lib/lab/freshness"
+import { labVerdict, orderNodes, storageRows } from "@/lib/lab/snapshot"
+import type { LabNodeStatus, LabStatus } from "@/lib/lab/types"
+import { STATUS_TEXT_CLASS } from "@/lib/status"
 import { cn } from "@/lib/utils"
 
 /** A Homecave "Homelab" row from the Studio: its description is the node's role line. */
 export interface NodeSpec {
   name: string
   description: string | null
-}
-
-const HEALTH: Record<string, { status: Status; label: string }> = {
-  ONLINE: { status: "up", label: "healthy" },
-  DEGRADED: { status: "warn", label: "degraded" },
 }
 
 const PERCENT: readonly [number, number] = [0, 100]
@@ -40,36 +38,7 @@ const slug = (name: string) => `node-${name.toLowerCase().replace(/[^a-z0-9]+/g,
 
 /** The whole cluster in one line: what an engineer wants to know in two seconds. */
 export function LabVerdict({ status, now }: { status: LabStatus; now: Date }) {
-  const summary = labSummary(status, now)
-  const fresh = status.nodes.filter((n) => isNodeFresh(n, now))
-  const pools = fresh.flatMap((n) => (n.storage ?? []).filter((s) => s.kind === "pool" && s.health))
-  const healthy = pools.filter((p) => p.health === "ONLINE").length
-  const poolStatus: Status =
-    healthy === pools.length ? "up" : pools.some((p) => p.health === "DEGRADED") ? "warn" : "down"
-  const guests = fresh.reduce(
-    (acc, n) => [acc[0] + (n.guests?.running ?? 0), acc[1] + (n.guests?.total ?? 0)],
-    [0, 0],
-  )
-  const updated = lastReceived(status)
-  const reporting = fresh.length
-
-  const items: { key: string; text: string; status?: Status }[] = []
-  if (summary) {
-    items.push({
-      key: "nodes",
-      text:
-        summary.label === "no data" ? "no data" : `${summary.label.replace(" up", "")} nodes up`,
-      status: summary.status,
-    })
-  }
-  if (pools.length > 0) {
-    items.push({
-      key: "pools",
-      text: `${healthy}/${pools.length} pools healthy`,
-      status: poolStatus,
-    })
-  }
-  if (guests[1] > 0) items.push({ key: "guests", text: `${guests[0]}/${guests[1]} guests running` })
+  const { summary, items, updated, reporting, total } = labVerdict(status, now)
 
   return (
     <div className="space-y-2">
@@ -89,9 +58,7 @@ export function LabVerdict({ status, now }: { status: LabStatus; now: Date }) {
         ))}
       </p>
       <p className="label-caps">
-        {reporting < status.nodes.length
-          ? `${reporting} of ${status.nodes.length} reporting · `
-          : ""}
+        {reporting < total ? `${reporting} of ${total} reporting · ` : ""}
         {updated ? `updated ${formatRelative(updated, now)}` : ""} · reports every 30s
       </p>
       {/* Screen readers hear the cluster state when it changes, not every 30s tick. */}
@@ -317,15 +284,8 @@ export function NodePanel({
 }
 
 function StoragePanel({ status, now }: { status: LabStatus; now: Date }) {
-  const rows = status.nodes.flatMap((node) =>
-    (node.storage ?? []).map((pool) => ({ node, pool })),
-  ) as { node: LabNodeStatus; pool: LabStorage }[]
+  const rows = storageRows(status, now)
   if (rows.length === 0) return null
-  // Pools first (largest first), then the off-site backup store, in one list.
-  const ordered = [
-    ...rows.filter((r) => r.pool.kind === "pool").sort((a, b) => b.pool.totalGiB - a.pool.totalGiB),
-    ...rows.filter((r) => r.pool.kind === "backup"),
-  ]
 
   return (
     <section aria-labelledby="homecave-storage">
@@ -339,24 +299,14 @@ function StoragePanel({ status, now }: { status: LabStatus; now: Date }) {
           meta={<span>zfs pools · backups</span>}
         />
         <DataList>
-          {ordered.map(({ node, pool }) => {
-            const fresh = isNodeFresh(node, now)
-            const health = pool.health
-              ? (HEALTH[pool.health] ?? {
-                  status: "down" as const,
-                  label: pool.health.toLowerCase(),
-                })
-              : null
-            // Health is a measured state only while the report is fresh; a stale store says so.
-            const shown = !fresh
-              ? { status: "idle" as const, label: "no data" }
-              : (health ?? undefined)
+          {/* Health is a measured state only while the report is fresh; a stale store says so. */}
+          {rows.map(({ node, pool, health }) => {
             return (
               <DataRow
                 key={`${node.name}:${pool.label}`}
                 title={pool.label}
                 description={pool.kind === "backup" ? "Proxmox Backup Server" : node.name}
-                status={shown}
+                status={health}
                 meta={[
                   <span key="size" className="normal-case">
                     {formatBytes(pool.usedGiB)} / {formatBytes(pool.totalGiB)}
@@ -396,12 +346,10 @@ export function LabDashboardView({
   /** Jellyfin streams now (undefined while loading, null when not connected). */
   streams?: number | null
 }) {
-  const nodes = [...(status?.nodes ?? [])].sort((a, b) => {
-    // The Studio's Homelab order first (Tower, Mini PC #1, …), then the rest by name.
-    const ia = specs.findIndex((s) => s.name === a.name)
-    const ib = specs.findIndex((s) => s.name === b.name)
-    return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib) || a.name.localeCompare(b.name)
-  })
+  const nodes = orderNodes(
+    status?.nodes ?? [],
+    specs.map((s) => s.name),
+  )
 
   if (!status || nodes.length === 0) {
     // Before the first heartbeat: the Studio's spec sheet, with nothing claimed.
@@ -424,7 +372,16 @@ export function LabDashboardView({
 
   return (
     <div className="space-y-6">
-      <LabVerdict status={status} now={now} />
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <LabVerdict status={status} now={now} />
+        {/* A picture of this moment, drawn on the server from the same public status. */}
+        <Button asChild variant="outline" size="sm">
+          <a href="/homecave/snapshot?download=1" download>
+            <Camera aria-hidden />
+            Snapshot <span className="sr-only">of the lab, as a PNG</span>
+          </a>
+        </Button>
+      </div>
       <div aria-label="Nodes" role="region" className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
         {nodes.map((node) => (
           <NodePanel

@@ -26,6 +26,17 @@ export function isHomelab(title: string | null | undefined): boolean {
   return /^homelab/i.test(title ?? "")
 }
 
+/** The Studio's Homelab rows as node specs: names in order, descriptions as role lines. */
+export function homelabSpecs(
+  uses: USES_QUERY_RESULT | null | undefined,
+): { name: string; description: string | null }[] {
+  const homelab = visibleUsesSections(uses).find((s) => isHomelab(s.title))
+  return (homelab?.items ?? []).map((item) => ({
+    name: item.name!.trim(),
+    description: item.description ?? null,
+  }))
+}
+
 /**
  * Homecave's content sections from the Studio (Self-hosted, Network & access, the setup):
  * one panel per section, one row per item. `badge` adds a measured status to a row by name.
