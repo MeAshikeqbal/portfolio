@@ -5,12 +5,13 @@ import { SectionHeader } from "@/components/dashboard/section-header"
 import { ProjectPanel } from "@/components/projects/project-panel"
 import { ProjectsBrowser } from "@/components/projects/projects-browser"
 import { getProjects } from "@/lib/api"
+import { pageMetadata } from "@/lib/metadata"
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "Projects",
   description: "Open-source and personal projects by Ashik Eqbal.",
-  alternates: { canonical: "/projects" },
-}
+  path: "/projects",
+})
 
 export default async function ProjectsPage() {
   const projects = await getProjects()

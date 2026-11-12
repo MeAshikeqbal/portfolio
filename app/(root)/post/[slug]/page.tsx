@@ -15,9 +15,10 @@ import { JsonLd } from "@/components/seo/json-ld"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { getPost, getPostSlugs } from "@/lib/api"
 import { formatDate } from "@/lib/format"
+import { pageMetadata } from "@/lib/metadata"
 import { rankRelated } from "@/lib/related"
 import { buildToc, readingTime, wordCount } from "@/lib/portable-text"
-import { absoluteUrl, siteConfig } from "@/lib/site"
+import { siteConfig } from "@/lib/site"
 import { blogPostingSchema, breadcrumbSchema, jsonLdGraph } from "@/lib/structured-data"
 import { urlFor } from "@/sanity/lib/image"
 
@@ -41,21 +42,20 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     `Read ${post.title}${post.author?.name ? ` by ${post.author.name}` : ""}.`
 
   return {
-    title,
-    description,
-    alternates: { canonical: `/post/${slug}` },
-    // Archived posts stay reachable but leave search results, like the site's own lists.
-    robots: post.seo?.noIndex || post.archived ? { index: false } : undefined,
-    openGraph: {
+    ...pageMetadata({
       title,
       description,
-      type: "article",
-      url: absoluteUrl(`/post/${slug}`),
-      publishedTime: post.publishedAt ?? undefined,
-      modifiedTime: post._updatedAt,
-      authors: post.author?.name ? [post.author.name] : undefined,
-      tags: post.categories?.flatMap((c) => (c.title ? [c.title] : [])),
-    },
+      path: `/post/${slug}`,
+      openGraph: {
+        type: "article",
+        publishedTime: post.publishedAt ?? undefined,
+        modifiedTime: post._updatedAt,
+        authors: post.author?.name ? [post.author.name] : undefined,
+        tags: post.categories?.flatMap((c) => (c.title ? [c.title] : [])),
+      },
+    }),
+    // Archived posts stay reachable but leave search results, like the site's own lists.
+    robots: post.seo?.noIndex || post.archived ? { index: false } : undefined,
   }
 }
 

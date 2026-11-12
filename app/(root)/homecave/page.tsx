@@ -3,13 +3,13 @@ import { HomecaveView } from "@/components/homecave/homecave-view"
 import { getUses } from "@/lib/api"
 import { toPublicStatus } from "@/lib/lab/public"
 import { readLabStatus } from "@/lib/lab/store"
+import { HOMECAVE_DESCRIPTION, pageMetadata } from "@/lib/metadata"
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "Homecave",
-  description:
-    "Ashik Eqbal's homelab, live: a three-node Proxmox cluster's health, load, storage and services, anonymized.",
-  alternates: { canonical: "/homecave" },
-}
+  description: HOMECAVE_DESCRIPTION,
+  path: "/homecave",
+})
 
 // Server-rendered from the latest heartbeat (so it works without JavaScript), at most 30s old;
 // the page then keeps itself fresh in the browser.

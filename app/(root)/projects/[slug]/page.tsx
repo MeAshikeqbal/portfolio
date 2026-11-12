@@ -14,7 +14,7 @@ import { JsonLd } from "@/components/seo/json-ld"
 import { Button } from "@/components/ui/button"
 import { getProject, getProjectSlugs } from "@/lib/api"
 import { formatMonth } from "@/lib/format"
-import { absoluteUrl } from "@/lib/site"
+import { pageMetadata } from "@/lib/metadata"
 import { hasActivity } from "@/lib/projects"
 import { projectStatus } from "@/lib/status"
 import { breadcrumbSchema, jsonLdGraph, projectSchema } from "@/lib/structured-data"
@@ -39,16 +39,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     project.seo?.description || project.description || `${project.title}, a project by Ashik Eqbal.`
 
   return {
-    title,
-    description,
-    alternates: { canonical: `/projects/${slug}` },
-    robots: project.seo?.noIndex ? { index: false } : undefined,
-    openGraph: {
+    ...pageMetadata({
       title,
       description,
-      type: "article",
-      url: absoluteUrl(`/projects/${slug}`),
-    },
+      path: `/projects/${slug}`,
+      openGraph: { type: "article" },
+    }),
+    robots: project.seo?.noIndex ? { index: false } : undefined,
   }
 }
 

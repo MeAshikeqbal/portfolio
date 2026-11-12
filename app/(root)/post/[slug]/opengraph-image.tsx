@@ -1,10 +1,9 @@
 import { ImageResponse } from "next/og"
 import { getPost, getPostSlugs } from "@/lib/api"
 import { formatDate } from "@/lib/format"
-import { OG_COLORS, OG_CONTENT_TYPE, OG_SIZE, OgFrame, ogFonts } from "@/lib/og"
+import { OG_COLORS, OG_CONTENT_TYPE, OG_SIZE, OgFrame, ogFonts, sanityOgImage } from "@/lib/og"
 import { readingTime } from "@/lib/portable-text"
 import { siteConfig } from "@/lib/site"
-import { urlFor } from "@/sanity/lib/image"
 
 export const alt = `Blog post by ${siteConfig.name}`
 export const size = OG_SIZE
@@ -23,15 +22,7 @@ export default async function Image({ params }: { params: Promise<{ slug: string
 
   // An explicit social image in the post's SEO settings wins over the generated card.
   if (post?.seo?.ogImage?.asset) {
-    return new ImageResponse(
-      <img
-        src={urlFor(post.seo.ogImage).width(size.width).height(size.height).url()}
-        width={size.width}
-        height={size.height}
-        alt=""
-      />,
-      { ...size, fonts },
-    )
+    return sanityOgImage(post.seo.ogImage, fonts)
   }
 
   if (!post?.title) {
