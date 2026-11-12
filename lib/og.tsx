@@ -20,6 +20,7 @@ export const OG_COLORS = {
   foreground: "#f5f5f6",
   muted: "#a0a1a9",
   border: "#262629",
+  surface2: "#1b1b1e",
   up: "#3cc96a",
   warn: "#f5af20",
   down: "#fc5855",
@@ -166,7 +167,7 @@ export function OgFrame({ eyebrow, title, description, footer = [], status }: Og
   )
 }
 
-function Bar({ children, bottom = false }: { children: ReactNode; bottom?: boolean }) {
+export function Bar({ children, bottom = false }: { children: ReactNode; bottom?: boolean }) {
   return (
     <div
       style={{
@@ -190,7 +191,15 @@ function Bar({ children, bottom = false }: { children: ReactNode; bottom?: boole
   )
 }
 
-function Mono({ children, size, color }: { children: ReactNode; size: number; color: string }) {
+export function Mono({
+  children,
+  size,
+  color,
+}: {
+  children: ReactNode
+  size: number
+  color: string
+}) {
   return (
     <div
       style={{
@@ -207,6 +216,6 @@ function Mono({ children, size, color }: { children: ReactNode; size: number; co
   )
 }
 
-function Dot({ color }: { color: string }) {
+export function Dot({ color }: { color: string }) {
   return <div style={{ width: 14, height: 14, borderRadius: 999, background: color }} />
 }

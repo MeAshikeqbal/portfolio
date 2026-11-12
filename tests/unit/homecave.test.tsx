@@ -51,6 +51,15 @@ describe("Homecave dashboard", () => {
     expect(screen.getByText("Tower")).toBeVisible()
     expect(screen.queryByText(/nodes up/)).toBeNull()
     expect(screen.queryByText(/^up/)).toBeNull()
+    // Nothing to photograph yet.
+    expect(screen.queryByRole("link", { name: /snapshot/i })).toBeNull()
+  })
+
+  it("offers a snapshot of the lab once it has reported", () => {
+    render(<LabDashboardView status={{ nodes: [tower] }} now={now} specs={specs} />)
+    const link = screen.getByRole("link", { name: "Snapshot of the lab, as a PNG" })
+    expect(link).toHaveAttribute("href", "/homecave/snapshot?download=1")
+    expect(link).toHaveAttribute("download")
   })
 
   it("leads with a one-line verdict for the whole cluster", () => {

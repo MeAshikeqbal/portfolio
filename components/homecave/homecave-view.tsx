@@ -1,5 +1,10 @@
 import { ChevronRight } from "lucide-react"
-import { isHomelab, UsesSections, visibleUsesSections } from "@/components/about/uses-view"
+import {
+  homelabSpecs,
+  isHomelab,
+  UsesSections,
+  visibleUsesSections,
+} from "@/components/about/uses-view"
 import { Container, Section } from "@/components/dashboard/layout"
 import { SectionHeader } from "@/components/dashboard/section-header"
 import { LabServiceBadge } from "@/components/lab/lab-badges"
@@ -20,10 +25,7 @@ const isLabSection = (title: string | null | undefined) => /self-hosted|network/
 export function HomecaveView({ uses, lab }: { uses: USES_QUERY_RESULT; lab: LabStatus | null }) {
   const sections = visibleUsesSections(uses)
   const homelab = sections.find((s) => isHomelab(s.title))
-  const specs: NodeSpec[] = (homelab?.items ?? []).map((item) => ({
-    name: item.name!.trim(),
-    description: item.description ?? null,
-  }))
+  const specs: NodeSpec[] = homelabSpecs(uses)
   const rest = sections.filter((s) => s !== homelab)
   const labSections = rest.filter((s) => isLabSection(s.title))
   const deskSections = rest.filter((s) => !isLabSection(s.title))

@@ -48,4 +48,18 @@ test.describe("Homecave", () => {
     expect(response.status()).toBe(200)
     expect(response.headers()["cache-control"]).toContain("s-maxage=30")
   })
+
+  test("the snapshot is a live PNG, saved as a dated file", async ({ request }) => {
+    const response = await request.get("/homecave/snapshot?download=1")
+    expect(response.status()).toBe(200)
+    expect(response.headers()["content-type"]).toBe("image/png")
+    expect(response.headers()["content-disposition"]).toMatch(
+      /^attachment; filename="homecave-\d{4}-\d{2}-\d{2}-\d{4}Z\.png"$/,
+    )
+    // Never the year-long immutable cache ImageResponse defaults to.
+    expect(response.headers()["cache-control"]).toContain("s-maxage=30")
+    expect(response.headers()["cache-control"]).not.toContain("immutable")
+    const inline = await request.get("/homecave/snapshot")
+    expect(inline.headers()["content-disposition"]).toMatch(/^inline;/)
+  })
 })
