@@ -68,11 +68,7 @@ export function HomecaveView({ uses, lab }: { uses: USES_QUERY_RESULT; lab: LabS
                   title="What runs here"
                   description="The services on the cluster, and how they're reached."
                 />
-                <UsesSections
-                  sections={labSections}
-                  badge={badge}
-                  className="grid items-start gap-6 space-y-0 lg:grid-cols-2"
-                />
+                <UsesSections sections={labSections} badge={badge} />
               </>
             )}
             {deskSections.length > 0 && (
@@ -86,10 +82,7 @@ export function HomecaveView({ uses, lab }: { uses: USES_QUERY_RESULT; lab: LabS
                   <h2 className="text-lg font-semibold tracking-tight">Desk &amp; tools</h2>
                   <span className="label-caps">{deskSections.map((s) => s.title).join(" · ")}</span>
                 </summary>
-                <UsesSections
-                  sections={deskSections}
-                  className="mt-4 grid items-start gap-6 space-y-0 lg:grid-cols-2"
-                />
+                <UsesSections sections={deskSections} className="mt-4" />
               </details>
             )}
           </Container>

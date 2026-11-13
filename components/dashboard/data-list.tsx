@@ -10,6 +10,9 @@ export function DataList({ className, children }: { className?: string; children
   return <ul className={cn("divide-y", className)}>{children}</ul>
 }
 
+/** Where a row's status dot sits: by the title's first line on phones, centred on wide rows. */
+const DOT_SLOT = "mt-1.5 sm:mt-0"
+
 interface DataRowProps {
   title: ReactNode
   href?: string
@@ -23,6 +26,8 @@ interface DataRowProps {
   /** A small plate before the title (artwork, an icon). It takes the dot's place, so the dot
    * moves in front of the status word. Greyscale art turns to colour on row hover via `group`. */
   leading?: ReactNode
+  /** Keep the dot's slot when the row has no status, so its title lines up with dotted rows. */
+  reserveDot?: boolean
   className?: string
 }
 
@@ -34,6 +39,7 @@ export function DataRow({
   meta = [],
   value,
   leading,
+  reserveDot = false,
   className,
 }: DataRowProps) {
   const external = Boolean(href && !href.startsWith("/"))
@@ -56,7 +62,12 @@ export function DataRow({
     : meta
   const body = (
     <>
-      {leading ?? (status && <StatusDot status={status.status} className="mt-1.5 sm:mt-0" />)}
+      {leading ??
+        (status ? (
+          <StatusDot status={status.status} className={DOT_SLOT} />
+        ) : (
+          reserveDot && <span aria-hidden className={cn("size-2 shrink-0", DOT_SLOT)} />
+        ))}
       <div className="min-w-0 flex-1">
         {/* Titles wrap rather than truncate: a cut-off name is no name at all. */}
         <div className="font-medium text-pretty">
