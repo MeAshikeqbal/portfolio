@@ -225,6 +225,9 @@ export function NodePanel({
         <dl
           className={cn(
             "grid grid-cols-2 gap-px border-b bg-border",
+            // An odd tile out keeps its half and a blank cell (a pseudo-element, so the dl
+            // stays valid) fills the row: every node's tiles and trends sit in the same slots.
+            tiles.length % 2 === 1 && "after:bg-surface",
             !live && "opacity-55 grayscale",
           )}
           aria-label={live ? undefined : `${node.name}, last readings`}
@@ -232,9 +235,6 @@ export function NodePanel({
           {tiles.map((tile) => (
             <Metric key={tile.label} {...tile} />
           ))}
-          {/* An odd tile out keeps its half (a blank cell fills the row), so every node's tiles
-              sit in the same slots and their trends line up across the cards. */}
-          {tiles.length % 2 === 1 && <div aria-hidden className="bg-surface" />}
         </dl>
         {node.guests && (
           <div className={cn("space-y-2 px-4 py-3", !live && "opacity-55")}>
@@ -284,6 +284,7 @@ export function NodePanel({
 function StoragePanel({ status, now }: { status: LabStatus; now: Date }) {
   const rows = storageRows(status, now)
   if (rows.length === 0) return null
+  const withDots = rows.some((row) => row.health)
 
   return (
     <section aria-labelledby="homecave-storage">
@@ -305,11 +306,9 @@ function StoragePanel({ status, now }: { status: LabStatus; now: Date }) {
                 title={pool.label}
                 description={pool.kind === "backup" ? "Proxmox Backup Server" : node.name}
                 status={health}
-                // No measured health (backups): an empty slot where the dot goes keeps the
-                // titles aligned with the pools above.
-                leading={
-                  health ? undefined : <span aria-hidden className="mt-1.5 size-2 shrink-0 sm:mt-0" />
-                }
+                // Backups have no measured health: they keep the dot's slot, so their titles
+                // line up with the pools (when any pool has a dot to line up with).
+                reserveDot={withDots}
                 meta={[
                   <span key="size" className="normal-case">
                     {formatBytes(pool.usedGiB)} / {formatBytes(pool.totalGiB)}

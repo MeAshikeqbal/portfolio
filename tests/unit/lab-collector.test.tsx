@@ -205,14 +205,16 @@ describe("node panels with collector readings", () => {
     ).toBeGreaterThan(0)
   })
 
-  it("spans the last tile across the row when the count is odd", () => {
+  it("keeps an odd last tile in its half and fills the row with a pseudo-element", () => {
     const node = served(fixtures.mini1)
     render(<LabDashboardView status={{ nodes: [node] }} now={now} specs={[]} />)
     const panel = screen.getByRole("region", { name: "Mini PC #1" })
-    const tiles = panel.querySelectorAll("dl > div")
+    const grid = panel.querySelector("dl")!
+    const tiles = grid.querySelectorAll(":scope > div")
+    // Only real dt/dd groups in the dl: the blank cell is CSS, not markup.
     expect(tiles).toHaveLength(5)
-    expect(tiles[4]).toHaveClass("col-span-2")
-    expect(tiles[3]).not.toHaveClass("col-span-2")
+    expect(tiles[4]).not.toHaveClass("col-span-2")
+    expect(grid).toHaveClass("after:bg-surface")
   })
 })
 
