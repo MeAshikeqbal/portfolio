@@ -229,14 +229,12 @@ export function NodePanel({
           )}
           aria-label={live ? undefined : `${node.name}, last readings`}
         >
-          {tiles.map((tile, i) => (
-            // An odd tile out spans the row, so the grid never shows an empty cell.
-            <Metric
-              key={tile.label}
-              {...tile}
-              className={cn(i === tiles.length - 1 && tiles.length % 2 === 1 && "col-span-2")}
-            />
+          {tiles.map((tile) => (
+            <Metric key={tile.label} {...tile} />
           ))}
+          {/* An odd tile out keeps its half (a blank cell fills the row), so every node's tiles
+              sit in the same slots and their trends line up across the cards. */}
+          {tiles.length % 2 === 1 && <div aria-hidden className="bg-surface" />}
         </dl>
         {node.guests && (
           <div className={cn("space-y-2 px-4 py-3", !live && "opacity-55")}>
@@ -307,6 +305,11 @@ function StoragePanel({ status, now }: { status: LabStatus; now: Date }) {
                 title={pool.label}
                 description={pool.kind === "backup" ? "Proxmox Backup Server" : node.name}
                 status={health}
+                // No measured health (backups): an empty slot where the dot goes keeps the
+                // titles aligned with the pools above.
+                leading={
+                  health ? undefined : <span aria-hidden className="mt-1.5 size-2 shrink-0 sm:mt-0" />
+                }
                 meta={[
                   <span key="size" className="normal-case">
                     {formatBytes(pool.usedGiB)} / {formatBytes(pool.totalGiB)}

@@ -17,6 +17,23 @@ import { LabDashboard, type NodeSpec } from "./lab-dashboard"
 /** Sections about the lab itself (Self-hosted, Network & access); the rest is the desk setup. */
 const isLabSection = (title: string | null | undefined) => /self-hosted|network/i.test(title ?? "")
 
+type Sections = ReturnType<typeof visibleUsesSections>
+
+/**
+ * Deal panels into two stacks, each to the shorter one (by rows, plus one for its header), so a
+ * short panel never sits under the gap a tall neighbour leaves in a row-by-row grid.
+ */
+function balance(sections: Sections): Sections[] {
+  const columns: Sections[] = [[], []]
+  const heights = [0, 0]
+  for (const section of sections) {
+    const i = heights[0] <= heights[1] ? 0 : 1
+    columns[i].push(section)
+    heights[i] += section.items.length + 1
+  }
+  return columns.filter((column) => column.length > 0)
+}
+
 /**
  * Homecave: the homelab, live. The dashboard (nodes, storage, backups) comes from the lab's
  * signed, anonymized heartbeats; the copy around it (intro, node role lines, self-hosted and
@@ -68,11 +85,11 @@ export function HomecaveView({ uses, lab }: { uses: USES_QUERY_RESULT; lab: LabS
                   title="What runs here"
                   description="The services on the cluster, and how they're reached."
                 />
-                <UsesSections
-                  sections={labSections}
-                  badge={badge}
-                  className="grid items-start gap-6 space-y-0 lg:grid-cols-2"
-                />
+                <div className="grid items-start gap-6 lg:grid-cols-2">
+                  {balance(labSections).map((column, i) => (
+                    <UsesSections key={i} sections={column} badge={badge} />
+                  ))}
+                </div>
               </>
             )}
             {deskSections.length > 0 && (
@@ -86,10 +103,11 @@ export function HomecaveView({ uses, lab }: { uses: USES_QUERY_RESULT; lab: LabS
                   <h2 className="text-lg font-semibold tracking-tight">Desk &amp; tools</h2>
                   <span className="label-caps">{deskSections.map((s) => s.title).join(" · ")}</span>
                 </summary>
-                <UsesSections
-                  sections={deskSections}
-                  className="mt-4 grid items-start gap-6 space-y-0 lg:grid-cols-2"
-                />
+                <div className="mt-4 grid items-start gap-6 lg:grid-cols-2">
+                  {balance(deskSections).map((column, i) => (
+                    <UsesSections key={i} sections={column} />
+                  ))}
+                </div>
               </details>
             )}
           </Container>
