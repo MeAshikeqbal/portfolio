@@ -201,6 +201,12 @@ export type Project = {
     pushedAt?: string
     weeklyCommits?: Array<number>
   }
+  showReadme?: boolean
+  readme?: {
+    path?: string
+    ref?: string
+    markdown?: string
+  }
   seo?: Seo
   githubSyncRequestedAt?: string
 }
@@ -694,7 +700,7 @@ export type PROJECTS_QUERY_RESULT = Array<{
 
 // Source: sanity/lib/queries.ts
 // Variable: PROJECT_QUERY
-// Query: *[_type == "project" && !(_id in path("drafts.**")) && slug.current == $slug][0] {   _id,  title,  "slug": slug.current,  description,  mainImage,  publishedAt,  github,  url,  featured,  status,  tech,  githubData, body, seo }
+// Query: *[_type == "project" && !(_id in path("drafts.**")) && slug.current == $slug][0] {      _id,  title,  "slug": slug.current,  description,  mainImage,  publishedAt,  github,  url,  featured,  status,  tech,  githubData,    body,    seo,    // Only on the project page (lists don't carry READMEs).    "readme": select(showReadme != false => readme { markdown, path, ref })  }
 export type PROJECT_QUERY_RESULT = {
   _id: string
   title: string | null
@@ -726,6 +732,11 @@ export type PROJECT_QUERY_RESULT = {
   } | null
   body: BlockContent | null
   seo: Seo | null
+  readme: {
+    markdown: string | null
+    path: string | null
+    ref: string | null
+  } | null
 } | null
 
 // Source: sanity/lib/queries.ts
@@ -952,7 +963,7 @@ declare global {
     '\n  *[_type == "post" && !(_id in path("drafts.**")) && slug.current == $slug][0] {\n    _id,\n    title,\n    "slug": slug.current,\n    author->{ name, image },\n    mainImage,\n    "cover": mainImage.asset->metadata{ lqip, "width": dimensions.width, "height": dimensions.height },\n    // posts: how many listed posts share the category, so rare ones weigh more in "related".\n    categories[]->{ _id, title, "posts": count(*[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && archived != true && references(^._id)]) },\n    publishedAt,\n    _updatedAt,\n    body,\n    excerpt,\n    seo,\n    archived,\n    "previous": *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && archived != true && publishedAt < ^.publishedAt]\n      | order(publishedAt desc)[0] { title, "slug": slug.current },\n    "next": *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && archived != true && publishedAt > ^.publishedAt]\n      | order(publishedAt asc)[0] { title, "slug": slug.current },\n    // Every candidate sharing a category, ranked in lib/related.ts (rare shared topics first).\n    // The cap is only a payload guard, far above the site\'s post count: limiting by date\n    // first would drop an older rare-topic match before it could be ranked.\n    "related": *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && archived != true && _id != ^._id && count(categories[@._ref in ^.^.categories[]._ref]) > 0]\n      | order(publishedAt desc)[0...200] { \n  _id,\n  title,\n  "slug": slug.current,\n  mainImage,\n  "lqip": mainImage.asset->metadata.lqip,\n  publishedAt,\n  "excerpt": coalesce(excerpt, array::join(string::split(pt::text(body[_type == "block" && style == "normal"]), "")[0...200], "")),\n  categories[]->{ _id, title },\n  author->{ name }\n, "categoryIds": categories[]._ref }\n  }\n': POST_QUERY_RESULT
     '\n  *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current)].slug.current\n': POST_SLUGS_QUERY_RESULT
     '\n  *[_type == "project" && !(_id in path("drafts.**"))] | order(orderRank asc, _createdAt desc) { \n  _id,\n  title,\n  "slug": slug.current,\n  description,\n  mainImage,\n  publishedAt,\n  github,\n  url,\n  featured,\n  status,\n  tech,\n  githubData\n }\n': PROJECTS_QUERY_RESULT
-    '\n  *[_type == "project" && !(_id in path("drafts.**")) && slug.current == $slug][0] { \n  _id,\n  title,\n  "slug": slug.current,\n  description,\n  mainImage,\n  publishedAt,\n  github,\n  url,\n  featured,\n  status,\n  tech,\n  githubData\n, body, seo }\n': PROJECT_QUERY_RESULT
+    '\n  *[_type == "project" && !(_id in path("drafts.**")) && slug.current == $slug][0] {\n    \n  _id,\n  title,\n  "slug": slug.current,\n  description,\n  mainImage,\n  publishedAt,\n  github,\n  url,\n  featured,\n  status,\n  tech,\n  githubData\n,\n    body,\n    seo,\n    // Only on the project page (lists don\'t carry READMEs).\n    "readme": select(showReadme != false => readme { markdown, path, ref })\n  }\n': PROJECT_QUERY_RESULT
     '\n  *[_type == "project" && !(_id in path("drafts.**")) && defined(slug.current)].slug.current\n': PROJECT_SLUGS_QUERY_RESULT
     '{\n  "posts": count(*[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && archived != true]),\n  "projects": count(*[_type == "project" && !(_id in path("drafts.**"))]),\n  // Past-52-week commits per repo, summed (see lib/fetch-github-data.ts).\n  "commits": math::sum(*[_type == "project" && !(_id in path("drafts.**"))].githubData.commits),\n  "latestPost": *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && archived != true]\n    | order(publishedAt desc)[0] { title, "slug": slug.current, publishedAt },\n  // The "Homelab" section of /uses, if there is one.\n  "homelab": *[_type == "uses" && _id == "uses"][0]\n    .sections[string::startsWith(lower(title), "homelab")][0]\n    .items[0...5] { _key, name, description, url, icon }\n}': HOME_STATS_QUERY_RESULT
     '{\n  "syncedAt": *[_type == "project" && !(_id in path("drafts.**")) && defined(githubData.syncedAt)]\n    | order(githubData.syncedAt desc)[0].githubData.syncedAt,\n  "latestPostAt": *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && archived != true] | order(publishedAt desc)[0].publishedAt\n}': SITE_STATUS_QUERY_RESULT

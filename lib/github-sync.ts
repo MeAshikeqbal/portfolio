@@ -42,10 +42,13 @@ export async function syncProjects(projects: SyncableProject[]): Promise<Project
       continue
     }
     try {
-      await patch
+      let next = patch
         .setIfMissing({ githubData: {} })
         .set({ ...githubPatchFields(data), "githubData.syncedAt": new Date().toISOString() })
-        .commit()
+      // undefined: the README couldn't be fetched, so the stored copy stays.
+      if (data.readme) next = next.set({ readme: data.readme })
+      else if (data.readme === null) next = next.unset(["readme"])
+      await next.commit()
       results.push({
         id: project._id,
         title,

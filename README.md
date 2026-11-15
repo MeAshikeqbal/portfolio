@@ -71,8 +71,10 @@ tests/unit, tests/e2e
   schema, run `npm run typegen`.
 - **GitHub stats.** `/api/sync-github-data` runs daily (`vercel.json`). It updates stars,
   language, last push and past-year commit activity (including a 12-week series for the
-  sparklines) on every project with a repo. It also creates draft projects for new public
-  repositories. In the Studio, **Sync from GitHub** (a project's ⋯ menu) or **Sync all now**
+  sparklines) on every project with a repo, plus the repo's README, which the project page shows
+  below the case study (sanitized, GitHub-hosted images only, starter READMEs hidden; **Show
+  README** in the project's GitHub tab turns it off). New repositories are not added
+  automatically. In the Studio, **Sync from GitHub** (a project's ⋯ menu) or **Sync all now**
   (Home dashboard) runs it on demand: the Studio stamps `githubSyncRequestedAt` with the
   editor's own permissions and `/api/github-sync` only syncs freshly stamped projects, so no
   secret ever reaches the browser.

@@ -426,3 +426,33 @@ html[data-transition="theme"]::view-transition-new(root) {
     animation: none;
   }
 }
+
+/* Project READMEs (components/projects/project-readme.tsx): GitHub markup in the site's prose. */
+.readme img {
+  display: inline-block;
+  max-width: 100%;
+  height: auto;
+  margin-block: 0.5rem;
+  border-radius: var(--radius-sm);
+}
+
+.readme table {
+  display: block;
+  overflow-x: auto;
+}
+
+.readme details {
+  margin-block: 1rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 0.5rem 1rem;
+}
+
+.readme summary {
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.readme :where(h2, h3, h4) {
+  scroll-margin-top: 6rem;
+}

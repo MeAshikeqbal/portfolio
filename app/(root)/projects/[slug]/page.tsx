@@ -20,6 +20,9 @@ import { projectStatus } from "@/lib/status"
 import { breadcrumbSchema, jsonLdGraph, projectSchema } from "@/lib/structured-data"
 import { urlFor } from "@/sanity/lib/image"
 import { LiveSiteShot } from "@/components/projects/live-site-shot"
+import { ProjectReadme } from "@/components/projects/project-readme"
+import { isBoilerplateReadme } from "@/lib/readme"
+import { parseRepoUrl } from "@/lib/fetch-github-data"
 import { screenshotUrl } from "@/lib/screenshot"
 
 type Props = { params: Promise<{ slug: string }> }
@@ -60,6 +63,19 @@ export default async function ProjectPage({ params }: Props) {
   const gh = project.githubData
   const weekly = gh?.weeklyCommits ?? []
   const title = project.title ?? "Untitled project"
+  const hasBody = Boolean(project.body && project.body.length > 0)
+  const repo = project.github ? parseRepoUrl(project.github) : null
+  const readme =
+    repo && project.readme?.markdown && !isBoilerplateReadme(project.readme.markdown)
+      ? {
+          markdown: project.readme.markdown,
+          source: {
+            ...repo,
+            ref: project.readme.ref || "HEAD",
+            path: project.readme.path || "README.md",
+          },
+        }
+      : null
 
   const structuredData = jsonLdGraph(
     projectSchema({
@@ -170,27 +186,19 @@ export default async function ProjectPage({ params }: Props) {
             liveShot && project.url && <LiveSiteShot src={liveShot} host={hostOf(project.url)} />
           )}
 
-          <div className="mt-12">
-            {project.body && project.body.length > 0 ? (
-              <article className="prose max-w-none">
-                <PortableText value={project.body} components={portableTextComponents} />
-              </article>
-            ) : (
-              <p className="rounded-lg border border-dashed p-8 text-center text-muted-foreground">
-                No write-up yet.{" "}
-                {project.github && (
-                  <a
-                    href={project.github}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="underline underline-offset-4 hover:text-foreground"
-                  >
-                    Read the README on GitHub
-                  </a>
-                )}
+          {hasBody ? (
+            <article className="prose mt-12 max-w-none">
+              <PortableText value={project.body!} components={portableTextComponents} />
+            </article>
+          ) : (
+            !readme && (
+              <p className="mt-12 rounded-lg border border-dashed p-8 text-center text-muted-foreground">
+                No write-up yet.
               </p>
-            )}
-          </div>
+            )
+          )}
+
+          {readme && <ProjectReadme {...readme} open={!hasBody} />}
         </Container>
       </Section>
     </main>

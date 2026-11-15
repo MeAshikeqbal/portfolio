@@ -1,7 +1,6 @@
 import { timingSafeEqual } from "crypto"
 import { revalidatePath } from "next/cache"
 import { type NextRequest, NextResponse } from "next/server"
-import { fetchOwnedPublicRepositories, normalizeRepoUrl } from "@/lib/fetch-github-data"
 import { syncProjects } from "@/lib/github-sync"
 import { GITHUB_PROJECTS_QUERY } from "@/sanity/lib/queries"
 import { writeClient } from "@/sanity/lib/write-client"
@@ -18,14 +17,9 @@ function isAuthorized(req: NextRequest): boolean {
   return expected.length === received.length && timingSafeEqual(expected, received)
 }
 
-/** Sanity document IDs allow letters, digits, `-` and `_`. */
-function draftIdForRepo(name: string): string {
-  return `drafts.project-${name.toLowerCase().replace(/[^a-z0-9_-]+/g, "-")}`
-}
-
 /**
- * Syncs GitHub stats onto every project with a repo URL, and creates a draft
- * project for each new public repository so it can be reviewed in the Studio.
+ * Syncs GitHub stats and READMEs onto every project with a repo URL. New repositories are
+ * not added automatically: projects are curated by hand in the Studio.
  *
  * Called daily by Vercel Cron (GET, see vercel.json) with `Authorization: Bearer $CRON_SECRET`.
  */
@@ -37,42 +31,12 @@ async function sync(req: NextRequest) {
   const results: string[] = []
   const errors: string[] = []
 
-  // `raw` includes drafts, so draft-only projects are updated and not re-created.
+  // `raw` includes drafts, so draft-only projects are kept in sync too.
   const projects = await writeClient.fetch(GITHUB_PROJECTS_QUERY, {}, { perspective: "raw" })
-  const knownRepos = new Set(
-    projects.flatMap((p) => (p.github ? [normalizeRepoUrl(p.github)] : [])),
-  )
 
   for (const result of await syncProjects(projects)) {
     if (result.ok) results.push(`${result.message} ${result.title}`)
     else errors.push(`${result.title}: ${result.message}`)
-  }
-
-  for (const repo of await fetchOwnedPublicRepositories()) {
-    if (knownRepos.has(normalizeRepoUrl(repo.url))) continue
-    try {
-      await writeClient.createIfNotExists({
-        _id: draftIdForRepo(repo.name),
-        _type: "project",
-        title: repo.name,
-        description: repo.description ?? "",
-        github: repo.url,
-        url: repo.homepage || undefined,
-        tech: repo.language ? [repo.language] : [],
-        githubData: {
-          stars: repo.stars,
-          commits: 0,
-          license: "Not specified",
-          language: repo.language ?? null,
-          topics: repo.topics,
-          pushedAt: repo.pushedAt ?? null,
-          weeklyCommits: [],
-        },
-      })
-      results.push(`Draft for new repository ${repo.name}`)
-    } catch (error) {
-      errors.push(`Failed to create draft for ${repo.name}: ${String(error)}`)
-    }
   }
 
   revalidatePath("/projects")
