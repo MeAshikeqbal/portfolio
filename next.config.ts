@@ -7,6 +7,8 @@ import type { NextConfig } from "next"
  * scripts/styles (Next.js bootstrap, next/font, style attributes) need 'unsafe-inline'.
  * The policy still pins every other source to the services the site actually uses:
  * - Sanity: images from the CDN, Live Content API (EventSource) for content updates
+ * - Videos: uploads from the Sanity CDN (media-src); YouTube thumbnails and the
+ *   privacy-enhanced youtube-nocookie player, loaded only when a visitor presses play
  * - GitHub: README images on project pages (lib/readme.ts keeps only these hosts)
  * - Cloudflare Turnstile: script + iframe for the contact form
  * - Vercel Analytics / Speed Insights: same-origin scripts and beacons under /_vercel
@@ -15,10 +17,11 @@ const csp = [
   "default-src 'self'",
   "script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com",
   "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' data: blob: https://cdn.sanity.io https://raw.githubusercontent.com https://github.com https://*.githubusercontent.com",
+  "img-src 'self' data: blob: https://cdn.sanity.io https://raw.githubusercontent.com https://github.com https://*.githubusercontent.com https://i.ytimg.com",
+  "media-src 'self' https://cdn.sanity.io",
   "font-src 'self'",
   "connect-src 'self' https://*.api.sanity.io https://*.apicdn.sanity.io wss://*.api.sanity.io",
-  "frame-src https://challenges.cloudflare.com",
+  "frame-src https://challenges.cloudflare.com https://www.youtube-nocookie.com",
   "frame-ancestors 'self'",
   "object-src 'none'",
   "base-uri 'self'",

@@ -118,6 +118,8 @@ export const blockContentType = defineType({
         }),
       },
     }),
+    // Upload or YouTube (sanity/schemaTypes/videoType.ts).
+    defineArrayMember({ type: "video" }),
     defineArrayMember({
       type: "image",
       icon: ImageIcon,

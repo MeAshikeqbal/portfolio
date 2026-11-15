@@ -374,6 +374,15 @@ const RICH_TEXT_SAMPLE = [
     title: "Before you start",
     text: "Take a backup first: the migration deletes the originals once the copy is verified.",
   },
+  {
+    // YouTube loads behind a thumbnail until played; uploads render a native player.
+    _type: "video",
+    _key: "v",
+    kind: "youtube",
+    youtubeUrl: "https://www.youtube.com/watch?v=aqz-KE-bpKQ",
+    title: "Big Buck Bunny (Blender Foundation)",
+    caption: "Video blocks: an upload from Sanity or a YouTube link, with an optional caption.",
+  },
 ]
 
 function Block({ id, title, children }: { id: string; title: string; children: ReactNode }) {

@@ -20,6 +20,8 @@ import { projectStatus } from "@/lib/status"
 import { breadcrumbSchema, jsonLdGraph, projectSchema } from "@/lib/structured-data"
 import { urlFor } from "@/sanity/lib/image"
 import { LiveSiteShot } from "@/components/projects/live-site-shot"
+import { VideoFigure } from "@/components/media/video-figure"
+import { playableKind } from "@/lib/video"
 import { ProjectReadme } from "@/components/projects/project-readme"
 import { isBoilerplateReadme } from "@/lib/readme"
 import { parseRepoUrl } from "@/lib/fetch-github-data"
@@ -56,8 +58,12 @@ export default async function ProjectPage({ params }: Props) {
   const { slug } = await params
   const project = await getProject(slug)
   if (!project) notFound()
+  // The demo video, when set, takes the cover's place.
+  const hasVideo = playableKind(project.video) !== null
   const liveShot =
-    !project.mainImage?.asset && project.url ? screenshotUrl(project.url, 896, 560) : null
+    !hasVideo && !project.mainImage?.asset && project.url
+      ? screenshotUrl(project.url, 896, 560)
+      : null
 
   const status = projectStatus(project)
   const gh = project.githubData
@@ -171,7 +177,9 @@ export default async function ProjectPage({ params }: Props) {
             </ul>
           )}
 
-          {project.mainImage?.asset ? (
+          {hasVideo ? (
+            <VideoFigure value={project.video} className="mt-10" />
+          ) : project.mainImage?.asset ? (
             <Image
               src={urlFor(project.mainImage).width(1600).height(900).url()}
               alt={project.mainImage.alt || title}

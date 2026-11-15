@@ -99,6 +99,7 @@ export const PROJECT_QUERY = defineQuery(`
     ${projectFields},
     body,
     seo,
+    video,
     // Only on the project page (lists don't carry READMEs).
     "readme": select(showReadme != false => readme { markdown, path, ref })
   }

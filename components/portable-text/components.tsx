@@ -7,6 +7,8 @@ import { cn } from "@/lib/utils"
 import { StatusDot } from "@/components/dashboard/status-dot"
 import type { Status } from "@/lib/status"
 import { CodeBlock } from "./code-block"
+import { VideoFigure } from "@/components/media/video-figure"
+import type { VideoValue } from "@/lib/video"
 
 interface ImageBlock {
   asset?: { _ref?: string }
@@ -103,6 +105,7 @@ export function createPortableTextComponents(
           </aside>
         )
       },
+      video: ({ value }: { value: VideoValue }) => <VideoFigure value={value} className="my-8" />,
       image: ({ value }: { value: ImageBlock }) => {
         if (!value?.asset?._ref) return null
         return (

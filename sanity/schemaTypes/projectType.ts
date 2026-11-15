@@ -99,6 +99,14 @@ export const projectType = defineType({
       ],
     }),
     defineField({
+      name: "video",
+      title: "Demo video",
+      type: "video",
+      group: "overview",
+      description:
+        "Optional. Shown at the top of the project page, in place of the cover image or live-site screenshot.",
+    }),
+    defineField({
       name: "url",
       title: "Live URL",
       type: "url",
