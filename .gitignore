@@ -62,7 +62,20 @@ public/Thumbs.db
 # Sanity dataset exports (npm run backup); the inbox export holds personal data
 /backups/
 
-# scripts/about-content.ts dry-run snapshot (revisions + content hash)
+# Content seeds and one-off content scripts: local only. The repo is public, and these hold
+# draft copy, owner decisions and private names; Sanity is the source of truth for content.
+/scripts/projects-content.ts
+/scripts/projects-content.data.ts
+/scripts/about-content.ts
+/scripts/about-content.data.ts
+/scripts/about-content.validate.ts
+/scripts/curation.ts
+/scripts/home-content.ts
+/scripts/delete-orphans.ts
+/scripts/move-contacts-to-inbox.ts
+/scripts/seed-order-rank.ts
+/tests/unit/about-content.test.ts
+# their dry-run snapshots (revisions + content hash)
 /scripts/.about-content.snapshot.json
 /scripts/.curation.snapshot.json
 /scripts/.projects-content.snapshot.json
