@@ -1,6 +1,14 @@
 import { escapeHTML, toHTML, type PortableTextComponents } from "@portabletext/to-html"
 import type { TypedObject } from "@portabletext/types"
+import { dataset, projectId } from "@/sanity/env"
 import { urlFor } from "@/sanity/lib/image"
+import {
+  playableKind,
+  sanityFileUrl,
+  youtubeId,
+  youtubeWatchUrl,
+  type VideoValue,
+} from "@/lib/video"
 
 /** Absolute image URL, or null for a missing or malformed asset reference (never throws). */
 function imageUrl(value: { asset?: { _ref?: string } } | undefined): string | null {
@@ -28,6 +36,19 @@ const feedComponents: PortableTextComponents = {
       value?.text
         ? `<blockquote><p><strong>${escapeHTML(value.title || (value.tone === "warning" ? "Warning" : "Note"))}</strong></p><p>${escapeHTML(value.text)}</p></blockquote>`
         : "",
+    // Feed readers rarely play embeds: link to the video instead.
+    video: ({ value }: { value: VideoValue }) => {
+      const kind = playableKind(value)
+      const href =
+        kind === "youtube"
+          ? youtubeWatchUrl(youtubeId(value.youtubeUrl)!)
+          : kind === "upload"
+            ? sanityFileUrl(value.file?.asset?._ref, { projectId, dataset })
+            : null
+      if (!href) return ""
+      const label = `Video: ${value.title || "watch"}`
+      return `<p><a href="${escapeHTML(href)}">${escapeHTML(label)}</a>${value.caption ? ` (${escapeHTML(value.caption)})` : ""}</p>`
+    },
     image: ({
       value,
     }: {

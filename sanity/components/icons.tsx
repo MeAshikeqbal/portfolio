@@ -22,6 +22,7 @@ import {
   Tag,
   User,
   UserRound,
+  Video,
   Wrench,
   type LucideIcon,
   type LucideProps,
@@ -65,6 +66,7 @@ export const PersonalIcon = studioIcon(UserRound, "Personal")
 export const CodeBlockIcon = studioIcon(SquareCode, "CodeBlock")
 export const ImageIcon = studioIcon(Image, "Image")
 export const CalloutIcon = studioIcon(Info, "Callout")
+export const VideoIcon = studioIcon(Video, "Video")
 
 // Actions and tools
 export const HomeIcon = studioIcon(House, "Home")

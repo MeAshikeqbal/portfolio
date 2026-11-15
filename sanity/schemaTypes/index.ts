@@ -12,6 +12,7 @@ import { cvType } from "./cvType"
 import { seoType } from "./seoType"
 import { usesType } from "./usesType"
 import { nowType } from "./nowType"
+import { videoType } from "./videoType"
 
 export const schema: { types: SchemaTypeDefinition[] } = {
   types: [
@@ -27,5 +28,6 @@ export const schema: { types: SchemaTypeDefinition[] } = {
     seoType,
     usesType,
     nowType,
+    videoType,
   ],
 }

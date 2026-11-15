@@ -93,14 +93,19 @@ tests/unit, tests/e2e
   claimed until it's set.
 - **Project `featured`** and the drag-and-drop order of the *Projects* list decide what leads
   the home page (skills follow the order of the *Skills* list). Adding `tech` and a
-  case-study `body` fills `/projects/[slug]` and the filters.
+  case-study `body` fills `/projects/[slug]` and the filters. A **Demo video** (Overview tab)
+  replaces the cover at the top of the project page.
 - **`excerpt`** and the **SEO** fields (title, description, social image, noindex) override
   the generated defaults for posts and projects.
 - **Skill icons** are [Iconify](https://icon-sets.iconify.design) names (`logos:aws`,
   `mdi:security`) from the `logos`, `mdi`, `simple-icons` and `ri` sets. The icon field has a
   search and warns when a name doesn't exist.
 - **Rich text** has code blocks (language, filename, highlighted lines), note/warning
-  callouts, numbered lists and inline code. `/styleguide` shows every block type.
+  callouts, videos, numbered lists and inline code. `/styleguide` shows every block type.
+- **Videos** (demo video or a block in any case study or post) are either an upload (MP4/WebM
+  on Sanity's CDN; keep clips short, every view counts against Sanity bandwidth; "Play like a
+  GIF" loops them muted) or a YouTube link, which loads the youtube-nocookie player only when
+  played. RSS readers get a link instead.
 - **Open on site** (⋯ menu) opens a published post, project, Homecave or `/now` in a new tab.
 - **Homecave** (`/homecave`, formerly `/uses`, which now redirects) is the live homelab
   dashboard. Each Proxmox node's agent (`scripts/lab-heartbeat/`) posts a signed, anonymized
