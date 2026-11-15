@@ -136,31 +136,3 @@ async function fetchReadme(
     return undefined
   }
 }
-
-/** Public, non-fork, non-archived repositories owned by the token's user. */
-export async function fetchOwnedPublicRepositories() {
-  try {
-    const repos = await octokit.paginate(octokit.rest.repos.listForAuthenticatedUser, {
-      visibility: "public",
-      affiliation: "owner",
-      sort: "updated",
-      per_page: 100,
-    })
-
-    return repos
-      .filter((repo) => !repo.fork && !repo.archived)
-      .map((repo) => ({
-        name: repo.name,
-        description: repo.description,
-        url: repo.html_url,
-        homepage: repo.homepage,
-        stars: repo.stargazers_count,
-        language: repo.language,
-        topics: repo.topics ?? [],
-        pushedAt: repo.pushed_at,
-      }))
-  } catch (error) {
-    console.error("Error fetching repositories:", error)
-    return []
-  }
-}
