@@ -95,7 +95,13 @@ export const PROJECTS_QUERY = defineQuery(`
 `)
 
 export const PROJECT_QUERY = defineQuery(`
-  *[_type == "project" && ${published} && slug.current == $slug][0] { ${projectFields}, body, seo }
+  *[_type == "project" && ${published} && slug.current == $slug][0] {
+    ${projectFields},
+    body,
+    seo,
+    // Only on the project page (lists don't carry READMEs).
+    "readme": select(showReadme != false => readme { markdown, path, ref })
+  }
 `)
 
 export const PROJECT_SLUGS_QUERY = defineQuery(`

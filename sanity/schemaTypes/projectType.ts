@@ -153,6 +153,30 @@ export const projectType = defineType({
       ],
     }),
     defineField({
+      name: "showReadme",
+      title: "Show README",
+      type: "boolean",
+      group: "github",
+      description:
+        "Show the repository README below the case study. Framework starter READMEs are always hidden.",
+      initialValue: true,
+    }),
+    defineField({
+      name: "readme",
+      title: "README",
+      type: "object",
+      group: "github",
+      description: "Synced from GitHub with the data above.",
+      readOnly: true,
+      hidden: ({ document }) => !document?.readme,
+      options: { collapsible: true, collapsed: true },
+      fields: [
+        { name: "path", type: "string" },
+        { name: "ref", title: "Branch", type: "string" },
+        { name: "markdown", type: "text", rows: 12 },
+      ],
+    }),
+    defineField({
       name: "seo",
       type: "seo",
       group: "seo",

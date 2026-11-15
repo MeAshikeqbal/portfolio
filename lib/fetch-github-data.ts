@@ -6,6 +6,18 @@ const octokit = new Octokit({
   auth: process.env.GITHUB_ACCESS_TOKEN,
 })
 
+/** A repository README as stored on the project (the `readme` field). */
+export interface ReadmeData {
+  markdown: string
+  /** Path in the repository, e.g. "README.md". */
+  path: string
+  /** The default branch it was read from. */
+  ref: string
+}
+
+/** READMEs above this size are not stored (Sanity documents stay small; nobody reads 200 KB). */
+export const README_MAX_BYTES = 200_000
+
 export interface GitHubData {
   stars: number
   license: string
@@ -22,6 +34,11 @@ export interface GitHubData {
     /** Commits per week for the last 12 weeks, oldest first. */
     weeklyCommits: number[]
   } | null
+  /**
+   * The README: null when the repository has none (or it's too large), undefined when it
+   * couldn't be fetched, in which case the stored copy is kept.
+   */
+  readme?: ReadmeData | null
 }
 
 /** Parses `https://github.com/owner/repo(.git)(/...)` into its parts, or null if it isn't a GitHub repo URL. */
@@ -51,7 +68,8 @@ export function normalizeRepoUrl(repoUrl: string): string {
  * commits and weekly series instead of erasing them.
  */
 export function githubPatchFields(data: GitHubData): Record<string, unknown> {
-  const { activity, ...repoFields } = data
+  const { activity, stars, license, language, topics, pushedAt } = data
+  const repoFields = { stars, license, language, topics, pushedAt }
   const fields: Record<string, unknown> = Object.fromEntries(
     Object.entries(repoFields).map(([key, value]) => [`githubData.${key}`, value]),
   )
@@ -71,9 +89,10 @@ export async function fetchGitHubData(repoUrl: string): Promise<GitHubData | nul
   const { owner, repo } = parsed
 
   try {
-    const [repoData, commitsData] = await Promise.all([
+    const [repoData, commitsData, readme] = await Promise.all([
       octokit.rest.repos.get({ owner, repo }),
       octokit.rest.repos.getCommitActivityStats({ owner, repo }).catch(() => null),
+      fetchReadme(owner, repo),
     ])
 
     // Commit activity covers the past year. GitHub answers 202 with no data while it computes
@@ -94,10 +113,27 @@ export async function fetchGitHubData(repoUrl: string): Promise<GitHubData | nul
       topics: repoData.data.topics ?? [],
       pushedAt: repoData.data.pushed_at ?? null,
       activity,
+      readme: readme && { ...readme, ref: repoData.data.default_branch },
     }
   } catch (error) {
     console.error(`Error fetching GitHub data for ${owner}/${repo}:`, error)
     return null
+  }
+}
+
+/** The repository's README (default branch), null if there is none, undefined on error. */
+async function fetchReadme(
+  owner: string,
+  repo: string,
+): Promise<Omit<ReadmeData, "ref"> | null | undefined> {
+  try {
+    const { data } = await octokit.rest.repos.getReadme({ owner, repo })
+    if (data.encoding !== "base64" || data.size > README_MAX_BYTES) return null
+    return { markdown: Buffer.from(data.content, "base64").toString("utf8"), path: data.path }
+  } catch (error) {
+    if ((error as { status?: number }).status === 404) return null
+    console.error(`Error fetching the README for ${owner}/${repo}:`, error)
+    return undefined
   }
 }
 

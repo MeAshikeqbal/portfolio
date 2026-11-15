@@ -4,7 +4,8 @@
  *
  * - features the chosen posts (home page writing),
  * - sets project statuses (from each repo's last push, confirmed by the owner),
- * - syncs GitHub stats onto every project with a public repo, stamping `githubData.syncedAt`.
+ * - syncs GitHub stats onto every project with a public repo, stamping `githubData.syncedAt`,
+ *   and its README into `readme` (as lib/github-sync.ts does).
  *
  *   npx sanity exec scripts/home-content.ts --with-user-token              # dry run
  *   npx sanity exec scripts/home-content.ts --with-user-token -- --execute
@@ -22,6 +23,8 @@ interface GitHubData {
   topics: string[]
   pushedAt: string | null
   activity: { commits: number; weeklyCommits: number[] } | null
+  /** null: no README (or over 200 KB); undefined: fetch failed, keep the stored copy. */
+  readme?: { markdown: string; path: string; ref: string } | null
 }
 
 async function github<T>(path: string): Promise<{ status: number; data: T | null }> {
@@ -42,6 +45,7 @@ async function fetchGitHubData(repoUrl: string): Promise<GitHubData | null> {
     language: string | null
     topics?: string[]
     pushed_at: string | null
+    default_branch: string
   }>(`/repos/${owner}/${name}`)
   if (!info.data) return null
 
@@ -53,7 +57,23 @@ async function fetchGitHubData(repoUrl: string): Promise<GitHubData | null> {
     else break
   }
 
+  const file = await github<{ content: string; encoding: string; size: number; path: string }>(
+    `/repos/${owner}/${name}/readme`,
+  )
+  const readme =
+    file.status === 404 ||
+    (file.data && (file.data.encoding !== "base64" || file.data.size > 200_000))
+      ? null
+      : file.data
+        ? {
+            markdown: Buffer.from(file.data.content, "base64").toString("utf8"),
+            path: file.data.path,
+            ref: info.data.default_branch,
+          }
+        : undefined
+
   return {
+    readme,
     stars: info.data.stargazers_count,
     license: info.data.license?.name || "Not specified",
     language: info.data.language ?? null,
@@ -70,7 +90,8 @@ async function fetchGitHubData(repoUrl: string): Promise<GitHubData | null> {
 
 /** Same fields as githubPatchFields(): activity only when GitHub returned it. */
 function githubPatchFields(data: GitHubData): Record<string, unknown> {
-  const { activity, ...repoFields } = data
+  const { activity, stars, license, language, topics, pushedAt } = data
+  const repoFields = { stars, license, language, topics, pushedAt }
   const fields: Record<string, unknown> = Object.fromEntries(
     Object.entries(repoFields).map(([key, value]) => [`githubData.${key}`, value]),
   )
@@ -147,11 +168,15 @@ async function main() {
     console.log(
       `sync     ${project.title}: ${data.language ?? "?"}, ★${data.stars}, ${
         data.activity ? `${data.activity.commits} commits/yr` : "commit stats pending"
-      }`,
+      }, README ${data.readme ? `${data.readme.path} (${data.readme.markdown.length} chars)` : data.readme === null ? "none" : "kept"}`,
     )
-    tx.patch(project._id, (p) =>
-      p.setIfMissing({ githubData: {} }).set({ ...fields, "githubData.syncedAt": syncedAt }),
-    )
+    tx.patch(project._id, (p) => {
+      const next = p
+        .setIfMissing({ githubData: {} })
+        .set({ ...fields, "githubData.syncedAt": syncedAt })
+      if (data.readme) return next.set({ readme: data.readme })
+      return data.readme === null ? next.unset(["readme"]) : next
+    })
   }
 
   if (!execute) return
