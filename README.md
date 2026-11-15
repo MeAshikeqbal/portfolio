@@ -126,11 +126,10 @@ tests/unit, tests/e2e
 - **`/now`** is a singleton under *Personal Info*. It stays a 404, and isn't linked from the
   footer, ⌘K palette or sitemap, until it has published content. It turns its date pill amber
   once it hasn't been edited for `siteConfig.nowStaleAfterDays`.
-- **Seeding Homecave and `/now`.** The content lives in `scripts/about-content.data.ts` and is
-  published by a revision-aware script (dry run by default; `--execute` refuses while
-  `// REVIEW:` comments remain or if anything changed in Sanity since the dry run):
-  `npx sanity exec scripts/about-content.ts --with-user-token [-- --execute]`.
-  `scripts/about-content.validate.ts` rejects IPs, hostnames, ports and versions in the copy.
+- **Content seeds stay local.** Sanity is the source of truth for content. The one-off seed
+  and migration scripts (Homecave and `/now` copy, the project refresh, curation) are
+  git-ignored, because this repo is public: they live only on the owner's machine and run with
+  `npx sanity exec scripts/<name>.ts --with-user-token` (dry run first).
 - **E2E and publication state.** Tests expect `ABOUT_PAGES=published|unpublished` (whether
   `/now` is live), decided before the build by `export $(node scripts/about-state.mjs)`
   (uncached Sanity API). CI does this automatically and picks `lighthouserc.published.json`
