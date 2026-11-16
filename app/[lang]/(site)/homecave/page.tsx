@@ -1,8 +1,9 @@
 import type { Metadata } from "next"
 import { HomecaveView } from "@/components/homecave/homecave-view"
-import { getUses } from "@/lib/api"
+import { getHomecaveRecord, getUses } from "@/lib/api"
+import { toPublicReliability } from "@/lib/lab/incidents"
 import { toPublicStatus } from "@/lib/lab/public"
-import { readLabStatus } from "@/lib/lab/store"
+import { readLabReliability, readLabStatus } from "@/lib/lab/store"
 import { getTranslations } from "next-intl/server"
 import { currentLocale, localizedPageMetadata } from "@/i18n/metadata"
 import { siteConfig } from "@/lib/site"
@@ -21,9 +22,20 @@ export async function generateMetadata(): Promise<Metadata> {
 export const revalidate = 30
 
 export default async function HomecavePage() {
-  const [uses, lab] = await Promise.all([
-    getUses(await currentLocale()),
+  const locale = await currentLocale()
+  const [uses, history, lab, record] = await Promise.all([
+    getUses(locale),
+    getHomecaveRecord(locale),
     readLabStatus(process.env, fetch, { revalidate: 30 }),
+    // The track record moves slowly: one Upstash read a minute at most, shared by every language.
+    readLabReliability(process.env, fetch, { revalidate: 60 }),
   ])
-  return <HomecaveView uses={uses} lab={lab ? toPublicStatus(lab) : null} />
+  return (
+    <HomecaveView
+      uses={uses}
+      lab={lab ? toPublicStatus(lab) : null}
+      record={record ? toPublicReliability(record) : null}
+      history={history}
+    />
+  )
 }

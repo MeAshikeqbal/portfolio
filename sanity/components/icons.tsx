@@ -19,6 +19,7 @@ import {
   Rss,
   Search,
   Server,
+  History,
   SquareCode,
   Tag,
   User,
@@ -58,6 +59,7 @@ export const EducationIcon = studioIcon(GraduationCap, "Education")
 export const CvIcon = studioIcon(FileUser, "Cv")
 export const HomecaveIcon = studioIcon(Server, "Homecave")
 export const NowIcon = studioIcon(Clock, "Now")
+export const LabChangeIcon = studioIcon(History, "LabChange")
 export const MessageIcon = studioIcon(Mail, "Message")
 export const BlogIcon = studioIcon(FileText, "Blog")
 export const PortfolioIcon = studioIcon(Briefcase, "Portfolio")

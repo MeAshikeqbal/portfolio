@@ -222,19 +222,40 @@ describe("store", () => {
   })
 
   it("writes a heartbeat in one EVAL, adding a down sample for an offline peer", async () => {
-    const redis = fakeUpstash([1])
+    const redis = fakeUpstash([[1, "1794823200\tsvc:Jellyfin\tup\tdown\t30", "garbage"]])
     const nodes = parseHeartbeat(v2)!
-    expect(await writeHeartbeat(nodes, +ts, now, env, redis.impl)).toBe(1)
+    expect(await writeHeartbeat(nodes, +ts, now, env, redis.impl)).toEqual({
+      written: 1,
+      events: [{ t: 1794823200, id: "svc:Jellyfin", from: "up", to: "down", d: 30 }],
+    })
     expect(redis.calls).toHaveLength(1)
     const [cmd, , numkeys, ...rest] = redis.calls[0]
     expect(cmd).toBe("EVAL")
-    // lab:nodes + 4 keys for Tower + 4 keys for the offline peer.
-    expect(Number(numkeys)).toBe(9)
-    expect(rest.slice(0, 9)).toContain("lab:node:Mini PC #2")
-    const args = rest.slice(9)
+    // lab:nodes, state, events, today's rollup + 4 keys for Tower + 4 for the offline peer.
+    expect(Number(numkeys)).toBe(12)
+    expect(rest.slice(0, 4)).toEqual([
+      "lab:nodes",
+      "lab:state",
+      "lab:events",
+      `lab:day:${now.toISOString().slice(0, 10)}`,
+    ])
+    expect(rest.slice(0, 12)).toContain("lab:node:Mini PC #2")
+    const args = rest.slice(12)
     const peerEntry = args.indexOf("Mini PC #2")
     expect(args[peerEntry + 1]).toBe("") // no report: history only
     expect(JSON.parse(args[peerEntry + 2])).toMatchObject({ u: 0 })
+    expect(args[peerEntry + 3]).toBe("node:Mini PC #2\tdown\t0")
+    // Tower's own readings: the node, then its services and pools.
+    const towerEntry = args.indexOf("Tower")
+    expect(args[towerEntry + 3].split("\n")[0]).toBe("node:Tower\tup\t1")
+  })
+
+  it("still reads an old plain-number reply", async () => {
+    const redis = fakeUpstash([0])
+    expect(await writeHeartbeat(parseHeartbeat(v2)!, +ts, now, env, redis.impl)).toEqual({
+      written: 0,
+      events: [],
+    })
   })
 
   it("reads every node in two commands and summarises its history", async () => {
@@ -301,9 +322,9 @@ describe("POST /api/lab-heartbeat", () => {
   }
 
   it("stores a valid heartbeat (204) and reports a replay as 409", async () => {
-    vi.stubGlobal("fetch", fakeUpstash([1]).impl)
+    vi.stubGlobal("fetch", fakeUpstash([[1]]).impl)
     expect((await post(JSON.stringify(v2))).status).toBe(204)
-    vi.stubGlobal("fetch", fakeUpstash([0]).impl)
+    vi.stubGlobal("fetch", fakeUpstash([[0]]).impl)
     expect((await post(JSON.stringify(v2))).status).toBe(409)
   })
 

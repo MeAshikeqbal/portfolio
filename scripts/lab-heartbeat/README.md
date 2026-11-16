@@ -115,11 +115,40 @@ Tests: `python3 -I test_collect.py`.
    - `501`: the site's env vars aren't set.
    - `409`: ignored (a report for that node already arrived).
 
+## Incidents, uptime bars and alerts
+The same `EVAL` that stores a heartbeat also keeps the lab's track record, so it costs no extra
+commands:
+- **State per entity:** each machine, named service, ZFS pool, the internet line and the nightly
+  backup round. A change of state (`up` to `down`, `ONLINE` to `DEGRADED`, `ok` to `failed`) is
+  logged in `lab:events` with the time spent in the old state (newest 500 kept, shown for 30
+  days). A machine heard from again after more than 3 minutes of silence logs a gap ("no data
+  from Tower, 12 min"), unless a peer had already reported it down.
+- **Daily rollups** `lab:day:<UTC date>`: with each 5-minute history sample, `<entity>:n` (samples)
+  and `<entity>:u` (up) for machines, services and the internet. Kept 91 days; Homecave draws
+  them as 90-day bars and claims a percentage only after a day of samples.
+
+Homecave reads all of it in one more `EVAL`, cached for a minute.
+
+**Phone alerts (private, optional):** set `NTFY_TOPIC` in Vercel (a long random topic on ntfy.sh,
+or your own server with `NTFY_URL` and `NTFY_TOKEN`) and every logged change is pushed after the
+heartbeat is answered: high priority when something breaks, normal when it recovers.
+
+**Dead-man switch (optional):** a total outage (power, internet or the site itself) sends
+nothing, so nothing gets logged. For that, create one healthchecks.io check per node (period
+1 minute, grace 5 minutes, alerting to the same ntfy topic) and add its ping URL to that node's
+`/etc/lab-heartbeat.env`:
+```sh
+HC_PING_URL=https://hc-ping.com/<uuid>
+```
+The agent pings it after every heartbeat the site accepts, so the check goes quiet, and alerts,
+whenever heartbeats stop getting through, whatever the reason.
+
 ## Budget
 Three nodes every 30s is 8,640 heartbeats a day. Each is **one** Upstash command (a Lua `EVAL`
-that checks replay, stores the latest report and appends history at most every 5 minutes). Reads
-of `/api/lab-status` are two commands and are CDN-cached for 30s.
+that checks replay, stores the latest report, appends history at most every 5 minutes and keeps
+the track record). Reads of `/api/lab-status` are two commands and are CDN-cached for 30s;
+Homecave's track record is one command, cached for 60s.
 
-That works out to roughly 10–14k commands a day (about 300–420k a month), inside Upstash's free
+That works out to roughly 10–15k commands a day (about 300–450k a month), inside Upstash's free
 tier of 500k a month, and about 260k Vercel function invocations a month. Check both against
 your plans.

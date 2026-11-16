@@ -17,6 +17,9 @@ Config: environment (systemd EnvironmentFile=/etc/lab-heartbeat.env, mode 600):
   REPORT_SHARED=1          on one node only: report shared stores (off-site backups) once
   NODE_SELF=pve            optional; defaults to this machine's short hostname
   PVE_API_URL=https://localhost:8006   PVE_CA=/etc/pve/pve-root-ca.pem   (optional)
+  HC_PING_URL=https://hc-ping.com/<uuid>   optional dead-man switch: pinged after every heartbeat
+                                           the site accepts, so healthchecks.io alerts when they
+                                           stop (node, internet or site down). One check per node.
 
 Also merges the root collector's readings (/run/lab-collect/collect.json, see collect.py) when
 they're under 3 minutes old: named public services up/down, container health, temperatures,
@@ -215,6 +218,18 @@ def main():
         # 409 means another report for this node already arrived: harmless.
         if error.code != 409:
             sys.exit(f"heartbeat: HTTP {error.code} {error.read()[:200]!r}")
+    ping_healthcheck()
+
+
+def ping_healthcheck():
+    """Tells healthchecks.io this node's heartbeat got through. Best effort: never fails the run."""
+    url = os.environ.get("HC_PING_URL", "").strip()
+    if not url.startswith("https://"):
+        return
+    try:
+        urllib.request.urlopen(urllib.request.Request(url, method="HEAD"), timeout=10).close()
+    except Exception as error:
+        print(f"heartbeat: healthcheck ping failed: {error}", file=sys.stderr)
 
 
 if __name__ == "__main__":

@@ -8,6 +8,7 @@ import {
   EducationIcon,
   ExperienceIcon,
   HomecaveIcon,
+  LabChangeIcon,
   NowIcon,
   PersonalIcon,
   PortfolioIcon,
@@ -84,6 +85,7 @@ export const structure: StructureResolver = (S, context) =>
                 .title("Homecave")
                 .icon(HomecaveIcon)
                 .child(S.editor().id("uses").schemaType("uses").documentId("uses")),
+              S.documentTypeListItem("labChange").title("Lab changelog").icon(LabChangeIcon),
               S.listItem()
                 .title("Now")
                 .icon(NowIcon)
@@ -136,6 +138,7 @@ export const structure: StructureResolver = (S, context) =>
             "education",
             "cv",
             "uses",
+            "labChange",
             "now",
             "media.tag",
             "translation",

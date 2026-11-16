@@ -8,6 +8,7 @@ import {
   EDUCATION_QUERY,
   EXPERIENCES_QUERY,
   HOME_STATS_QUERY,
+  HOMECAVE_RECORD_QUERY,
   NOW_QUERY,
   LATEST_POSTS_QUERY,
   POST_QUERY,
@@ -144,6 +145,15 @@ export async function getCommandIndex(lang: Locale) {
 
 export async function getUses(lang: Locale) {
   const { data } = await sanityFetch({ query: USES_QUERY, params: { lang }, stega: false })
+  return data
+}
+
+export async function getHomecaveRecord(lang: Locale) {
+  const { data } = await sanityFetch({
+    query: HOMECAVE_RECORD_QUERY,
+    params: { lang },
+    stega: false,
+  })
   return data
 }
 

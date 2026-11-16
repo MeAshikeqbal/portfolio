@@ -11,7 +11,10 @@
     "nodeUp": "activo",
     "nodeUpFor": "activo · {uptime}",
     "labSummary": "{up}/{total} activos",
-    "nodeDown": "caído"
+    "nodeDown": "caído",
+    "uptimeLegend": "{level, select, up {sin tiempo de inactividad} partial {algo de inactividad} down {mayormente desconectado} other {no hay datos}}",
+    "writeup": "Leer el análisis",
+    "incident": "{kind, select, node {{state, select, nodata {Sin datos de {name}} other {{name} caído}}} svc {{name} caído} wan {Internet caído} backup {{state, select, failed {Falló la ronda de copias de seguridad} other {Ronda de copias de seguridad con avisos}}} other {{name}}}"
   },
   "home": {
     "resume": "Currículum"
