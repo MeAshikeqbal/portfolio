@@ -74,3 +74,59 @@ export function byActivity<T extends Pick<Project, "status" | "githubData">>(pro
     )
     .map(({ project }) => project)
 }
+
+type Tagged = {
+  slug?: string | null
+  tech?: string[] | null
+  githubData?: { language?: string | null } | null
+}
+
+/** Tech and language, lower-cased and de-duplicated, for comparing projects. */
+function techSet(project: Tagged): Set<string> {
+  return new Set(
+    [project.githubData?.language, ...(project.tech ?? [])]
+      .filter((t): t is string => Boolean(t))
+      .map((t) => t.toLowerCase()),
+  )
+}
+
+/**
+ * Projects that share the most distinctive tech with this one, like related posts
+ * (lib/related.ts): each shared tag counts for more the rarer it is, so sharing "Bubble Tea"
+ * (2 projects) beats sharing "TypeScript" (7). Ties keep the list's order. Never the project
+ * itself, and nothing that shares no tag.
+ */
+export function relatedProjects<T extends Tagged>(current: Tagged, all: T[], limit = 3): T[] {
+  const others = all.filter((p) => p.slug && p.slug !== current.slug)
+  const sets = new Map(all.map((p) => [p, techSet(p)]))
+  const frequency = new Map<string, number>()
+  for (const set of sets.values())
+    for (const tag of set) frequency.set(tag, (frequency.get(tag) ?? 0) + 1)
+  const mine = techSet(current)
+  const weight = (tag: string) => 1 / Math.log2(1 + Math.max(1, frequency.get(tag) ?? 1))
+
+  return others
+    .map((project, index) => ({
+      project,
+      index,
+      score: [...(sets.get(project) ?? [])].reduce(
+        (sum, tag) => sum + (mine.has(tag) ? weight(tag) : 0),
+        0,
+      ),
+    }))
+    .filter((entry) => entry.score > 0)
+    .sort((a, b) => b.score - a.score || a.index - b.index)
+    .slice(0, limit)
+    .map((entry) => entry.project)
+}
+
+/** The projects before and after this one in the list's (CMS) order, skipping slugless ones. */
+export function adjacentProjects<T extends { slug?: string | null }>(
+  slug: string,
+  all: T[],
+): { previous: T | null; next: T | null } {
+  const linked = all.filter((p) => p.slug)
+  const index = linked.findIndex((p) => p.slug === slug)
+  if (index === -1) return { previous: null, next: null }
+  return { previous: linked[index - 1] ?? null, next: linked[index + 1] ?? null }
+}

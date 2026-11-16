@@ -6,12 +6,14 @@ import { FaGithub } from "react-icons/fa6"
 import { Panel } from "@/components/dashboard/panel"
 import { CodeBlock } from "@/components/portable-text/code-block"
 import { isBoilerplateReadme, readmeTree, type ReadmeSource } from "@/lib/readme"
+import { cn } from "@/lib/utils"
 
 interface ProjectReadmeProps {
   markdown: string
   source: ReadmeSource
   /** Open by default (when the project has no case study of its own). */
   open?: boolean
+  className?: string
 }
 
 function codeOf(node: Element): { code: string; language: string | null } {
@@ -34,7 +36,7 @@ function codeOf(node: Element): { code: string; language: string | null } {
  * The repository README, synced from GitHub with the project's stats, in a collapsible panel
  * below the case study. Framework starter READMEs render nothing.
  */
-export function ProjectReadme({ markdown, source, open = false }: ProjectReadmeProps) {
+export function ProjectReadme({ markdown, source, open = false, className }: ProjectReadmeProps) {
   if (!markdown.trim() || isBoilerplateReadme(markdown)) return null
   const tree = readmeTree(markdown, source)
   const fileUrl = `https://github.com/${source.owner}/${source.repo}/blob/${source.ref}/${source.path}`
@@ -54,7 +56,7 @@ export function ProjectReadme({ markdown, source, open = false }: ProjectReadmeP
   })
 
   return (
-    <section aria-labelledby="readme" className="mt-12">
+    <section aria-labelledby="readme" className={cn("scroll-mt-24", className)}>
       <Panel>
         <details open={open} className="group">
           <summary className="flex min-h-10 cursor-pointer list-none items-center justify-between gap-3 px-4 py-2 select-none hover:bg-surface-2 [&::-webkit-details-marker]:hidden">

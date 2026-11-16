@@ -76,12 +76,13 @@ test.describe("projects", () => {
     await page.goto("/projects")
     const count = page.getByText(/\d+ of \d+ projects/)
     await expect(count).toBeVisible()
-    await page.getByLabel("Search projects").fill("portfolio")
-    await expect(page).toHaveURL(/\?q=portfolio/)
+    // "itsashik" matches this site's own project only ("portfolio" also matches Portfolio TUI).
+    await page.getByLabel("Search projects").fill("itsashik")
+    await expect(page).toHaveURL(/\?q=itsashik/)
     await expect(count).toHaveText(/^1 of \d+ projects$/)
 
     await page.reload()
-    await expect(page.getByLabel("Search projects")).toHaveValue("portfolio")
+    await expect(page.getByLabel("Search projects")).toHaveValue("itsashik")
     await expect(count).toHaveText(/^1 of \d+ projects$/)
   })
 
@@ -100,12 +101,25 @@ test.describe("projects", () => {
 
   test("a case study page renders its metrics and links", async ({ page }) => {
     await page.goto("/projects/portfolio")
-    await expect(page.getByRole("heading", { level: 1, name: "Portfolio" })).toBeVisible()
+    await expect(page.getByRole("heading", { level: 1, name: "itsashik.dev" })).toBeVisible()
     await expect(page.getByText("commits", { exact: true })).toBeVisible()
     await expect(page.getByRole("link", { name: /Source on GitHub/ })).toHaveAttribute(
       "href",
       /github\.com/,
     )
+  })
+
+  test("a case study page is laid out like a post: contents, README, neighbours", async ({
+    page,
+  }) => {
+    await page.goto("/projects/portfolio")
+    // The contents are a sidebar on wide screens and a collapsible list on phones; both link
+    // to the case study's headings and the README.
+    await expect(page.locator('a[href="#readme"]').first()).toBeAttached()
+    await expect(page.getByRole("heading", { level: 2, name: "README.md" })).toBeVisible()
+    await expect(page.getByRole("navigation", { name: "More projects" })).toBeVisible()
+    await page.getByRole("link", { name: /^#typescript$/ }).click()
+    await expect(page).toHaveURL(/\/projects\?tag=TypeScript/)
   })
 
   test("unknown case studies 404", async ({ page }) => {
