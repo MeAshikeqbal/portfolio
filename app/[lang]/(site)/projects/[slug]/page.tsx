@@ -18,12 +18,13 @@ import { createPortableTextComponents } from "@/components/portable-text/compone
 import { LiveSiteShot } from "@/components/projects/live-site-shot"
 import { ProjectReadme } from "@/components/projects/project-readme"
 import { JsonLd } from "@/components/seo/json-ld"
+import { TranslationNotice } from "@/components/site/translation-notice"
 import { Button } from "@/components/ui/button"
 import { getProject, getProjectSlugs, getProjects } from "@/lib/api"
 import { parseRepoUrl } from "@/lib/fetch-github-data"
 import { formatMonth } from "@/lib/format"
 import { currentLocale, localizedPageMetadata } from "@/i18n/metadata"
-import { localizedPath } from "@/i18n/locales"
+import { defaultLocale, localizedPath } from "@/i18n/locales"
 import { Link } from "@/i18n/navigation"
 import { siteConfig } from "@/lib/site"
 import { buildToc, type TocEntry } from "@/lib/portable-text"
@@ -36,6 +37,9 @@ import { playableKind } from "@/lib/video"
 import { urlFor } from "@/sanity/lib/image"
 
 type Props = { params: Promise<{ slug: string }> }
+
+/** The language of the project's own text (title, description, body): English until translated. */
+const CONTENT_LANG = "en"
 
 export async function generateStaticParams() {
   const slugs = await getProjectSlugs()
@@ -59,6 +63,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       title,
       description,
       path: `/projects/${slug}`,
+      // The case study is English in every language: one canonical copy.
+      available: [defaultLocale],
       openGraph: { type: "article" },
     })),
     robots: project.seo?.noIndex ? { index: false } : undefined,
@@ -174,14 +180,19 @@ export default async function ProjectPage({ params }: Props) {
                 )}
               </div>
               {/* Same scale as a post title: 1.875rem on phones, 3rem from sm. */}
-              <h1 className="mt-2 max-w-3xl text-3xl leading-tight font-semibold tracking-tight text-balance sm:mt-3 sm:text-5xl">
+              {/* The project's own words are English until translated; say so to screen readers. */}
+              <h1
+                lang={CONTENT_LANG}
+                className="mt-2 max-w-3xl text-3xl leading-tight font-semibold tracking-tight text-balance sm:mt-3 sm:text-5xl"
+              >
                 {title}
               </h1>
               {project.description && (
-                <p className="mt-4 max-w-2xl text-lg text-muted-foreground">
+                <p lang={CONTENT_LANG} className="mt-4 max-w-2xl text-lg text-muted-foreground">
                   {project.description}
                 </p>
               )}
+              <TranslationNotice path={`/projects/${slug}`} scope="english" className="mt-4" />
               {(project.url || project.github) && (
                 <div className="mt-6 flex flex-wrap gap-3">
                   {project.url && (
@@ -279,7 +290,7 @@ export default async function ProjectPage({ params }: Props) {
               )}
 
               {hasBody ? (
-                <div className="prose prose-lg max-w-none">
+                <div lang={CONTENT_LANG} className="prose prose-lg max-w-none">
                   <PortableText value={project.body!} components={components} />
                 </div>
               ) : (

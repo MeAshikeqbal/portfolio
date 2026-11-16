@@ -1,7 +1,6 @@
-import { ImageResponse } from "next/og"
 import { getPosts } from "@/lib/api"
 import { formatDate } from "@/lib/format"
-import { OG_CONTENT_TYPE, OG_SIZE, OgFrame, ogFonts } from "@/lib/og"
+import { OG_CONTENT_TYPE, OG_SIZE, OgFrame, ogResponse } from "@/lib/og"
 import { siteConfig } from "@/lib/site"
 import { routeTranslations } from "@/i18n/route-translations"
 import { ogLocale, ogStaticParams, type OgParams } from "@/i18n/og"
@@ -34,13 +33,13 @@ export default async function Image({ params }: { params: OgParams }) {
   // Newest first (POSTS_QUERY orders by publishedAt desc).
   const latest = formatDate(posts[0]?.publishedAt, locale)
 
-  return new ImageResponse(
+  return ogResponse(
     <OgFrame
       eyebrow={t("writingCount", { count: posts.length })}
       title={writing("title")}
       description={t("writingDescription")}
       footer={[...(latest ? [t("latest", { date: latest })] : []), ...topics]}
     />,
-    { ...size, fonts: await ogFonts() },
+    locale,
   )
 }

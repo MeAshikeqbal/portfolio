@@ -6,6 +6,7 @@ import { VisualEditing } from "next-sanity/visual-editing"
 import { draftMode } from "next/headers"
 import { getTranslations } from "next-intl/server"
 import { DraftModeBanner } from "@/components/site/draft-mode-banner"
+import { LanguageSuggest } from "@/components/site/language-suggest"
 import { getCommandIndex, getSiteStatus } from "@/lib/api"
 import { SanityLive } from "@/sanity/lib/live"
 
@@ -35,6 +36,7 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
         extraLinks={[...(commandIndex.hasNow ? [{ label: nav("now"), href: "/now" }] : [])]}
       />
       <BackToTop />
+      <LanguageSuggest />
       {/* Live content updates for the public site only (not the Studio or style guide). */}
       <SanityLive includeDrafts={isDraftMode} />
       {isDraftMode && (

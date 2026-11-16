@@ -1,7 +1,6 @@
-import { ImageResponse } from "next/og"
 import { getHomeStats } from "@/lib/api"
 import { formatCompact } from "@/lib/format"
-import { OG_CONTENT_TYPE, OG_SIZE, OgFrame, ogFonts } from "@/lib/og"
+import { OG_CONTENT_TYPE, OG_SIZE, OgFrame, ogResponse } from "@/lib/og"
 import { siteConfig } from "@/lib/site"
 import { routeTranslations } from "@/i18n/route-translations"
 import { ogLocale, ogStaticParams, type OgParams } from "@/i18n/og"
@@ -19,7 +18,7 @@ export default async function Image({ params }: { params: OgParams }) {
     routeTranslations(locale, "og"),
     routeTranslations(locale, "site"),
   ])
-  return new ImageResponse(
+  return ogResponse(
     <OgFrame
       eyebrow={site("role")}
       title={siteConfig.name}
@@ -32,6 +31,6 @@ export default async function Image({ params }: { params: OgParams }) {
           : []),
       ]}
     />,
-    { ...size, fonts: await ogFonts() },
+    locale,
   )
 }

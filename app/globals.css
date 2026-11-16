@@ -144,8 +144,13 @@
   --color-chart-3: var(--border-strong);
 
   /* Type */
-  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
-  --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
+  /* --font-script: the page's Devanagari, Bengali or Japanese font (lib/fonts.ts), after Geist
+     so Latin text and digits keep Geist's shapes. Unset on Latin-script pages. */
+  --font-sans:
+    var(--font-geist-sans), var(--font-script, ui-sans-serif), ui-sans-serif, system-ui, sans-serif;
+  --font-mono:
+    var(--font-geist-mono), var(--font-script, ui-monospace), ui-monospace, SFMono-Regular, Menlo,
+    monospace;
   --text-display: clamp(2.25rem, 1.6rem + 3.2vw, 4rem);
   --text-display--line-height: 1.05;
   --text-display--letter-spacing: -0.035em;
@@ -455,4 +460,20 @@ html[data-transition="theme"]::view-transition-new(root) {
 
 .readme :where(h2, h3, h4) {
   scroll-margin-top: 6rem;
+}
+
+/*
+ * Per-script typography. Unlayered, so it wins over the label-caps utility's tracking.
+ * Scripts without case or word spaces: the caps labels' tracking only spreads them apart.
+ */
+:lang(hi) .label-caps,
+:lang(bn) .label-caps,
+:lang(ja) .label-caps {
+  letter-spacing: normal;
+}
+
+/* Japanese: break between phrases, never inside one, with strict kinsoku rules. */
+:lang(ja) {
+  word-break: auto-phrase;
+  line-break: strict;
 }

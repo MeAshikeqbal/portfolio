@@ -9,7 +9,7 @@ import { SpeedInsights } from "@vercel/speed-insights/next"
 import { Providers } from "@/components/providers"
 import { localeInfo, locales } from "@/i18n/locales"
 import { routing } from "@/i18n/routing"
-import { fontVariables } from "@/lib/fonts"
+import { localeFontVariables } from "@/lib/fonts"
 import { siteConfig } from "@/lib/site"
 
 /** Matches --background in app/globals.css (browser UI tint on mobile). */
@@ -69,7 +69,11 @@ export default async function RootLayout({ children }: LayoutProps<"/[lang]">) {
   const t = await getTranslations("site")
 
   return (
-    <html lang={locale} suppressHydrationWarning className={fontVariables}>
+    <html
+      lang={locale}
+      suppressHydrationWarning
+      className={localeFontVariables(localeInfo[locale].script)}
+    >
       <head>
         {/* In <head> rather than metadata.alternates, which child pages' canonicals would override. */}
         <link

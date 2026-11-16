@@ -29,17 +29,15 @@ export async function GET(request: Request, { params }: RouteContext<"/[lang]/ho
   const now = new Date()
   const snapshot = labSnapshot(lab ? toPublicStatus(lab) : null, now, homelabSpecs(uses), t, locale)
 
-  return new ImageResponse(
-    <SnapshotCard snapshot={snapshot} labels={snapshotLabels(t, snapshotTime(now, locale))} />,
-    {
-      width: SNAPSHOT_WIDTH,
-      height: snapshotHeight(snapshot),
-      fonts: await ogFonts(),
-      headers: {
-        // ImageResponse defaults to a year-long immutable cache; this picture is live.
-        "cache-control": "public, s-maxage=30, stale-while-revalidate=30",
-        "content-disposition": `${download ? "attachment" : "inline"}; filename="${snapshotFilename(now)}"`,
-      },
+  const labels = snapshotLabels(t, snapshotTime(now, locale))
+  return new ImageResponse(<SnapshotCard snapshot={snapshot} labels={labels} />, {
+    width: SNAPSHOT_WIDTH,
+    height: snapshotHeight(snapshot),
+    fonts: await ogFonts(locale, snapshot, labels),
+    headers: {
+      // ImageResponse defaults to a year-long immutable cache; this picture is live.
+      "cache-control": "public, s-maxage=30, stale-while-revalidate=30",
+      "content-disposition": `${download ? "attachment" : "inline"}; filename="${snapshotFilename(now)}"`,
     },
-  )
+  })
 }

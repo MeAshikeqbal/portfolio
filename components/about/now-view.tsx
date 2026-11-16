@@ -10,6 +10,7 @@ import type { NOW_QUERY_RESULT } from "@/sanity.types"
 import { formatDate, trimText } from "@/lib/format"
 import { toPlainText } from "@/lib/portable-text"
 import { siteConfig } from "@/lib/site"
+import { TranslationNotice } from "@/components/site/translation-notice"
 import { isStale } from "@/lib/staleness"
 
 type Now = NonNullable<NOW_QUERY_RESULT>
@@ -76,7 +77,7 @@ function PreviousUpdate({ entry }: { entry: Entry }) {
         </summary>
         <div className="pt-2 pb-6 pl-7">
           {entry.location?.trim() && <p className="mb-3 label-caps">{entry.location}</p>}
-          <div className="prose max-w-none">
+          <div lang="en" className="prose max-w-none">
             <PortableText value={entry.body ?? []} components={portableTextComponents} />
           </div>
         </div>
@@ -125,8 +126,10 @@ export function NowView({
             })}
           />
           <MetaLine updated={now.updated} location={now.location} stale={stale} />
+          <TranslationNotice path="/now" scope="english" className="-mt-4 mb-8" />
 
-          <article className="prose prose-lg max-w-none">
+          {/* The update is written in English (not translated yet). */}
+          <article lang="en" className="prose prose-lg max-w-none">
             <PortableText value={now.body ?? []} components={portableTextComponents} />
           </article>
 

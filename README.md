@@ -76,6 +76,13 @@ tests/unit, tests/e2e
   `/en/...` to them; files (`rss.xml`, `resume.pdf`…), `/api` and the Studio are left alone.
   Internal links use `Link` from `i18n/navigation.ts` (or `SiteLink`, which keeps files
   unprefixed). Dates and numbers go through `lib/format.ts` with the page's locale.
+- **Translations.** `npm run i18n:translate` machine-translates new and changed English messages
+  with Google Cloud Translation (`GOOGLE_TRANSLATE_API_KEY`) into `messages/<locale>.json`,
+  keeping ICU arguments, plurals and tags intact; `--dry-run` shows what it would send. Hand
+  fixes go in `messages/overrides/<locale>.json` and always win. `messages/.lock.json` records
+  which English each translation came from, and `tests/unit/messages.test.ts` fails when a
+  served locale is missing keys or is stale. Post, project and /now bodies stay English (marked
+  `lang="en"`, canonical to the English URL) until content translation lands.
 
 - **Content and freshness.** Every read goes through `sanityFetch` (`lib/api.ts`). Pages are
   static. `<SanityLive />` revalidates them when content is published, and the Sanity webhook

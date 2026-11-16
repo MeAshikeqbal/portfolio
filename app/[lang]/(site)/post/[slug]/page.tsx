@@ -12,6 +12,7 @@ import { Container, GridBackdrop } from "@/components/dashboard/layout"
 import { Panel, PanelHeader } from "@/components/dashboard/panel"
 import { createPortableTextComponents } from "@/components/portable-text/components"
 import { JsonLd } from "@/components/seo/json-ld"
+import { TranslationNotice } from "@/components/site/translation-notice"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { getPost, getPostSlugs } from "@/lib/api"
 import { formatDate } from "@/lib/format"
@@ -21,10 +22,13 @@ import { rankRelated } from "@/lib/related"
 import { buildToc, readingTime, wordCount } from "@/lib/portable-text"
 import { siteConfig } from "@/lib/site"
 import { blogPostingSchema, breadcrumbSchema, jsonLdGraph } from "@/lib/structured-data"
-import { localizedPath } from "@/i18n/locales"
+import { defaultLocale, localizedPath } from "@/i18n/locales"
 import { urlFor } from "@/sanity/lib/image"
 
 type Props = { params: Promise<{ slug: string }> }
+
+/** The language of the post's own text (title, excerpt, body): English until translated. */
+const CONTENT_LANG = "en"
 
 /** Prerender every published post at build time; new posts render on demand. */
 export async function generateStaticParams() {
@@ -48,6 +52,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       title,
       description,
       path: `/post/${slug}`,
+      // The post itself is English in every language: one canonical copy.
+      available: [defaultLocale],
       openGraph: {
         type: "article",
         publishedTime: post.publishedAt ?? undefined,
@@ -130,11 +136,17 @@ export default async function PostPage({ params }: Props) {
                 </ul>
               )}
               {/* On the type scale: the headline step (1.875rem) on phones, 3rem from sm. */}
-              <h1 className="mt-2 max-w-3xl text-3xl leading-tight font-semibold tracking-tight text-balance sm:mt-3 sm:text-5xl">
+              {/* The post's own words are English until it's translated; say so to screen readers. */}
+              <h1
+                lang={CONTENT_LANG}
+                className="mt-2 max-w-3xl text-3xl leading-tight font-semibold tracking-tight text-balance sm:mt-3 sm:text-5xl"
+              >
                 {title}
               </h1>
               {post.excerpt && (
-                <p className="mt-4 max-w-2xl text-lg text-muted-foreground">{post.excerpt}</p>
+                <p lang={CONTENT_LANG} className="mt-4 max-w-2xl text-lg text-muted-foreground">
+                  {post.excerpt}
+                </p>
               )}
               <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted-foreground sm:mt-6">
                 <span className="flex items-center gap-2 text-foreground">
@@ -158,6 +170,7 @@ export default async function PostPage({ params }: Props) {
                 )}
                 <span className="label-caps">{t("minRead", { minutes })}</span>
               </div>
+              <TranslationNotice path={`/post/${slug}`} scope="english" className="mt-4" />
               {post.archived && (
                 <p className="mt-5 max-w-2xl rounded-md bg-status-idle-soft px-3 py-2 text-sm text-status-idle-fg">
                   {t("archived")}
@@ -207,7 +220,7 @@ export default async function PostPage({ params }: Props) {
                   </ol>
                 </details>
               )}
-              <div className="prose prose-lg max-w-none">
+              <div lang={CONTENT_LANG} className="prose prose-lg max-w-none">
                 <PortableText value={post.body ?? []} components={components} />
               </div>
             </div>

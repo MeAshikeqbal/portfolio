@@ -16,7 +16,8 @@
     "typegen": "node -e \"require('fs').rmSync('schema.json',{force:true})\" && sanity schema extract --workspace content --path schema.json && sanity typegen generate",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "studio:tokens": "sanity exec scripts/studio-tokens.ts && prettier --write sanity/theme/tokens.generated.ts"
+    "studio:tokens": "sanity exec scripts/studio-tokens.ts && prettier --write sanity/theme/tokens.generated.ts",
+    "i18n:translate": "jiti scripts/translate-messages.ts"
   },
   "dependencies": {
     "@iconify-json/logos": "^1.2.19",
@@ -70,6 +71,7 @@
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.14.0",
+    "@formatjs/icu-messageformat-parser": "^3.5.23",
     "@iconify/types": "^2.0.0",
     "@playwright/test": "^1.65.0",
     "@sanity/color": "^3.0.9",
@@ -86,6 +88,7 @@
     "eslint": "^9.39.5",
     "eslint-config-next": "16.4.5",
     "hast-util-to-html": "^9.0.6",
+    "jiti": "^2.7.0",
     "jsdom": "^31.0.0",
     "lexorank": "^1.0.5",
     "openpgp": "^6.3.2",

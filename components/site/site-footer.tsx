@@ -8,6 +8,7 @@ import { identityLines } from "@/lib/identity"
 import { fingerprintGroups, keyValidity, parseClearsigned } from "@/lib/pgp"
 import { pgpKey, signedIdentity } from "@/lib/pgp.generated"
 import { siteConfig } from "@/lib/site"
+import { FooterTranslationNotice } from "./footer-translation-notice"
 import { KeyValidity } from "./key-validity"
 import { Link } from "@/i18n/navigation"
 
@@ -51,6 +52,9 @@ export function SiteFooter({
       </Container>
 
       <div className="border-t">
+        <Container className="pt-5 empty:hidden">
+          <FooterTranslationNotice />
+        </Container>
         <Container className="flex flex-col gap-4 py-5 sm:flex-row sm:items-center sm:justify-between">
           <nav aria-label={t("label")}>
             <ul className="flex flex-wrap gap-x-5 gap-y-2 text-sm text-muted-foreground">

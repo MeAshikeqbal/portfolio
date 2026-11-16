@@ -4,6 +4,7 @@ import { NowView } from "@/components/about/now-view"
 import { LivePanel } from "@/components/live/live-panel"
 import { getNow } from "@/lib/api"
 import { getTranslations } from "next-intl/server"
+import { defaultLocale } from "@/i18n/locales"
 import { localizedPageMetadata } from "@/i18n/metadata"
 import { siteConfig } from "@/lib/site"
 
@@ -13,6 +14,8 @@ export async function generateMetadata(): Promise<Metadata> {
     title: t("nowTitle"),
     description: t("nowDescription", { name: siteConfig.name }),
     path: "/now",
+    // The update itself is English in every language: one canonical copy.
+    available: [defaultLocale],
   })
 }
 

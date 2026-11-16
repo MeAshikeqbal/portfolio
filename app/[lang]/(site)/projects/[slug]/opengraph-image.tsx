@@ -1,4 +1,3 @@
-import { ImageResponse } from "next/og"
 import { getProject, getProjectSlugs } from "@/lib/api"
 import {
   OG_COLORS,
@@ -7,6 +6,7 @@ import {
   OG_SIZE,
   OgFrame,
   ogFonts,
+  ogResponse,
   sanityOgImage,
 } from "@/lib/og"
 import { siteConfig } from "@/lib/site"
@@ -31,25 +31,24 @@ export default async function Image({
 }) {
   const { slug } = await params
   const locale = await ogLocale(params)
-  const [project, fonts, t, projects] = await Promise.all([
+  const [project, t, projects] = await Promise.all([
     getProject(slug),
-    ogFonts(),
     routeTranslations(locale, "og"),
     routeTranslations(locale, "projects"),
   ])
 
   if (project?.seo?.ogImage?.asset) {
-    return sanityOgImage(project.seo.ogImage, fonts)
+    return sanityOgImage(project.seo.ogImage, await ogFonts())
   }
 
   if (!project?.title) {
-    return new ImageResponse(
+    return ogResponse(
       <OgFrame
         eyebrow={t("project")}
         title={t("projectNotFound")}
         status={{ color: OG_COLORS.idle, label: t("http404") }}
       />,
-      { ...size, fonts },
+      locale,
     )
   }
 
@@ -63,7 +62,7 @@ export default async function Image({
     gh?.license && gh.license !== "Not specified" ? gh.license : null,
   ].filter((item): item is string => Boolean(item))
 
-  return new ImageResponse(
+  return ogResponse(
     <OgFrame
       eyebrow={status ? t("projectStatus", { status: status.label }) : t("project")}
       title={project.title}
@@ -78,6 +77,6 @@ export default async function Image({
           : undefined
       }
     />,
-    { ...size, fonts },
+    locale,
   )
 }

@@ -1,8 +1,7 @@
-import { ImageResponse } from "next/og"
 import { toPublicStatus } from "@/lib/lab/public"
 import { labShareFacts } from "@/lib/lab/share"
 import { readLabStatus } from "@/lib/lab/store"
-import { OG_CONTENT_TYPE, OG_SIZE, OG_STATUS_COLORS, OgFrame, ogFonts } from "@/lib/og"
+import { OG_CONTENT_TYPE, OG_SIZE, OG_STATUS_COLORS, OgFrame, ogResponse } from "@/lib/og"
 import { siteConfig } from "@/lib/site"
 import { routeTranslations } from "@/i18n/route-translations"
 import { ogLocale, ogStaticParams, type OgParams } from "@/i18n/og"
@@ -45,7 +44,7 @@ export default async function Image({ params }: { params: OgParams }) {
     }
   })
 
-  return new ImageResponse(
+  return ogResponse(
     <OgFrame
       // "live" only when there is something live to show.
       eyebrow={footer.length > 0 ? t("homelabLive") : t("homelab")}
@@ -54,6 +53,6 @@ export default async function Image({ params }: { params: OgParams }) {
       footer={footer}
       status={{ color: OG_STATUS_COLORS[status.status], label: status.label }}
     />,
-    { ...size, fonts: await ogFonts() },
+    locale,
   )
 }

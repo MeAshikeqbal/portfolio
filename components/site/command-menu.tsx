@@ -8,6 +8,7 @@ import {
   FileText,
   FolderGit2,
   Home,
+  Languages,
   Link2,
   Monitor,
   Moon,
@@ -16,7 +17,7 @@ import {
   Server,
   Sun,
 } from "lucide-react"
-import { useTranslations } from "next-intl"
+import { useLocale, useTranslations } from "next-intl"
 import { useTheme } from "next-themes"
 import { useEffect, useRef, useState, type ReactNode } from "react"
 import { toast } from "sonner"
@@ -37,7 +38,9 @@ import { projectHref } from "@/lib/projects"
 import { siteConfig } from "@/lib/site"
 import { withViewTransition } from "@/lib/view-transition"
 import { cn } from "@/lib/utils"
-import { useRouter } from "@/i18n/navigation"
+import { localeInfo, locales } from "@/i18n/locales"
+import { usePathname, useRouter } from "@/i18n/navigation"
+import { switchLocale } from "./language-switcher"
 
 /** True when the keyboard focus is somewhere the user types text. */
 function isTyping(target: EventTarget | null): boolean {
@@ -59,6 +62,9 @@ const sections = [
 export function CommandMenu({ index, className }: { index: CommandIndex; className?: string }) {
   const t = useTranslations("command")
   const nav = useTranslations("nav")
+  const language = useTranslations("language")
+  const locale = useLocale()
+  const pathname = usePathname()
   const [open, setOpen] = useState(false)
   const openRef = useRef(false)
   // The palette opens from a button or a shortcut, never a DialogTrigger, so Radix can't
@@ -237,6 +243,24 @@ export function CommandMenu({ index, className }: { index: CommandIndex; classNa
               {t("source")}
             </Item>
           </CommandGroup>
+
+          {locales.length > 1 && (
+            <CommandGroup heading={language("group")}>
+              {locales
+                .filter((l) => l !== locale)
+                .map((l) => (
+                  <Item
+                    key={l}
+                    icon={<Languages />}
+                    value={`language ${localeInfo[l].nativeName} ${localeInfo[l].englishName} ${l}`}
+                    keywords={["language", "translate"]}
+                    onSelect={() => run(() => switchLocale(pathname, l))}
+                  >
+                    <span lang={l}>{localeInfo[l].nativeName}</span>
+                  </Item>
+                ))}
+            </CommandGroup>
+          )}
 
           {index.posts.length > 0 && (
             <>
