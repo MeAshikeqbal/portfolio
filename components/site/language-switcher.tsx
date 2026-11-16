@@ -1,6 +1,6 @@
 "use client"
 
-import { Check, Languages } from "lucide-react"
+import { Check, ChevronDown, Languages } from "lucide-react"
 import { useLocale, useTranslations } from "next-intl"
 import { DropdownMenu } from "radix-ui"
 import type { MouseEvent } from "react"
@@ -72,32 +72,32 @@ export function LanguageSwitcher({ className }: { className?: string }) {
   )
 }
 
-/** The language choice as a plain list, for the mobile menu. */
-export function LanguageList({ className }: { className?: string }) {
+/**
+ * The language choice for the mobile menu: a native select, so the phone shows its own picker,
+ * one row high like the theme toggle beside it.
+ */
+export function LanguageSelect({ id, className }: { id?: string; className?: string }) {
   const current = useLocale()
   const pathname = usePathname()
   if (locales.length < 2) return null
   return (
-    <ul className={cn("flex flex-wrap gap-1.5", className)}>
-      {locales.map((locale) => (
-        <li key={locale}>
-          <a
-            href={localizedPath(pathname, locale)}
-            hrefLang={locale}
-            lang={locale}
-            aria-current={locale === current ? "true" : undefined}
-            onClick={(event) => switchLocale(pathname, locale, event)}
-            className={cn(
-              "inline-flex min-h-9 items-center rounded-md border px-2.5 text-sm",
-              locale === current
-                ? "border-foreground bg-foreground text-background"
-                : "text-muted-foreground",
-            )}
-          >
+    <span className={cn("relative inline-flex", className)}>
+      <select
+        id={id}
+        value={current}
+        onChange={(event) => switchLocale(pathname, event.target.value as Locale)}
+        className="h-8 appearance-none rounded-md border bg-transparent py-0 pr-8 pl-2.5 text-sm text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+      >
+        {locales.map((locale) => (
+          <option key={locale} value={locale} lang={locale}>
             {localeInfo[locale].nativeName}
-          </a>
-        </li>
-      ))}
-    </ul>
+          </option>
+        ))}
+      </select>
+      <ChevronDown
+        aria-hidden
+        className="pointer-events-none absolute top-1/2 right-2.5 size-3.5 -translate-y-1/2 text-muted-foreground"
+      />
+    </span>
   )
 }
