@@ -15,7 +15,9 @@ export const contactSchema = z.object({
     .max(5000, { error: "Message must be at most 5000 characters." }),
   turnstileToken: z
     .string()
-    .min(1, { error: "Please complete the Cloudflare Turnstile challenge." }),
+    .min(1, { error: "Please complete the Cloudflare Turnstile challenge." })
+    // Cloudflare's documented maximum; anything longer isn't a real token.
+    .max(2048, { error: "Please complete the check again." }),
 })
 
 export type ContactInput = z.infer<typeof contactSchema>

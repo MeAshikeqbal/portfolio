@@ -2,8 +2,10 @@
 
 import { randomUUID } from "node:crypto"
 import { headers } from "next/headers"
+import { TURNSTILE_ACTION } from "@/lib/contact-fields"
 import { contactSchema, HONEYPOT_FIELD } from "@/lib/contact-schema"
 import { buildMessageDocument } from "@/lib/inbox-message"
+import { verifyTurnstile } from "@/lib/turnstile"
 import { inboxClient } from "@/sanity/lib/inbox-client"
 
 type Field = "name" | "email" | "message" | "turnstileToken"
@@ -56,15 +58,14 @@ export async function submitContact(
   }
 
   const ip = (await headers()).get("x-forwarded-for")?.split(",")[0]?.trim()
-  const verification = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ secret, response: parsed.data.turnstileToken, remoteip: ip }),
+  const verified = await verifyTurnstile({
+    secret,
+    token: parsed.data.turnstileToken,
+    expectedAction: TURNSTILE_ACTION,
+    remoteIp: ip,
   })
-    .then((res) => res.json() as Promise<{ success: boolean }>)
-    .catch(() => ({ success: false }))
 
-  if (!verification.success) {
+  if (!verified) {
     return {
       status: "error",
       message: "The anti-spam check failed. Please try again.",

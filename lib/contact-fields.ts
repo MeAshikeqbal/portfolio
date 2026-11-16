@@ -8,3 +8,6 @@
  * "website" match browser/password-manager autofill, which would silently drop real messages.
  */
 export const HONEYPOT_FIELD = "hp_field_7c1"
+
+/** Turnstile action for the contact widget. Siteverify echoes it back and the server checks it. */
+export const TURNSTILE_ACTION = "contact"
