@@ -11,6 +11,8 @@ import { formatDate, trimText } from "@/lib/format"
 import { toPlainText } from "@/lib/portable-text"
 import { siteConfig } from "@/lib/site"
 import { TranslationNotice } from "@/components/site/translation-notice"
+import type { Locale } from "@/i18n/locales"
+import { servedLanguages } from "@/lib/metadata"
 import { isStale } from "@/lib/staleness"
 
 type Now = NonNullable<NOW_QUERY_RESULT>
@@ -51,7 +53,7 @@ function MetaLine({
 }
 
 /** One archived update: its date and opening words, the whole text a click away. */
-function PreviousUpdate({ entry }: { entry: Entry }) {
+function PreviousUpdate({ entry, lang }: { entry: Entry; lang: string }) {
   const locale = useLocale()
   const opening = trimText(toPlainText(entry.body), 90)
   return (
@@ -77,7 +79,7 @@ function PreviousUpdate({ entry }: { entry: Entry }) {
         </summary>
         <div className="pt-2 pb-6 pl-7">
           {entry.location?.trim() && <p className="mb-3 label-caps">{entry.location}</p>}
-          <div lang="en" className="prose max-w-none">
+          <div lang={lang} className="prose max-w-none">
             <PortableText value={entry.body ?? []} components={portableTextComponents} />
           </div>
         </div>
@@ -102,7 +104,11 @@ export function NowView({
   live?: ReactNode
 }) {
   const t = useTranslations("now")
+  const locale = useLocale()
   const stale = isStale(now.updated, today, siteConfig.nowStaleAfterDays)
+  // The update's own words: this page's language once translated, English until then.
+  const translated = servedLanguages(now.languages).includes(locale as Locale)
+  const contentLang = translated ? locale : "en"
   const archive = (now.archive ?? []).filter((entry) => entry.date && entry.body?.length)
   return (
     <main>
@@ -126,10 +132,13 @@ export function NowView({
             })}
           />
           <MetaLine updated={now.updated} location={now.location} stale={stale} />
-          <TranslationNotice path="/now" scope="english" className="-mt-4 mb-8" />
+          <TranslationNotice
+            path="/now"
+            scope={translated ? "content" : "english"}
+            className="-mt-4 mb-8"
+          />
 
-          {/* The update is written in English (not translated yet). */}
-          <article lang="en" className="prose prose-lg max-w-none">
+          <article lang={contentLang} className="prose prose-lg max-w-none">
             <PortableText value={now.body ?? []} components={portableTextComponents} />
           </article>
 
@@ -146,7 +155,7 @@ export function NowView({
               </h2>
               <ol className="mt-3 divide-y border-y">
                 {archive.map((entry) => (
-                  <PreviousUpdate key={entry._key} entry={entry} />
+                  <PreviousUpdate key={entry._key} entry={entry} lang={contentLang} />
                 ))}
               </ol>
             </section>

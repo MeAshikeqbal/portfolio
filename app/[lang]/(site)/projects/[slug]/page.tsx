@@ -26,6 +26,7 @@ import { formatMonth } from "@/lib/format"
 import { currentLocale, localizedPageMetadata } from "@/i18n/metadata"
 import { defaultLocale, localizedPath } from "@/i18n/locales"
 import { Link } from "@/i18n/navigation"
+import { servedLanguages } from "@/lib/metadata"
 import { siteConfig } from "@/lib/site"
 import { buildToc, type TocEntry } from "@/lib/portable-text"
 import { adjacentProjects, hasActivity, relatedProjects } from "@/lib/projects"
@@ -38,9 +39,6 @@ import { urlFor } from "@/sanity/lib/image"
 
 type Props = { params: Promise<{ slug: string }> }
 
-/** The language of the project's own text (title, description, body): English until translated. */
-const CONTENT_LANG = "en"
-
 export async function generateStaticParams() {
   const slugs = await getProjectSlugs()
   return slugs.map((slug) => ({ slug }))
@@ -48,7 +46,7 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
-  const project = await getProject(slug)
+  const project = await getProject(slug, await currentLocale())
   const t = await getTranslations("meta")
   if (!project?.title) return { title: t("projectNotFound") }
 
@@ -63,8 +61,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       title,
       description,
       path: `/projects/${slug}`,
-      // The case study is English in every language: one canonical copy.
-      available: [defaultLocale],
+      // Only the languages it's translated into; elsewhere the English copy is canonical.
+      available: servedLanguages(project.languages),
       openGraph: { type: "article" },
     })),
     robots: project.seo?.noIndex ? { index: false } : undefined,
@@ -74,15 +72,18 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 /** Laid out like a post (app/(root)/post/[slug]/page.tsx): header, media, body + contents, footer. */
 export default async function ProjectPage({ params }: Props) {
   const { slug } = await params
-  const [project, projects, t, locale] = await Promise.all([
-    getProject(slug),
-    getProjects(),
+  const locale = await currentLocale()
+  const [project, projects, t] = await Promise.all([
+    getProject(slug, locale),
+    getProjects(locale),
     getTranslations("projects"),
-    currentLocale(),
   ])
   if (!project) notFound()
 
   const title = project.title ?? t("untitled")
+  // The language of the project's own words: this page's once translated, English until then.
+  const translated = servedLanguages(project.languages).includes(locale)
+  const contentLang = translated ? locale : defaultLocale
   const status = projectStatus(project)
   const translatedStatus = (value: ReturnType<typeof projectStatus>) =>
     value ? { ...value, label: t("status", { status: value.label }) } : undefined
@@ -180,19 +181,23 @@ export default async function ProjectPage({ params }: Props) {
                 )}
               </div>
               {/* Same scale as a post title: 1.875rem on phones, 3rem from sm. */}
-              {/* The project's own words are English until translated; say so to screen readers. */}
+              {/* Untranslated projects are English on every page; say so to screen readers. */}
               <h1
-                lang={CONTENT_LANG}
+                lang={contentLang}
                 className="mt-2 max-w-3xl text-3xl leading-tight font-semibold tracking-tight text-balance sm:mt-3 sm:text-5xl"
               >
                 {title}
               </h1>
               {project.description && (
-                <p lang={CONTENT_LANG} className="mt-4 max-w-2xl text-lg text-muted-foreground">
+                <p lang={contentLang} className="mt-4 max-w-2xl text-lg text-muted-foreground">
                   {project.description}
                 </p>
               )}
-              <TranslationNotice path={`/projects/${slug}`} scope="english" className="mt-4" />
+              <TranslationNotice
+                path={`/projects/${slug}`}
+                scope={translated ? "content" : "english"}
+                className="mt-4"
+              />
               {(project.url || project.github) && (
                 <div className="mt-6 flex flex-wrap gap-3">
                   {project.url && (
@@ -290,7 +295,7 @@ export default async function ProjectPage({ params }: Props) {
               )}
 
               {hasBody ? (
-                <div lang={CONTENT_LANG} className="prose prose-lg max-w-none">
+                <div lang={contentLang} className="prose prose-lg max-w-none">
                   <PortableText value={project.body!} components={components} />
                 </div>
               ) : (

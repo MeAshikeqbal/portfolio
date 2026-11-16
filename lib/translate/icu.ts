@@ -6,7 +6,7 @@ import {
   type SelectElement,
 } from "@formatjs/icu-messageformat-parser"
 import { printAST } from "@formatjs/icu-messageformat-parser/printer.js"
-import { NO_TRANSLATE } from "../../i18n/no-translate"
+import { decodeHtml, textHtml } from "./html"
 
 /**
  * Machine translation for ICU messages without breaking them.
@@ -25,8 +25,7 @@ export interface Run {
 }
 
 type Slot =
-  | { kind: "atom"; element: MessageFormatElement }
-  | { kind: "tag"; name: string; run: PreparedRun }
+  { kind: "atom"; element: MessageFormatElement } | { kind: "tag"; name: string; run: PreparedRun }
 
 /** A run with what its placeholders stand for. */
 interface PreparedRun {
@@ -45,27 +44,11 @@ export interface PreparedMessage {
   segments: string[]
 }
 
-const escapeHtml = (text: string) =>
-  text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
-
-const NO_TRANSLATE_PATTERN = new RegExp(
-  `\\b(${[...NO_TRANSLATE]
-    .sort((a, b) => b.length - a.length)
-    .map((term) => term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"))
-    .join("|")})\\b`,
-  "g",
-)
-
-/** Literal text as HTML, with protected names wrapped so Google copies them. */
-function literalHtml(text: string): string {
-  return escapeHtml(text).replace(NO_TRANSLATE_PATTERN, '<span translate="no">$1</span>')
-}
-
 function prepareRun(elements: MessageFormatElement[], inPlural: boolean): PreparedRun {
   const run: PreparedRun = { html: "", slots: [], branches: new Map(), inPlural }
   for (const element of elements) {
     if (element.type === TYPE.literal) {
-      run.html += literalHtml(element.value)
+      run.html += textHtml(element.value)
       continue
     }
     if (element.type === TYPE.tag && element.children.length > 0) {
@@ -92,13 +75,15 @@ function prepareRun(elements: MessageFormatElement[], inPlural: boolean): Prepar
 function collect(run: PreparedRun, out: string[]) {
   if (/\S/.test(stripMarkup(run.html))) out.push(run.html)
   for (const slot of run.slots) if (slot.kind === "tag") collectTag(slot.run, out)
-  for (const { runs } of run.branches.values()) for (const branch of runs.values()) collect(branch, out)
+  for (const { runs } of run.branches.values())
+    for (const branch of runs.values()) collect(branch, out)
 }
 
 /** A tag's content is translated as part of its run, but its nested branches are not. */
 function collectTag(run: PreparedRun, out: string[]) {
   for (const slot of run.slots) if (slot.kind === "tag") collectTag(slot.run, out)
-  for (const { runs } of run.branches.values()) for (const branch of runs.values()) collect(branch, out)
+  for (const { runs } of run.branches.values())
+    for (const branch of runs.values()) collect(branch, out)
 }
 
 /** Text a translator would see, without our placeholders (empty means nothing to translate). */
@@ -113,15 +98,6 @@ export function prepare(message: string): PreparedMessage {
   collect(root, segments)
   return { source: message, root, segments }
 }
-
-const decodeHtml = (text: string) =>
-  text
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;|&#x27;|&apos;/g, "'")
-    .replace(/&nbsp;/g, " ")
-    .replace(/&amp;/g, "&")
 
 /** Literal text as ICU: apostrophes doubled, braces quoted, `#` quoted inside plurals. */
 function escapeIcu(text: string, inPlural: boolean): string {

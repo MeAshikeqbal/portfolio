@@ -22,7 +22,7 @@ export async function GET(request: Request, { params }: RouteContext<"/[lang]/ho
   const locale = isLocale(lang) ? lang : defaultLocale
   const download = new URL(request.url).searchParams.has("download")
   const [uses, lab, t] = await Promise.all([
-    getUses(),
+    getUses(locale),
     readLabStatus(process.env, fetch, { revalidate: 30 }),
     routeTranslations(locale, "homecave"),
   ])

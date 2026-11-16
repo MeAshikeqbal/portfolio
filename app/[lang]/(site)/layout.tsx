@@ -9,10 +9,12 @@ import { DraftModeBanner } from "@/components/site/draft-mode-banner"
 import { LanguageSuggest } from "@/components/site/language-suggest"
 import { getCommandIndex, getSiteStatus } from "@/lib/api"
 import { SanityLive } from "@/sanity/lib/live"
+import { currentLocale } from "@/i18n/metadata"
 
 export default async function SiteLayout({ children }: { children: React.ReactNode }) {
+  const locale = await currentLocale()
   const [commandIndex, siteStatus, { isEnabled: isDraftMode }, t, nav] = await Promise.all([
-    getCommandIndex(),
+    getCommandIndex(locale),
     getSiteStatus(),
     draftMode(),
     getTranslations("site"),

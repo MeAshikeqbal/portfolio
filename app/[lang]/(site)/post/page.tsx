@@ -5,7 +5,7 @@ import { Container, Section } from "@/components/dashboard/layout"
 import { SectionHeader } from "@/components/dashboard/section-header"
 import { getPosts } from "@/lib/api"
 import { getTranslations } from "next-intl/server"
-import { localizedPageMetadata } from "@/i18n/metadata"
+import { currentLocale, localizedPageMetadata } from "@/i18n/metadata"
 import { siteConfig } from "@/lib/site"
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -18,7 +18,10 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function PostsPage() {
-  const [posts, t] = await Promise.all([getPosts(), getTranslations("writing")])
+  const [posts, t] = await Promise.all([
+    getPosts(await currentLocale()),
+    getTranslations("writing"),
+  ])
 
   return (
     <main>

@@ -14,7 +14,9 @@ import {
   PostIcon,
   ProjectIcon,
   SkillIcon,
+  TranslationIcon,
 } from "./components/icons"
+import { allLocales, localeInfo } from "../i18n/locales"
 
 export const structure: StructureResolver = (S, context) =>
   S.list()
@@ -91,6 +93,35 @@ export const structure: StructureResolver = (S, context) =>
 
       S.divider(),
 
+      // Machine translations, written on publish (lib/translate). Listed per language so a
+      // translation can be checked or corrected by hand; they're never created from here.
+      S.listItem()
+        .title("Translations")
+        .icon(TranslationIcon)
+        .child(
+          S.list()
+            .title("Translations")
+            .items(
+              allLocales
+                .filter((locale) => locale !== "en")
+                .map((locale) =>
+                  S.listItem()
+                    .id(`translations-${locale}`)
+                    .title(localeInfo[locale].englishName)
+                    .icon(TranslationIcon)
+                    .child(
+                      S.documentList()
+                        .title(localeInfo[locale].englishName)
+                        .schemaType("translation")
+                        .filter('_type == "translation" && language == $locale')
+                        .params({ locale })
+                        .defaultOrdering([{ field: "translatedAt", direction: "desc" }])
+                        .canHandleIntent(() => false),
+                    ),
+                ),
+            ),
+        ),
+
       // Singleton documents and other types - exclude cv from the filter
       ...S.documentTypeListItems().filter(
         (item) =>
@@ -107,6 +138,7 @@ export const structure: StructureResolver = (S, context) =>
             "uses",
             "now",
             "media.tag",
+            "translation",
           ].includes(item.getId()!),
       ),
     ])

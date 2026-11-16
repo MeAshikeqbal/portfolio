@@ -18,6 +18,7 @@ import { getPost, getPostSlugs } from "@/lib/api"
 import { formatDate } from "@/lib/format"
 import { currentLocale, localizedPageMetadata } from "@/i18n/metadata"
 import { Link } from "@/i18n/navigation"
+import { servedLanguages } from "@/lib/metadata"
 import { rankRelated } from "@/lib/related"
 import { buildToc, readingTime, wordCount } from "@/lib/portable-text"
 import { siteConfig } from "@/lib/site"
@@ -27,9 +28,6 @@ import { urlFor } from "@/sanity/lib/image"
 
 type Props = { params: Promise<{ slug: string }> }
 
-/** The language of the post's own text (title, excerpt, body): English until translated. */
-const CONTENT_LANG = "en"
-
 /** Prerender every published post at build time; new posts render on demand. */
 export async function generateStaticParams() {
   const slugs = await getPostSlugs()
@@ -38,7 +36,10 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
-  const [post, t] = await Promise.all([getPost(slug), getTranslations("meta")])
+  const [post, t] = await Promise.all([
+    getPost(slug, await currentLocale()),
+    getTranslations("meta"),
+  ])
   if (!post?.title) return { title: t("postNotFound") }
 
   const title = post.seo?.title || post.title
@@ -52,8 +53,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       title,
       description,
       path: `/post/${slug}`,
-      // The post itself is English in every language: one canonical copy.
-      available: [defaultLocale],
+      // Only the languages it's translated into; elsewhere the English copy is canonical.
+      available: servedLanguages(post.languages),
       openGraph: {
         type: "article",
         publishedTime: post.publishedAt ?? undefined,
@@ -69,14 +70,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function PostPage({ params }: Props) {
   const { slug } = await params
-  const [post, t, locale] = await Promise.all([
-    getPost(slug),
-    getTranslations("posts"),
-    currentLocale(),
-  ])
+  const locale = await currentLocale()
+  const [post, t] = await Promise.all([getPost(slug, locale), getTranslations("posts")])
   if (!post) notFound()
 
   const title = post.title ?? t("untitled")
+  // The language of the post's own words: this page's once translated, English until then.
+  const translated = servedLanguages(post.languages).includes(locale)
+  const contentLang = translated ? locale : defaultLocale
   const { entries, idsByKey } = buildToc(post.body)
   const minutes = readingTime(post.body)
   const components = createPortableTextComponents(idsByKey)
@@ -136,15 +137,15 @@ export default async function PostPage({ params }: Props) {
                 </ul>
               )}
               {/* On the type scale: the headline step (1.875rem) on phones, 3rem from sm. */}
-              {/* The post's own words are English until it's translated; say so to screen readers. */}
+              {/* Untranslated posts are English on every page; say so to screen readers. */}
               <h1
-                lang={CONTENT_LANG}
+                lang={contentLang}
                 className="mt-2 max-w-3xl text-3xl leading-tight font-semibold tracking-tight text-balance sm:mt-3 sm:text-5xl"
               >
                 {title}
               </h1>
               {post.excerpt && (
-                <p lang={CONTENT_LANG} className="mt-4 max-w-2xl text-lg text-muted-foreground">
+                <p lang={contentLang} className="mt-4 max-w-2xl text-lg text-muted-foreground">
                   {post.excerpt}
                 </p>
               )}
@@ -170,7 +171,11 @@ export default async function PostPage({ params }: Props) {
                 )}
                 <span className="label-caps">{t("minRead", { minutes })}</span>
               </div>
-              <TranslationNotice path={`/post/${slug}`} scope="english" className="mt-4" />
+              <TranslationNotice
+                path={`/post/${slug}`}
+                scope={translated ? "content" : "english"}
+                className="mt-4"
+              />
               {post.archived && (
                 <p className="mt-5 max-w-2xl rounded-md bg-status-idle-soft px-3 py-2 text-sm text-status-idle-fg">
                   {t("archived")}
@@ -220,7 +225,7 @@ export default async function PostPage({ params }: Props) {
                   </ol>
                 </details>
               )}
-              <div lang={CONTENT_LANG} className="prose prose-lg max-w-none">
+              <div lang={contentLang} className="prose prose-lg max-w-none">
                 <PortableText value={post.body ?? []} components={components} />
               </div>
             </div>

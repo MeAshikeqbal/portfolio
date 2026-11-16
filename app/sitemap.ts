@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next"
-import { defaultLocale, type Locale } from "@/i18n/locales"
-import { languageAlternates } from "@/lib/metadata"
+import { type Locale } from "@/i18n/locales"
+import { languageAlternates, servedLanguages } from "@/lib/metadata"
 import { absoluteUrl } from "@/lib/site"
 import { sanityFetch } from "@/sanity/lib/live"
 import { SITEMAP_QUERY } from "@/sanity/lib/queries"
@@ -9,7 +9,7 @@ type Entry = MetadataRoute.Sitemap[number]
 
 /**
  * One sitemap entry per page, at its English (canonical) URL, listing the other languages it
- * exists in as hreflang alternates. Pages whose content isn't translated yet list English only.
+ * exists in as hreflang alternates. Content pages list the languages they're translated into.
  */
 function entry(
   path: string,
@@ -33,8 +33,6 @@ function entry(
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const { data } = await sanityFetch({ query: SITEMAP_QUERY, stega: false })
   const latestPost = data.posts[0]?._updatedAt ? new Date(data.posts[0]._updatedAt) : undefined
-  // Post, project and /now bodies are still English everywhere: one canonical copy each.
-  const english: readonly Locale[] = [defaultLocale]
 
   return [
     entry("/", undefined, { lastModified: latestPost, changeFrequency: "weekly", priority: 1 }),
@@ -47,17 +45,22 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // Always there: the live homelab dashboard (its Sanity copy only adds context).
     entry("/homecave", undefined, { changeFrequency: "daily", priority: 0.6 }),
     ...(data.now
-      ? [entry("/now", english, { lastModified: new Date(data.now), priority: 0.5 })]
+      ? [
+          entry("/now", servedLanguages(data.now.languages), {
+            lastModified: new Date(data.now._updatedAt),
+            priority: 0.5,
+          }),
+        ]
       : []),
     ...data.projects.map((project) =>
-      entry(`/projects/${encodeURIComponent(project.slug!)}`, english, {
+      entry(`/projects/${encodeURIComponent(project.slug!)}`, servedLanguages(project.languages), {
         lastModified: new Date(project._updatedAt),
         changeFrequency: "monthly",
         priority: 0.6,
       }),
     ),
     ...data.posts.map((post) =>
-      entry(`/post/${encodeURIComponent(post.slug!)}`, english, {
+      entry(`/post/${encodeURIComponent(post.slug!)}`, servedLanguages(post.languages), {
         lastModified: new Date(post._updatedAt),
         changeFrequency: "monthly",
         priority: 0.6,

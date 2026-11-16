@@ -14,7 +14,7 @@ export const generateStaticParams = ogStaticParams
 export default async function Image({ params }: { params: OgParams }) {
   const locale = await ogLocale(params)
   const [stats, t, site] = await Promise.all([
-    getHomeStats(),
+    getHomeStats(locale),
     routeTranslations(locale, "og"),
     routeTranslations(locale, "site"),
   ])

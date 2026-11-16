@@ -78,9 +78,11 @@ export default defineConfig([
     ],
     document: {
       newDocumentOptions: (prev, { creationContext }) =>
-        creationContext.type === "global"
+        // Translations are written by the site on publish, never created by hand.
+        (creationContext.type === "global"
           ? prev.filter((item) => !SINGLETONS.has(item.templateId))
-          : prev,
+          : prev
+        ).filter((item) => item.templateId !== "translation"),
       actions: (prev, { schemaType }) => {
         const actions = SINGLETONS.has(schemaType)
           ? prev.filter(({ action }) => action && SINGLETON_ACTIONS.has(action))

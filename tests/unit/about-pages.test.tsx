@@ -37,6 +37,7 @@ describe("UsesSections", () => {
     const sections = visibleUsesSections({
       _updatedAt: "2026-11-01T00:00:00Z",
       intro: "My setup.",
+      sectionKinds: null,
       sections: [
         {
           _key: "s1",
@@ -74,6 +75,7 @@ describe("NowView", () => {
         now={{
           _updatedAt: "2026-11-10T08:00:00Z",
           updated: "2026-11-09",
+          languages: ["en"],
           archive: null,
           location: "Kolkata",
           body: [
@@ -107,6 +109,7 @@ describe("NowView", () => {
         now={{
           _updatedAt: "2026-11-10T08:00:00Z",
           updated: "2026-11-10",
+          languages: ["en"],
           location: null,
           body: [paragraph("The current update.")],
           archive: [
@@ -132,7 +135,12 @@ describe("NowView", () => {
 })
 
 describe("UsesSections with malformed content", () => {
-  const base: Uses = { _updatedAt: "2026-11-01T00:00:00Z", intro: null, sections: [] }
+  const base: Uses = {
+    _updatedAt: "2026-11-01T00:00:00Z",
+    intro: null,
+    sections: [],
+    sectionKinds: null,
+  }
 
   it("drops nameless items and sections left empty", () => {
     const sections = visibleUsesSections({
@@ -188,6 +196,7 @@ describe("NowView edge cases", () => {
   const now: Now = {
     _updatedAt: "2026-11-05T00:00:00Z",
     updated: "2026-11-01T00:00:00Z",
+    languages: ["en"],
     archive: null,
     location: null,
     body: [paragraph("Building things.")],
@@ -247,5 +256,26 @@ describe("the /now page", () => {
   ])("/now 404s when %s", async (_, now) => {
     vi.mocked(getNow).mockResolvedValue(now as NOW_QUERY_RESULT)
     await expect(NowPage()).rejects.toThrow("NEXT_NOT_FOUND")
+  })
+})
+
+describe("Homecave sections in another language", () => {
+  it("are recognised by their English titles", async () => {
+    const { homelabSpecs } = await import("@/components/about/uses-view")
+    const specs = homelabSpecs({
+      _updatedAt: "2026-11-01T00:00:00Z",
+      intro: null,
+      // Translated titles…
+      sections: [
+        {
+          _key: "h",
+          title: "Heimlabor",
+          items: [{ _key: "t", name: "Tower", description: "Medienserver", url: null, icon: null }],
+        },
+      ],
+      // …and the English ones they came from.
+      sectionKinds: [{ _key: "h", title: "Homelab" }],
+    })
+    expect(specs).toEqual([{ name: "Tower", description: "Medienserver" }])
   })
 })

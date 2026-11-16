@@ -11,6 +11,7 @@ import {
   Image,
   Inbox,
   Info,
+  Languages,
   Mail,
   RefreshCw,
   RotateCcw,
@@ -61,6 +62,7 @@ export const MessageIcon = studioIcon(Mail, "Message")
 export const BlogIcon = studioIcon(FileText, "Blog")
 export const PortfolioIcon = studioIcon(Briefcase, "Portfolio")
 export const PersonalIcon = studioIcon(UserRound, "Personal")
+export const TranslationIcon = studioIcon(Languages, "Translation")
 
 // Portable Text blocks
 export const CodeBlockIcon = studioIcon(SquareCode, "CodeBlock")
