@@ -6,6 +6,8 @@ import { SectionHeader } from "@/components/dashboard/section-header"
 import { StatusDot } from "@/components/dashboard/status-dot"
 import { getEducation, getExperiences } from "@/lib/api"
 import { isCurrentPeriod } from "@/lib/format"
+import { getTranslations } from "next-intl/server"
+import { useTranslations } from "next-intl"
 import { urlFor } from "@/sanity/lib/image"
 
 interface Entry {
@@ -18,7 +20,11 @@ interface Entry {
 }
 
 export async function UptimeSection() {
-  const [experiences, education] = await Promise.all([getExperiences(), getEducation()])
+  const [experiences, education, t] = await Promise.all([
+    getExperiences(),
+    getEducation(),
+    getTranslations("uptime"),
+  ])
 
   const work: Entry[] = experiences.flatMap((experience) =>
     (experience.works ?? []).map((job) => ({
@@ -47,10 +53,10 @@ export async function UptimeSection() {
   return (
     <Section id="uptime" className="border-t">
       <Container>
-        <SectionHeader title="Experience & education" />
+        <SectionHeader title={t("title")} />
         <div className="grid gap-6 lg:grid-cols-2">
-          {work.length > 0 && <Log title="experience" entries={work} />}
-          {study.length > 0 && <Log title="education" entries={study} />}
+          {work.length > 0 && <Log title={t("experience")} entries={work} />}
+          {study.length > 0 && <Log title={t("education")} entries={study} />}
         </div>
       </Container>
     </Section>
@@ -58,16 +64,10 @@ export async function UptimeSection() {
 }
 
 function Log({ title, entries }: { title: string; entries: Entry[] }) {
+  const t = useTranslations("uptime")
   return (
     <Panel>
-      <PanelHeader
-        title={title}
-        meta={
-          <span>
-            {entries.length} {entries.length === 1 ? "entry" : "entries"}
-          </span>
-        }
-      />
+      <PanelHeader title={title} meta={<span>{t("entries", { count: entries.length })}</span>} />
       <ol className="relative m-4 space-y-6 border-l pl-6">
         {entries.map((entry) => {
           const current = isCurrentPeriod(entry.period)
@@ -75,7 +75,7 @@ function Log({ title, entries }: { title: string; entries: Entry[] }) {
             <li key={entry.key} className="relative">
               <StatusDot
                 status={current ? "up" : "idle"}
-                label={current ? "current" : "past"}
+                label={current ? t("current") : t("past")}
                 className="absolute top-1 -left-[1.82rem] size-2.5 ring-4 ring-surface"
               />
               <p className="label-caps">{entry.period}</p>

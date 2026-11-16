@@ -1,6 +1,7 @@
 "use client"
 
 import { Camera } from "lucide-react"
+import { useLocale, useTranslations } from "next-intl"
 import type { ComponentProps } from "react"
 import { DataList, DataRow } from "@/components/dashboard/data-list"
 import { Meter } from "@/components/dashboard/meter"
@@ -19,6 +20,8 @@ import { labVerdict, orderNodes, storageRows } from "@/lib/lab/snapshot"
 import type { LabNodeStatus, LabStatus } from "@/lib/lab/types"
 import { STATUS_TEXT_CLASS } from "@/lib/status"
 import { cn } from "@/lib/utils"
+import { localizedPath } from "@/i18n/locales"
+import type { HomecaveT } from "@/i18n/translator"
 
 /** A Homecave "Homelab" row from the Studio: its description is the node's role line. */
 export interface NodeSpec {
@@ -38,7 +41,10 @@ const slug = (name: string) => `node-${name.toLowerCase().replace(/[^a-z0-9]+/g,
 
 /** The whole cluster in one line: what an engineer wants to know in two seconds. */
 export function LabVerdict({ status, now }: { status: LabStatus; now: Date }) {
-  const { summary, items, updated, reporting, total } = labVerdict(status, now)
+  const t = useTranslations("homecave")
+  const lab = useTranslations("lab")
+  const locale = useLocale()
+  const { summary, items, updated, reporting, total } = labVerdict(status, now, t)
 
   return (
     <div className="space-y-2">
@@ -58,12 +64,24 @@ export function LabVerdict({ status, now }: { status: LabStatus; now: Date }) {
         ))}
       </p>
       <p className="label-caps">
-        {reporting < total ? `${reporting} of ${total} reporting · ` : ""}
-        {updated ? `updated ${formatRelative(updated, now)}` : ""} · reports every 30s
+        {[
+          reporting < total && t("reporting", { reporting, total }),
+          updated && t("updated", { ago: formatRelative(updated, now, locale) ?? "—" }),
+          t("reportsEvery"),
+        ]
+          .filter(Boolean)
+          .join(" · ")}
       </p>
       {/* Screen readers hear the cluster state when it changes, not every 30s tick. */}
       <span className="sr-only" aria-live="polite">
-        {summary ? `Homelab: ${summary.label}` : ""}
+        {summary
+          ? t("announce", {
+              summary:
+                summary.up === null
+                  ? lab("noData")
+                  : lab("summary", { up: summary.up, total: summary.total }),
+            })
+          : ""}
       </span>
     </div>
   )
@@ -72,18 +90,19 @@ export function LabVerdict({ status, now }: { status: LabStatus; now: Date }) {
 type Tile = ComponentProps<typeof Metric>
 
 /** A node's metric tiles: the four every node has, then temperature and GPU where reported. */
-function nodeTiles(node: LabNodeStatus, live: boolean): Tile[] {
+function nodeTiles(node: LabNodeStatus, live: boolean, t: HomecaveT): Tile[] {
   const tiles: Tile[] = []
+  const name = node.name
   if (node.cpu) {
     tiles.push({
-      label: "cpu",
+      label: t("cpu"),
       value: formatPercent(node.cpu.pct, 0),
-      hint: node.load && `load ${node.load.map((v) => v.toFixed(2)).join(" · ")}`,
+      hint: node.load && t("load", { values: node.load.map((v) => v.toFixed(2)).join(" · ") }),
       trend: (
         <Sparkline
           values={series(node.history.cpu)}
           domain={PERCENT}
-          label={`${node.name} CPU %, last 24 hours`}
+          label={t("trendCpu", { name })}
           width={64}
         />
       ),
@@ -91,11 +110,11 @@ function nodeTiles(node: LabNodeStatus, live: boolean): Tile[] {
   }
   if (node.mem) {
     tiles.push({
-      label: "memory",
+      label: t("memory"),
       value: formatPercent(node.mem.pct, 0),
       hint: [
-        `of ${node.mem.totalGiB} GiB`,
-        node.swap && node.swap.totalGiB > 0 && `swap ${node.swap.pct}%`,
+        t("ofGiB", { total: node.mem.totalGiB }),
+        node.swap && node.swap.totalGiB > 0 && t("swap", { pct: node.swap.pct }),
       ]
         .filter(Boolean)
         .join(" · "),
@@ -103,7 +122,7 @@ function nodeTiles(node: LabNodeStatus, live: boolean): Tile[] {
         <Sparkline
           values={series(node.history.mem)}
           domain={PERCENT}
-          label={`${node.name} memory %, last 24 hours`}
+          label={t("trendMemory", { name })}
           width={64}
         />
       ),
@@ -111,37 +130,37 @@ function nodeTiles(node: LabNodeStatus, live: boolean): Tile[] {
   }
   if (node.net) {
     tiles.push({
-      label: "network in",
+      label: t("networkIn"),
       value: formatRate(node.net.inKBps),
       // The 24h peak is in the trend's text summary; the hint stays short enough not to clip.
-      hint: `out ${formatRate(node.net.outKBps)}`,
+      hint: t("out", { rate: formatRate(node.net.outKBps) }),
       trend: (
         <Sparkline
           values={series(node.history.netIn)}
-          label={`${node.name} inbound KB/s, last 24 hours`}
+          label={t("trendNetwork", { name })}
           width={64}
         />
       ),
     })
   }
   tiles.push({
-    label: "uptime",
+    label: t("uptime"),
     value: live ? formatUptime(node.uptime) : "—",
     hint:
       node.availability24h !== null
-        ? `${formatPercent(node.availability24h)} up · 24h`
-        : "availability after 1h",
+        ? t("upDay", { pct: formatPercent(node.availability24h) })
+        : t("availabilityLater"),
   })
   if (node.temps && (node.temps.cpuC !== null || node.temps.diskC !== null)) {
     tiles.push({
-      label: "temperature",
+      label: t("temperature"),
       value: node.temps.cpuC !== null ? `${node.temps.cpuC}°C` : "—",
-      hint: node.temps.diskC !== null ? `cpu · hottest disk ${node.temps.diskC}°C` : "cpu",
+      hint: node.temps.diskC !== null ? t("hottestDisk", { temp: node.temps.diskC }) : t("cpuHint"),
       trend: (
         <Sparkline
           values={series(node.history.temp)}
           domain={TEMPERATURE}
-          label={`${node.name} CPU °C, last 24 hours`}
+          label={t("trendTemperature", { name })}
           width={64}
         />
       ),
@@ -150,11 +169,11 @@ function nodeTiles(node: LabNodeStatus, live: boolean): Tile[] {
   if (node.gpu) {
     const gib = (mib: number) => (mib / 1024).toFixed(1).replace(/\.0$/, "")
     tiles.push({
-      label: "gpu",
+      label: t("gpu"),
       value: formatPercent(node.gpu.utilPct, 0),
       hint: [
-        `vram ${gib(node.gpu.memUsedMiB)}/${gib(node.gpu.memTotalMiB)} GiB`,
-        node.gpu.encoders > 0 && `${node.gpu.encoders} encoding`,
+        t("vram", { used: gib(node.gpu.memUsedMiB), total: gib(node.gpu.memTotalMiB) }),
+        node.gpu.encoders > 0 && t("encoding", { count: node.gpu.encoders }),
         `${node.gpu.tempC}°C`,
       ]
         .filter(Boolean)
@@ -163,7 +182,7 @@ function nodeTiles(node: LabNodeStatus, live: boolean): Tile[] {
         <Sparkline
           values={series(node.history.gpu)}
           domain={PERCENT}
-          label={`${node.name} GPU %, last 24 hours`}
+          label={t("trendGpu", { name })}
           width={64}
         />
       ),
@@ -184,15 +203,17 @@ export function NodePanel({
   now: Date
   spec?: NodeSpec
 }) {
+  const t = useTranslations("homecave")
+  const locale = useLocale()
   const state = nodeState(node.name, status, now)
   const live = state?.state === "up"
   const hardware = [
     node.cpu?.model,
-    node.cpu && `${node.cpu.cores} cores / ${node.cpu.threads} threads`,
+    node.cpu && t("cores", { cores: node.cpu.cores, threads: node.cpu.threads }),
   ].filter(Boolean)
   const categories = Object.entries(node.guests?.byCategory ?? {}).filter(([, v]) => v && v[1] > 0)
   const id = slug(node.name)
-  const tiles = nodeTiles(node, live)
+  const tiles = nodeTiles(node, live, t)
 
   return (
     <section aria-labelledby={id} className="flex min-w-0">
@@ -205,7 +226,11 @@ export function NodePanel({
           }
           meta={
             <>
-              {!live && <span>last seen {formatRelative(node.receivedAt, now)}</span>}
+              {!live && (
+                <span>
+                  {t("lastSeen", { ago: formatRelative(node.receivedAt, now, locale) ?? "—" })}
+                </span>
+              )}
               <LabNodeBadgeView name={node.name} status={status} now={now} compact />
             </>
           }
@@ -217,9 +242,7 @@ export function NodePanel({
           </div>
         )}
         {state?.state === "down" && (
-          <p className="border-b px-4 py-3 text-sm">
-            Not reporting, and the other nodes see it offline. Its last readings are below.
-          </p>
+          <p className="border-b px-4 py-3 text-sm">{t("notReporting")}</p>
         )}
         {/* Not live: the last readings stay visible (when it fell over matters), but muted. */}
         <dl
@@ -230,7 +253,7 @@ export function NodePanel({
             tiles.length % 2 === 1 && "after:bg-surface",
             !live && "opacity-55 grayscale",
           )}
-          aria-label={live ? undefined : `${node.name}, last readings`}
+          aria-label={live ? undefined : t("lastReadings", { name: node.name })}
         >
           {tiles.map((tile) => (
             <Metric key={tile.label} {...tile} />
@@ -242,7 +265,7 @@ export function NodePanel({
               <span className="font-medium tabular">
                 {node.guests.running}/{node.guests.total}
               </span>{" "}
-              <span className="text-muted-foreground">guests running</span>
+              <span className="text-muted-foreground">{t("guestsLabel")}</span>
               {node.containers && node.containers.total > 0 && (
                 <>
                   <span className="text-muted-foreground"> · </span>
@@ -254,12 +277,15 @@ export function NodePanel({
                   >
                     {node.containers.ok}/{node.containers.total}
                   </span>{" "}
-                  <span className="text-muted-foreground">containers healthy</span>
+                  <span className="text-muted-foreground">{t("containersHealthy")}</span>
                 </>
               )}
             </p>
             {categories.length > 0 && (
-              <ul aria-label={`${node.name} guests by category`} className="flex flex-wrap gap-1.5">
+              <ul
+                aria-label={t("guestsByCategory", { name: node.name })}
+                className="flex flex-wrap gap-1.5"
+              >
                 {categories.map(([category, [running, total]]) => {
                   const use = node.resources?.[category as keyof typeof node.resources]
                   return (
@@ -282,7 +308,8 @@ export function NodePanel({
 }
 
 function StoragePanel({ status, now }: { status: LabStatus; now: Date }) {
-  const rows = storageRows(status, now)
+  const t = useTranslations("homecave")
+  const rows = storageRows(status, now, t)
   if (rows.length === 0) return null
   const withDots = rows.some((row) => row.health)
 
@@ -292,10 +319,10 @@ function StoragePanel({ status, now }: { status: LabStatus; now: Date }) {
         <PanelHeader
           title={
             <h2 id="homecave-storage" className="text-foreground">
-              storage
+              {t("storage")}
             </h2>
           }
-          meta={<span>zfs pools · backups</span>}
+          meta={<span>{t("storageMeta")}</span>}
         />
         <DataList>
           {/* Health is a measured state only while the report is fresh; a stale store says so. */}
@@ -304,7 +331,7 @@ function StoragePanel({ status, now }: { status: LabStatus; now: Date }) {
               <DataRow
                 key={`${node.name}:${pool.label}`}
                 title={pool.label}
-                description={pool.kind === "backup" ? "Proxmox Backup Server" : node.name}
+                description={pool.kind === "backup" ? t("backupServer") : node.name}
                 status={health}
                 // Backups have no measured health: they keep the dot's slot, so their titles
                 // line up with the pools (when any pool has a dot to line up with).
@@ -321,8 +348,8 @@ function StoragePanel({ status, now }: { status: LabStatus; now: Date }) {
                     max={pool.totalGiB}
                     label={
                       pool.kind === "backup"
-                        ? `${pool.label}, used`
-                        : `${pool.label} on ${node.name}, used`
+                        ? t("used", { pool: pool.label })
+                        : t("usedOn", { pool: pool.label, node: node.name })
                     }
                   />
                 }
@@ -348,6 +375,8 @@ export function LabDashboardView({
   /** Jellyfin streams now (undefined while loading, null when not connected). */
   streams?: number | null
 }) {
+  const t = useTranslations("homecave")
+  const locale = useLocale()
   const nodes = orderNodes(
     status?.nodes ?? [],
     specs.map((s) => s.name),
@@ -357,10 +386,10 @@ export function LabDashboardView({
     // Before the first heartbeat: the Studio's spec sheet, with nothing claimed.
     return (
       <div className="space-y-6">
-        <StatusPill status="idle">the lab hasn&apos;t reported yet</StatusPill>
+        <StatusPill status="idle">{t("notReported")}</StatusPill>
         {specs.length > 0 && (
           <Panel>
-            <PanelHeader title="homelab" />
+            <PanelHeader title={t("homelab")} />
             <DataList>
               {specs.map((spec) => (
                 <DataRow key={spec.name} title={spec.name} description={spec.description} />
@@ -378,13 +407,18 @@ export function LabDashboardView({
         <LabVerdict status={status} now={now} />
         {/* A picture of this moment, drawn on the server from the same public status. */}
         <Button asChild variant="outline" size="sm">
-          <a href="/homecave/snapshot?download=1" download>
+          {/* A file, not a page: a plain link, drawn in the page's language. */}
+          <a href={`${localizedPath("/homecave/snapshot", locale)}?download=1`} download>
             <Camera aria-hidden />
-            Snapshot <span className="sr-only">of the lab, as a PNG</span>
+            {t("snapshot")} <span className="sr-only">{t("snapshotHint")}</span>
           </a>
         </Button>
       </div>
-      <div aria-label="Nodes" role="region" className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+      <div
+        aria-label={t("nodes")}
+        role="region"
+        className="grid gap-6 md:grid-cols-2 xl:grid-cols-3"
+      >
         {nodes.map((node) => (
           <NodePanel
             key={node.name}

@@ -1,5 +1,6 @@
 import { PortableText } from "@portabletext/react"
 import { ChevronRight } from "lucide-react"
+import { useLocale, useTranslations } from "next-intl"
 import type { ReactNode } from "react"
 import { Container, Section } from "@/components/dashboard/layout"
 import { SectionHeader } from "@/components/dashboard/section-header"
@@ -30,19 +31,18 @@ function MetaLine({
   location?: string | null
   stale: boolean
 }) {
-  const date = formatDate(updated)
+  const t = useTranslations("now")
+  const date = formatDate(updated, useLocale())
   return (
     <p className="mb-8 flex flex-wrap items-center gap-x-4 gap-y-1 label-caps">
       {stale && (
         <span className="inline-flex items-center gap-1.5 text-status-warn-fg">
           <StatusDot status="warn" />
-          stale
+          {t("stale")}
         </span>
       )}
       {date && (
-        <span>
-          updated <time dateTime={updated}>{date}</time>
-        </span>
+        <span>{t.rich("updated", { time: () => <time dateTime={updated}>{date}</time> })}</span>
       )}
       {location?.trim() && <span>{location}</span>}
     </p>
@@ -51,6 +51,7 @@ function MetaLine({
 
 /** One archived update: its date and opening words, the whole text a click away. */
 function PreviousUpdate({ entry }: { entry: Entry }) {
+  const locale = useLocale()
   const opening = trimText(toPlainText(entry.body), 90)
   return (
     <li>
@@ -64,7 +65,7 @@ function PreviousUpdate({ entry }: { entry: Entry }) {
             dateTime={entry.date ?? undefined}
             className="w-28 shrink-0 label-caps text-foreground"
           >
-            {formatDate(entry.date)}
+            {formatDate(entry.date, locale)}
           </time>
           {opening && (
             // The opening line is a preview; once open, the full text below replaces it.
@@ -99,6 +100,7 @@ export function NowView({
   /** Live activity, rendered client-side under the update (see components/live). */
   live?: ReactNode
 }) {
+  const t = useTranslations("now")
   const stale = isStale(now.updated, today, siteConfig.nowStaleAfterDays)
   const archive = (now.archive ?? []).filter((entry) => entry.date && entry.body?.length)
   return (
@@ -107,22 +109,20 @@ export function NowView({
         <Container className="max-w-3xl">
           <SectionHeader
             as="h1"
-            title="Now"
+            title={t("title")}
             className="mb-3"
-            description={
-              <>
-                What I&apos;m focused on at the moment. A{" "}
+            description={t.rich("description", {
+              link: (chunks) => (
                 <a
                   href="https://nownownow.com/about"
                   target="_blank"
                   rel="noopener noreferrer"
                   className={LINK}
                 >
-                  now page
+                  {chunks}
                 </a>
-                , an idea from Derek Sivers.
-              </>
-            }
+              ),
+            })}
           />
           <MetaLine updated={now.updated} location={now.location} stale={stale} />
 
@@ -131,7 +131,7 @@ export function NowView({
           </article>
 
           {live && (
-            <section id="live" aria-label="Live activity" className="mt-12 scroll-mt-20">
+            <section id="live" aria-label={t("live")} className="mt-12 scroll-mt-20">
               {live}
             </section>
           )}
@@ -139,7 +139,7 @@ export function NowView({
           {archive.length > 0 && (
             <section aria-labelledby="now-history" className="mt-12">
               <h2 id="now-history" className="text-lg font-semibold tracking-tight">
-                Previous updates
+                {t("previous")}
               </h2>
               <ol className="mt-3 divide-y border-y">
                 {archive.map((entry) => (

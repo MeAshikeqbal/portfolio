@@ -28,28 +28,58 @@ describe("share card colours", () => {
 })
 
 describe("pageMetadata", () => {
+  const base = { locale: "en" as const, siteName: `${siteConfig.name} Portfolio` }
+
+  it("prefixes other locales and lists every language it exists in", () => {
+    const meta = pageMetadata({
+      ...base,
+      locale: "hi",
+      available: ["en", "hi"],
+      title: "x",
+      description: "y",
+      path: "/now",
+    })
+    expect(meta.alternates?.canonical).toBe("/hi/now")
+    expect(meta.alternates?.languages).toEqual({ en: "/now", hi: "/hi/now", "x-default": "/now" })
+    expect(meta.openGraph).toMatchObject({ locale: "hi_IN", alternateLocale: ["en_US"] })
+  })
+
+  it("points search engines at English when the page isn't in this language", () => {
+    const meta = pageMetadata({
+      ...base,
+      locale: "de",
+      available: ["en"],
+      title: "x",
+      description: "y",
+      path: "/post/a",
+    })
+    expect(meta.alternates?.canonical).toBe("/post/a")
+    expect(meta.alternates?.languages).toBeUndefined()
+  })
+
   it("gives a page its own share title, URL and Twitter card", () => {
-    const meta = pageMetadata({ title: "Now", description: "Doing things.", path: "/now" })
+    const meta = pageMetadata({ ...base, title: "Now", description: "Doing things.", path: "/now" })
     expect(meta.alternates?.canonical).toBe("/now")
     expect(meta.openGraph).toMatchObject({
       title: "Now",
       description: "Doing things.",
       url: `${siteConfig.url}/now`,
       siteName: `${siteConfig.name} Portfolio`,
-      locale: siteConfig.locale,
+      locale: "en_US",
       type: "website",
     })
     expect(meta.twitter).toMatchObject({ card: "summary_large_image", title: "Now" })
   })
 
   it("never sets images (each segment's opengraph-image supplies them)", () => {
-    const meta = pageMetadata({ title: "x", description: "y", path: "/x" })
+    const meta = pageMetadata({ ...base, title: "x", description: "y", path: "/x" })
     expect(meta.openGraph).not.toHaveProperty("images")
     expect(meta.twitter).not.toHaveProperty("images")
   })
 
   it("lets article pages add their own Open Graph fields", () => {
     const meta = pageMetadata({
+      ...base,
       title: "Post",
       description: "d",
       path: "/post/a",

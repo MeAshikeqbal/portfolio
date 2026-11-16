@@ -4,14 +4,28 @@ import { Panel, PanelHeader } from "@/components/dashboard/panel"
 import { SectionHeader } from "@/components/dashboard/section-header"
 import { Sparkline } from "@/components/dashboard/sparkline"
 import { TraceOnView } from "@/components/dashboard/trace-on-view"
+import { getLocale, getTranslations } from "next-intl/server"
 import { getProjects } from "@/lib/api"
 import { formatDate } from "@/lib/format"
 import { byActivity, hasActivity, projectHref, projectMeta } from "@/lib/projects"
 import { projectStatus } from "@/lib/status"
 
 export async function ServicesSection() {
-  const projects = await getProjects()
+  const [projects, t, locale] = await Promise.all([
+    getProjects(),
+    getTranslations("projects"),
+    getLocale(),
+  ])
   if (projects.length === 0) return null
+  const metaLabels = {
+    locale,
+    commits: (count: number) => t("commits", { count }),
+    pushed: (date: string) => t("pushed", { date }),
+  }
+  const translatedStatus = (project: (typeof projects)[number]) => {
+    const status = projectStatus(project)
+    return status ? { ...status, label: t("status", { status: status.label }) } : undefined
+  }
 
   // The six most recently pushed: the panel is an instrument, so it shows what's moving.
   const selected = byActivity(projects).slice(0, 6)
@@ -27,19 +41,21 @@ export async function ServicesSection() {
     <Section id="services" className="border-t">
       <Container>
         <SectionHeader
-          title="Projects"
-          description="Things I've built and run."
-          actions={[{ href: "/projects", label: `All ${projects.length} projects` }]}
+          title={t("sectionTitle")}
+          description={t("sectionDescription")}
+          actions={[{ href: "/projects", label: t("allProjects", { count: projects.length }) }]}
         />
         <Panel>
           <PanelHeader
-            title={`services · ${selected.length} of ${projects.length}`}
+            title={t("services", { shown: selected.length, total: projects.length })}
             meta={
               <>
-                {hasTrends && <span className="hidden sm:inline">commits / wk</span>}
+                {hasTrends && <span className="hidden sm:inline">{t("commitsWeek")}</span>}
                 {syncedAt && (
                   <span>
-                    synced <time dateTime={syncedAt}>{formatDate(syncedAt)}</time>
+                    {t.rich("synced", {
+                      time: () => <time dateTime={syncedAt}>{formatDate(syncedAt, locale)}</time>,
+                    })}
                   </span>
                 )}
               </>
@@ -53,16 +69,19 @@ export async function ServicesSection() {
                   <DataRow
                     key={project._id}
                     href={projectHref(project)}
-                    title={project.title ?? "Untitled project"}
-                    status={projectStatus(project) ?? undefined}
+                    title={project.title ?? t("untitled")}
+                    status={translatedStatus(project)}
                     description={project.description}
-                    meta={projectMeta(project)}
+                    meta={projectMeta(project, metaLabels)}
                     value={
                       // Only draw a trend that has something in it; the push date is in the meta.
                       hasActivity(weekly) ? (
                         <Sparkline
                           values={weekly}
-                          label={`${project.title} commits per week, last ${weekly.length} weeks`}
+                          label={t("commitsPerWeekLast", {
+                            title: project.title ?? "",
+                            weeks: weekly.length,
+                          })}
                         />
                       ) : undefined
                     }

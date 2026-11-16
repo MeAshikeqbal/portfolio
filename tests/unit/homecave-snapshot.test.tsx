@@ -2,11 +2,21 @@
 import { ImageResponse } from "next/og"
 import { describe, expect, it } from "vitest"
 import { SNAPSHOT_WIDTH, SnapshotCard, snapshotHeight } from "@/components/homecave/snapshot-card"
-import { labSnapshot, snapshotFilename, snapshotTime } from "@/lib/lab/snapshot"
+import {
+  labSnapshot as snapshotIn,
+  snapshotFilename,
+  snapshotLabels,
+  snapshotTime,
+} from "@/lib/lab/snapshot"
 import type { LabNodeStatus, LabStatus } from "@/lib/lab/types"
 import { ogFonts } from "@/lib/og"
+import { englishT } from "./intl"
 
 const now = new Date("2026-11-13T14:32:09Z")
+const t = englishT("homecave")
+/** The snapshot in English, as /homecave/snapshot draws it. */
+const labSnapshot = (status: LabStatus | null, at: Date, studio: typeof specs = []) =>
+  snapshotIn(status, at, studio, t, "en")
 const ago = (s: number) => new Date(now.getTime() - s * 1000).toISOString()
 const day = (f: (i: number) => number) => Array.from({ length: 96 }, (_, i) => f(i))
 const empty = { t: [], cpu: [], mem: [], netIn: [], netOut: [], temp: [], gpu: [], edge: [] }
@@ -84,7 +94,7 @@ describe("labSnapshot", () => {
     ])
     expect(snap.freshness).toBe("2 of 3 reporting · updated just now · reports every 30s")
     // Studio order, not the store's.
-    expect(snap.nodes.map((n) => [n.name, n.state?.label])).toEqual([
+    expect(snap.nodes.map((n) => [n.name, n.stateLabel])).toEqual([
       ["Tower", "up · 12d"],
       ["Mini PC #1", "up · 40d"],
       ["Mini PC #2", "down"],
@@ -113,7 +123,7 @@ describe("labSnapshot", () => {
     const stale = { nodes: [{ ...tower, peers: [], receivedAt: ago(3600) }] }
     const snap = labSnapshot(stale, now)!
     expect(snap.summary).toEqual({ status: "idle", label: "no data" })
-    expect(snap.nodes[0].state?.label).toBe("no data")
+    expect(snap.nodes[0].stateLabel).toBe("no data")
     expect(snap.pools.filter((p) => p.where === "Tower").map((p) => p.health?.label)).toEqual([
       "no data",
       "no data",
@@ -139,7 +149,7 @@ describe("SnapshotCard", () => {
     ["no heartbeat yet", null],
   ])("renders to a PNG for %s", async (_, snap) => {
     const response = new ImageResponse(
-      <SnapshotCard snapshot={snap} takenAt={snapshotTime(now)} />,
+      <SnapshotCard snapshot={snap} labels={snapshotLabels(t, snapshotTime(now))} />,
       {
         width: SNAPSHOT_WIDTH,
         height: snapshotHeight(snap),

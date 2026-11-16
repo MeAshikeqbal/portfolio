@@ -3,7 +3,7 @@
 import { randomUUID } from "node:crypto"
 import { headers } from "next/headers"
 import { TURNSTILE_ACTION } from "@/lib/contact-fields"
-import { contactSchema, HONEYPOT_FIELD } from "@/lib/contact-schema"
+import { contactSchema, HONEYPOT_FIELD, type ContactErrorCode } from "@/lib/contact-schema"
 import { buildMessageDocument } from "@/lib/inbox-message"
 import { verifyTurnstile } from "@/lib/turnstile"
 import { inboxClient } from "@/sanity/lib/inbox-client"
@@ -12,8 +12,9 @@ type Field = "name" | "email" | "message" | "turnstileToken"
 
 export interface ContactState {
   status: "idle" | "success" | "error"
-  message?: string
-  fieldErrors?: Partial<Record<Field, string>>
+  /** Error codes, translated by the form (messages: contact.errors.*). */
+  message?: ContactErrorCode
+  fieldErrors?: Partial<Record<Field, ContactErrorCode>>
   /** Echoed back on error so the form keeps what the visitor typed. */
   values?: { name: string; email: string; message: string }
 }
@@ -46,15 +47,15 @@ export async function submitContact(
     const fieldErrors: ContactState["fieldErrors"] = {}
     for (const issue of parsed.error.issues) {
       const field = issue.path[0] as Field
-      fieldErrors[field] ??= issue.message
+      fieldErrors[field] ??= issue.message as ContactErrorCode
     }
-    return { status: "error", message: "Please fix the highlighted fields.", fieldErrors, values }
+    return { status: "error", message: "fixFields", fieldErrors, values }
   }
 
   const secret = process.env.CLOUDFLARE_TURNSTILE_SECRET_KEY
   if (!secret) {
     console.error("CLOUDFLARE_TURNSTILE_SECRET_KEY is not set")
-    return { status: "error", message: "The contact form isn't configured right now.", values }
+    return { status: "error", message: "notConfigured", values }
   }
 
   const ip = (await headers()).get("x-forwarded-for")?.split(",")[0]?.trim()
@@ -68,8 +69,8 @@ export async function submitContact(
   if (!verified) {
     return {
       status: "error",
-      message: "The anti-spam check failed. Please try again.",
-      fieldErrors: { turnstileToken: "Please complete the check again." },
+      message: "spamFailed",
+      fieldErrors: { turnstileToken: "challengeAgain" },
       values,
     }
   }
@@ -85,7 +86,7 @@ export async function submitContact(
     console.error("Couldn't store contact message in the inbox dataset:", error)
     return {
       status: "error",
-      message: "Couldn't send your message. Please try again later.",
+      message: "sendFailed",
       values,
     }
   }

@@ -1,15 +1,17 @@
 "use client"
 
 import { StatusDot } from "@/components/dashboard/status-dot"
+import { useLocale, useTranslations } from "next-intl"
 import { useHydrated } from "@/hooks/use-hydrated"
-import { keyValidity } from "@/lib/pgp"
-import { STATUS_TEXT_CLASS, type Status } from "@/lib/status"
+import { formatDate } from "@/lib/format"
+import { keyValidity, type KeyValidityVerdict } from "@/lib/pgp"
+import { STATUS_TEXT_CLASS } from "@/lib/status"
 import { cn } from "@/lib/utils"
 
 interface KeyValidityProps {
   expiresAt: string | null
   /** The verdict when the page was rendered; used until the browser re-checks. */
-  initial: { status: Status; label: string }
+  initial: KeyValidityVerdict
   className?: string
 }
 
@@ -18,6 +20,8 @@ interface KeyValidityProps {
  * (red). Pages are static, so after hydration it is re-judged against the visitor's clock.
  */
 export function KeyValidity({ expiresAt, initial, className }: KeyValidityProps) {
+  const t = useTranslations("footer")
+  const locale = useLocale()
   const hydrated = useHydrated()
   const current = hydrated ? keyValidity(expiresAt) : initial
 
@@ -30,7 +34,7 @@ export function KeyValidity({ expiresAt, initial, className }: KeyValidityProps)
       )}
     >
       <StatusDot status={current.status} />
-      {current.label}
+      {t(current.code, { days: current.days ?? 0, date: formatDate(current.date, locale) ?? "" })}
     </span>
   )
 }

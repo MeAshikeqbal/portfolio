@@ -147,7 +147,7 @@ describe("node state", () => {
       { name: "Mini PC #2", receivedAt: secondsAgo(3600) },
     ])
     expect(nodeState("Mini PC #2", s, now)).toMatchObject({ status: "down", label: "down" })
-    expect(labSummary(s, now)).toEqual({ status: "warn", label: "1/2 up" })
+    expect(labSummary(s, now)).toEqual({ status: "warn", label: "1/2 up", up: 1, total: 2 })
   })
 
   it("is 'no data' when silent and nobody says it's down (the agent, not the node)", () => {
@@ -164,6 +164,8 @@ describe("node state", () => {
     expect(labSummary(status([{ receivedAt: secondsAgo(4000) }]), now)).toEqual({
       status: "idle",
       label: "no data",
+      up: null,
+      total: 1,
     })
   })
 

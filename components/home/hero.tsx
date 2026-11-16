@@ -1,6 +1,6 @@
 import { ArrowRight, FileText, Rss } from "lucide-react"
 import Image from "next/image"
-import Link from "next/link"
+import { getLocale, getTranslations } from "next-intl/server"
 import { Container, GridBackdrop } from "@/components/dashboard/layout"
 import { Panel, PanelHeader } from "@/components/dashboard/panel"
 import { StatusPill } from "@/components/dashboard/status-pill"
@@ -11,9 +11,13 @@ import { getCvUrl, getHomeStats } from "@/lib/api"
 import { readLabStatus } from "@/lib/lab/store"
 import { formatCompact, formatDate } from "@/lib/format"
 import { siteConfig } from "@/lib/site"
+import { Link } from "@/i18n/navigation"
 
 export async function Hero() {
-  const [cvUrl, stats, lab] = await Promise.all([
+  const [t, site, locale, cvUrl, stats, lab] = await Promise.all([
+    getTranslations("home"),
+    getTranslations("site"),
+    getLocale(),
     getCvUrl(),
     getHomeStats(),
     // Only the machines' names, to pick the rows; cached for an hour (names rarely change).
@@ -24,9 +28,9 @@ export async function Hero() {
 
   // Only counts that exist: commits stay hidden until the GitHub sync has written some.
   const metrics = [
-    { label: "posts", value: stats.posts },
-    { label: "projects", value: stats.projects },
-    ...(stats.commits > 0 ? [{ label: "commits/yr", value: stats.commits }] : []),
+    { label: t("statPosts"), value: stats.posts },
+    { label: t("statProjects"), value: stats.projects },
+    ...(stats.commits > 0 ? [{ label: t("statCommits"), value: stats.commits }] : []),
   ]
 
   return (
@@ -46,7 +50,7 @@ export async function Hero() {
             <h1 className="text-display font-semibold">{siteConfig.name}</h1>
           </div>
           <p className="mt-5 max-w-xl text-lg text-pretty text-muted-foreground sm:mt-6">
-            {siteConfig.tagline}
+            {site("tagline")}
           </p>
 
           <div className="mt-7 flex flex-wrap items-center gap-3 sm:mt-8">
@@ -54,17 +58,17 @@ export async function Hero() {
               <Button asChild>
                 {/* Served from our own domain (app/resume.pdf/route.ts), not the Sanity CDN. */}
                 <a href="/resume.pdf" target="_blank" rel="noopener">
-                  <FileText /> Résumé
-                  <span className="sr-only"> (PDF, opens in a new tab)</span>
+                  <FileText /> {t("resume")}
+                  <span className="sr-only">{t("resumeHint")}</span>
                 </a>
               </Button>
             )}
             <Button asChild variant="outline">
-              <Link href="/#contact">Get in touch</Link>
+              <Link href="/#contact">{t("getInTouch")}</Link>
             </Button>
             <Button asChild variant="ghost" className="text-muted-foreground">
               <a href="/rss.xml">
-                <Rss /> Follow via RSS
+                <Rss /> {t("followRss")}
               </a>
             </Button>
           </div>
@@ -74,7 +78,7 @@ export async function Hero() {
           {/* Only when there's something to say: no decorative "node" header. */}
           {availability && (
             <PanelHeader
-              title="availability"
+              title={t("availability")}
               meta={
                 <StatusPill status={availability.status} pulse={availability.status === "up"}>
                   {availability.label}
@@ -90,11 +94,13 @@ export async function Hero() {
             >
               <span className="min-w-0 flex-1">
                 <span className="block label-caps">
-                  latest post
+                  {t("latestPost")}
                   {latest.publishedAt && (
                     <>
                       {" · "}
-                      <time dateTime={latest.publishedAt}>{formatDate(latest.publishedAt)}</time>
+                      <time dateTime={latest.publishedAt}>
+                        {formatDate(latest.publishedAt, locale)}
+                      </time>
                     </>
                   )}
                 </span>
@@ -118,7 +124,7 @@ export async function Hero() {
               <div key={metric.label} className="px-4 py-3">
                 <dt className="label-caps">{metric.label}</dt>
                 <dd className="mt-1 text-2xl font-semibold tracking-tight tabular">
-                  {formatCompact(metric.value)}
+                  {formatCompact(metric.value, locale)}
                 </dd>
               </div>
             ))}

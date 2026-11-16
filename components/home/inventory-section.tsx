@@ -4,16 +4,20 @@ import { SectionHeader } from "@/components/dashboard/section-header"
 import { SkillIcon } from "@/components/skill-icon"
 import { getSkills, type Skill } from "@/lib/api"
 import { isMonochromeIcon } from "@/lib/icons"
+import { getTranslations } from "next-intl/server"
 import { cn } from "@/lib/utils"
 
 type Category = NonNullable<Skill["category"]>
 
 /** Display groups over the Studio's finer categories (sanity/schemaTypes/skillType.tsx). */
-const GROUPS: { title: string; categories: Category[] }[] = [
-  { title: "Languages & frontend", categories: ["languages", "frontend"] },
-  { title: "Backend & data", categories: ["backend", "api-development", "database", "testing"] },
+const GROUPS: {
+  title: "frontend" | "backend" | "infrastructure" | "tools"
+  categories: Category[]
+}[] = [
+  { title: "frontend", categories: ["languages", "frontend"] },
+  { title: "backend", categories: ["backend", "api-development", "database", "testing"] },
   {
-    title: "Infrastructure & homelab",
+    title: "infrastructure",
     categories: [
       "linux-infrastructure",
       "self-hosting",
@@ -26,7 +30,7 @@ const GROUPS: { title: string; categories: Category[] }[] = [
       "security",
     ],
   },
-  { title: "Tools & AI", categories: ["ai-automation", "tools"] },
+  { title: "tools", categories: ["ai-automation", "tools"] },
 ]
 
 /** Skills shown per group before "show all". */
@@ -34,19 +38,20 @@ const VISIBLE = 8
 const TOGGLE_ID = "inventory-show-all"
 
 export async function InventorySection() {
-  const skills = (await getSkills()).filter((skill) => skill.name)
+  const [all, t] = await Promise.all([getSkills(), getTranslations("inventory")])
+  const skills = all.filter((skill) => skill.name)
   if (skills.length === 0) return null
 
   const grouped = new Set<Category>(GROUPS.flatMap((group) => group.categories))
   const groups = [
     ...GROUPS.map((group) => ({
-      title: group.title,
+      title: t(`groups.${group.title}`),
       skills: skills.filter((s) => s.category && group.categories.includes(s.category)),
       collapsed: false,
     })),
     // Uncategorized skills only show once expanded: they're the long tail.
     {
-      title: "Other",
+      title: t("groups.other"),
       skills: skills.filter((s) => !s.category || !grouped.has(s.category)),
       collapsed: true,
     },
@@ -60,13 +65,13 @@ export async function InventorySection() {
   return (
     <Section id="inventory" className="border-t">
       <Container>
-        <SectionHeader
-          title="Stack"
-          description="Languages, tools and infrastructure I work with."
-        />
+        <SectionHeader title={t("title")} description={t("description")} />
         {/* A checkbox drives "show all" through :has(), so it works without JavaScript. */}
         <Panel className="group/inventory">
-          <PanelHeader title="inventory" meta={<span>{skills.length} items</span>} />
+          <PanelHeader
+            title={t("panel")}
+            meta={<span>{t("items", { count: skills.length })}</span>}
+          />
           <div className="divide-y">
             {groups.map((group) => (
               <section
@@ -105,10 +110,10 @@ export async function InventorySection() {
                 className="flex min-h-11 cursor-pointer items-center justify-center rounded-md text-sm font-medium text-muted-foreground transition-colors peer-focus-visible:outline-2 peer-focus-visible:-outline-offset-2 peer-focus-visible:outline-ring hover:text-foreground"
               >
                 <span className="group-has-[#inventory-show-all:checked]/inventory:hidden">
-                  Show all {skills.length}
+                  {t("showAll", { count: skills.length })}
                 </span>
                 <span className="hidden group-has-[#inventory-show-all:checked]/inventory:inline">
-                  Show fewer
+                  {t("showFewer")}
                 </span>
               </label>
             </div>

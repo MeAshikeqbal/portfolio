@@ -1,5 +1,6 @@
 "use client"
 
+import { useLocale } from "next-intl"
 import { useHydrated } from "@/hooks/use-hydrated"
 import { formatDate, formatRelative } from "@/lib/format"
 
@@ -9,11 +10,12 @@ import { formatDate, formatRelative } from "@/lib/format"
  * Past a month both read as the date.
  */
 export function RelativeTime({ iso, className }: { iso: string; className?: string }) {
+  const locale = useLocale()
   const hydrated = useHydrated()
-  const text = hydrated ? formatRelative(iso) : formatDate(iso)
+  const text = hydrated ? formatRelative(iso, undefined, locale) : formatDate(iso, locale)
   if (!text) return null
   return (
-    <time dateTime={iso} title={formatDate(iso) ?? undefined} className={className}>
+    <time dateTime={iso} title={formatDate(iso, locale) ?? undefined} className={className}>
       {text}
     </time>
   )

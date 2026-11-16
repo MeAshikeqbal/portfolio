@@ -1,5 +1,6 @@
 "use client"
 
+import { useTranslations } from "next-intl"
 import { useHydrated } from "@/hooks/use-hydrated"
 import { STATUS_TEXT_CLASS, syncStatus, type Status } from "@/lib/status"
 import { cn } from "@/lib/utils"
@@ -19,6 +20,7 @@ interface SyncIndicatorProps {
  * it; after hydration the age is re-judged against the visitor's clock.
  */
 export function SyncIndicator({ syncedAt, initial, className }: SyncIndicatorProps) {
+  const t = useTranslations("systemBar")
   const hydrated = useHydrated()
   const current = hydrated ? syncStatus(syncedAt) : initial
   if (!current) return null
@@ -34,7 +36,7 @@ export function SyncIndicator({ syncedAt, initial, className }: SyncIndicatorPro
     >
       <StatusDot status={current.status} />
       <span>
-        github · {fresh ? "synced" : "stale"} <RelativeTime iso={syncedAt} />
+        {fresh ? t("githubSynced") : t("githubStale")} <RelativeTime iso={syncedAt} />
       </span>
     </span>
   )

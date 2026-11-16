@@ -1,0 +1,48 @@
+import { BackToTop } from "@/components/back-to-top"
+import { SystemBar } from "@/components/dashboard/system-bar"
+import { SiteFooter } from "@/components/site/site-footer"
+import { SiteNav } from "@/components/site/site-nav"
+import { VisualEditing } from "next-sanity/visual-editing"
+import { draftMode } from "next/headers"
+import { getTranslations } from "next-intl/server"
+import { DraftModeBanner } from "@/components/site/draft-mode-banner"
+import { getCommandIndex, getSiteStatus } from "@/lib/api"
+import { SanityLive } from "@/sanity/lib/live"
+
+export default async function SiteLayout({ children }: { children: React.ReactNode }) {
+  const [commandIndex, siteStatus, { isEnabled: isDraftMode }, t, nav] = await Promise.all([
+    getCommandIndex(),
+    getSiteStatus(),
+    draftMode(),
+    getTranslations("site"),
+    getTranslations("nav"),
+  ])
+
+  return (
+    <div className="flex min-h-screen flex-col">
+      <a
+        href="#main"
+        className="sr-only z-50 rounded-md bg-foreground px-3 py-2 text-background focus:not-sr-only focus:fixed focus:top-2 focus:left-2"
+      >
+        {t("skipToContent")}
+      </a>
+      <SystemBar syncedAt={siteStatus.syncedAt} latestPostAt={siteStatus.latestPostAt} />
+      <SiteNav commandIndex={commandIndex} />
+      <div id="main" className="flex-1">
+        {children}
+      </div>
+      <SiteFooter
+        extraLinks={[...(commandIndex.hasNow ? [{ label: nav("now"), href: "/now" }] : [])]}
+      />
+      <BackToTop />
+      {/* Live content updates for the public site only (not the Studio or style guide). */}
+      <SanityLive includeDrafts={isDraftMode} />
+      {isDraftMode && (
+        <>
+          <VisualEditing />
+          <DraftModeBanner />
+        </>
+      )}
+    </div>
+  )
+}

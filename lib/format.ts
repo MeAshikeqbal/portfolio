@@ -1,24 +1,61 @@
 /**
  * Formatting helpers. Dates format in UTC so server and client render the same text
- * (no hydration mismatches across time zones).
+ * (no hydration mismatches across time zones). Every formatter takes the page's locale; numbers
+ * always use Latin digits (`-u-nu-latn`) so dashboard figures keep their tabular alignment in
+ * Bengali and Hindi too.
  */
-const dateFormat = new Intl.DateTimeFormat("en-US", {
-  year: "numeric",
-  month: "short",
-  day: "numeric",
-  timeZone: "UTC",
-})
+type FormatLocale = string
 
-const monthFormat = new Intl.DateTimeFormat("en-US", {
-  year: "numeric",
-  month: "short",
-  timeZone: "UTC",
-})
+const formatters = new Map<
+  string,
+  Intl.DateTimeFormat | Intl.NumberFormat | Intl.RelativeTimeFormat
+>()
 
-const compactFormat = new Intl.NumberFormat("en-US", {
-  notation: "compact",
-  maximumFractionDigits: 1,
-})
+function cached<T extends Intl.DateTimeFormat | Intl.NumberFormat | Intl.RelativeTimeFormat>(
+  key: string,
+  create: () => T,
+): T {
+  let formatter = formatters.get(key)
+  if (!formatter) {
+    formatter = create()
+    formatters.set(key, formatter)
+  }
+  return formatter as T
+}
+
+const latn = (locale: FormatLocale) => `${locale}-u-nu-latn`
+
+const dateFormat = (locale: FormatLocale) =>
+  cached(
+    `date:${locale}`,
+    () =>
+      new Intl.DateTimeFormat(latn(locale), {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+        timeZone: "UTC",
+      }),
+  )
+
+const monthFormat = (locale: FormatLocale) =>
+  cached(
+    `month:${locale}`,
+    () =>
+      new Intl.DateTimeFormat(latn(locale), { year: "numeric", month: "short", timeZone: "UTC" }),
+  )
+
+const compactFormat = (locale: FormatLocale) =>
+  cached(
+    `compact:${locale}`,
+    () => new Intl.NumberFormat(latn(locale), { notation: "compact", maximumFractionDigits: 1 }),
+  )
+
+// "always": "1d ago", never "yesterday", so every age reads as the same kind of figure.
+const relativeFormat = (locale: FormatLocale, numeric: "always" | "auto" = "always") =>
+  cached(
+    `relative:${numeric}:${locale}`,
+    () => new Intl.RelativeTimeFormat(latn(locale), { style: "narrow", numeric }),
+  )
 
 /** A Date for a valid ISO-ish string, or null for missing or unparseable input. */
 export function parseDate(iso: string | null | undefined): Date | null {
@@ -27,21 +64,32 @@ export function parseDate(iso: string | null | undefined): Date | null {
   return Number.isNaN(date.getTime()) ? null : date
 }
 
-/** "Mar 10, 2026", or null for missing or invalid dates. */
-export function formatDate(iso: string | null | undefined): string | null {
+/** "Mar 10, 2026" (in English), or null for missing or invalid dates. */
+export function formatDate(
+  iso: string | null | undefined,
+  locale: FormatLocale = "en",
+): string | null {
   const date = parseDate(iso)
-  return date ? dateFormat.format(date) : null
+  return date ? dateFormat(locale).format(date) : null
 }
 
-/** "Mar 2026", or null for missing or invalid dates. */
-export function formatMonth(iso: string | null | undefined): string | null {
+/** "Mar 2026" (in English), or null for missing or invalid dates. */
+export function formatMonth(
+  iso: string | null | undefined,
+  locale: FormatLocale = "en",
+): string | null {
   const date = parseDate(iso)
-  return date ? monthFormat.format(date) : null
+  return date ? monthFormat(locale).format(date) : null
 }
 
-/** 1284 → "1.3K" */
-export function formatCompact(value: number): string {
-  return compactFormat.format(value)
+/** 1284 → "1.3K" (in English) */
+export function formatCompact(value: number, locale: FormatLocale = "en"): string {
+  return compactFormat(locale).format(value)
+}
+
+/** 1284 → "1,284" (in English) */
+export function formatNumber(value: number, locale: FormatLocale = "en"): string {
+  return cached(`number:${locale}`, () => new Intl.NumberFormat(latn(locale))).format(value)
 }
 
 /**
@@ -75,20 +123,27 @@ export function trimText(text: string | null | undefined, max: number): string |
   return `${(space > max * 0.6 ? cut.slice(0, space) : cut).replace(/[\s.,;:!?-]+$/, "")}…`
 }
 
-/** "just now", "5m ago", "3h ago", "2d ago" or a date past a month; null for invalid input. */
+/**
+ * "just now", "5m ago", "3h ago", "2d ago" or a date past a month (in English; other locales get
+ * Intl's narrow relative time); null for invalid input.
+ */
 export function formatRelative(
   iso: string | null | undefined,
   now: Date = new Date(),
+  locale: FormatLocale = "en",
 ): string | null {
   const date = parseDate(iso)
   if (!date) return null
+  const rtf = relativeFormat(locale)
   const minutes = Math.max(0, Math.round((now.getTime() - date.getTime()) / 60_000))
-  if (minutes < 1) return "just now"
-  if (minutes < 60) return `${minutes}m ago`
+  if (minutes < 1) {
+    return locale === "en" ? "just now" : relativeFormat(locale, "auto").format(0, "second")
+  }
+  if (minutes < 60) return rtf.format(-minutes, "minute")
   const hours = Math.round(minutes / 60)
-  if (hours < 24) return `${hours}h ago`
+  if (hours < 24) return rtf.format(-hours, "hour")
   const days = Math.round(hours / 24)
-  return days <= 30 ? `${days}d ago` : formatDate(iso)
+  return days <= 30 ? rtf.format(-days, "day") : formatDate(iso, locale)
 }
 
 /** GiB as "512 GiB" or "3.6 TiB" (binary units, as ZFS and Proxmox count). */

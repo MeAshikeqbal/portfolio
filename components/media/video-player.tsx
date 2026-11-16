@@ -1,6 +1,7 @@
 "use client"
 
 import { Pause, Play } from "lucide-react"
+import { useTranslations } from "next-intl"
 import { useEffect, useRef, useState } from "react"
 import { cn } from "@/lib/utils"
 
@@ -25,6 +26,7 @@ export function UploadedVideo({
   loop?: boolean
 }) {
   const ref = useRef<HTMLVideoElement>(null)
+  const t = useTranslations("ui")
   const [playing, setPlaying] = useState(false)
 
   useEffect(() => {
@@ -73,7 +75,7 @@ export function UploadedVideo({
           else video.pause()
         }}
         className="absolute right-3 bottom-3 inline-flex size-9 items-center justify-center rounded-full border bg-background/85 text-foreground backdrop-blur transition-colors hover:bg-background focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
-        aria-label={playing ? `Pause: ${title}` : `Play: ${title}`}
+        aria-label={playing ? t("pause", { title }) : t("play", { title })}
       >
         {playing ? (
           <Pause className="size-4" aria-hidden />
@@ -98,6 +100,7 @@ export function YouTubeEmbed({
   thumbnail: string
   title: string
 }) {
+  const t = useTranslations("ui")
   const [active, setActive] = useState(false)
 
   return (
@@ -116,7 +119,7 @@ export function YouTubeEmbed({
           type="button"
           onClick={() => setActive(true)}
           className="group absolute inset-0 size-full cursor-pointer focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring"
-          aria-label={`Play video: ${title}`}
+          aria-label={t("playVideo", { title })}
         >
           {/* eslint-disable-next-line @next/next/no-img-element -- YouTube's CDN, not next/image */}
           <img

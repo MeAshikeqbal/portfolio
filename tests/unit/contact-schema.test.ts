@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest"
 import { contactSchema } from "@/lib/contact-schema"
+import messages from "@/messages/en.json"
 
 const valid = {
   name: "Ada Lovelace",
@@ -19,13 +20,20 @@ describe("contactSchema", () => {
   })
 
   it.each([
-    ["email", "not-an-email", "Please enter a valid email address."],
-    ["message", "too short", "Message must be at least 10 characters."],
-    ["message", "x".repeat(5001), "Message must be at most 5000 characters."],
-    ["turnstileToken", "", "Please complete the Cloudflare Turnstile challenge."],
-  ])("rejects an invalid %s with a helpful message", (field, value, error) => {
+    ["email", "not-an-email", "emailInvalid"],
+    ["message", "too short", "messageTooShort"],
+    ["message", "x".repeat(5001), "messageTooLong"],
+    ["turnstileToken", "", "challengeMissing"],
+  ])("rejects an invalid %s with an error code", (field, value, error) => {
     const result = contactSchema.safeParse({ ...valid, [field]: value })
     expect(result.success).toBe(false)
     expect(result.error?.issues[0]?.message).toBe(error)
+  })
+
+  it("has an English message for every error code", () => {
+    const codes = Object.keys(messages.contact.errors)
+    for (const code of ["nameTooShort", "nameTooLong", "emailInvalid", "challengeAgain"]) {
+      expect(codes).toContain(code)
+    }
   })
 })

@@ -1,4 +1,5 @@
 import { ArrowUpRight } from "lucide-react"
+import { useTranslations } from "next-intl"
 import type { ReactNode } from "react"
 import { Panel, PanelHeader } from "@/components/dashboard/panel"
 import { SkillIcon } from "@/components/skill-icon"
@@ -96,9 +97,13 @@ function UsesPanel({
   section: VisibleSection
   badge?: (name: string) => ReactNode
 }) {
+  const t = useTranslations("uses")
   return (
     <Panel>
-      <PanelHeader title={section.title} meta={<span>{section.items.length} items</span>} />
+      <PanelHeader
+        title={section.title}
+        meta={<span>{t("items", { count: section.items.length })}</span>}
+      />
       <ul className="divide-y">
         {section.items.map((item) => (
           <li key={item._key} className="flex items-start gap-3 px-4 py-3">
@@ -122,7 +127,7 @@ function UsesPanel({
                 >
                   {item.name}
                   <ArrowUpRight className="size-3.5 text-muted-foreground" aria-hidden />
-                  <span className="sr-only"> (opens in a new tab)</span>
+                  <span className="sr-only">{t("newTab")}</span>
                 </a>
               ) : (
                 <p className="font-medium">{item.name}</p>

@@ -57,8 +57,9 @@ test.describe("seo", () => {
         await meta("og:title"),
       )
       // The image comes from this route's own opengraph-image, not the root's default card.
+      // Next names English images after the internal /en route; the proxy serves them as is.
       expect(new URL(await ogImage(page), "http://x").pathname).toMatch(
-        new RegExp(`^${path}/opengraph-image`),
+        new RegExp(`^(/en)?${path}/opengraph-image`),
       )
     })
   }

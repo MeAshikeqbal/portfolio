@@ -11,6 +11,7 @@ import { LabServiceBadge } from "@/components/lab/lab-badges"
 import { serviceState } from "@/lib/lab/services"
 import type { LabStatus } from "@/lib/lab/types"
 import type { USES_QUERY_RESULT } from "@/sanity.types"
+import { useTranslations } from "next-intl"
 import { cn } from "@/lib/utils"
 import { LabDashboard, type NodeSpec } from "./lab-dashboard"
 
@@ -23,6 +24,7 @@ const isLabSection = (title: string | null | undefined) => /self-hosted|network/
  * setup sections) from the Studio's Homecave document.
  */
 export function HomecaveView({ uses, lab }: { uses: USES_QUERY_RESULT; lab: LabStatus | null }) {
+  const t = useTranslations("homecave")
   const sections = visibleUsesSections(uses)
   const homelab = sections.find((s) => isHomelab(s.title))
   const specs: NodeSpec[] = homelabSpecs(uses)
@@ -41,20 +43,14 @@ export function HomecaveView({ uses, lab }: { uses: USES_QUERY_RESULT; lab: LabS
         <Container>
           <SectionHeader
             as="h1"
-            title="Homecave"
-            description={
-              uses?.intro ??
-              "My homelab, live: a three-node Proxmox cluster at home, and what runs on it."
-            }
+            title={t("title")}
+            description={uses?.intro ?? t("introFallback")}
           />
           <LabDashboard initial={lab} renderedAt={renderedAt.toISOString()} specs={specs} />
           {/* The privacy note sits with the numbers it qualifies, not at the foot of the page. */}
           <p className="mt-4 max-w-[65ch] text-sm text-pretty text-muted-foreground">
-            <span className="font-medium text-foreground">What this doesn&apos;t show.</span> Each
-            node reports itself every 30 seconds, signed, and the lab connects outward only: nothing
-            here can reach into it. No hostnames, IP addresses, domains or software versions;
-            containers and VMs are counted by category, never named; storage gets plain labels;
-            numbers are rounded, and private projects only add to the counts.
+            <span className="font-medium text-foreground">{t("privacyTitle")}</span>{" "}
+            {t("privacyBody")}
           </p>
         </Container>
       </Section>
@@ -64,10 +60,7 @@ export function HomecaveView({ uses, lab }: { uses: USES_QUERY_RESULT; lab: LabS
           <Container>
             {labSections.length > 0 && (
               <>
-                <SectionHeader
-                  title="What runs here"
-                  description="The services on the cluster, and how they're reached."
-                />
+                <SectionHeader title={t("runsTitle")} description={t("runsDescription")} />
                 <UsesSections sections={labSections} badge={badge} />
               </>
             )}
@@ -79,7 +72,7 @@ export function HomecaveView({ uses, lab }: { uses: USES_QUERY_RESULT; lab: LabS
                     aria-hidden
                     className="size-4 text-muted-foreground transition-transform group-open:rotate-90 motion-reduce:transition-none"
                   />
-                  <h2 className="text-lg font-semibold tracking-tight">Desk &amp; tools</h2>
+                  <h2 className="text-lg font-semibold tracking-tight">{t("desk")}</h2>
                   <span className="label-caps">{deskSections.map((s) => s.title).join(" · ")}</span>
                 </summary>
                 <UsesSections sections={deskSections} className="mt-4" />

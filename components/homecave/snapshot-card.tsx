@@ -1,6 +1,6 @@
 import type { ReactNode } from "react"
 import { sparklinePoints } from "@/components/dashboard/sparkline"
-import type { LabSnapshot, SnapshotNode, SnapshotPool } from "@/lib/lab/snapshot"
+import type { LabSnapshot, SnapshotLabels, SnapshotNode, SnapshotPool } from "@/lib/lab/snapshot"
 import { Bar, Dot, Mono, OG_COLORS, truncate } from "@/lib/og"
 import { siteConfig } from "@/lib/site"
 import type { Status } from "@/lib/status"
@@ -55,10 +55,11 @@ export function snapshotHeight(snapshot: LabSnapshot | null): number {
 
 export function SnapshotCard({
   snapshot,
-  takenAt,
+  labels,
 }: {
   snapshot: LabSnapshot | null
-  takenAt: string
+  /** The fixed words, in the snapshot's language (snapshotLabels). */
+  labels: SnapshotLabels
 }) {
   const summary = snapshot?.summary
 
@@ -79,7 +80,7 @@ export function SnapshotCard({
           {/* Satori lays out fragments' children loosely: dot and label are plain siblings. */}
           {summary && <Dot color={DOT[summary.status]} />}
           <span style={{ color: summary ? TEXT[summary.status] : OG_COLORS.muted }}>
-            {summary?.label ?? "no data"}
+            {summary?.label ?? labels.noData}
           </span>
         </span>
         <span>itsashik.dev/homecave</span>
@@ -95,7 +96,7 @@ export function SnapshotCard({
       >
         <div style={{ display: "flex", flexDirection: "column", height: HEAD }}>
           <Mono size={20} color={OG_COLORS.muted}>
-            homecave · snapshot
+            {labels.title}
           </Mono>
           {snapshot ? (
             <div style={{ display: "flex", flexDirection: "column" }}>
@@ -137,7 +138,7 @@ export function SnapshotCard({
                 color: OG_COLORS.muted,
               }}
             >
-              the lab hasn&apos;t reported yet
+              {labels.notReported}
             </div>
           )}
         </div>
@@ -157,11 +158,13 @@ export function SnapshotCard({
           </div>
         )}
 
-        {snapshot && snapshot.pools.length > 0 && <Storage pools={snapshot.pools} />}
+        {snapshot && snapshot.pools.length > 0 && (
+          <Storage pools={snapshot.pools} labels={labels} />
+        )}
       </div>
 
       <Bar bottom>
-        <span>snapshot · {takenAt}</span>
+        <span>{labels.taken}</span>
         <span>{siteConfig.name}</span>
       </Bar>
     </div>
@@ -206,7 +209,7 @@ function NodeCard({ node }: { node: SnapshotNode }) {
           <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <Dot color={DOT[state.status]} />
             <Mono size={16} color={TEXT[state.status]}>
-              {state.label}
+              {node.stateLabel}
             </Mono>
           </span>
         )}
@@ -309,7 +312,7 @@ function Spark({ values }: { values: number[] }) {
   )
 }
 
-function Storage({ pools }: { pools: SnapshotPool[] }) {
+function Storage({ pools, labels }: { pools: SnapshotPool[]; labels: SnapshotLabels }) {
   return (
     <div style={{ display: "flex", flexDirection: "column", marginTop: GAP }}>
       <div
@@ -322,10 +325,10 @@ function Storage({ pools }: { pools: SnapshotPool[] }) {
         }}
       >
         <Mono size={15} color={OG_COLORS.muted}>
-          storage
+          {labels.storage}
         </Mono>
         <Mono size={15} color={OG_COLORS.muted}>
-          zfs pools · backups
+          {labels.storageMeta}
         </Mono>
       </div>
       {pools.map((pool) => (

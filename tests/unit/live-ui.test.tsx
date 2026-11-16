@@ -103,7 +103,7 @@ describe("pickLiveLine", () => {
   it("prefers playing, then watching, then streams, then the newest last item", () => {
     expect(
       pickLiveLine(data({ spotify: spotify("playing"), trakt: trakt("watching") })),
-    ).toMatchObject({ verb: "listening to", status: "up" })
+    ).toMatchObject({ verb: "listening", status: "up" })
     expect(
       pickLiveLine(
         data({ spotify: spotify("last", "2026-11-09T10:00:00Z"), trakt: trakt("watching") }),
@@ -113,7 +113,7 @@ describe("pickLiveLine", () => {
       pickLiveLine(
         data({ spotify: spotify("last", "2026-11-09T10:00:00Z"), jellyfin: jellyfin(2) }),
       ),
-    ).toMatchObject({ verb: "jellyfin", text: "2 streams right now" })
+    ).toMatchObject({ verb: "jellyfin", text: null, streams: 2 })
     expect(
       pickLiveLine(
         data({
@@ -122,7 +122,7 @@ describe("pickLiveLine", () => {
           jellyfin: jellyfin(0),
         }),
       ),
-    ).toMatchObject({ verb: "last watched", status: "idle" })
+    ).toMatchObject({ verb: "lastWatched", status: "idle" })
   })
 
   it("is null with nothing to show", () => {

@@ -1,11 +1,15 @@
 "use client"
 
-import Link from "next/link"
+import { useTranslations } from "next-intl"
 import { StatusDot } from "@/components/dashboard/status-dot"
 import { pickLiveLine, type LiveLineContent } from "@/components/live/describe"
 import { useLiveActivity } from "@/components/live/use-live-activity"
+import { Link } from "@/i18n/navigation"
 
 export function LiveLineView({ line }: { line: LiveLineContent }) {
+  const t = useTranslations("live")
+  const verb = t("verbs", { verb: line.verb })
+  const text = line.text ?? t("streamsNow", { count: line.streams ?? 0 })
   return (
     <Link
       href="/now#live"
@@ -15,14 +19,12 @@ export function LiveLineView({ line }: { line: LiveLineContent }) {
       <StatusDot
         status={line.status}
         pulse={line.status === "up"}
-        label={line.status === "up" ? "Now:" : "Earlier:"}
+        label={line.status === "up" ? t("now") : t("earlier")}
       />
       {/* A sentence, not another label: "Jellyfin · 1 stream right now". */}
       <span className="min-w-0 truncate">
-        <span className="font-medium">
-          {line.verb.charAt(0).toUpperCase() + line.verb.slice(1)}
-        </span>
-        <span className="text-muted-foreground"> · {line.text}</span>
+        <span className="font-medium">{verb.charAt(0).toLocaleUpperCase() + verb.slice(1)}</span>
+        <span className="text-muted-foreground"> · {text}</span>
       </span>
     </Link>
   )

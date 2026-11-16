@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl"
 import { dataset, projectId } from "@/sanity/env"
 import { urlFor } from "@/sanity/lib/image"
 import {
@@ -35,9 +36,10 @@ export function VideoFigure({
   className?: string
   captionClassName?: string
 }) {
+  const t = useTranslations("ui")
   const kind = playableKind(value)
   if (!value || !kind) return null
-  const title = value.title || "Video"
+  const title = value.title || t("video")
   const poster = posterUrl(value)
 
   let player: React.ReactNode = null

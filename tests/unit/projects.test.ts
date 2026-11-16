@@ -29,6 +29,12 @@ function project(overrides: Partial<Project> = {}): Project {
   } as Project
 }
 
+const english = {
+  locale: "en",
+  commits: (count: number) => `${count} ${count === 1 ? "commit" : "commits"}`,
+  pushed: (month: string) => `pushed ${month}`,
+}
+
 describe("projectMeta", () => {
   it("lists only facts that have values, hiding zero stars", () => {
     const meta = projectMeta(
@@ -40,17 +46,19 @@ describe("projectMeta", () => {
           pushedAt: "2026-03-01T00:00:00Z",
         } as Project["githubData"],
       }),
+      english,
     )
     expect(meta).toEqual(["Go", "42 commits", "pushed Mar 2026"])
   })
 
   it("is empty without GitHub data", () => {
-    expect(projectMeta(project())).toEqual([])
+    expect(projectMeta(project(), english)).toEqual([])
   })
 
   it("skips an invalid push date instead of printing 'pushed null'", () => {
     const meta = projectMeta(
       project({ githubData: { language: "Go", pushedAt: "garbage" } as Project["githubData"] }),
+      english,
     )
     expect(meta).toEqual(["Go"])
   })

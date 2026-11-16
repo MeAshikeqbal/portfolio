@@ -1,6 +1,7 @@
 "use client"
 
 import { Check, Copy } from "lucide-react"
+import { useTranslations } from "next-intl"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
@@ -14,12 +15,8 @@ interface CopyButtonProps {
   className?: string
 }
 
-export function CopyButton({
-  text,
-  label = "Copy code",
-  showLabel = false,
-  className,
-}: CopyButtonProps) {
+export function CopyButton({ text, label, showLabel = false, className }: CopyButtonProps) {
+  const t = useTranslations("ui")
   const [copied, setCopied] = useState(false)
 
   async function copy() {
@@ -32,7 +29,7 @@ export function CopyButton({
     }
   }
 
-  const current = copied ? "Copied" : label
+  const current = copied ? t("copied") : (label ?? t("copyCode"))
 
   return (
     <Button

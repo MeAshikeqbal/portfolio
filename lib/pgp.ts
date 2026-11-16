@@ -1,4 +1,3 @@
-import { formatDate } from "./format"
 import type { Status } from "./status"
 
 /** The pieces of a clearsigned message, as they appear between its armor lines. */
@@ -52,16 +51,24 @@ export const KEY_WARN_DAYS = 60
  * Whether the key is still good, judged against `now` (pages are static, so the browser
  * re-judges it). Valid is green, the last KEY_WARN_DAYS are amber, expired is red.
  */
-export function keyValidity(
-  expiresAt: string | null,
-  now: Date = new Date(),
-): { status: Status; label: string } {
-  if (!expiresAt) return { status: "up", label: "valid · no expiry" }
+export function keyValidity(expiresAt: string | null, now: Date = new Date()): KeyValidityVerdict {
+  if (!expiresAt) return { status: "up", code: "keyNoExpiry" }
   const expires = new Date(expiresAt)
   const days = Math.floor((expires.getTime() - now.getTime()) / 86_400_000)
-  if (days < 0) return { status: "down", label: `expired ${formatDate(expiresAt)}` }
+  if (days < 0) return { status: "down", code: "keyExpired", date: expiresAt }
   if (days < KEY_WARN_DAYS) {
-    return { status: "warn", label: days === 0 ? "expires today" : `expires in ${days}d` }
+    return days === 0
+      ? { status: "warn", code: "keyExpiresToday" }
+      : { status: "warn", code: "keyExpiresIn", days }
   }
-  return { status: "up", label: `valid until ${formatDate(expiresAt)}` }
+  return { status: "up", code: "keyValidUntil", date: expiresAt }
+}
+
+/** keyValidity's verdict; `code` is a key in the `footer` messages, filled from `days`/`date`. */
+export interface KeyValidityVerdict {
+  status: Status
+  code: "keyNoExpiry" | "keyExpired" | "keyExpiresToday" | "keyExpiresIn" | "keyValidUntil"
+  days?: number
+  /** ISO date, formatted for the page's locale by the caller. */
+  date?: string
 }

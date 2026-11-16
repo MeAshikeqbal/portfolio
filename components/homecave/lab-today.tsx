@@ -1,30 +1,23 @@
 "use client"
 
+import { useLocale, useTranslations } from "next-intl"
 import type { ReactNode } from "react"
 import { Panel, PanelHeader } from "@/components/dashboard/panel"
 import { Sparkline } from "@/components/dashboard/sparkline"
-import { formatCompact, formatPercent, formatRelative } from "@/lib/format"
+import { formatCompact, formatNumber, formatPercent, formatRelative } from "@/lib/format"
 import { labToday } from "@/lib/lab/services"
 import { ATTACK_KINDS, type AttackKind, type BackupStatus, type LabStatus } from "@/lib/lab/types"
 import { STATUS_TEXT_CLASS, type Status } from "@/lib/status"
 import { Metric } from "./metric"
 
-const BACKUP: Record<BackupStatus, { status: Status; label: string }> = {
-  ok: { status: "up", label: "ok" },
-  warnings: { status: "warn", label: "with warnings" },
-  failed: { status: "down", label: "failed" },
+const BACKUP_STATUS: Record<BackupStatus, Status> = {
+  ok: "up",
+  warnings: "warn",
+  failed: "down",
 }
 
-const KIND_LABEL: Record<AttackKind, string> = {
-  probing: "probing",
-  exploit: "exploits",
-  bruteforce: "brute force",
-  crawler: "crawlers",
-  other: "other",
-}
-
-const ago = (epochSeconds: number, now: Date) =>
-  formatRelative(new Date(epochSeconds * 1000).toISOString(), now) ?? "—"
+const ago = (epochSeconds: number, now: Date, locale: string) =>
+  formatRelative(new Date(epochSeconds * 1000).toISOString(), now, locale) ?? "—"
 
 /** A status word inside a hint: the label carries the state, in its own colour. */
 const Word = ({ status, children }: { status: Status; children: ReactNode }) => (
@@ -46,15 +39,17 @@ export function LabTodayView({
   /** Jellyfin streams right now: undefined while loading, null when not connected. */
   streams?: number | null
 }) {
+  const t = useTranslations("homecave")
+  const locale = useLocale()
   const today = labToday(status, now)
   const { edge, dns, wan, backup, scrubs, containers, security } = today
   if (!edge && !dns && !wan && !backup && !scrubs && !containers && !security) return null
   // "brute force 2,228 · exploits 889", largest first, skipping empty kinds.
   const describe = (byKind: Partial<Record<AttackKind, number>> | undefined) =>
-    ATTACK_KINDS.map((k) => [KIND_LABEL[k], byKind?.[k] ?? 0] as const)
+    ATTACK_KINDS.map((kind) => [kind, byKind?.[kind] ?? 0] as const)
       .filter(([, n]) => n > 0)
       .sort((a, b) => b[1] - a[1])
-      .map(([label, n]) => `${label} ${n.toLocaleString("en-US")}`)
+      .map(([kind, n]) => `${t("attackKind", { kind })} ${formatNumber(n, locale)}`)
   const blocked = describe(security?.blocklist?.byKind)
   const detected = describe(security?.byKind)
 
@@ -66,113 +61,110 @@ export function LabTodayView({
         <PanelHeader
           title={
             <h2 id="homecave-today" className="text-foreground">
-              today in the lab
+              {t("today")}
             </h2>
           }
-          meta={<span className="hidden sm:inline">measured inside the guests</span>}
+          meta={<span className="hidden sm:inline">{t("todayMeta")}</span>}
         />
         <dl className="grid grid-cols-2 gap-px bg-border lg:grid-cols-4">
           <Metric
-            label="edge traffic"
-            value={edge ? `${rpm(edge.rpm)} req/min` : "—"}
-            trend={
-              edge && (
-                <Sparkline
-                  values={edge.trend}
-                  label="Public requests per minute, last 24 hours"
-                  width={64}
-                />
-              )
-            }
+            label={t("edgeTraffic")}
+            value={edge ? t("reqPerMin", { rate: rpm(edge.rpm) }) : "—"}
+            trend={edge && <Sparkline values={edge.trend} label={t("edgeTrend")} width={64} />}
             hint={
               edge ? (
                 <>
                   <Word status={edge.errPct >= 5 ? "warn" : "up"}>
-                    {formatPercent(edge.errPct)} errors
+                    {t("errors", { pct: formatPercent(edge.errPct) })}
                   </Word>{" "}
-                  · 2h
+                  · {t("twoHours")}
                 </>
               ) : (
-                "not reported"
+                t("missing")
               )
             }
           />
           <Metric
-            label="dns blocked"
+            label={t("dnsBlocked")}
             value={dns ? formatPercent(dns.blockedPct) : "—"}
             hint={
               dns
-                ? `of ${formatCompact(dns.queries)} queries · ${dns.hours >= 24 ? "24h" : `last ${dns.hours}h`}`
-                : "not reported"
+                ? t("dnsHint", {
+                    queries: formatCompact(dns.queries, locale),
+                    window: dns.hours >= 24 ? t("day") : t("lastHours", { hours: dns.hours }),
+                  })
+                : t("missing")
             }
           />
           <Metric
-            label="internet"
+            label={t("internet")}
             value={wan?.rttMs != null ? `${wan.rttMs} ms` : "—"}
             hint={
               wan ? (
                 <Word status={wan.lossPct === 0 ? "up" : wan.lossPct < 50 ? "warn" : "down"}>
-                  {wan.lossPct}% packet loss
+                  {t("packetLoss", { pct: wan.lossPct })}
                 </Word>
               ) : (
-                "not reported"
+                t("missing")
               )
             }
           />
           <Metric
-            label="streaming"
+            label={t("streaming")}
             value={typeof streams === "number" ? String(streams) : "—"}
             hint={
               streams === undefined
-                ? "checking Jellyfin…"
+                ? t("checkingJellyfin")
                 : streams === null
-                  ? "not connected"
-                  : "on Jellyfin, now"
+                  ? t("notConnected")
+                  : t("onJellyfin")
             }
           />
           <Metric
-            label="last backup"
-            value={backup ? ago(backup.at, now) : "—"}
+            label={t("lastBackup")}
+            value={backup ? ago(backup.at, now, locale) : "—"}
             hint={
               backup ? (
                 <>
-                  <Word status={BACKUP[backup.status].status}>{BACKUP[backup.status].label}</Word>
-                  {` · ${backup.covered}/${backup.total} guests`}
+                  <Word status={BACKUP_STATUS[backup.status]}>
+                    {t("backupStatus", { status: backup.status })}
+                  </Word>
+                  {t("backupGuests", { covered: backup.covered, total: backup.total })}
                 </>
               ) : (
-                "not reported"
+                t("missing")
               )
             }
           />
           <Metric
-            label="last scrub"
-            value={scrubs ? ago(scrubs.oldestAt, now) : "—"}
+            label={t("lastScrub")}
+            value={scrubs ? ago(scrubs.oldestAt, now, locale) : "—"}
             hint={
               scrubs ? (
                 <>
                   <Word status={scrubs.errors === 0 ? "up" : "down"}>
-                    {scrubs.errors === 0 ? "no errors" : `${scrubs.errors} errors`}
+                    {scrubs.errors === 0
+                      ? t("noErrors")
+                      : t("errorCount", { count: scrubs.errors })}
                   </Word>
-                  {` · ${scrubs.pools} pools`}
+                  {t("scrubPools", { count: scrubs.pools })}
                 </>
               ) : (
-                "not reported"
+                t("missing")
               )
             }
           />
           {/* Requests checked moves with traffic every hour; the blocklist is the context. */}
           <Metric
-            label={security && !security.checkedHourly ? "attacks detected" : "security checks"}
-            value={security ? formatCompact(security.checked24h ?? security.attacks24h) : "—"}
+            label={security && !security.checkedHourly ? t("attacksDetected") : t("securityChecks")}
+            value={
+              security ? formatCompact(security.checked24h ?? security.attacks24h, locale) : "—"
+            }
             trend={
               security && (
                 <Sparkline
                   values={security.checkedHourly ?? security.hourly}
-                  label={
-                    security.checkedHourly
-                      ? "Requests checked for known attackers per hour, last 24 hours"
-                      : "Attacks detected per hour, last 24 hours"
-                  }
+                  label={security.checkedHourly ? t("checkedTrend") : t("attacksTrend")}
                   width={64}
                 />
               )
@@ -180,27 +172,28 @@ export function LabTodayView({
             hint={
               security
                 ? [
-                    security.blocklist && `${formatCompact(security.blocklist.total)} blocklisted`,
-                    security.bans > 0 && `${security.bans} banned here`,
-                    "24h",
+                    security.blocklist &&
+                      t("blocklisted", { count: formatCompact(security.blocklist.total, locale) }),
+                    security.bans > 0 && t("banned", { count: security.bans }),
+                    t("day"),
                   ]
                     .filter(Boolean)
                     .join(" · ")
-                : "not reported"
+                : t("missing")
             }
           />
           <Metric
-            label="containers"
+            label={t("containers")}
             value={containers ? `${containers.ok}/${containers.total}` : "—"}
             hint={
               containers ? (
                 <Word status={containers.ok === containers.total ? "up" : "warn"}>
                   {containers.ok === containers.total
-                    ? "all healthy"
-                    : `${containers.total - containers.ok} not healthy`}
+                    ? t("allHealthy")
+                    : t("notHealthy", { count: containers.total - containers.ok })}
                 </Word>
               ) : (
-                "not reported"
+                t("missing")
               )
             }
           />
@@ -210,13 +203,13 @@ export function LabTodayView({
           <div className="flex flex-col gap-1 border-t px-4 py-3 text-sm sm:flex-row sm:flex-wrap sm:gap-x-6">
             {blocked.length > 0 && (
               <p className="flex flex-wrap items-baseline gap-x-3">
-                <span className="label-caps">blocklist</span>
+                <span className="label-caps">{t("blocklist")}</span>
                 <span className="text-muted-foreground tabular">{blocked.join(" · ")}</span>
               </p>
             )}
             {detected.length > 0 && (
               <p className="flex flex-wrap items-baseline gap-x-3">
-                <span className="label-caps">detected here · 24h</span>
+                <span className="label-caps">{t("detectedHere")}</span>
                 <span className="text-muted-foreground tabular">{detected.join(" · ")}</span>
               </p>
             )}

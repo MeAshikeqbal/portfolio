@@ -1,5 +1,6 @@
 import { timingSafeEqual } from "crypto"
 import { revalidatePath } from "next/cache"
+import { revalidatePages } from "@/lib/revalidate"
 import { type NextRequest, NextResponse } from "next/server"
 
 /**
@@ -36,18 +37,14 @@ export async function POST(req: NextRequest) {
 
   switch (body._type) {
     case "post":
-      revalidatePath("/post")
       // Every post page, so renamed or unpublished slugs stop serving stale copies.
-      revalidatePath("/post/[slug]", "page")
+      revalidatePages("/post", "/post/[slug]", "/")
       revalidatePath("/rss.xml")
       revalidatePath("/sitemap.xml")
-      revalidatePath("/")
       break
     case "project":
-      revalidatePath("/projects")
-      revalidatePath("/projects/[slug]", "page")
+      revalidatePages("/projects", "/projects/[slug]", "/")
       revalidatePath("/sitemap.xml")
-      revalidatePath("/")
       break
     case "cv":
       revalidatePath("/resume.pdf")

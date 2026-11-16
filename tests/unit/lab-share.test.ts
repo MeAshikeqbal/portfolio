@@ -30,26 +30,24 @@ const mini = node("Mini PC #2", { uptime: 7_200, receivedAt: ago(5) })
 
 describe("labShareFacts", () => {
   it("claims nothing without a heartbeat", () => {
-    expect(labShareFacts(null, now)).toEqual({
-      status: { status: "idle", label: "no data" },
-      footer: [],
-    })
+    expect(labShareFacts(null, now)).toEqual({ status: "idle", up: null, total: 0, footer: [] })
   })
 
   it("claims nothing when every heartbeat is stale", () => {
     const stale = { nodes: [{ ...tower, receivedAt: ago(3600) }] }
     expect(labShareFacts(stale, now).footer).toEqual([])
-    expect(labShareFacts(stale, now).status.status).toBe("idle")
+    expect(labShareFacts(stale, now).status).toBe("idle")
+    expect(labShareFacts(stale, now).up).toBeNull()
   })
 
   it("reports the verdict and measured counts", () => {
     const facts = labShareFacts({ nodes: [tower, mini] }, now)
-    expect(facts.status).toEqual({ status: "up", label: "2/2 up" })
+    expect(facts).toMatchObject({ status: "up", up: 2, total: 2 })
     expect(facts.footer).toEqual([
-      "uptime 2h", // the shortest: how long the whole cluster has been up
-      "7/8 guests",
-      "1/1 pools",
-      "measured Nov 10 11:59 UTC",
+      { kind: "uptime", uptime: "2h" }, // the shortest: how long the whole cluster has been up
+      { kind: "guests", running: 7, total: 8 },
+      { kind: "pools", healthy: 1, total: 1 },
+      { kind: "measured", time: "Nov 10 11:59 UTC" },
     ])
   })
 
@@ -62,9 +60,10 @@ describe("labShareFacts", () => {
 
   it("goes amber when only some machines are up", () => {
     const down = { ...mini, online: false }
-    expect(labShareFacts({ nodes: [tower, down] }, now).status).toEqual({
+    expect(labShareFacts({ nodes: [tower, down] }, now)).toMatchObject({
       status: "warn",
-      label: "1/2 up",
+      up: 1,
+      total: 2,
     })
   })
 })

@@ -1,5 +1,5 @@
 import { ArrowUpRight } from "lucide-react"
-import Link from "next/link"
+import { SiteLink } from "@/components/site/smart-link"
 import type { ReactNode } from "react"
 import { STATUS_TEXT_CLASS, type Status } from "@/lib/status"
 import { cn } from "@/lib/utils"
@@ -118,9 +118,9 @@ export function DataRow({
           {body}
         </a>
       ) : href ? (
-        <Link href={href} className={linkClass}>
+        <SiteLink href={href} className={linkClass}>
           {body}
-        </Link>
+        </SiteLink>
       ) : (
         <div className={rowClass}>{body}</div>
       )}

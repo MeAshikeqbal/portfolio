@@ -79,19 +79,25 @@ describe("keyValidity", () => {
   it("is green while the key has more than 60 days left", () => {
     expect(keyValidity("2028-11-09T10:56:42Z", now)).toEqual({
       status: "up",
-      label: "valid until Nov 9, 2028",
+      code: "keyValidUntil",
+      date: "2028-11-09T10:56:42Z",
     })
   })
 
   it("turns amber in the last 60 days", () => {
-    expect(keyValidity(inDays(23.5), now)).toEqual({ status: "warn", label: "expires in 23d" })
-    expect(keyValidity(inDays(0.5), now)).toEqual({ status: "warn", label: "expires today" })
+    expect(keyValidity(inDays(23.5), now)).toEqual({
+      status: "warn",
+      code: "keyExpiresIn",
+      days: 23,
+    })
+    expect(keyValidity(inDays(0.5), now)).toEqual({ status: "warn", code: "keyExpiresToday" })
   })
 
   it("is red once expired", () => {
     expect(keyValidity("2026-11-01T00:00:00Z", now)).toEqual({
       status: "down",
-      label: "expired Nov 1, 2026",
+      code: "keyExpired",
+      date: "2026-11-01T00:00:00Z",
     })
   })
 

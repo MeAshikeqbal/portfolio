@@ -1,5 +1,5 @@
 import { timingSafeEqual } from "crypto"
-import { revalidatePath } from "next/cache"
+import { revalidatePages } from "@/lib/revalidate"
 import { type NextRequest, NextResponse } from "next/server"
 import { syncProjects } from "@/lib/github-sync"
 import { GITHUB_PROJECTS_QUERY } from "@/sanity/lib/queries"
@@ -39,9 +39,7 @@ async function sync(req: NextRequest) {
     else errors.push(`${result.title}: ${result.message}`)
   }
 
-  revalidatePath("/projects")
-  revalidatePath("/projects/[slug]", "page")
-  revalidatePath("/")
+  revalidatePages("/projects", "/projects/[slug]", "/")
 
   return NextResponse.json(
     { message: "GitHub data sync completed", results, errors },

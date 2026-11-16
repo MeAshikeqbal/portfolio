@@ -1,6 +1,7 @@
 "use client"
 
 import { ArrowUp } from "lucide-react"
+import { useTranslations } from "next-intl"
 import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 
@@ -10,6 +11,7 @@ import { Button } from "@/components/ui/button"
  * used to cover the right edge of rows).
  */
 export function BackToTop() {
+  const t = useTranslations("ui")
   const [visible, setVisible] = useState(false)
 
   useEffect(() => {
@@ -38,7 +40,7 @@ export function BackToTop() {
       size="icon"
       className="fixed right-4 bottom-[max(1rem,env(safe-area-inset-bottom))] z-30 rounded-full bg-surface/90 backdrop-blur"
       onClick={scrollToTop}
-      aria-label="Back to top"
+      aria-label={t("backToTop")}
     >
       <ArrowUp />
     </Button>

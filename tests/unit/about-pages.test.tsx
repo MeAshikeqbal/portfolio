@@ -1,13 +1,14 @@
 import { render, screen, within } from "@testing-library/react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
-import NowPage from "@/app/(root)/now/page"
+import NowPage from "@/app/[lang]/(site)/now/page"
 import { NowView } from "@/components/about/now-view"
 import { UsesSections, visibleUsesSections } from "@/components/about/uses-view"
 import { getNow } from "@/lib/api"
 import type { NOW_QUERY_RESULT, USES_QUERY_RESULT } from "@/sanity.types"
 
 vi.mock("@/lib/api", () => ({ getNow: vi.fn() }))
-vi.mock("next/navigation", () => ({
+vi.mock("next/navigation", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("next/navigation")>()),
   notFound: () => {
     throw new Error("NEXT_NOT_FOUND")
   },
@@ -156,7 +157,7 @@ describe("UsesSections with malformed content", () => {
     })
     render(<UsesSections sections={sections} />)
     expect(screen.getByText("Keyboard")).toBeVisible()
-    expect(screen.getByText("1 items")).toBeVisible()
+    expect(screen.getByText("1 item")).toBeVisible()
     expect(screen.queryByText("blank")).toBeNull()
     expect(screen.queryByText("Only nameless")).toBeNull()
     expect(screen.queryByText("Null items")).toBeNull()

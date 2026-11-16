@@ -1,8 +1,7 @@
 "use client"
 
 import { Menu, X } from "lucide-react"
-import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { useTranslations } from "next-intl"
 import { useEffect, useRef, useState } from "react"
 import { Container } from "@/components/dashboard/layout"
 import { ThemeCycleButton, ThemeToggle } from "@/components/theme-toggle"
@@ -11,6 +10,7 @@ import { CommandMenu } from "./command-menu"
 import { Button } from "@/components/ui/button"
 import { siteConfig } from "@/lib/site"
 import { cn } from "@/lib/utils"
+import { Link, usePathname } from "@/i18n/navigation"
 
 /** A route link is active on its own page and any page beneath it; hash links never are. */
 function isActive(pathname: string, href: string) {
@@ -19,6 +19,7 @@ function isActive(pathname: string, href: string) {
 }
 
 export function SiteNav({ commandIndex }: { commandIndex?: CommandIndex }) {
+  const t = useTranslations("nav")
   const pathname = usePathname()
   const [open, setOpen] = useState(false)
   const header = useRef<HTMLElement>(null)
@@ -64,13 +65,13 @@ export function SiteNav({ commandIndex }: { commandIndex?: CommandIndex }) {
         <Link
           href="/"
           className="font-mono text-sm font-medium tracking-tight"
-          aria-label={`${siteConfig.name}, home`}
+          aria-label={t("home", { name: siteConfig.name })}
         >
           itsashik<span className="text-muted-foreground">.dev</span>
         </Link>
 
         {/* Links fill the header's height so the active one's underline sits on its border. */}
-        <nav aria-label="Main" className="ml-auto hidden self-stretch md:flex">
+        <nav aria-label={t("main")} className="ml-auto hidden self-stretch md:flex">
           {siteConfig.nav.map((item) => {
             const active = isActive(pathname, item.href)
             return (
@@ -86,7 +87,7 @@ export function SiteNav({ commandIndex }: { commandIndex?: CommandIndex }) {
                     : "text-muted-foreground hover:text-foreground hover:after:bg-border-strong",
                 )}
               >
-                {item.label}
+                {t(item.key)}
               </Link>
             )
           })}
@@ -106,7 +107,7 @@ export function SiteNav({ commandIndex }: { commandIndex?: CommandIndex }) {
             onClick={() => setOpen((value) => !value)}
             aria-expanded={open}
             aria-controls="mobile-menu"
-            aria-label="Toggle menu"
+            aria-label={t("toggleMenu")}
           >
             {open ? <X /> : <Menu />}
           </Button>
@@ -125,7 +126,7 @@ export function SiteNav({ commandIndex }: { commandIndex?: CommandIndex }) {
       {open && (
         <nav
           id="mobile-menu"
-          aria-label="Main"
+          aria-label={t("main")}
           // Opens with a short drop; closes instantly (any scroll or tap dismisses it).
           className="absolute inset-x-0 top-full animate-in border-y bg-background duration-200 fade-in-0 motion-safe:slide-in-from-top-2 md:hidden"
         >
@@ -143,12 +144,12 @@ export function SiteNav({ commandIndex }: { commandIndex?: CommandIndex }) {
                     active ? "bg-surface-2 text-foreground" : "text-muted-foreground",
                   )}
                 >
-                  {item.label}
+                  {t(item.key)}
                 </Link>
               )
             })}
             <div className="mt-2 flex items-center justify-between border-t px-3 pt-3">
-              <span className="label-caps">Theme</span>
+              <span className="label-caps">{t("theme")}</span>
               <ThemeToggle />
             </div>
           </Container>

@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl"
 import type { Element } from "hast"
 import { toJsxRuntime } from "hast-util-to-jsx-runtime"
 import { ChevronDown } from "lucide-react"
@@ -37,6 +38,7 @@ function codeOf(node: Element): { code: string; language: string | null } {
  * below the case study. Framework starter READMEs render nothing.
  */
 export function ProjectReadme({ markdown, source, open = false, className }: ProjectReadmeProps) {
+  const t = useTranslations("projects")
   if (!markdown.trim() || isBoilerplateReadme(markdown)) return null
   const tree = readmeTree(markdown, source)
   const fileUrl = `https://github.com/${source.owner}/${source.repo}/blob/${source.ref}/${source.path}`
@@ -82,7 +84,7 @@ export function ProjectReadme({ markdown, source, open = false, className }: Pro
               rel="noopener noreferrer"
               className="mt-8 inline-flex items-center gap-1.5 label-caps transition-colors hover:text-foreground"
             >
-              <FaGithub className="size-3.5" aria-hidden /> view on GitHub
+              <FaGithub className="size-3.5" aria-hidden /> {t("viewOnGithub")}
             </a>
           </div>
         </details>

@@ -16,7 +16,7 @@ import {
   Server,
   Sun,
 } from "lucide-react"
-import { useRouter } from "next/navigation"
+import { useTranslations } from "next-intl"
 import { useTheme } from "next-themes"
 import { useEffect, useRef, useState, type ReactNode } from "react"
 import { toast } from "sonner"
@@ -37,6 +37,7 @@ import { projectHref } from "@/lib/projects"
 import { siteConfig } from "@/lib/site"
 import { withViewTransition } from "@/lib/view-transition"
 import { cn } from "@/lib/utils"
+import { useRouter } from "@/i18n/navigation"
 
 /** True when the keyboard focus is somewhere the user types text. */
 function isTyping(target: EventTarget | null): boolean {
@@ -46,16 +47,18 @@ function isTyping(target: EventTarget | null): boolean {
 
 /** Home-page sections without a page of their own (posts and projects have "All …" entries). */
 const sections = [
-  { label: "Experience & education", href: "/#uptime", keywords: ["uptime", "cv", "history"] },
-  { label: "Stack", href: "/#inventory", keywords: ["inventory", "skills", "tools"] },
-  { label: "Contact", href: "/#contact", keywords: ["get in touch", "email", "message"] },
-]
+  { key: "sectionUptime", href: "/#uptime", keywords: ["uptime", "cv", "history"] },
+  { key: "sectionInventory", href: "/#inventory", keywords: ["inventory", "skills", "tools"] },
+  { key: "sectionContact", href: "/#contact", keywords: ["get in touch", "email", "message"] },
+] as const
 
 /**
  * ⌘K / Ctrl+K (or "/") command palette: jump to any page, post or project, switch theme,
  * copy the current link, grab the résumé or open a social profile.
  */
 export function CommandMenu({ index, className }: { index: CommandIndex; className?: string }) {
+  const t = useTranslations("command")
+  const nav = useTranslations("nav")
   const [open, setOpen] = useState(false)
   const openRef = useRef(false)
   // The palette opens from a button or a shortcut, never a DialogTrigger, so Radix can't
@@ -116,7 +119,7 @@ export function CommandMenu({ index, className }: { index: CommandIndex; classNa
           rememberFocus()
           setOpen(true)
         }}
-        aria-label="Search and commands"
+        aria-label={t("trigger")}
         aria-keyshortcuts="Control+K Meta+K /"
         className={cn("gap-2 px-2.5 text-muted-foreground hover:text-foreground", className)}
       >
@@ -131,68 +134,68 @@ export function CommandMenu({ index, className }: { index: CommandIndex; classNa
         open={open}
         onOpenChange={setOpen}
         onCloseAutoFocus={restoreFocus}
-        title="Search and commands"
-        description="Jump to a page, post or project, or run an action."
+        title={t("trigger")}
+        description={t("description")}
       >
-        <CommandInput placeholder="Search pages, posts, projects, actions…" />
+        <CommandInput placeholder={t("placeholder")} />
         {/* No CommandSeparator: it renders role="separator" inside the listbox, which ARIA
             doesn't allow (axe: aria-required-children). Group headings separate sections. */}
         <CommandList className="max-h-[min(70vh,28rem)]">
-          <CommandEmpty>No results.</CommandEmpty>
+          <CommandEmpty>{t("empty")}</CommandEmpty>
 
-          <CommandGroup heading="Navigate">
+          <CommandGroup heading={t("navigate")}>
             <Item icon={<Home />} onSelect={() => go("/")} keywords={["start", "index"]}>
-              Home
+              {t("home")}
             </Item>
             <Item icon={<FolderGit2 />} onSelect={() => go("/projects")}>
-              All projects
+              {t("allProjects")}
             </Item>
             <Item icon={<FileText />} onSelect={() => go("/post")} keywords={["blog"]}>
-              All posts
+              {t("allPosts")}
             </Item>
             <Item
               icon={<Server />}
               onSelect={() => go("/homecave")}
               keywords={["homelab", "uses", "setup", "status", "proxmox"]}
             >
-              Homecave
+              {nav("homecave")}
             </Item>
             {index.hasNow && (
               <Item icon={<Clock />} onSelect={() => go("/now")} keywords={["status", "currently"]}>
-                Now
+                {nav("now")}
               </Item>
             )}
             {sections.map((section) => (
               <Item
                 key={section.href}
                 onSelect={() => go(section.href)}
-                keywords={section.keywords}
+                keywords={[...section.keywords]}
               >
-                <span className="text-muted-foreground">Home ›</span> {section.label}
+                <span className="text-muted-foreground">{t("homeSection")}</span> {t(section.key)}
               </Item>
             ))}
           </CommandGroup>
-          <CommandGroup heading="Actions">
+          <CommandGroup heading={t("actions")}>
             <Item
               icon={<Monitor />}
               onSelect={() => run(() => withViewTransition("theme", () => setTheme("system")))}
               keywords={["theme", "auto"]}
             >
-              Use system theme
+              {t("systemTheme")}
             </Item>
             <Item
               icon={<Sun />}
               onSelect={() => run(() => withViewTransition("theme", () => setTheme("light")))}
               keywords={["theme", "mode"]}
             >
-              Switch to light theme
+              {t("lightTheme")}
             </Item>
             <Item
               icon={<Moon />}
               onSelect={() => run(() => withViewTransition("theme", () => setTheme("dark")))}
               keywords={["theme", "mode"]}
             >
-              Switch to dark theme
+              {t("darkTheme")}
             </Item>
             <Item
               icon={<Link2 />}
@@ -201,14 +204,14 @@ export function CommandMenu({ index, className }: { index: CommandIndex; classNa
                 run(async () => {
                   try {
                     await navigator.clipboard.writeText(window.location.href)
-                    toast.success("Link copied")
+                    toast.success(t("linkCopied"))
                   } catch {
-                    toast.error("Couldn't copy the link")
+                    toast.error(t("linkCopyFailed"))
                   }
                 })
               }
             >
-              Copy link to this page
+              {t("copyLink")}
             </Item>
             {index.hasCv && (
               <Item
@@ -216,7 +219,7 @@ export function CommandMenu({ index, className }: { index: CommandIndex; classNa
                 onSelect={() => visit("/resume.pdf")}
                 keywords={["cv", "resume", "download"]}
               >
-                Open résumé
+                {t("resume")}
               </Item>
             )}
             <Item
@@ -224,25 +227,27 @@ export function CommandMenu({ index, className }: { index: CommandIndex; classNa
               onSelect={() => visit("/rss.xml")}
               keywords={["feed", "subscribe"]}
             >
-              RSS feed
+              {t("rss")}
             </Item>
             <Item
               icon={<Code2 />}
               onSelect={() => visit(siteConfig.repo)}
               keywords={["github", "code"]}
             >
-              View this site&apos;s source
+              {t("source")}
             </Item>
           </CommandGroup>
 
           {index.posts.length > 0 && (
             <>
-              <CommandGroup heading="Posts">
+              <CommandGroup heading={t("posts")}>
                 {index.posts.map((post) => (
                   <Item
                     key={post._id}
                     value={`post ${post.title} ${post._id}`}
-                    keywords={(post.topics ?? []).filter((t): t is string => Boolean(t))}
+                    keywords={(post.topics ?? []).filter((topic): topic is string =>
+                      Boolean(topic),
+                    )}
                     icon={<FileText />}
                     onSelect={() => go(`/post/${post.slug}`)}
                   >
@@ -255,7 +260,7 @@ export function CommandMenu({ index, className }: { index: CommandIndex; classNa
 
           {index.projects.length > 0 && (
             <>
-              <CommandGroup heading="Projects">
+              <CommandGroup heading={t("projects")}>
                 {index.projects.map((project) => {
                   const href = projectHref(project)
                   if (!href) return null
@@ -275,7 +280,7 @@ export function CommandMenu({ index, className }: { index: CommandIndex; classNa
               </CommandGroup>
             </>
           )}
-          <CommandGroup heading="Elsewhere">
+          <CommandGroup heading={t("elsewhere")}>
             {siteConfig.socialLinks.map((link) => (
               <Item
                 key={link.href}
@@ -289,8 +294,8 @@ export function CommandMenu({ index, className }: { index: CommandIndex; classNa
           </CommandGroup>
         </CommandList>
         <div className="flex items-center justify-between border-t px-3 py-2 label-caps">
-          <span>↑↓ to move · ↵ to open</span>
-          <CommandShortcut className="tracking-[0.08em]">esc to close</CommandShortcut>
+          <span>{t("hintMove")}</span>
+          <CommandShortcut className="tracking-[0.08em]">{t("hintClose")}</CommandShortcut>
         </div>
       </CommandDialog>
     </>

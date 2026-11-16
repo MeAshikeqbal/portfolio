@@ -25,7 +25,14 @@ export function formatUptime(seconds: number): string {
   return `${Math.max(1, Math.floor(seconds / 60))}m`
 }
 
-export type NodeState = { status: Status; label: string; state: "up" | "down" | "stale" }
+export type NodeState = {
+  status: Status
+  /** English label ("up · 12d"); the UI words it per locale from `state` and `uptime`. */
+  label: string
+  state: "up" | "down" | "stale"
+  /** "12d" while up. */
+  uptime?: string
+}
 
 /**
  * One machine's measured state:
@@ -43,7 +50,8 @@ export function nodeState(
   if (!node) return null
   const fresh = isNodeFresh(node, now)
   if (fresh && node.online) {
-    return { status: "up", label: `up · ${formatUptime(node.uptime)}`, state: "up" }
+    const uptime = formatUptime(node.uptime)
+    return { status: "up", label: `up · ${uptime}`, state: "up", uptime }
   }
   const peerSaysDown = (status?.nodes ?? []).some(
     (peer) =>
@@ -57,17 +65,28 @@ export function nodeState(
 }
 
 /** "3/3 up", "2/3 up" (amber), "0/3 up" (red) or "no data", for headers and the system bar. */
-export function labSummary(
-  status: LabStatus | null | undefined,
-  now: Date,
-): { status: Status; label: string } | null {
+export interface LabSummary {
+  status: Status
+  /** English label ("2/3 up"); the UI words it per locale from `up` and `total`. */
+  label: string
+  /** Machines up and in total; null when no machine's state is known ("no data"). */
+  up: number | null
+  total: number
+}
+
+export function labSummary(status: LabStatus | null | undefined, now: Date): LabSummary | null {
   if (!status || status.nodes.length === 0) return null
   const states = status.nodes.map((n) => nodeState(n.name, status, now)?.state)
   const up = states.filter((s) => s === "up").length
   const known = states.filter((s) => s === "up" || s === "down").length
-  if (known === 0) return { status: "idle", label: "no data" }
   const total = status.nodes.length
-  return { status: up === total ? "up" : up === 0 ? "down" : "warn", label: `${up}/${total} up` }
+  if (known === 0) return { status: "idle", label: "no data", up: null, total }
+  return {
+    status: up === total ? "up" : up === 0 ? "down" : "warn",
+    label: `${up}/${total} up`,
+    up,
+    total,
+  }
 }
 
 /** The newest heartbeat time across nodes (for "updated 20s ago"). */

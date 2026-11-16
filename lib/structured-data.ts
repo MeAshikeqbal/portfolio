@@ -1,3 +1,4 @@
+import { localizedPath } from "@/i18n/locales"
 import { absoluteUrl, siteConfig } from "@/lib/site"
 
 /**
@@ -22,14 +23,15 @@ export function personSchema(): Thing {
   }
 }
 
-export function websiteSchema(): Thing {
+/** The site in `locale` (the language of the page it's embedded in). */
+export function websiteSchema(locale = "en"): Thing {
   return {
     "@type": "WebSite",
     "@id": WEBSITE_ID,
     url: siteConfig.url,
     name: siteConfig.name,
     description: siteConfig.description,
-    inLanguage: "en",
+    inLanguage: locale,
     author: { "@id": PERSON_ID },
     publisher: { "@id": PERSON_ID },
   }
@@ -58,8 +60,11 @@ export function blogPostingSchema(post: {
   wordCount?: number
   /** Absolute URL of the cover image, if any. */
   image?: string
+  /** The language this copy of the post is in; its URL follows. */
+  locale?: string
 }): Thing {
-  const url = absoluteUrl(`/post/${post.slug}`)
+  const locale = post.locale ?? "en"
+  const url = absoluteUrl(localizedPath(`/post/${post.slug}`, locale))
   return {
     "@type": "BlogPosting",
     "@id": `${url}#article`,
@@ -78,7 +83,7 @@ export function blogPostingSchema(post: {
     isPartOf: { "@id": WEBSITE_ID },
     keywords: post.tags?.length ? post.tags.join(", ") : undefined,
     wordCount: post.wordCount,
-    inLanguage: "en",
+    inLanguage: locale,
   }
 }
 
@@ -92,8 +97,10 @@ export function projectSchema(project: {
   license?: string | null
   /** Absolute URL of the cover image, if any. */
   image?: string
+  /** The page's language; its URL follows. */
+  locale?: string
 }): Thing {
-  const pageUrl = absoluteUrl(`/projects/${project.slug}`)
+  const pageUrl = absoluteUrl(localizedPath(`/projects/${project.slug}`, project.locale ?? "en"))
   return {
     "@type": "SoftwareSourceCode",
     "@id": `${pageUrl}#project`,
