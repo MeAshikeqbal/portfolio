@@ -96,7 +96,9 @@
   },
   "common": {
     "filterBy": "{label} द्वारा फ़िल्टर करें",
-    "all": "सभी"
+    "all": "सभी",
+    "more": "+{count} और",
+    "fewer": "कम दिखाएँ"
   },
   "ui": {
     "themeLabel": "रंग थीम",

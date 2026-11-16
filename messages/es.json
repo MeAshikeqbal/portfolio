@@ -96,7 +96,9 @@
   },
   "common": {
     "filterBy": "Filtrar por {label}",
-    "all": "todo"
+    "all": "todo",
+    "more": "+{count} más",
+    "fewer": "mostrar menos"
   },
   "ui": {
     "themeLabel": "Tema de color",

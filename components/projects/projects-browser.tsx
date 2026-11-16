@@ -7,9 +7,14 @@ import { Panel } from "@/components/dashboard/panel"
 import { SearchInput } from "@/components/dashboard/search-input"
 import { useUrlParam } from "@/hooks/use-url-param"
 import type { Project } from "@/lib/api"
-import { projectTags } from "@/lib/projects"
+import { projectTags, tagsByUse } from "@/lib/projects"
 import { projectStatus } from "@/lib/status"
 import { ProjectPanel } from "./project-panel"
+
+/** Lifecycle order, liveliest first (labels from projectStatus). */
+const STATUS_ORDER = ["active", "maintained", "dormant", "archived"]
+/** Stack chips shown before "+N more": the most-used tags. */
+const STACK_LIMIT = 10
 
 /** Searchable, filterable project grid; filters live in the URL (?q=, ?status=, ?tag=). */
 export function ProjectsBrowser({ projects, now }: { projects: Project[]; now: string }) {
@@ -19,15 +24,11 @@ export function ProjectsBrowser({ projects, now }: { projects: Project[]; now: s
   const [status, setStatus] = useUrlParam("status")
   const [tag, setTag] = useUrlParam("tag")
 
-  const statuses = useMemo(
-    () => [
-      ...new Set(
-        projects.map((p) => projectStatus(p, at)?.label).filter((s): s is string => Boolean(s)),
-      ),
-    ],
-    [projects, at],
-  )
-  const tags = useMemo(() => [...new Set(projects.flatMap(projectTags))].sort(), [projects])
+  const statuses = useMemo(() => {
+    const present = new Set(projects.map((p) => projectStatus(p, at)?.label))
+    return STATUS_ORDER.filter((s) => present.has(s))
+  }, [projects, at])
+  const tags = useMemo(() => tagsByUse(projects), [projects])
 
   const needle = query.trim().toLowerCase()
   const visible = projects.filter((project) => {
@@ -59,7 +60,13 @@ export function ProjectsBrowser({ projects, now }: { projects: Project[]; now: s
             />
           )}
           {tags.length > 1 && (
-            <ChipFilter label={t("filterStack")} options={tags} value={tag} onChange={setTag} />
+            <ChipFilter
+              label={t("filterStack")}
+              options={tags}
+              value={tag}
+              onChange={setTag}
+              limit={STACK_LIMIT}
+            />
           )}
         </div>
       )}

@@ -96,7 +96,9 @@
   },
   "common": {
     "filterBy": "{label}でフィルタリング",
-    "all": "全て"
+    "all": "全て",
+    "more": "他{count}件",
+    "fewer": "表示を減らす"
   },
   "ui": {
     "themeLabel": "カラーテーマ",

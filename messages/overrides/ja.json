@@ -25,5 +25,8 @@
   "systemBar": {
     "build": "ビルド",
     "local": "ローカル"
+  },
+  "common": {
+    "more": "他{count}件"
   }
 }

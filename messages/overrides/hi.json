@@ -49,5 +49,8 @@
   },
   "uptime": {
     "present": "वर्तमान"
+  },
+  "common": {
+    "more": "+{count} और"
   }
 }

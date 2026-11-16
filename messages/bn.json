@@ -96,7 +96,9 @@
   },
   "common": {
     "filterBy": "{label} দ্বারা ফিল্টার করুন",
-    "all": "সব"
+    "all": "সব",
+    "more": "+{count}টি আরও",
+    "fewer": "কম দেখান"
   },
   "ui": {
     "themeLabel": "রঙের থিম",

@@ -39,5 +39,8 @@
   },
   "uptime": {
     "present": "Actualidad"
+  },
+  "common": {
+    "more": "+{count} más"
   }
 }

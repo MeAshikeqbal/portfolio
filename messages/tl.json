@@ -96,7 +96,9 @@
   },
   "common": {
     "filterBy": "Salain ayon sa {label}",
-    "all": "lahat"
+    "all": "lahat",
+    "more": "+{count} pa",
+    "fewer": "magpakita ng mas kaunti"
   },
   "ui": {
     "themeLabel": "Tema ng kulay",

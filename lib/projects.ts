@@ -56,6 +56,13 @@ export function projectTags(project: Project): string[] {
   ]
 }
 
+/** Every tag across the projects, most-used first, then alphabetical. */
+export function tagsByUse(projects: Project[]): string[] {
+  const counts = new Map<string, number>()
+  for (const tag of projects.flatMap(projectTags)) counts.set(tag, (counts.get(tag) ?? 0) + 1)
+  return [...counts.keys()].sort((a, b) => counts.get(b)! - counts.get(a)! || a.localeCompare(b))
+}
+
 /** Whether a weekly commit series has anything to draw: a flat zero line reports nothing. */
 export function hasActivity(weekly: readonly number[] | null | undefined): weekly is number[] {
   return Array.isArray(weekly) && weekly.length > 1 && weekly.some((value) => value > 0)

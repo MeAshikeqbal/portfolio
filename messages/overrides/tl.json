@@ -34,5 +34,8 @@
   },
   "live": {
     "title": "live"
+  },
+  "common": {
+    "more": "+{count} pa"
   }
 }

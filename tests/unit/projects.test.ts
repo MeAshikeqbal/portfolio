@@ -9,6 +9,7 @@ import {
   projectTags,
   relatedProjects,
   shortLicense,
+  tagsByUse,
 } from "@/lib/projects"
 
 function project(overrides: Partial<Project> = {}): Project {
@@ -88,6 +89,17 @@ describe("projectTags", () => {
       }),
     )
     expect(tags).toEqual(["TypeScript", "Sanity"])
+  })
+})
+
+describe("tagsByUse", () => {
+  it("orders tags by how many projects use them, then alphabetically", () => {
+    const tags = tagsByUse([
+      project({ tech: ["Redis", "Next.js"] }),
+      project({ tech: ["Next.js", "Go"] }),
+      project({ tech: ["Bash"], githubData: { language: "Go" } as Project["githubData"] }),
+    ])
+    expect(tags).toEqual(["Go", "Next.js", "Bash", "Redis"])
   })
 })
 
