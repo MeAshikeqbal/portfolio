@@ -4,7 +4,7 @@ import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile"
 import { CircleCheck, LoaderCircle } from "lucide-react"
 import { useActionState, useEffect, useRef, useState, type ReactNode } from "react"
 import { submitContact, type ContactState } from "@/actions/submit-contact"
-import { HONEYPOT_FIELD } from "@/lib/contact-fields"
+import { HONEYPOT_FIELD, TURNSTILE_ACTION } from "@/lib/contact-fields"
 import { StatusPill } from "@/components/dashboard/status-pill"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -110,7 +110,7 @@ export function ContactForm() {
           <Turnstile
             ref={turnstile}
             siteKey={siteKey}
-            options={{ theme: "auto", size: "flexible" }}
+            options={{ theme: "auto", size: "flexible", action: TURNSTILE_ACTION }}
             onWidgetLoad={() => setChallenge("ready")}
             onError={() => setChallenge("failed")}
           />
