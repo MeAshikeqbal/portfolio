@@ -1,5 +1,7 @@
+import { after } from "next/server"
+import { sendAlerts } from "@/lib/lab/alerts"
 import { MAX_BODY_BYTES, parseHeartbeat, verify } from "@/lib/lab/heartbeat"
-import { redisConfig, writeHeartbeat } from "@/lib/lab/store"
+import { redisConfig, writeHeartbeat, type WriteResult } from "@/lib/lab/store"
 
 export const dynamic = "force-dynamic"
 
@@ -15,6 +17,9 @@ const reply = (status: number, error?: string) =>
  * `${timestamp}.${body}` with LAB_HEARTBEAT_SECRET. Requests outside a 5-minute window, with a
  * bad signature or a malformed body are refused; one not newer than the node's last is a 409.
  * Nothing on the lab is reachable from here: the lab only ever calls out.
+ *
+ * Storing it also logs state changes (incidents); those are pushed to the owner through ntfy
+ * after the response, so the agent never waits on a phone notification.
  */
 export async function POST(request: Request) {
   const secret = process.env.LAB_HEARTBEAT_SECRET
@@ -40,11 +45,12 @@ export async function POST(request: Request) {
   const nodes = parseHeartbeat(json)
   if (!nodes) return reply(400, "Malformed heartbeat")
 
-  let written: number
+  let result: WriteResult
   try {
-    written = await writeHeartbeat(nodes, Number(timestamp), new Date())
+    result = await writeHeartbeat(nodes, Number(timestamp), new Date())
   } catch {
     return reply(502, "Could not store heartbeat")
   }
-  return written > 0 ? reply(204) : reply(409, "Stale or replayed heartbeat")
+  if (result.events.length > 0) after(() => sendAlerts(result.events))
+  return result.written > 0 ? reply(204) : reply(409, "Stale or replayed heartbeat")
 }

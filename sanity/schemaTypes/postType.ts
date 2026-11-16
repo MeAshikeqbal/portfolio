@@ -101,6 +101,14 @@ export const postType = defineType({
       initialValue: false,
     }),
     defineField({
+      name: "incident",
+      title: "Writes up a lab incident",
+      type: "date",
+      group: "meta",
+      description:
+        "The day of a Homecave incident this post explains. The incident in the Homecave log links here (matched within a day).",
+    }),
+    defineField({
       name: "seo",
       type: "seo",
       group: "seo",

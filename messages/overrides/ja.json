@@ -13,7 +13,11 @@
     "nodeUpFor": "稼働中 · {uptime}",
     "labSummary": "{up}/{total} 稼働中",
     "notReported": "ラボからの報告はまだありません",
-    "nodeDown": "停止中"
+    "nodeDown": "停止中",
+    "uptimeLegend": "{level, select, up {ダウンタイムなし} partial {ダウンタイムあり} down {ほぼオフライン} other {データなし}}",
+    "writeup": "記事を読む",
+    "changeCategory": "{category, select, hardware {ハードウェア} storage {ストレージ} network {ネットワーク} services {サービス} security {セキュリティ} backups {バックアップ} other {その他}}",
+    "recordDescription": "ラボで起きた障害を発生時にすべて記録し、過去90日間の稼働状況も表示します。"
   },
   "home": {
     "resume": "履歴書"

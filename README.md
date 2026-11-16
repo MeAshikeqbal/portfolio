@@ -149,6 +149,12 @@ tests/unit, tests/e2e
     "Homelab" rows, whose names match the lab's public node names and whose descriptions
     become the node spec lines; and the self-hosted and setup sections.
   - The hero's *homelab* list shows the first five Homelab rows, with measured badges.
+  - **Reliability** (below the dashboard): 90-day uptime bars per machine, service and the
+    internet line; a **log** of incidents (state changes and silent gaps, recorded by the same
+    heartbeat `EVAL`); and a **changelog** of deliberate changes (Studio: *Personal Info → Lab
+    changelog*). A post's **Writes up a lab incident** date (Meta tab) links the matching
+    incident to it. Optional phone alerts via ntfy (`NTFY_TOPIC`) and healthchecks.io dead-man
+    pings are described in `scripts/lab-heartbeat/README.md`.
   - **Snapshot** (button by the verdict) saves `/homecave/snapshot`, a PNG of the lab right
     now, rendered with `next/og` from the same public status and CDN-cached for 30s.
   - Env vars: `LAB_HEARTBEAT_SECRET`, plus Upstash (`UPSTASH_REDIS_REST_*` or `KV_REST_API_*`).

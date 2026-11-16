@@ -134,6 +134,7 @@ const BUILDERS: Record<TranslatableType, (doc: Doc, pass: Pass) => Obj> = {
       })),
     })),
   }),
+  labChange: (doc, pass) => ({ title: text(pass, doc.title), note: text(pass, doc.note) }),
   experiences: (doc, pass) => ({
     works: list(doc.works)?.map((work) => ({
       ...work,

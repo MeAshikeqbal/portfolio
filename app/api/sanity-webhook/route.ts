@@ -33,7 +33,8 @@ function revalidateFor(type: string | undefined) {
     case "post":
     case "category":
       // Every post page, so renamed or unpublished slugs stop serving stale copies.
-      revalidatePages("/post", "/post/[slug]", "/")
+      // Homecave too: its log links incidents to the posts that write them up.
+      revalidatePages("/post", "/post/[slug]", "/", "/homecave")
       revalidatePath("/rss.xml")
       revalidatePath("/sitemap.xml")
       break

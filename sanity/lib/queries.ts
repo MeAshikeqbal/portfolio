@@ -235,6 +235,22 @@ export const USES_QUERY = defineQuery(`
   }
 `)
 
+/** Homecave's companions to the live dashboard: the lab changelog, and posts that write up an incident. */
+export const HOMECAVE_RECORD_QUERY = defineQuery(`{
+  "changes": *[_type == "labChange" && defined(date) && defined(title)] | order(date desc, _createdAt desc) [0...12] {
+    _id,
+    date,
+    category,
+    "title": coalesce(${tr}.title, title),
+    "note": coalesce(${tr}.note, note)
+  },
+  "writeups": *[_type == "post" && defined(incident) && defined(slug.current) && archived != true] | order(incident desc) [0...50] {
+    "title": coalesce(${tr}.title, title),
+    "slug": slug.current,
+    incident
+  }
+}`)
+
 export const NOW_QUERY = defineQuery(`
   *[_type == "now" && _id == "now"][0] {
     _updatedAt,

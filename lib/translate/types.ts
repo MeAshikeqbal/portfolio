@@ -4,6 +4,7 @@ export const TRANSLATABLE_TYPES = [
   "project",
   "now",
   "uses",
+  "labChange",
   "experiences",
   "education",
   "category",

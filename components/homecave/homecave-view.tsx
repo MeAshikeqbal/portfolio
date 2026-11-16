@@ -10,11 +10,13 @@ import { Container, Section } from "@/components/dashboard/layout"
 import { SectionHeader } from "@/components/dashboard/section-header"
 import { LabServiceBadge } from "@/components/lab/lab-badges"
 import { serviceState } from "@/lib/lab/services"
+import type { LabReliability, Writeup } from "@/lib/lab/incidents"
 import type { LabStatus } from "@/lib/lab/types"
-import type { USES_QUERY_RESULT } from "@/sanity.types"
+import type { HOMECAVE_RECORD_QUERY_RESULT, USES_QUERY_RESULT } from "@/sanity.types"
 import { useTranslations } from "next-intl"
 import { cn } from "@/lib/utils"
 import { LabDashboard, type NodeSpec } from "./lab-dashboard"
+import { LabRecord } from "./lab-record"
 
 /** Sections about the lab itself (Self-hosted, Network & access); the rest is the desk setup. */
 const isLabSection = (title: string | null | undefined) => /self-hosted|network/i.test(title ?? "")
@@ -24,7 +26,19 @@ const isLabSection = (title: string | null | undefined) => /self-hosted|network/
  * signed, anonymized heartbeats; the copy around it (intro, node role lines, self-hosted and
  * setup sections) from the Studio's Homecave document.
  */
-export function HomecaveView({ uses, lab }: { uses: USES_QUERY_RESULT; lab: LabStatus | null }) {
+export function HomecaveView({
+  uses,
+  lab,
+  record = null,
+  history = null,
+}: {
+  uses: USES_QUERY_RESULT
+  lab: LabStatus | null
+  /** Incidents and uptime from the lab's heartbeats; null when not configured. */
+  record?: LabReliability | null
+  /** The Studio's changelog and incident write-ups. */
+  history?: HOMECAVE_RECORD_QUERY_RESULT | null
+}) {
   const t = useTranslations("homecave")
   const sections = visibleUsesSections(uses)
   // Grouped by their English titles, so a translated page groups the same way.
@@ -36,6 +50,10 @@ export function HomecaveView({ uses, lab }: { uses: USES_QUERY_RESULT; lab: LabS
   const deskSections = rest.filter((s) => !isLabSection(kind(s)))
   // Server-side first answer for each service badge (same snapshot the dashboard renders).
   const renderedAt = new Date()
+  const changes = history?.changes ?? []
+  const writeups = (history?.writeups ?? []).filter((w): w is Writeup =>
+    Boolean(w.slug && w.title && w.incident),
+  )
   const badge = (name: string) => (
     <LabServiceBadge name={name} initial={serviceState(name, lab, renderedAt)} />
   )
@@ -57,6 +75,15 @@ export function HomecaveView({ uses, lab }: { uses: USES_QUERY_RESULT; lab: LabS
           </p>
         </Container>
       </Section>
+
+      {(record || changes.length > 0) && (
+        <Section className="border-t">
+          <Container>
+            <SectionHeader title={t("recordTitle")} description={t("recordDescription")} />
+            <LabRecord record={record} changes={changes} writeups={writeups} now={renderedAt} />
+          </Container>
+        </Section>
+      )}
 
       {rest.length > 0 && (
         <Section className="border-t">

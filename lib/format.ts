@@ -164,3 +164,31 @@ export function formatPercent(value: number, digits = 1): string {
   const fixed = value.toFixed(digits)
   return `${fixed.endsWith(".0") ? fixed.slice(0, -2) : fixed}%`
 }
+
+const unitFormat = (locale: FormatLocale, unit: "second" | "minute" | "hour" | "day") =>
+  cached(
+    `unit:${unit}:${locale}`,
+    () => new Intl.NumberFormat(latn(locale), { style: "unit", unit, unitDisplay: "short" }),
+  )
+
+/**
+ * A length of time as one or two units: "45 sec", "12 min", "3 hr 5 min", "2 days 4 hr"
+ * (in English; Intl's short units elsewhere).
+ */
+export function formatDuration(seconds: number, locale: FormatLocale = "en"): string {
+  if (!Number.isFinite(seconds) || seconds < 0) return "—"
+  const s = Math.round(seconds)
+  if (s < 60) return unitFormat(locale, "second").format(s)
+  const minutes = Math.round(s / 60)
+  if (minutes < 60) return unitFormat(locale, "minute").format(minutes)
+  const hours = Math.floor(minutes / 60)
+  const rest = minutes % 60
+  if (hours < 48) {
+    const h = unitFormat(locale, "hour").format(hours)
+    return rest ? `${h} ${unitFormat(locale, "minute").format(rest)}` : h
+  }
+  const days = Math.floor(hours / 24)
+  const restH = hours % 24
+  const d = unitFormat(locale, "day").format(days)
+  return restH ? `${d} ${unitFormat(locale, "hour").format(restH)}` : d
+}

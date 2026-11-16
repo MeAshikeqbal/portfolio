@@ -12,7 +12,12 @@
     "nodeUpFor": "online · {uptime}",
     "labSummary": "{up}/{total} online",
     "storage": "Speicher",
-    "nodeDown": "offline"
+    "nodeDown": "offline",
+    "uptimeLegend": "{level, select, up {keine Ausfallzeiten} partial {einige Ausfallzeiten} down {meistens offline} other {Keine Daten}}",
+    "writeup": "Zum Bericht",
+    "logMeta": "letzte 30 Tage",
+    "changeCategory": "{category, select, hardware {Hardware} storage {Speicher} network {Netzwerk} services {Dienste} security {Sicherheit} backups {Backups} other {andere}}",
+    "incident": "{kind, select, node {{state, select, nodata {Keine Daten von {name}} other {{name} ausgefallen}}} svc {{name} ausgefallen} wan {Internet ausgefallen} backup {{state, select, failed {Backup-Runde fehlgeschlagen} other {Backup-Runde mit Warnungen}}} other {{name}}}"
   },
   "home": {
     "resume": "Lebenslauf"

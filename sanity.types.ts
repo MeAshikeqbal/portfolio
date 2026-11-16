@@ -58,6 +58,13 @@ export type UsesReference = {
   [internalGroqTypeReferenceTo]?: "uses"
 }
 
+export type LabChangeReference = {
+  _ref: string
+  _type: "reference"
+  _weak?: boolean
+  [internalGroqTypeReferenceTo]?: "labChange"
+}
+
 export type ExperiencesReference = {
   _ref: string
   _type: "reference"
@@ -90,6 +97,7 @@ export type Translation = {
     | ProjectReference
     | NowReference
     | UsesReference
+    | LabChangeReference
     | ExperiencesReference
     | EducationReference
     | CategoryReference
@@ -272,6 +280,18 @@ export type Now = {
     _type: "nowEntry"
     _key: string
   }>
+}
+
+export type LabChange = {
+  _id: string
+  _type: "labChange"
+  _createdAt: string
+  _updatedAt: string
+  _rev: string
+  date?: string
+  title?: string
+  note?: string
+  category?: "hardware" | "storage" | "network" | "services" | "security" | "backups"
 }
 
 export type Uses = {
@@ -460,6 +480,7 @@ export type Post = {
   >
   featured?: boolean
   archived?: boolean
+  incident?: string
   seo?: Seo
 }
 
@@ -647,6 +668,7 @@ export type AllSanitySchemaTypes =
   | ProjectReference
   | NowReference
   | UsesReference
+  | LabChangeReference
   | ExperiencesReference
   | EducationReference
   | CategoryReference
@@ -658,6 +680,7 @@ export type AllSanitySchemaTypes =
   | SanityImageHotspot
   | BlockContent
   | Now
+  | LabChange
   | Uses
   | Cv
   | Skills
@@ -1099,6 +1122,24 @@ export type USES_QUERY_RESULT = {
 } | null
 
 // Source: sanity/lib/queries.ts
+// Variable: HOMECAVE_RECORD_QUERY
+// Query: {  "changes": *[_type == "labChange" && defined(date) && defined(title)] | order(date desc, _createdAt desc) [0...12] {    _id,    date,    category,    "title": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.title, title),    "note": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.note, note)  },  "writeups": *[_type == "post" && defined(incident) && defined(slug.current) && archived != true] | order(incident desc) [0...50] {    "title": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.title, title),    "slug": slug.current,    incident  }}
+export type HOMECAVE_RECORD_QUERY_RESULT = {
+  changes: Array<{
+    _id: string
+    date: string
+    category: "backups" | "hardware" | "network" | "security" | "services" | "storage" | null
+    title: string
+    note: string | null
+  }>
+  writeups: Array<{
+    title: string | null
+    slug: string | null
+    incident: string | null
+  }>
+}
+
+// Source: sanity/lib/queries.ts
 // Variable: NOW_QUERY
 // Query: *[_type == "now" && _id == "now"][0] {    _updatedAt,    // The date the update was written; the last edit until that's set.    "updated": coalesce(updatedOn, _updatedAt),    "location": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.location, location),    "body": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.body, body),    "languages": ["en"] + *[_type == "translation" && source._ref == ^._id].language,    "archive": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.archive, archive)[defined(date) && count(body) > 0] | order(date desc) {      _key, date, location, body    }  }
 export type NOW_QUERY_RESULT = {
@@ -1137,6 +1178,7 @@ declare global {
     '{\n  "posts": *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && archived != true && seo.noIndex != true]\n    | order(publishedAt desc) { "slug": slug.current, _updatedAt, "languages": ["en"] + *[_type == "translation" && source._ref == ^._id].language },\n  "projects": *[_type == "project" && !(_id in path("drafts.**")) && defined(slug.current) && seo.noIndex != true]\n    { "slug": slug.current, _updatedAt, "languages": ["en"] + *[_type == "translation" && source._ref == ^._id].language },\n  "now": *[_type == "now" && _id == "now" && count(body) > 0][0] { _updatedAt, "languages": ["en"] + *[_type == "translation" && source._ref == ^._id].language }\n}': SITEMAP_QUERY_RESULT
     '{\n  "posts": *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && archived != true] | order(publishedAt desc) {\n    _id, "title": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.title, title), "slug": slug.current, "topics": categories[]->{ "title": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.title, title) }.title\n  },\n  "projects": *[_type == "project" && !(_id in path("drafts.**"))] | order(orderRank asc, _createdAt desc) {\n    _id, "title": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.title, title), "slug": slug.current, url, github\n  },\n  // Only whether a CV exists: the file itself is served from /resume.pdf.\n  "hasCv": defined(*[_type == "cv"][0].cvFile.asset),\n  // /now is only linked once it has published content (Homecave always exists).\n  "hasNow": count(*[_type == "now" && _id == "now"][0].body) > 0\n}': COMMAND_INDEX_QUERY_RESULT
     '\n  *[_type == "uses" && _id == "uses"][0] {\n    _updatedAt,\n    "intro": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.intro, intro),\n    "sections": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.sections, sections)[]{ _key, title, items[]{ _key, name, description, url, icon } },\n    // English section titles by key: the page groups sections by them (Homelab, Self-hosted\u2026).\n    "sectionKinds": sections[]{ _key, title }\n  }\n': USES_QUERY_RESULT
+    '{\n  "changes": *[_type == "labChange" && defined(date) && defined(title)] | order(date desc, _createdAt desc) [0...12] {\n    _id,\n    date,\n    category,\n    "title": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.title, title),\n    "note": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.note, note)\n  },\n  "writeups": *[_type == "post" && defined(incident) && defined(slug.current) && archived != true] | order(incident desc) [0...50] {\n    "title": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.title, title),\n    "slug": slug.current,\n    incident\n  }\n}': HOMECAVE_RECORD_QUERY_RESULT
     '\n  *[_type == "now" && _id == "now"][0] {\n    _updatedAt,\n    // The date the update was written; the last edit until that\'s set.\n    "updated": coalesce(updatedOn, _updatedAt),\n    "location": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.location, location),\n    "body": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.body, body),\n    "languages": ["en"] + *[_type == "translation" && source._ref == ^._id].language,\n    "archive": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.archive, archive)[defined(date) && count(body) > 0] | order(date desc) {\n      _key, date, location, body\n    }\n  }\n': NOW_QUERY_RESULT
   }
 }

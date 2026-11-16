@@ -11,7 +11,13 @@
     "nodeUp": "gumagana",
     "nodeUpFor": "gumagana · {uptime}",
     "labSummary": "{up}/{total} gumagana",
-    "nodeDown": "offline"
+    "nodeDown": "offline",
+    "logTitle": "log",
+    "uptimeTitle": "uptime · 90 araw",
+    "uptimeLegend": "{level, select, up {walang downtime} partial {ilang downtime} down {halos offline} other {walang datos}}",
+    "incident": "{kind, select, node {{state, select, nodata {Walang datos mula sa {name}} other {Down ang {name}}}} svc {Down ang {name}} wan {Down ang Internet} backup {{state, select, failed {Nabigo ang backup round} other {Backup round na may mga babala}}} other {{name}}}",
+    "recordDescription": "Itinatala ng lab ang bawat outage habang nangyayari ito, kasama ang uptime sa nakalipas na 90 araw.",
+    "changeCategory": "{category, select, hardware {hardware} storage {imbakan} network {network} services {mga serbisyo} security {seguridad} backups {mga backup} other {iba pa}}"
   },
   "writing": {
     "log": "talaan"

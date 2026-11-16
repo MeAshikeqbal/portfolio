@@ -11,7 +11,9 @@
     "nodeUp": "চালু",
     "nodeUpFor": "চালু · {uptime}",
     "labSummary": "{up}/{total} চালু",
-    "nodeDown": "বন্ধ"
+    "nodeDown": "বন্ধ",
+    "uptimeLegend": "{level, select, up {কোন ডাউনটাইম নেই} partial {কিছু ডাউনটাইম} down {বেশিরভাগ অফলাইন} other {কোন ডেটা নেই}}",
+    "incidentPool": "{node}-এ {name}: {state}"
   },
   "systemBar": {
     "build": "বিল্ড",

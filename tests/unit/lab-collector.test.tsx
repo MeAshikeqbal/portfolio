@@ -237,7 +237,9 @@ describe("history with collector series", () => {
     const env = { UPSTASH_REDIS_REST_URL: "https://r", UPSTASH_REDIS_REST_TOKEN: "t" }
     await writeHeartbeat(nodes, 1794291000, now, env, fetchImpl)
     expect(calls).toHaveLength(1)
-    const sample = JSON.parse(calls[0].at(-1)!)
+    // Each entry's arguments end with its sample, then its entity readings.
+    const sample = JSON.parse(calls[0].at(-2)!)
+    expect(calls[0].at(-1)).toMatch(/^node:Tower\tup\t1\n/)
     expect(sample).toMatchObject({ tc: nodes[0].temps!.cpuC, g: nodes[0].gpu!.utilPct })
     expect(sample.e).toBe(nodes[0].edge!.rpm)
   })
