@@ -18,7 +18,8 @@
     "home": "{name}, home",
     "main": "Main",
     "toggleMenu": "Toggle menu",
-    "theme": "Theme"
+    "theme": "Theme",
+    "language": "Language"
   },
   "footer": {
     "label": "Footer",
@@ -261,7 +262,8 @@
     "education": "education",
     "entries": "{count, plural, one {# entry} other {# entries}}",
     "current": "current",
-    "past": "past"
+    "past": "past",
+    "present": "Present"
   },
   "posts": {
     "search": "Search posts",
@@ -456,5 +458,14 @@
     "postDescription": "Read {title} by {name}.",
     "projectNotFound": "Project not found",
     "projectDescription": "{title}, a project by {name}."
+  },
+  "language": {
+    "label": "Language: {language}",
+    "available": "This page is available in {language}.",
+    "pageNotice": "This page was machine-translated from English.",
+    "contentNotice": "This article was machine-translated from English.",
+    "contentEnglish": "This article is only available in English.",
+    "original": "Read the original",
+    "group": "Language"
   }
 }

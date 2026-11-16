@@ -12,16 +12,18 @@ import { Container, GridBackdrop } from "@/components/dashboard/layout"
 import { Panel, PanelHeader } from "@/components/dashboard/panel"
 import { createPortableTextComponents } from "@/components/portable-text/components"
 import { JsonLd } from "@/components/seo/json-ld"
+import { TranslationNotice } from "@/components/site/translation-notice"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { getPost, getPostSlugs } from "@/lib/api"
 import { formatDate } from "@/lib/format"
 import { currentLocale, localizedPageMetadata } from "@/i18n/metadata"
 import { Link } from "@/i18n/navigation"
+import { servedLanguages } from "@/lib/metadata"
 import { rankRelated } from "@/lib/related"
 import { buildToc, readingTime, wordCount } from "@/lib/portable-text"
 import { siteConfig } from "@/lib/site"
 import { blogPostingSchema, breadcrumbSchema, jsonLdGraph } from "@/lib/structured-data"
-import { localizedPath } from "@/i18n/locales"
+import { defaultLocale, localizedPath } from "@/i18n/locales"
 import { urlFor } from "@/sanity/lib/image"
 
 type Props = { params: Promise<{ slug: string }> }
@@ -34,7 +36,10 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
-  const [post, t] = await Promise.all([getPost(slug), getTranslations("meta")])
+  const [post, t] = await Promise.all([
+    getPost(slug, await currentLocale()),
+    getTranslations("meta"),
+  ])
   if (!post?.title) return { title: t("postNotFound") }
 
   const title = post.seo?.title || post.title
@@ -48,6 +53,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       title,
       description,
       path: `/post/${slug}`,
+      // Only the languages it's translated into; elsewhere the English copy is canonical.
+      available: servedLanguages(post.languages),
       openGraph: {
         type: "article",
         publishedTime: post.publishedAt ?? undefined,
@@ -63,14 +70,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function PostPage({ params }: Props) {
   const { slug } = await params
-  const [post, t, locale] = await Promise.all([
-    getPost(slug),
-    getTranslations("posts"),
-    currentLocale(),
-  ])
+  const locale = await currentLocale()
+  const [post, t] = await Promise.all([getPost(slug, locale), getTranslations("posts")])
   if (!post) notFound()
 
   const title = post.title ?? t("untitled")
+  // The language of the post's own words: this page's once translated, English until then.
+  const translated = servedLanguages(post.languages).includes(locale)
+  const contentLang = translated ? locale : defaultLocale
   const { entries, idsByKey } = buildToc(post.body)
   const minutes = readingTime(post.body)
   const components = createPortableTextComponents(idsByKey)
@@ -130,11 +137,17 @@ export default async function PostPage({ params }: Props) {
                 </ul>
               )}
               {/* On the type scale: the headline step (1.875rem) on phones, 3rem from sm. */}
-              <h1 className="mt-2 max-w-3xl text-3xl leading-tight font-semibold tracking-tight text-balance sm:mt-3 sm:text-5xl">
+              {/* Untranslated posts are English on every page; say so to screen readers. */}
+              <h1
+                lang={contentLang}
+                className="mt-2 max-w-3xl text-3xl leading-tight font-semibold tracking-tight text-balance sm:mt-3 sm:text-5xl"
+              >
                 {title}
               </h1>
               {post.excerpt && (
-                <p className="mt-4 max-w-2xl text-lg text-muted-foreground">{post.excerpt}</p>
+                <p lang={contentLang} className="mt-4 max-w-2xl text-lg text-muted-foreground">
+                  {post.excerpt}
+                </p>
               )}
               <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted-foreground sm:mt-6">
                 <span className="flex items-center gap-2 text-foreground">
@@ -158,6 +171,11 @@ export default async function PostPage({ params }: Props) {
                 )}
                 <span className="label-caps">{t("minRead", { minutes })}</span>
               </div>
+              <TranslationNotice
+                path={`/post/${slug}`}
+                scope={translated ? "content" : "english"}
+                className="mt-4"
+              />
               {post.archived && (
                 <p className="mt-5 max-w-2xl rounded-md bg-status-idle-soft px-3 py-2 text-sm text-status-idle-fg">
                   {t("archived")}
@@ -207,7 +225,7 @@ export default async function PostPage({ params }: Props) {
                   </ol>
                 </details>
               )}
-              <div className="prose prose-lg max-w-none">
+              <div lang={contentLang} className="prose prose-lg max-w-none">
                 <PortableText value={post.body ?? []} components={components} />
               </div>
             </div>

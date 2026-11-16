@@ -64,3 +64,20 @@ describe("revalidatePages", () => {
     expect(revalidatePath).toHaveBeenCalledWith("/[lang]/post/[slug]", "page")
   })
 })
+
+describe("suggestedLocale", () => {
+  it("offers the first browser language the site speaks, unless the page is already in it", async () => {
+    const { suggestedLocale } = await import("@/components/site/language-suggest")
+    expect(suggestedLocale(["fr-FR", "en-GB"], "ja")).toBe("en")
+    expect(suggestedLocale(["en-US", "ja"], "en")).toBeNull()
+    expect(suggestedLocale(["fr", "pt"], "en")).toBeNull()
+  })
+})
+
+describe("OG script characters", () => {
+  it("keeps only what Geist can't draw, from any string in the image", async () => {
+    const { scriptCharacters } = await import("@/lib/og")
+    const chars = scriptCharacters([{ title: "ホーム · 2026年", footer: ["Proxmox — 3"] }])
+    expect([...chars].sort()).toEqual([..."ホーム年"].sort())
+  })
+})

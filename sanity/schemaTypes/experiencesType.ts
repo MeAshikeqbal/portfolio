@@ -3,6 +3,41 @@ import { defineArrayMember, defineField, defineType } from "sanity"
 
 import { yearRange } from "./validation"
 
+/** One role at a company. Shared with the translation type (sanity/schemaTypes/translationType.ts). */
+export const workExperience = defineArrayMember({
+  name: "workExperience",
+  title: "Role",
+  type: "object",
+  fields: [
+    defineField({
+      name: "name",
+      title: "Role",
+      type: "string",
+      validation: (rule) => rule.required(),
+    }),
+    defineField({
+      name: "company",
+      type: "string",
+      validation: (rule) => rule.required(),
+    }),
+    defineField({
+      // Stored as "copmanyLogo" (sic); renaming would orphan existing data.
+      name: "copmanyLogo",
+      title: "Company logo",
+      type: "image",
+      options: { hotspot: true },
+    }),
+    defineField({
+      name: "desc",
+      title: "Description",
+      type: "string",
+    }),
+  ],
+  preview: {
+    select: { title: "name", subtitle: "company", media: "copmanyLogo" },
+  },
+})
+
 /** One year (or range) of the experience timeline, holding the roles from that period. */
 export const experiencesType = defineType({
   name: "experiences",
@@ -22,41 +57,7 @@ export const experiencesType = defineType({
       title: "Roles",
       type: "array",
       validation: (rule) => rule.required().min(1),
-      of: [
-        defineArrayMember({
-          name: "workExperience",
-          title: "Role",
-          type: "object",
-          fields: [
-            defineField({
-              name: "name",
-              title: "Role",
-              type: "string",
-              validation: (rule) => rule.required(),
-            }),
-            defineField({
-              name: "company",
-              type: "string",
-              validation: (rule) => rule.required(),
-            }),
-            defineField({
-              // Stored as "copmanyLogo" (sic); renaming would orphan existing data.
-              name: "copmanyLogo",
-              title: "Company logo",
-              type: "image",
-              options: { hotspot: true },
-            }),
-            defineField({
-              name: "desc",
-              title: "Description",
-              type: "string",
-            }),
-          ],
-          preview: {
-            select: { title: "name", subtitle: "company", media: "copmanyLogo" },
-          },
-        }),
-      ],
+      of: [workExperience],
     }),
   ],
   orderings: [

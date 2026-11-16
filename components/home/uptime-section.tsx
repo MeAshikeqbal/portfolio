@@ -6,7 +6,7 @@ import { SectionHeader } from "@/components/dashboard/section-header"
 import { StatusDot } from "@/components/dashboard/status-dot"
 import { getEducation, getExperiences } from "@/lib/api"
 import { isCurrentPeriod } from "@/lib/format"
-import { getTranslations } from "next-intl/server"
+import { getLocale, getTranslations } from "next-intl/server"
 import { useTranslations } from "next-intl"
 import { urlFor } from "@/sanity/lib/image"
 
@@ -20,9 +20,10 @@ interface Entry {
 }
 
 export async function UptimeSection() {
+  const locale = await getLocale()
   const [experiences, education, t] = await Promise.all([
-    getExperiences(),
-    getEducation(),
+    getExperiences(locale),
+    getEducation(locale),
     getTranslations("uptime"),
   ])
 
@@ -78,7 +79,10 @@ function Log({ title, entries }: { title: string; entries: Entry[] }) {
                 label={current ? t("current") : t("past")}
                 className="absolute top-1 -left-[1.82rem] size-2.5 ring-4 ring-surface"
               />
-              <p className="label-caps">{entry.period}</p>
+              <p className="label-caps">
+                {/* "2024 – Present": the CMS writes the open end in English. */}
+                {entry.period?.replace(/\b(present|now|current)\b/i, t("present"))}
+              </p>
               <div className="mt-1 flex items-start gap-3">
                 {entry.logo}
                 <div className="min-w-0">

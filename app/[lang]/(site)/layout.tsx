@@ -6,12 +6,15 @@ import { VisualEditing } from "next-sanity/visual-editing"
 import { draftMode } from "next/headers"
 import { getTranslations } from "next-intl/server"
 import { DraftModeBanner } from "@/components/site/draft-mode-banner"
+import { LanguageSuggest } from "@/components/site/language-suggest"
 import { getCommandIndex, getSiteStatus } from "@/lib/api"
 import { SanityLive } from "@/sanity/lib/live"
+import { currentLocale } from "@/i18n/metadata"
 
 export default async function SiteLayout({ children }: { children: React.ReactNode }) {
+  const locale = await currentLocale()
   const [commandIndex, siteStatus, { isEnabled: isDraftMode }, t, nav] = await Promise.all([
-    getCommandIndex(),
+    getCommandIndex(locale),
     getSiteStatus(),
     draftMode(),
     getTranslations("site"),
@@ -35,6 +38,7 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
         extraLinks={[...(commandIndex.hasNow ? [{ label: nav("now"), href: "/now" }] : [])]}
       />
       <BackToTop />
+      <LanguageSuggest />
       {/* Live content updates for the public site only (not the Studio or style guide). */}
       <SanityLive includeDrafts={isDraftMode} />
       {isDraftMode && (

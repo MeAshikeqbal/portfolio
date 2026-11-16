@@ -1,7 +1,14 @@
-import { ImageResponse } from "next/og"
 import { getPost, getPostSlugs } from "@/lib/api"
 import { formatDate } from "@/lib/format"
-import { OG_COLORS, OG_CONTENT_TYPE, OG_SIZE, OgFrame, ogFonts, sanityOgImage } from "@/lib/og"
+import {
+  OG_COLORS,
+  OG_CONTENT_TYPE,
+  OG_SIZE,
+  OgFrame,
+  ogFonts,
+  ogResponse,
+  sanityOgImage,
+} from "@/lib/og"
 import { readingTime } from "@/lib/portable-text"
 import { siteConfig } from "@/lib/site"
 import { routeTranslations } from "@/i18n/route-translations"
@@ -24,25 +31,21 @@ export default async function Image({
 }) {
   const { slug } = await params
   const locale = await ogLocale(params)
-  const [post, fonts, t] = await Promise.all([
-    getPost(slug),
-    ogFonts(),
-    routeTranslations(locale, "og"),
-  ])
+  const [post, t] = await Promise.all([getPost(slug, locale), routeTranslations(locale, "og")])
 
   // An explicit social image in the post's SEO settings wins over the generated card.
   if (post?.seo?.ogImage?.asset) {
-    return sanityOgImage(post.seo.ogImage, fonts)
+    return sanityOgImage(post.seo.ogImage, await ogFonts())
   }
 
   if (!post?.title) {
-    return new ImageResponse(
+    return ogResponse(
       <OgFrame
         eyebrow={t("writing")}
         title={t("postNotFound")}
         status={{ color: OG_COLORS.idle, label: t("http404") }}
       />,
-      { ...size, fonts },
+      locale,
     )
   }
 
@@ -54,7 +57,7 @@ export default async function Image({
     .filter(Boolean)
     .join(" · ")
 
-  return new ImageResponse(
+  return ogResponse(
     <OgFrame
       eyebrow={eyebrow}
       title={post.title}
@@ -63,6 +66,6 @@ export default async function Image({
         c.title ? [`#${c.title.toLocaleLowerCase(locale)}`] : [],
       )}
     />,
-    { ...size, fonts },
+    locale,
   )
 }

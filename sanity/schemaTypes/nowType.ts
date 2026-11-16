@@ -1,6 +1,29 @@
 import { NowIcon } from "../components/icons"
 import { defineArrayMember, defineField, defineType } from "sanity"
 
+/** A dated earlier update. Shared with the translation type (sanity/schemaTypes/translationType.ts). */
+export const nowEntry = defineArrayMember({
+  name: "nowEntry",
+  title: "Update",
+  type: "object",
+  fields: [
+    defineField({ name: "date", type: "date", validation: (rule) => rule.required() }),
+    defineField({ name: "location", type: "string" }),
+    defineField({
+      name: "body",
+      type: "blockContent",
+      validation: (rule) => rule.required().min(1),
+    }),
+  ],
+  preview: {
+    select: { date: "date", location: "location" },
+    prepare: ({ date, location }) => ({
+      title: date ?? "Undated update",
+      subtitle: location,
+    }),
+  },
+})
+
 /** Today as YYYY-MM-DD in the editor's time zone (Sanity `date` fields have no time). */
 export function todayIso(now = new Date()): string {
   const pad = (n: number) => String(n).padStart(2, "0")
@@ -54,29 +77,7 @@ export const nowType = defineType({
       title: "Previous updates",
       type: "array",
       fieldset: "history",
-      of: [
-        defineArrayMember({
-          name: "nowEntry",
-          title: "Update",
-          type: "object",
-          fields: [
-            defineField({ name: "date", type: "date", validation: (rule) => rule.required() }),
-            defineField({ name: "location", type: "string" }),
-            defineField({
-              name: "body",
-              type: "blockContent",
-              validation: (rule) => rule.required().min(1),
-            }),
-          ],
-          preview: {
-            select: { date: "date", location: "location" },
-            prepare: ({ date, location }) => ({
-              title: date ?? "Undated update",
-              subtitle: location,
-            }),
-          },
-        }),
-      ],
+      of: [nowEntry],
     }),
   ],
   preview: { prepare: () => ({ title: "Now" }) },

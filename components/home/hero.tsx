@@ -14,12 +14,12 @@ import { siteConfig } from "@/lib/site"
 import { Link } from "@/i18n/navigation"
 
 export async function Hero() {
-  const [t, site, locale, cvUrl, stats, lab] = await Promise.all([
+  const locale = await getLocale()
+  const [t, site, cvUrl, stats, lab] = await Promise.all([
     getTranslations("home"),
     getTranslations("site"),
-    getLocale(),
     getCvUrl(),
-    getHomeStats(),
+    getHomeStats(locale),
     // Only the machines' names, to pick the rows; cached for an hour (names rarely change).
     readLabStatus(process.env, fetch, { revalidate: 3600 }),
   ])

@@ -7,6 +7,7 @@ import { Container } from "@/components/dashboard/layout"
 import { ThemeCycleButton, ThemeToggle } from "@/components/theme-toggle"
 import type { CommandIndex } from "@/lib/api"
 import { CommandMenu } from "./command-menu"
+import { LanguageList, LanguageSwitcher } from "./language-switcher"
 import { Button } from "@/components/ui/button"
 import { siteConfig } from "@/lib/site"
 import { cn } from "@/lib/utils"
@@ -98,6 +99,7 @@ export function SiteNav({ commandIndex }: { commandIndex?: CommandIndex }) {
         <div className="flex items-center gap-1">
           {/* A single palette instance for every screen size (one keyboard listener). */}
           {commandIndex && <CommandMenu index={commandIndex} />}
+          <LanguageSwitcher className="hidden md:inline-flex" />
           <ThemeCycleButton className="hidden md:inline-flex" />
           <Button
             ref={toggle}
@@ -151,6 +153,10 @@ export function SiteNav({ commandIndex }: { commandIndex?: CommandIndex }) {
             <div className="mt-2 flex items-center justify-between border-t px-3 pt-3">
               <span className="label-caps">{t("theme")}</span>
               <ThemeToggle />
+            </div>
+            <div className="flex flex-col gap-2 px-3 pt-2">
+              <span className="label-caps">{t("language")}</span>
+              <LanguageList />
             </div>
           </Container>
         </nav>

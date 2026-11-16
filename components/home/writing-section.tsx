@@ -13,11 +13,11 @@ import { Link } from "@/i18n/navigation"
  * the hero already shows as "latest post" is skipped, so every slot is a new entry.
  */
 export async function WritingSection() {
-  const [candidates, stats, t, locale] = await Promise.all([
-    getLatestPosts(),
-    getHomeStats(),
+  const locale = await getLocale()
+  const [candidates, stats, t] = await Promise.all([
+    getLatestPosts(locale),
+    getHomeStats(locale),
     getTranslations("writing"),
-    getLocale(),
   ])
   const heroSlug = stats.latestPost?.slug
   const posts = candidates.filter((post) => post.slug !== heroSlug).slice(0, 3)

@@ -1,7 +1,6 @@
-import { ImageResponse } from "next/og"
 import { getProjects } from "@/lib/api"
 import { formatCompact } from "@/lib/format"
-import { OG_CONTENT_TYPE, OG_SIZE, OG_STATUS_COLORS, OgFrame, ogFonts } from "@/lib/og"
+import { OG_CONTENT_TYPE, OG_SIZE, OG_STATUS_COLORS, OgFrame, ogResponse } from "@/lib/og"
 import { siteConfig } from "@/lib/site"
 import { projectStatus } from "@/lib/status"
 import { routeTranslations } from "@/i18n/route-translations"
@@ -16,7 +15,7 @@ export const generateStaticParams = ogStaticParams
 export default async function Image({ params }: { params: OgParams }) {
   const locale = await ogLocale(params)
   const [projects, t, page] = await Promise.all([
-    getProjects(),
+    getProjects(locale),
     routeTranslations(locale, "og"),
     routeTranslations(locale, "projects"),
   ])
@@ -37,7 +36,7 @@ export default async function Image({ params }: { params: OgParams }) {
 
   const commits = projects.reduce((sum, p) => sum + (p.githubData?.commits ?? 0), 0)
 
-  return new ImageResponse(
+  return ogResponse(
     <OgFrame
       eyebrow={t("projectsCount", { count: projects.length })}
       title={page("sectionTitle")}
@@ -56,6 +55,6 @@ export default async function Image({ params }: { params: OgParams }) {
           : undefined
       }
     />,
-    { ...size, fonts: await ogFonts() },
+    locale,
   )
 }
