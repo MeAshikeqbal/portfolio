@@ -14,7 +14,8 @@ import { writeClient } from "@/sanity/lib/write-client"
  * `<SanityLive />` already revalidates content while visitors are on the site;
  * this webhook is the backstop for changes published while nobody is browsing.
  * Expects `Authorization: Bearer <SANITY_WEBHOOK_SECRET>` and a projection of
- * `{_id, _type, "operation": delta::operation()}` (create, update and delete).
+ * `{_id, _type, "operation": delta::operation()}` (create, update and delete), for every
+ * document type: translations included, so a written or hand-corrected translation shows.
  */
 function isAuthorized(header: string | null, secret: string): boolean {
   if (!header) return false
@@ -66,10 +67,12 @@ export async function POST(req: NextRequest) {
     // An empty or non-JSON body still triggers a full revalidation below.
   }
 
-  // Writing a translation is a publish too: nothing to translate, and the source's own
-  // webhook already refreshed its pages.
+  // A translation was written (on publish, by the backfill, or corrected by hand): refresh the
+  // pages that read it. Translations come from many types (a category's title shows on every
+  // post), so every page; there's nothing to translate.
   if (body._type === "translation") {
-    return NextResponse.json({ revalidated: false, type: "translation" })
+    revalidatePath("/", "layout")
+    return NextResponse.json({ revalidated: true, type: "translation" })
   }
 
   revalidateFor(body._type)
