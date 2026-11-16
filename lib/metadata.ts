@@ -1,5 +1,12 @@
 import type { Metadata } from "next"
-import { defaultLocale, localeInfo, localizedPath, locales, type Locale } from "@/i18n/locales"
+import {
+  defaultLocale,
+  isLocale,
+  localeInfo,
+  localizedPath,
+  locales,
+  type Locale,
+} from "@/i18n/locales"
 import { absoluteUrl, siteConfig } from "@/lib/site"
 
 type OpenGraph = NonNullable<Metadata["openGraph"]>
@@ -20,6 +27,18 @@ interface PageMetadataInput {
   siteName: string
   /** Extra Open Graph fields (e.g. `type: "article"`, `publishedTime`). */
   openGraph?: Partial<OpenGraph>
+}
+
+/**
+ * The served locales a document can be read in, from a query's `languages` (English plus each
+ * machine translation). Translations into a locale the site doesn't serve are left out.
+ */
+export function servedLanguages(
+  languages: readonly (string | null)[] | null | undefined,
+): Locale[] {
+  const available = new Set((languages ?? []).filter(isLocale))
+  available.add(defaultLocale)
+  return locales.filter((locale) => available.has(locale))
 }
 
 /**

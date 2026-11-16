@@ -262,7 +262,8 @@
     "education": "education",
     "entries": "{count, plural, one {# entry} other {# entries}}",
     "current": "current",
-    "past": "past"
+    "past": "past",
+    "present": "Present"
   },
   "posts": {
     "search": "Search posts",

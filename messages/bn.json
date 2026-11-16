@@ -262,7 +262,8 @@
     "education": "শিক্ষা",
     "entries": "{count, plural, one {# এন্ট্রি} other {# এন্ট্রি}}",
     "current": "বর্তমান",
-    "past": "অতীত"
+    "past": "অতীত",
+    "present": "বর্তমান"
   },
   "posts": {
     "search": "পোস্ট অনুসন্ধান করুন",

@@ -31,7 +31,7 @@ export default async function Image({
 }) {
   const { slug } = await params
   const locale = await ogLocale(params)
-  const [post, t] = await Promise.all([getPost(slug), routeTranslations(locale, "og")])
+  const [post, t] = await Promise.all([getPost(slug, locale), routeTranslations(locale, "og")])
 
   // An explicit social image in the post's SEO settings wins over the generated card.
   if (post?.seo?.ogImage?.asset) {

@@ -32,7 +32,7 @@ export default async function Image({
   const { slug } = await params
   const locale = await ogLocale(params)
   const [project, t, projects] = await Promise.all([
-    getProject(slug),
+    getProject(slug, locale),
     routeTranslations(locale, "og"),
     routeTranslations(locale, "projects"),
   ])

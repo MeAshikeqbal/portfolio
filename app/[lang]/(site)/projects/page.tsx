@@ -6,7 +6,7 @@ import { ProjectPanel } from "@/components/projects/project-panel"
 import { ProjectsBrowser } from "@/components/projects/projects-browser"
 import { getProjects } from "@/lib/api"
 import { getTranslations } from "next-intl/server"
-import { localizedPageMetadata } from "@/i18n/metadata"
+import { currentLocale, localizedPageMetadata } from "@/i18n/metadata"
 import { siteConfig } from "@/lib/site"
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -19,7 +19,10 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function ProjectsPage() {
-  const [projects, t] = await Promise.all([getProjects(), getTranslations("meta")])
+  const [projects, t] = await Promise.all([
+    getProjects(await currentLocale()),
+    getTranslations("meta"),
+  ])
 
   // Render time, passed down so the client re-renders statuses (which depend on push age)
   // exactly as the server did: no hydration mismatch when a project crosses into "dormant".

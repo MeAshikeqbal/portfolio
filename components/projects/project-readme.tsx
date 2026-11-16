@@ -77,7 +77,10 @@ export function ProjectReadme({ markdown, source, open = false, className }: Pro
             </span>
           </summary>
           <div className="border-t px-4 py-6 sm:px-6">
-            <article className="readme prose max-w-none">{content}</article>
+            {/* READMEs come straight from GitHub, in English, on every page. */}
+            <article lang="en" className="readme prose max-w-none">
+              {content}
+            </article>
             <a
               href={fileUrl}
               target="_blank"

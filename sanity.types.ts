@@ -15,18 +15,149 @@
 export declare const internalGroqTypeReferenceTo: unique symbol
 
 // Source: schema.json
-export type SanityFileAssetReference = {
-  _ref: string
-  _type: "reference"
-  _weak?: boolean
-  [internalGroqTypeReferenceTo]?: "sanity.fileAsset"
-}
-
 export type SanityImageAssetReference = {
   _ref: string
   _type: "reference"
   _weak?: boolean
   [internalGroqTypeReferenceTo]?: "sanity.imageAsset"
+}
+
+export type CopmanyLogo = {
+  asset?: SanityImageAssetReference
+  media?: unknown // Unable to locate the referenced type "copmanyLogo.media" in schema
+  hotspot?: SanityImageHotspot
+  crop?: SanityImageCrop
+  _type: "image"
+}
+
+export type PostReference = {
+  _ref: string
+  _type: "reference"
+  _weak?: boolean
+  [internalGroqTypeReferenceTo]?: "post"
+}
+
+export type ProjectReference = {
+  _ref: string
+  _type: "reference"
+  _weak?: boolean
+  [internalGroqTypeReferenceTo]?: "project"
+}
+
+export type NowReference = {
+  _ref: string
+  _type: "reference"
+  _weak?: boolean
+  [internalGroqTypeReferenceTo]?: "now"
+}
+
+export type UsesReference = {
+  _ref: string
+  _type: "reference"
+  _weak?: boolean
+  [internalGroqTypeReferenceTo]?: "uses"
+}
+
+export type ExperiencesReference = {
+  _ref: string
+  _type: "reference"
+  _weak?: boolean
+  [internalGroqTypeReferenceTo]?: "experiences"
+}
+
+export type EducationReference = {
+  _ref: string
+  _type: "reference"
+  _weak?: boolean
+  [internalGroqTypeReferenceTo]?: "education"
+}
+
+export type CategoryReference = {
+  _ref: string
+  _type: "reference"
+  _weak?: boolean
+  [internalGroqTypeReferenceTo]?: "category"
+}
+
+export type Translation = {
+  _id: string
+  _type: "translation"
+  _createdAt: string
+  _updatedAt: string
+  _rev: string
+  source?:
+    | PostReference
+    | ProjectReference
+    | NowReference
+    | UsesReference
+    | ExperiencesReference
+    | EducationReference
+    | CategoryReference
+  language?: "hi" | "bn" | "tl" | "es" | "de" | "ja"
+  manual?: boolean
+  translatedAt?: string
+  sourceRev?: string
+  content?: {
+    title?: string
+    excerpt?: string
+    description?: string
+    location?: string
+    intro?: string
+    degree?: string
+    desc?: string
+    body?: BlockContent
+    mainImage?: {
+      asset?: SanityImageAssetReference
+      media?: unknown
+      hotspot?: SanityImageHotspot
+      crop?: SanityImageCrop
+      alt?: string
+      _type: "image"
+    }
+    seo?: Seo
+    video?: Video
+    archive?: Array<{
+      date?: string
+      location?: string
+      body?: BlockContent
+      _type: "nowEntry"
+      _key: string
+    }>
+    sections?: Array<{
+      title?: string
+      items?: Array<{
+        name?: string
+        description?: string
+        url?: string
+        icon?: string
+        _type: "usesItem"
+        _key: string
+      }>
+      _type: "usesSection"
+      _key: string
+    }>
+    works?: Array<{
+      name?: string
+      company?: string
+      copmanyLogo?: CopmanyLogo
+      desc?: string
+      _type: "workExperience"
+      _key: string
+    }>
+  }
+  memory?: Array<{
+    hash?: string
+    html?: string
+    _type: "segment"
+    _key: string
+  }>
+}
+
+export type SanityFileAssetReference = {
+  _ref: string
+  _type: "reference"
+  _weak?: boolean
+  [internalGroqTypeReferenceTo]?: "sanity.fileAsset"
 }
 
 export type Video = {
@@ -51,22 +182,34 @@ export type Video = {
   }
 }
 
-export type Now = {
-  _id: string
-  _type: "now"
-  _createdAt: string
-  _updatedAt: string
-  _rev: string
-  updatedOn?: string
-  location?: string
-  body?: BlockContent
-  archive?: Array<{
-    date?: string
-    location?: string
-    body?: BlockContent
-    _type: "nowEntry"
-    _key: string
-  }>
+export type Seo = {
+  _type: "seo"
+  title?: string
+  description?: string
+  ogImage?: {
+    asset?: SanityImageAssetReference
+    media?: unknown
+    hotspot?: SanityImageHotspot
+    crop?: SanityImageCrop
+    _type: "image"
+  }
+  noIndex?: boolean
+}
+
+export type SanityImageCrop = {
+  _type: "sanity.imageCrop"
+  top?: number
+  bottom?: number
+  left?: number
+  right?: number
+}
+
+export type SanityImageHotspot = {
+  _type: "sanity.imageHotspot"
+  x?: number
+  y?: number
+  height?: number
+  width?: number
 }
 
 export type BlockContent = Array<
@@ -113,6 +256,24 @@ export type BlockContent = Array<
     }
 >
 
+export type Now = {
+  _id: string
+  _type: "now"
+  _createdAt: string
+  _updatedAt: string
+  _rev: string
+  updatedOn?: string
+  location?: string
+  body?: BlockContent
+  archive?: Array<{
+    date?: string
+    location?: string
+    body?: BlockContent
+    _type: "nowEntry"
+    _key: string
+  }>
+}
+
 export type Uses = {
   _id: string
   _type: "uses"
@@ -133,20 +294,6 @@ export type Uses = {
     _type: "usesSection"
     _key: string
   }>
-}
-
-export type Seo = {
-  _type: "seo"
-  title?: string
-  description?: string
-  ogImage?: {
-    asset?: SanityImageAssetReference
-    media?: unknown
-    hotspot?: SanityImageHotspot
-    crop?: SanityImageCrop
-    _type: "image"
-  }
-  noIndex?: boolean
 }
 
 export type Cv = {
@@ -237,22 +384,6 @@ export type Project = {
   githubSyncRequestedAt?: string
 }
 
-export type SanityImageCrop = {
-  _type: "sanity.imageCrop"
-  top?: number
-  bottom?: number
-  left?: number
-  right?: number
-}
-
-export type SanityImageHotspot = {
-  _type: "sanity.imageHotspot"
-  x?: number
-  y?: number
-  height?: number
-  width?: number
-}
-
 export type Slug = {
   _type: "slug"
   current?: string
@@ -288,13 +419,7 @@ export type Experiences = {
   works?: Array<{
     name?: string
     company?: string
-    copmanyLogo?: {
-      asset?: SanityImageAssetReference
-      media?: unknown
-      hotspot?: SanityImageHotspot
-      crop?: SanityImageCrop
-      _type: "image"
-    }
+    copmanyLogo?: CopmanyLogo
     desc?: string
     _type: "workExperience"
     _key: string
@@ -306,13 +431,6 @@ export type AuthorReference = {
   _type: "reference"
   _weak?: boolean
   [internalGroqTypeReferenceTo]?: "author"
-}
-
-export type CategoryReference = {
-  _ref: string
-  _type: "reference"
-  _weak?: boolean
-  [internalGroqTypeReferenceTo]?: "category"
 }
 
 export type Post = {
@@ -523,23 +641,31 @@ export type Geopoint = {
 }
 
 export type AllSanitySchemaTypes =
-  | SanityFileAssetReference
   | SanityImageAssetReference
+  | CopmanyLogo
+  | PostReference
+  | ProjectReference
+  | NowReference
+  | UsesReference
+  | ExperiencesReference
+  | EducationReference
+  | CategoryReference
+  | Translation
+  | SanityFileAssetReference
   | Video
-  | Now
-  | BlockContent
-  | Uses
   | Seo
+  | SanityImageCrop
+  | SanityImageHotspot
+  | BlockContent
+  | Now
+  | Uses
   | Cv
   | Skills
   | Project
-  | SanityImageCrop
-  | SanityImageHotspot
   | Slug
   | Education
   | Experiences
   | AuthorReference
-  | CategoryReference
   | Post
   | Author
   | Category
@@ -558,7 +684,7 @@ export type AllSanitySchemaTypes =
 
 // Source: sanity/lib/queries.ts
 // Variable: POSTS_QUERY
-// Query: *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && archived != true] | order(publishedAt desc) {   _id,  title,  "slug": slug.current,  mainImage,  "lqip": mainImage.asset->metadata.lqip,  publishedAt,  "excerpt": coalesce(excerpt, array::join(string::split(pt::text(body[_type == "block" && style == "normal"]), "")[0...200], "")),  categories[]->{ _id, title },  author->{ name } }
+// Query: *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && archived != true] | order(publishedAt desc) {   _id,  "title": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.title, title),  "slug": slug.current,  "mainImage": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.mainImage, mainImage),  "lqip": mainImage.asset->metadata.lqip,  publishedAt,  "excerpt": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.excerpt, coalesce(excerpt, array::join(string::split(pt::text(body[_type == "block" && style == "normal"]), "")[0...200], ""))),  categories[]->{ _id, "title": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.title, title) },  author->{ name } }
 export type POSTS_QUERY_RESULT = Array<{
   _id: string
   title: string | null
@@ -585,7 +711,7 @@ export type POSTS_QUERY_RESULT = Array<{
 
 // Source: sanity/lib/queries.ts
 // Variable: LATEST_POSTS_QUERY
-// Query: *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && archived != true]    | order(coalesce(featured, false) desc, publishedAt desc) [0...4] {        _id,  title,  "slug": slug.current,  mainImage,  "lqip": mainImage.asset->metadata.lqip,  publishedAt,  "excerpt": coalesce(excerpt, array::join(string::split(pt::text(body[_type == "block" && style == "normal"]), "")[0...200], "")),  categories[]->{ _id, title },  author->{ name },      "pinned": featured == true    }
+// Query: *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && archived != true]    | order(coalesce(featured, false) desc, publishedAt desc) [0...4] {        _id,  "title": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.title, title),  "slug": slug.current,  "mainImage": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.mainImage, mainImage),  "lqip": mainImage.asset->metadata.lqip,  publishedAt,  "excerpt": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.excerpt, coalesce(excerpt, array::join(string::split(pt::text(body[_type == "block" && style == "normal"]), "")[0...200], ""))),  categories[]->{ _id, "title": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.title, title) },  author->{ name },      "pinned": featured == true    }
 export type LATEST_POSTS_QUERY_RESULT = Array<{
   _id: string
   title: string | null
@@ -613,7 +739,7 @@ export type LATEST_POSTS_QUERY_RESULT = Array<{
 
 // Source: sanity/lib/queries.ts
 // Variable: POST_QUERY
-// Query: *[_type == "post" && !(_id in path("drafts.**")) && slug.current == $slug][0] {    _id,    title,    "slug": slug.current,    author->{ name, image },    mainImage,    "cover": mainImage.asset->metadata{ lqip, "width": dimensions.width, "height": dimensions.height },    // posts: how many listed posts share the category, so rare ones weigh more in "related".    categories[]->{ _id, title, "posts": count(*[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && archived != true && references(^._id)]) },    publishedAt,    _updatedAt,    body,    excerpt,    seo,    archived,    "previous": *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && archived != true && publishedAt < ^.publishedAt]      | order(publishedAt desc)[0] { title, "slug": slug.current },    "next": *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && archived != true && publishedAt > ^.publishedAt]      | order(publishedAt asc)[0] { title, "slug": slug.current },    // Every candidate sharing a category, ranked in lib/related.ts (rare shared topics first).    // The cap is only a payload guard, far above the site's post count: limiting by date    // first would drop an older rare-topic match before it could be ranked.    "related": *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && archived != true && _id != ^._id && count(categories[@._ref in ^.^.categories[]._ref]) > 0]      | order(publishedAt desc)[0...200] {   _id,  title,  "slug": slug.current,  mainImage,  "lqip": mainImage.asset->metadata.lqip,  publishedAt,  "excerpt": coalesce(excerpt, array::join(string::split(pt::text(body[_type == "block" && style == "normal"]), "")[0...200], "")),  categories[]->{ _id, title },  author->{ name }, "categoryIds": categories[]._ref }  }
+// Query: *[_type == "post" && !(_id in path("drafts.**")) && slug.current == $slug][0] {    _id,    "title": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.title, title),    "slug": slug.current,    author->{ name, image },    "mainImage": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.mainImage, mainImage),    "cover": mainImage.asset->metadata{ lqip, "width": dimensions.width, "height": dimensions.height },    // posts: how many listed posts share the category, so rare ones weigh more in "related".    categories[]->{ _id, "title": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.title, title), "posts": count(*[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && archived != true && references(^._id)]) },    publishedAt,    _updatedAt,    "body": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.body, body),    "excerpt": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.excerpt, excerpt),    "seo": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.seo, seo),    archived,    "languages": ["en"] + *[_type == "translation" && source._ref == ^._id].language,    "previous": *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && archived != true && publishedAt < ^.publishedAt]      | order(publishedAt desc)[0] { "title": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.title, title), "slug": slug.current },    "next": *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && archived != true && publishedAt > ^.publishedAt]      | order(publishedAt asc)[0] { "title": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.title, title), "slug": slug.current },    // Every candidate sharing a category, ranked in lib/related.ts (rare shared topics first).    // The cap is only a payload guard, far above the site's post count: limiting by date    // first would drop an older rare-topic match before it could be ranked.    "related": *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && archived != true && _id != ^._id && count(categories[@._ref in ^.^.categories[]._ref]) > 0]      | order(publishedAt desc)[0...200] {   _id,  "title": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.title, title),  "slug": slug.current,  "mainImage": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.mainImage, mainImage),  "lqip": mainImage.asset->metadata.lqip,  publishedAt,  "excerpt": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.excerpt, coalesce(excerpt, array::join(string::split(pt::text(body[_type == "block" && style == "normal"]), "")[0...200], ""))),  categories[]->{ _id, "title": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.title, title) },  author->{ name }, "categoryIds": categories[]._ref }  }
 export type POST_QUERY_RESULT = {
   _id: string
   title: string | null
@@ -652,6 +778,7 @@ export type POST_QUERY_RESULT = {
   excerpt: string | null
   seo: Seo | null
   archived: boolean | null
+  languages: Array<"bn" | "de" | "es" | "hi" | "ja" | "tl" | null | "en">
   previous: {
     title: string | null
     slug: string | null
@@ -693,7 +820,7 @@ export type POST_SLUGS_QUERY_RESULT = Array<string | null>
 
 // Source: sanity/lib/queries.ts
 // Variable: PROJECTS_QUERY
-// Query: *[_type == "project" && !(_id in path("drafts.**"))] | order(orderRank asc, _createdAt desc) {   _id,  title,  "slug": slug.current,  description,  mainImage,  publishedAt,  github,  url,  featured,  status,  tech,  githubData }
+// Query: *[_type == "project" && !(_id in path("drafts.**"))] | order(orderRank asc, _createdAt desc) {   _id,  "title": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.title, title),  "slug": slug.current,  "description": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.description, description),  "mainImage": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.mainImage, mainImage),  publishedAt,  github,  url,  featured,  status,  tech,  githubData }
 export type PROJECTS_QUERY_RESULT = Array<{
   _id: string
   title: string | null
@@ -727,7 +854,7 @@ export type PROJECTS_QUERY_RESULT = Array<{
 
 // Source: sanity/lib/queries.ts
 // Variable: PROJECT_QUERY
-// Query: *[_type == "project" && !(_id in path("drafts.**")) && slug.current == $slug][0] {      _id,  title,  "slug": slug.current,  description,  mainImage,  publishedAt,  github,  url,  featured,  status,  tech,  githubData,    body,    seo,    video,    // Only on the project page (lists don't carry READMEs).    "readme": select(showReadme != false => readme { markdown, path, ref })  }
+// Query: *[_type == "project" && !(_id in path("drafts.**")) && slug.current == $slug][0] {      _id,  "title": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.title, title),  "slug": slug.current,  "description": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.description, description),  "mainImage": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.mainImage, mainImage),  publishedAt,  github,  url,  featured,  status,  tech,  githubData,    "body": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.body, body),    "seo": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.seo, seo),    "video": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.video, video),    "languages": ["en"] + *[_type == "translation" && source._ref == ^._id].language,    // Only on the project page (lists don't carry READMEs).    "readme": select(showReadme != false => readme { markdown, path, ref })  }
 export type PROJECT_QUERY_RESULT = {
   _id: string
   title: string | null
@@ -760,6 +887,7 @@ export type PROJECT_QUERY_RESULT = {
   body: BlockContent | null
   seo: Seo | null
   video: Video | null
+  languages: Array<"bn" | "de" | "es" | "hi" | "ja" | "tl" | null | "en">
   readme: {
     markdown: string | null
     path: string | null
@@ -774,7 +902,7 @@ export type PROJECT_SLUGS_QUERY_RESULT = Array<string | null>
 
 // Source: sanity/lib/queries.ts
 // Variable: HOME_STATS_QUERY
-// Query: {  "posts": count(*[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && archived != true]),  "projects": count(*[_type == "project" && !(_id in path("drafts.**"))]),  // Past-52-week commits per repo, summed (see lib/fetch-github-data.ts).  "commits": math::sum(*[_type == "project" && !(_id in path("drafts.**"))].githubData.commits),  "latestPost": *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && archived != true]    | order(publishedAt desc)[0] { title, "slug": slug.current, publishedAt },  // The "Homelab" section of /uses, if there is one.  "homelab": *[_type == "uses" && _id == "uses"][0]    .sections[string::startsWith(lower(title), "homelab")][0]    .items[0...5] { _key, name, description, url, icon }}
+// Query: {  "posts": count(*[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && archived != true]),  "projects": count(*[_type == "project" && !(_id in path("drafts.**"))]),  // Past-52-week commits per repo, summed (see lib/fetch-github-data.ts).  "commits": math::sum(*[_type == "project" && !(_id in path("drafts.**"))].githubData.commits),  "latestPost": *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && archived != true]    | order(publishedAt desc)[0] { "title": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.title, title), "slug": slug.current, publishedAt },  // The "Homelab" section of Homecave, if there is one: found by its English title, read in  // the page's language (machine names are never translated, only their role lines).  "homelab": *[_type == "uses" && _id == "uses"][0] {    "key": sections[string::startsWith(lower(title), "homelab")][0]._key,    "sections": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.sections, sections)  } { "items": sections[_key == ^.key][0].items[0...5] { _key, name, description, url, icon } }.items}
 export type HOME_STATS_QUERY_RESULT = {
   posts: number
   projects: number
@@ -831,7 +959,7 @@ export type SKILLS_QUERY_RESULT = Array<{
 
 // Source: sanity/lib/queries.ts
 // Variable: EDUCATION_QUERY
-// Query: *[_type == "education"] | order(year desc) { _id, year, degree, school, schoolLogo, desc }
+// Query: *[_type == "education"] | order(year desc) {    _id, year, "degree": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.degree, degree), school, schoolLogo, "desc": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.desc, desc)  }
 export type EDUCATION_QUERY_RESULT = Array<{
   _id: string
   year: string | null
@@ -849,7 +977,7 @@ export type EDUCATION_QUERY_RESULT = Array<{
 
 // Source: sanity/lib/queries.ts
 // Variable: EXPERIENCES_QUERY
-// Query: *[_type == "experiences"] | order(year desc) {    _id,    year,    works[]{ _key, name, company, copmanyLogo, desc }  }
+// Query: *[_type == "experiences"] | order(year desc) {    _id,    year,    "works": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.works, works)[]{ _key, name, company, copmanyLogo, desc }  }
 export type EXPERIENCES_QUERY_RESULT = Array<{
   _id: string
   year: string | null
@@ -857,13 +985,7 @@ export type EXPERIENCES_QUERY_RESULT = Array<{
     _key: string
     name: string | null
     company: string | null
-    copmanyLogo: {
-      asset?: SanityImageAssetReference
-      media?: unknown
-      hotspot?: SanityImageHotspot
-      crop?: SanityImageCrop
-      _type: "image"
-    } | null
+    copmanyLogo: CopmanyLogo | null
     desc: string | null
   }> | null
 }>
@@ -875,7 +997,7 @@ export type CV_URL_QUERY_RESULT = string | null
 
 // Source: sanity/lib/queries.ts
 // Variable: FEED_POSTS_QUERY
-// Query: *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && archived != true] | order(publishedAt desc) {    title,    body,    "slug": slug.current,    publishedAt,    _updatedAt,    "excerpt": coalesce(excerpt, array::join(string::split(pt::text(body[_type == "block" && style == "normal"]), "")[0...200], "")),    author->{ name },    "categories": categories[]->title,    "image": mainImage.asset->{ url, "mimeType": mimeType }  }
+// Query: *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && archived != true] | order(publishedAt desc) {    title,    body,    "slug": slug.current,    publishedAt,    _updatedAt,    // The feed is English (its <language> says so).    "excerpt": coalesce(excerpt, array::join(string::split(pt::text(body[_type == "block" && style == "normal"]), "")[0...200], "")),    author->{ name },    "categories": categories[]->title,    "image": mainImage.asset->{ url, "mimeType": mimeType }  }
 export type FEED_POSTS_QUERY_RESULT = Array<{
   title: string | null
   body: BlockContent | null
@@ -914,22 +1036,27 @@ export type GITHUB_SYNC_REQUESTS_QUERY_RESULT = Array<{
 
 // Source: sanity/lib/queries.ts
 // Variable: SITEMAP_QUERY
-// Query: {  "posts": *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && archived != true && seo.noIndex != true]    | order(publishedAt desc) { "slug": slug.current, _updatedAt },  "projects": *[_type == "project" && !(_id in path("drafts.**")) && defined(slug.current) && seo.noIndex != true]    { "slug": slug.current, _updatedAt },  "now": *[_type == "now" && _id == "now" && count(body) > 0][0]._updatedAt}
+// Query: {  "posts": *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && archived != true && seo.noIndex != true]    | order(publishedAt desc) { "slug": slug.current, _updatedAt, "languages": ["en"] + *[_type == "translation" && source._ref == ^._id].language },  "projects": *[_type == "project" && !(_id in path("drafts.**")) && defined(slug.current) && seo.noIndex != true]    { "slug": slug.current, _updatedAt, "languages": ["en"] + *[_type == "translation" && source._ref == ^._id].language },  "now": *[_type == "now" && _id == "now" && count(body) > 0][0] { _updatedAt, "languages": ["en"] + *[_type == "translation" && source._ref == ^._id].language }}
 export type SITEMAP_QUERY_RESULT = {
   posts: Array<{
     slug: string | null
     _updatedAt: string
+    languages: Array<"bn" | "de" | "es" | "hi" | "ja" | "tl" | null | "en">
   }>
   projects: Array<{
     slug: string | null
     _updatedAt: string
+    languages: Array<"bn" | "de" | "es" | "hi" | "ja" | "tl" | null | "en">
   }>
-  now: string | null
+  now: {
+    _updatedAt: string
+    languages: Array<"bn" | "de" | "es" | "hi" | "ja" | "tl" | null | "en">
+  } | null
 }
 
 // Source: sanity/lib/queries.ts
 // Variable: COMMAND_INDEX_QUERY
-// Query: {  "posts": *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && archived != true] | order(publishedAt desc) {    _id, title, "slug": slug.current, "topics": categories[]->title  },  "projects": *[_type == "project" && !(_id in path("drafts.**"))] | order(orderRank asc, _createdAt desc) {    _id, title, "slug": slug.current, url, github  },  // Only whether a CV exists: the file itself is served from /resume.pdf.  "hasCv": defined(*[_type == "cv"][0].cvFile.asset),  // /now is only linked once it has published content (Homecave always exists).  "hasNow": count(*[_type == "now" && _id == "now"][0].body) > 0}
+// Query: {  "posts": *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && archived != true] | order(publishedAt desc) {    _id, "title": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.title, title), "slug": slug.current, "topics": categories[]->{ "title": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.title, title) }.title  },  "projects": *[_type == "project" && !(_id in path("drafts.**"))] | order(orderRank asc, _createdAt desc) {    _id, "title": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.title, title), "slug": slug.current, url, github  },  // Only whether a CV exists: the file itself is served from /resume.pdf.  "hasCv": defined(*[_type == "cv"][0].cvFile.asset),  // /now is only linked once it has published content (Homecave always exists).  "hasNow": count(*[_type == "now" && _id == "now"][0].body) > 0}
 export type COMMAND_INDEX_QUERY_RESULT = {
   posts: Array<{
     _id: string
@@ -950,7 +1077,7 @@ export type COMMAND_INDEX_QUERY_RESULT = {
 
 // Source: sanity/lib/queries.ts
 // Variable: USES_QUERY
-// Query: *[_type == "uses" && _id == "uses"][0] {    _updatedAt,    intro,    sections[]{ _key, title, items[]{ _key, name, description, url, icon } }  }
+// Query: *[_type == "uses" && _id == "uses"][0] {    _updatedAt,    "intro": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.intro, intro),    "sections": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.sections, sections)[]{ _key, title, items[]{ _key, name, description, url, icon } },    // English section titles by key: the page groups sections by them (Homelab, Self-hosted…).    "sectionKinds": sections[]{ _key, title }  }
 export type USES_QUERY_RESULT = {
   _updatedAt: string
   intro: string | null
@@ -965,16 +1092,21 @@ export type USES_QUERY_RESULT = {
       icon: string | null
     }> | null
   }> | null
+  sectionKinds: Array<{
+    _key: string
+    title: string | null
+  }> | null
 } | null
 
 // Source: sanity/lib/queries.ts
 // Variable: NOW_QUERY
-// Query: *[_type == "now" && _id == "now"][0] {    _updatedAt,    // The date the update was written; the last edit until that's set.    "updated": coalesce(updatedOn, _updatedAt),    location,    body,    "archive": archive[defined(date) && count(body) > 0] | order(date desc) {      _key, date, location, body    }  }
+// Query: *[_type == "now" && _id == "now"][0] {    _updatedAt,    // The date the update was written; the last edit until that's set.    "updated": coalesce(updatedOn, _updatedAt),    "location": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.location, location),    "body": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.body, body),    "languages": ["en"] + *[_type == "translation" && source._ref == ^._id].language,    "archive": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.archive, archive)[defined(date) && count(body) > 0] | order(date desc) {      _key, date, location, body    }  }
 export type NOW_QUERY_RESULT = {
   _updatedAt: string
   updated: string
   location: string | null
   body: BlockContent | null
+  languages: Array<"bn" | "de" | "es" | "hi" | "ja" | "tl" | null | "en">
   archive: Array<{
     _key: string
     date: string | null
@@ -986,26 +1118,26 @@ export type NOW_QUERY_RESULT = {
 // Query TypeMap
 declare global {
   interface SanityQueries {
-    '\n  *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && archived != true] | order(publishedAt desc) { \n  _id,\n  title,\n  "slug": slug.current,\n  mainImage,\n  "lqip": mainImage.asset->metadata.lqip,\n  publishedAt,\n  "excerpt": coalesce(excerpt, array::join(string::split(pt::text(body[_type == "block" && style == "normal"]), "")[0...200], "")),\n  categories[]->{ _id, title },\n  author->{ name }\n }\n': POSTS_QUERY_RESULT
-    '\n  *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && archived != true]\n    | order(coalesce(featured, false) desc, publishedAt desc) [0...4] {\n      \n  _id,\n  title,\n  "slug": slug.current,\n  mainImage,\n  "lqip": mainImage.asset->metadata.lqip,\n  publishedAt,\n  "excerpt": coalesce(excerpt, array::join(string::split(pt::text(body[_type == "block" && style == "normal"]), "")[0...200], "")),\n  categories[]->{ _id, title },\n  author->{ name }\n,\n      "pinned": featured == true\n    }\n': LATEST_POSTS_QUERY_RESULT
-    '\n  *[_type == "post" && !(_id in path("drafts.**")) && slug.current == $slug][0] {\n    _id,\n    title,\n    "slug": slug.current,\n    author->{ name, image },\n    mainImage,\n    "cover": mainImage.asset->metadata{ lqip, "width": dimensions.width, "height": dimensions.height },\n    // posts: how many listed posts share the category, so rare ones weigh more in "related".\n    categories[]->{ _id, title, "posts": count(*[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && archived != true && references(^._id)]) },\n    publishedAt,\n    _updatedAt,\n    body,\n    excerpt,\n    seo,\n    archived,\n    "previous": *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && archived != true && publishedAt < ^.publishedAt]\n      | order(publishedAt desc)[0] { title, "slug": slug.current },\n    "next": *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && archived != true && publishedAt > ^.publishedAt]\n      | order(publishedAt asc)[0] { title, "slug": slug.current },\n    // Every candidate sharing a category, ranked in lib/related.ts (rare shared topics first).\n    // The cap is only a payload guard, far above the site\'s post count: limiting by date\n    // first would drop an older rare-topic match before it could be ranked.\n    "related": *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && archived != true && _id != ^._id && count(categories[@._ref in ^.^.categories[]._ref]) > 0]\n      | order(publishedAt desc)[0...200] { \n  _id,\n  title,\n  "slug": slug.current,\n  mainImage,\n  "lqip": mainImage.asset->metadata.lqip,\n  publishedAt,\n  "excerpt": coalesce(excerpt, array::join(string::split(pt::text(body[_type == "block" && style == "normal"]), "")[0...200], "")),\n  categories[]->{ _id, title },\n  author->{ name }\n, "categoryIds": categories[]._ref }\n  }\n': POST_QUERY_RESULT
+    '\n  *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && archived != true] | order(publishedAt desc) { \n  _id,\n  "title": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.title, title),\n  "slug": slug.current,\n  "mainImage": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.mainImage, mainImage),\n  "lqip": mainImage.asset->metadata.lqip,\n  publishedAt,\n  "excerpt": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.excerpt, coalesce(excerpt, array::join(string::split(pt::text(body[_type == "block" && style == "normal"]), "")[0...200], ""))),\n  categories[]->{ _id, "title": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.title, title) },\n  author->{ name }\n }\n': POSTS_QUERY_RESULT
+    '\n  *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && archived != true]\n    | order(coalesce(featured, false) desc, publishedAt desc) [0...4] {\n      \n  _id,\n  "title": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.title, title),\n  "slug": slug.current,\n  "mainImage": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.mainImage, mainImage),\n  "lqip": mainImage.asset->metadata.lqip,\n  publishedAt,\n  "excerpt": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.excerpt, coalesce(excerpt, array::join(string::split(pt::text(body[_type == "block" && style == "normal"]), "")[0...200], ""))),\n  categories[]->{ _id, "title": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.title, title) },\n  author->{ name }\n,\n      "pinned": featured == true\n    }\n': LATEST_POSTS_QUERY_RESULT
+    '\n  *[_type == "post" && !(_id in path("drafts.**")) && slug.current == $slug][0] {\n    _id,\n    "title": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.title, title),\n    "slug": slug.current,\n    author->{ name, image },\n    "mainImage": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.mainImage, mainImage),\n    "cover": mainImage.asset->metadata{ lqip, "width": dimensions.width, "height": dimensions.height },\n    // posts: how many listed posts share the category, so rare ones weigh more in "related".\n    categories[]->{ _id, "title": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.title, title), "posts": count(*[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && archived != true && references(^._id)]) },\n    publishedAt,\n    _updatedAt,\n    "body": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.body, body),\n    "excerpt": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.excerpt, excerpt),\n    "seo": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.seo, seo),\n    archived,\n    "languages": ["en"] + *[_type == "translation" && source._ref == ^._id].language,\n    "previous": *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && archived != true && publishedAt < ^.publishedAt]\n      | order(publishedAt desc)[0] { "title": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.title, title), "slug": slug.current },\n    "next": *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && archived != true && publishedAt > ^.publishedAt]\n      | order(publishedAt asc)[0] { "title": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.title, title), "slug": slug.current },\n    // Every candidate sharing a category, ranked in lib/related.ts (rare shared topics first).\n    // The cap is only a payload guard, far above the site\'s post count: limiting by date\n    // first would drop an older rare-topic match before it could be ranked.\n    "related": *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && archived != true && _id != ^._id && count(categories[@._ref in ^.^.categories[]._ref]) > 0]\n      | order(publishedAt desc)[0...200] { \n  _id,\n  "title": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.title, title),\n  "slug": slug.current,\n  "mainImage": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.mainImage, mainImage),\n  "lqip": mainImage.asset->metadata.lqip,\n  publishedAt,\n  "excerpt": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.excerpt, coalesce(excerpt, array::join(string::split(pt::text(body[_type == "block" && style == "normal"]), "")[0...200], ""))),\n  categories[]->{ _id, "title": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.title, title) },\n  author->{ name }\n, "categoryIds": categories[]._ref }\n  }\n': POST_QUERY_RESULT
     '\n  *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current)].slug.current\n': POST_SLUGS_QUERY_RESULT
-    '\n  *[_type == "project" && !(_id in path("drafts.**"))] | order(orderRank asc, _createdAt desc) { \n  _id,\n  title,\n  "slug": slug.current,\n  description,\n  mainImage,\n  publishedAt,\n  github,\n  url,\n  featured,\n  status,\n  tech,\n  githubData\n }\n': PROJECTS_QUERY_RESULT
-    '\n  *[_type == "project" && !(_id in path("drafts.**")) && slug.current == $slug][0] {\n    \n  _id,\n  title,\n  "slug": slug.current,\n  description,\n  mainImage,\n  publishedAt,\n  github,\n  url,\n  featured,\n  status,\n  tech,\n  githubData\n,\n    body,\n    seo,\n    video,\n    // Only on the project page (lists don\'t carry READMEs).\n    "readme": select(showReadme != false => readme { markdown, path, ref })\n  }\n': PROJECT_QUERY_RESULT
+    '\n  *[_type == "project" && !(_id in path("drafts.**"))] | order(orderRank asc, _createdAt desc) { \n  _id,\n  "title": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.title, title),\n  "slug": slug.current,\n  "description": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.description, description),\n  "mainImage": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.mainImage, mainImage),\n  publishedAt,\n  github,\n  url,\n  featured,\n  status,\n  tech,\n  githubData\n }\n': PROJECTS_QUERY_RESULT
+    '\n  *[_type == "project" && !(_id in path("drafts.**")) && slug.current == $slug][0] {\n    \n  _id,\n  "title": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.title, title),\n  "slug": slug.current,\n  "description": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.description, description),\n  "mainImage": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.mainImage, mainImage),\n  publishedAt,\n  github,\n  url,\n  featured,\n  status,\n  tech,\n  githubData\n,\n    "body": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.body, body),\n    "seo": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.seo, seo),\n    "video": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.video, video),\n    "languages": ["en"] + *[_type == "translation" && source._ref == ^._id].language,\n    // Only on the project page (lists don\'t carry READMEs).\n    "readme": select(showReadme != false => readme { markdown, path, ref })\n  }\n': PROJECT_QUERY_RESULT
     '\n  *[_type == "project" && !(_id in path("drafts.**")) && defined(slug.current)].slug.current\n': PROJECT_SLUGS_QUERY_RESULT
-    '{\n  "posts": count(*[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && archived != true]),\n  "projects": count(*[_type == "project" && !(_id in path("drafts.**"))]),\n  // Past-52-week commits per repo, summed (see lib/fetch-github-data.ts).\n  "commits": math::sum(*[_type == "project" && !(_id in path("drafts.**"))].githubData.commits),\n  "latestPost": *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && archived != true]\n    | order(publishedAt desc)[0] { title, "slug": slug.current, publishedAt },\n  // The "Homelab" section of /uses, if there is one.\n  "homelab": *[_type == "uses" && _id == "uses"][0]\n    .sections[string::startsWith(lower(title), "homelab")][0]\n    .items[0...5] { _key, name, description, url, icon }\n}': HOME_STATS_QUERY_RESULT
+    '{\n  "posts": count(*[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && archived != true]),\n  "projects": count(*[_type == "project" && !(_id in path("drafts.**"))]),\n  // Past-52-week commits per repo, summed (see lib/fetch-github-data.ts).\n  "commits": math::sum(*[_type == "project" && !(_id in path("drafts.**"))].githubData.commits),\n  "latestPost": *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && archived != true]\n    | order(publishedAt desc)[0] { "title": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.title, title), "slug": slug.current, publishedAt },\n  // The "Homelab" section of Homecave, if there is one: found by its English title, read in\n  // the page\'s language (machine names are never translated, only their role lines).\n  "homelab": *[_type == "uses" && _id == "uses"][0] {\n    "key": sections[string::startsWith(lower(title), "homelab")][0]._key,\n    "sections": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.sections, sections)\n  } { "items": sections[_key == ^.key][0].items[0...5] { _key, name, description, url, icon } }.items\n}': HOME_STATS_QUERY_RESULT
     '{\n  "syncedAt": *[_type == "project" && !(_id in path("drafts.**")) && defined(githubData.syncedAt)]\n    | order(githubData.syncedAt desc)[0].githubData.syncedAt,\n  "latestPostAt": *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && archived != true] | order(publishedAt desc)[0].publishedAt\n}': SITE_STATUS_QUERY_RESULT
     '\n  *[_type == "skills"] | order(orderRank asc, name asc) { _id, name, icon, category }\n': SKILLS_QUERY_RESULT
-    '\n  *[_type == "education"] | order(year desc) { _id, year, degree, school, schoolLogo, desc }\n': EDUCATION_QUERY_RESULT
-    '\n  *[_type == "experiences"] | order(year desc) {\n    _id,\n    year,\n    works[]{ _key, name, company, copmanyLogo, desc }\n  }\n': EXPERIENCES_QUERY_RESULT
+    '\n  *[_type == "education"] | order(year desc) {\n    _id, year, "degree": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.degree, degree), school, schoolLogo, "desc": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.desc, desc)\n  }\n': EDUCATION_QUERY_RESULT
+    '\n  *[_type == "experiences"] | order(year desc) {\n    _id,\n    year,\n    "works": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.works, works)[]{ _key, name, company, copmanyLogo, desc }\n  }\n': EXPERIENCES_QUERY_RESULT
     '\n  *[_type == "cv"][0].cvFile.asset->url\n': CV_URL_QUERY_RESULT
-    '\n  *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && archived != true] | order(publishedAt desc) {\n    title,\n    body,\n    "slug": slug.current,\n    publishedAt,\n    _updatedAt,\n    "excerpt": coalesce(excerpt, array::join(string::split(pt::text(body[_type == "block" && style == "normal"]), "")[0...200], "")),\n    author->{ name },\n    "categories": categories[]->title,\n    "image": mainImage.asset->{ url, "mimeType": mimeType }\n  }\n': FEED_POSTS_QUERY_RESULT
+    '\n  *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && archived != true] | order(publishedAt desc) {\n    title,\n    body,\n    "slug": slug.current,\n    publishedAt,\n    _updatedAt,\n    // The feed is English (its <language> says so).\n    "excerpt": coalesce(excerpt, array::join(string::split(pt::text(body[_type == "block" && style == "normal"]), "")[0...200], "")),\n    author->{ name },\n    "categories": categories[]->title,\n    "image": mainImage.asset->{ url, "mimeType": mimeType }\n  }\n': FEED_POSTS_QUERY_RESULT
     '\n  *[_type == "project" && defined(github)] { _id, title, github }\n': GITHUB_PROJECTS_QUERY_RESULT
     '\n  *[_type == "project" && _id in $ids] { _id, title, github, githubSyncRequestedAt }\n': GITHUB_SYNC_REQUESTS_QUERY_RESULT
-    '{\n  "posts": *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && archived != true && seo.noIndex != true]\n    | order(publishedAt desc) { "slug": slug.current, _updatedAt },\n  "projects": *[_type == "project" && !(_id in path("drafts.**")) && defined(slug.current) && seo.noIndex != true]\n    { "slug": slug.current, _updatedAt },\n  "now": *[_type == "now" && _id == "now" && count(body) > 0][0]._updatedAt\n}': SITEMAP_QUERY_RESULT
-    '{\n  "posts": *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && archived != true] | order(publishedAt desc) {\n    _id, title, "slug": slug.current, "topics": categories[]->title\n  },\n  "projects": *[_type == "project" && !(_id in path("drafts.**"))] | order(orderRank asc, _createdAt desc) {\n    _id, title, "slug": slug.current, url, github\n  },\n  // Only whether a CV exists: the file itself is served from /resume.pdf.\n  "hasCv": defined(*[_type == "cv"][0].cvFile.asset),\n  // /now is only linked once it has published content (Homecave always exists).\n  "hasNow": count(*[_type == "now" && _id == "now"][0].body) > 0\n}': COMMAND_INDEX_QUERY_RESULT
-    '\n  *[_type == "uses" && _id == "uses"][0] {\n    _updatedAt,\n    intro,\n    sections[]{ _key, title, items[]{ _key, name, description, url, icon } }\n  }\n': USES_QUERY_RESULT
-    '\n  *[_type == "now" && _id == "now"][0] {\n    _updatedAt,\n    // The date the update was written; the last edit until that\'s set.\n    "updated": coalesce(updatedOn, _updatedAt),\n    location,\n    body,\n    "archive": archive[defined(date) && count(body) > 0] | order(date desc) {\n      _key, date, location, body\n    }\n  }\n': NOW_QUERY_RESULT
+    '{\n  "posts": *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && archived != true && seo.noIndex != true]\n    | order(publishedAt desc) { "slug": slug.current, _updatedAt, "languages": ["en"] + *[_type == "translation" && source._ref == ^._id].language },\n  "projects": *[_type == "project" && !(_id in path("drafts.**")) && defined(slug.current) && seo.noIndex != true]\n    { "slug": slug.current, _updatedAt, "languages": ["en"] + *[_type == "translation" && source._ref == ^._id].language },\n  "now": *[_type == "now" && _id == "now" && count(body) > 0][0] { _updatedAt, "languages": ["en"] + *[_type == "translation" && source._ref == ^._id].language }\n}': SITEMAP_QUERY_RESULT
+    '{\n  "posts": *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && archived != true] | order(publishedAt desc) {\n    _id, "title": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.title, title), "slug": slug.current, "topics": categories[]->{ "title": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.title, title) }.title\n  },\n  "projects": *[_type == "project" && !(_id in path("drafts.**"))] | order(orderRank asc, _createdAt desc) {\n    _id, "title": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.title, title), "slug": slug.current, url, github\n  },\n  // Only whether a CV exists: the file itself is served from /resume.pdf.\n  "hasCv": defined(*[_type == "cv"][0].cvFile.asset),\n  // /now is only linked once it has published content (Homecave always exists).\n  "hasNow": count(*[_type == "now" && _id == "now"][0].body) > 0\n}': COMMAND_INDEX_QUERY_RESULT
+    '\n  *[_type == "uses" && _id == "uses"][0] {\n    _updatedAt,\n    "intro": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.intro, intro),\n    "sections": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.sections, sections)[]{ _key, title, items[]{ _key, name, description, url, icon } },\n    // English section titles by key: the page groups sections by them (Homelab, Self-hosted\u2026).\n    "sectionKinds": sections[]{ _key, title }\n  }\n': USES_QUERY_RESULT
+    '\n  *[_type == "now" && _id == "now"][0] {\n    _updatedAt,\n    // The date the update was written; the last edit until that\'s set.\n    "updated": coalesce(updatedOn, _updatedAt),\n    "location": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.location, location),\n    "body": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.body, body),\n    "languages": ["en"] + *[_type == "translation" && source._ref == ^._id].language,\n    "archive": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.archive, archive)[defined(date) && count(body) > 0] | order(date desc) {\n      _key, date, location, body\n    }\n  }\n': NOW_QUERY_RESULT
   }
 }
 // Lets @sanity/client releases that predate the global registry read it too

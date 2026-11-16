@@ -262,7 +262,8 @@
     "education": "शिक्षा",
     "entries": "{count, plural, one {# प्रविष्टि} other {# प्रविष्टियाँ}}",
     "current": "मौजूदा",
-    "past": "अतीत"
+    "past": "अतीत",
+    "present": "वर्तमान"
   },
   "posts": {
     "search": "पोस्ट खोजें",

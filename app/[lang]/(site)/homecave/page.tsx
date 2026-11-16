@@ -4,7 +4,7 @@ import { getUses } from "@/lib/api"
 import { toPublicStatus } from "@/lib/lab/public"
 import { readLabStatus } from "@/lib/lab/store"
 import { getTranslations } from "next-intl/server"
-import { localizedPageMetadata } from "@/i18n/metadata"
+import { currentLocale, localizedPageMetadata } from "@/i18n/metadata"
 import { siteConfig } from "@/lib/site"
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -22,7 +22,7 @@ export const revalidate = 30
 
 export default async function HomecavePage() {
   const [uses, lab] = await Promise.all([
-    getUses(),
+    getUses(await currentLocale()),
     readLabStatus(process.env, fetch, { revalidate: 30 }),
   ])
   return <HomecaveView uses={uses} lab={lab ? toPublicStatus(lab) : null} />

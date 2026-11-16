@@ -31,5 +31,8 @@
   },
   "inventory": {
     "title": "Stack"
+  },
+  "uptime": {
+    "present": "heute"
   }
 }

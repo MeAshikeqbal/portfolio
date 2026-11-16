@@ -19,7 +19,7 @@ export const revalidate = 86400
 export default async function Image({ params }: { params: OgParams }) {
   const locale = await ogLocale(params)
   const [now, t, page] = await Promise.all([
-    getNow(),
+    getNow(locale),
     routeTranslations(locale, "og"),
     routeTranslations(locale, "now"),
   ])

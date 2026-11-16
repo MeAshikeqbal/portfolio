@@ -2,6 +2,7 @@ import { ChevronRight } from "lucide-react"
 import {
   homelabSpecs,
   isHomelab,
+  sectionKind,
   UsesSections,
   visibleUsesSections,
 } from "@/components/about/uses-view"
@@ -26,11 +27,13 @@ const isLabSection = (title: string | null | undefined) => /self-hosted|network/
 export function HomecaveView({ uses, lab }: { uses: USES_QUERY_RESULT; lab: LabStatus | null }) {
   const t = useTranslations("homecave")
   const sections = visibleUsesSections(uses)
-  const homelab = sections.find((s) => isHomelab(s.title))
+  // Grouped by their English titles, so a translated page groups the same way.
+  const kind = (section: (typeof sections)[number]) => sectionKind(uses, section)
+  const homelab = sections.find((s) => isHomelab(kind(s)))
   const specs: NodeSpec[] = homelabSpecs(uses)
   const rest = sections.filter((s) => s !== homelab)
-  const labSections = rest.filter((s) => isLabSection(s.title))
-  const deskSections = rest.filter((s) => !isLabSection(s.title))
+  const labSections = rest.filter((s) => isLabSection(kind(s)))
+  const deskSections = rest.filter((s) => !isLabSection(kind(s)))
   // Server-side first answer for each service badge (same snapshot the dashboard renders).
   const renderedAt = new Date()
   const badge = (name: string) => (

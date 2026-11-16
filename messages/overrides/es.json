@@ -36,5 +36,8 @@
   },
   "live": {
     "title": "en vivo"
+  },
+  "uptime": {
+    "present": "Actualidad"
   }
 }

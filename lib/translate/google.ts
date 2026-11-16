@@ -25,7 +25,10 @@ export function batches(segments: readonly string[]): string[][] {
   let current: string[] = []
   let chars = 0
   for (const segment of segments) {
-    if (current.length > 0 && (current.length >= MAX_SEGMENTS || chars + segment.length > MAX_CHARS)) {
+    if (
+      current.length > 0 &&
+      (current.length >= MAX_SEGMENTS || chars + segment.length > MAX_CHARS)
+    ) {
       out.push(current)
       current = []
       chars = 0
@@ -40,7 +43,13 @@ export function batches(segments: readonly string[]): string[][] {
 /** Translates HTML segments, in order. Duplicates are sent once. */
 export async function translateHtml(
   segments: readonly string[],
-  { apiKey, target, source = "en", fetch: fetchImpl = fetch, sleep = defaultSleep }: TranslateOptions,
+  {
+    apiKey,
+    target,
+    source = "en",
+    fetch: fetchImpl = fetch,
+    sleep = defaultSleep,
+  }: TranslateOptions,
 ): Promise<string[]> {
   const unique = [...new Set(segments)]
   const translated = new Map<string, string>()
@@ -53,7 +62,13 @@ export async function translateHtml(
 
 async function request(
   q: string[],
-  opts: { apiKey: string; target: string; source: string; fetchImpl: typeof fetch; sleep: (ms: number) => Promise<void> },
+  opts: {
+    apiKey: string
+    target: string
+    source: string
+    fetchImpl: typeof fetch
+    sleep: (ms: number) => Promise<void>
+  },
 ): Promise<string[]> {
   for (let attempt = 0; ; attempt++) {
     const response = await opts.fetchImpl(`${ENDPOINT}?key=${encodeURIComponent(opts.apiKey)}`, {
@@ -67,7 +82,9 @@ async function request(
       }
       const translations = body.data?.translations ?? []
       if (translations.length !== q.length) {
-        throw new Error(`Google returned ${translations.length} translations for ${q.length} segments`)
+        throw new Error(
+          `Google returned ${translations.length} translations for ${q.length} segments`,
+        )
       }
       return translations.map((t) => t.translatedText)
     }

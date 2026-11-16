@@ -262,7 +262,8 @@
     "education": "教育",
     "entries": "{count, plural, other {#エントリ}}",
     "current": "現在",
-    "past": "過去"
+    "past": "過去",
+    "present": "現在"
   },
   "posts": {
     "search": "投稿を検索",

@@ -262,7 +262,8 @@
     "education": "educación",
     "entries": "{count, plural, one {entrada #} many {entradas #} other {entradas #}}",
     "current": "actual",
-    "past": "pasado"
+    "past": "pasado",
+    "present": "Actualidad"
   },
   "posts": {
     "search": "Buscar publicaciones",

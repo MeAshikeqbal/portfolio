@@ -27,11 +27,22 @@ export function isHomelab(title: string | null | undefined): boolean {
   return /^homelab/i.test(title ?? "")
 }
 
+/**
+ * A section's English title, which says what kind of section it is (Homelab, Self-hosted…)
+ * whatever language the page is in: translated titles are for reading, not matching.
+ */
+export function sectionKind(
+  uses: USES_QUERY_RESULT | null | undefined,
+  section: { _key: string; title: string | null },
+): string | null {
+  return uses?.sectionKinds?.find((kind) => kind._key === section._key)?.title ?? section.title
+}
+
 /** The Studio's Homelab rows as node specs: names in order, descriptions as role lines. */
 export function homelabSpecs(
   uses: USES_QUERY_RESULT | null | undefined,
 ): { name: string; description: string | null }[] {
-  const homelab = visibleUsesSections(uses).find((s) => isHomelab(s.title))
+  const homelab = visibleUsesSections(uses).find((s) => isHomelab(sectionKind(uses, s)))
   return (homelab?.items ?? []).map((item) => ({
     name: item.name!.trim(),
     description: item.description ?? null,

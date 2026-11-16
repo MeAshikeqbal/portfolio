@@ -6,7 +6,7 @@ import {
   type SelectElement,
 } from "@formatjs/icu-messageformat-parser"
 import { printAST } from "@formatjs/icu-messageformat-parser/printer.js"
-import { NO_TRANSLATE } from "../../i18n/no-translate"
+import { decodeHtml, textHtml, tidyPunctuation } from "./html"
 
 /**
  * Machine translation for ICU messages without breaking them.
@@ -44,28 +44,11 @@ export interface PreparedMessage {
   segments: string[]
 }
 
-const escapeHtml = (text: string) =>
-  text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
-
-const NO_TRANSLATE_PATTERN = new RegExp(
-  `\\b(${[...NO_TRANSLATE]
-    .sort((a, b) => b.length - a.length)
-    .map((term) => term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"))
-    .join("|")})\\b`,
-  // "jellyfin" in a sentence is still the media server, not a jellyfish.
-  "gi",
-)
-
-/** Literal text as HTML, with protected names wrapped so Google copies them. */
-function literalHtml(text: string): string {
-  return escapeHtml(text).replace(NO_TRANSLATE_PATTERN, '<span translate="no">$1</span>')
-}
-
 function prepareRun(elements: MessageFormatElement[], inPlural: boolean): PreparedRun {
   const run: PreparedRun = { html: "", slots: [], branches: new Map(), inPlural }
   for (const element of elements) {
     if (element.type === TYPE.literal) {
-      run.html += literalHtml(element.value)
+      run.html += textHtml(element.value)
       continue
     }
     if (element.type === TYPE.tag && element.children.length > 0) {
@@ -114,23 +97,6 @@ export function prepare(message: string): PreparedMessage {
   const segments: string[] = []
   collect(root, segments)
   return { source: message, root, segments }
-}
-
-const decodeHtml = (text: string) =>
-  text
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;|&#x27;|&apos;/g, "'")
-    .replace(/&nbsp;/g, " ")
-    .replace(/&amp;/g, "&")
-
-/**
- * Google leaves a space where a tag ended ("<link>now page</link> , an idea"): punctuation
- * goes back against the word before it.
- */
-function tidyPunctuation(text: string): string {
-  return text.replace(/[ \t]+([,.;:!?)])/g, "$1")
 }
 
 /** Literal text as ICU: apostrophes doubled, braces quoted, `#` quoted inside plurals. */

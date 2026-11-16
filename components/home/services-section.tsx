@@ -11,11 +11,8 @@ import { byActivity, hasActivity, projectHref, projectMeta } from "@/lib/project
 import { projectStatus } from "@/lib/status"
 
 export async function ServicesSection() {
-  const [projects, t, locale] = await Promise.all([
-    getProjects(),
-    getTranslations("projects"),
-    getLocale(),
-  ])
+  const locale = await getLocale()
+  const [projects, t] = await Promise.all([getProjects(locale), getTranslations("projects")])
   if (projects.length === 0) return null
   const metaLabels = {
     locale,

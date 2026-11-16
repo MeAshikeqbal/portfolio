@@ -262,7 +262,8 @@
     "education": "Ausbildung",
     "entries": "{count, plural, one {# Eintrag} other {# Einträge}}",
     "current": "aktuell",
-    "past": "Vergangenheit"
+    "past": "Vergangenheit",
+    "present": "heute"
   },
   "posts": {
     "search": "Beiträge durchsuchen",
