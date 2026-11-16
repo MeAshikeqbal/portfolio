@@ -52,5 +52,8 @@
   },
   "common": {
     "more": "+{count} और"
+  },
+  "language": {
+    "available": "यह पेज {language} में भी उपलब्ध है।"
   }
 }

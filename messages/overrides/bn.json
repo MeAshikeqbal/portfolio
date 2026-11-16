@@ -25,5 +25,8 @@
   },
   "common": {
     "more": "+{count}টি আরও"
+  },
+  "language": {
+    "available": "এই পৃষ্ঠাটি {language}-তেও উপলব্ধ।"
   }
 }
