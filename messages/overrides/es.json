@@ -1,0 +1,40 @@
+{
+  "lab": {
+    "up": "activo",
+    "upFor": "activo · {uptime}",
+    "summary": "{up}/{total} activos",
+    "down": "caído"
+  },
+  "homecave": {
+    "nodesUp": "{up}/{total} nodos activos",
+    "upDay": "{pct} activo · 24h",
+    "nodeUp": "activo",
+    "nodeUpFor": "activo · {uptime}",
+    "labSummary": "{up}/{total} activos",
+    "nodeDown": "caído"
+  },
+  "home": {
+    "resume": "Currículum"
+  },
+  "nav": {
+    "writing": "Escritos"
+  },
+  "systemBar": {
+    "build": "versión"
+  },
+  "now": {
+    "stale": "desactualizado"
+  },
+  "og": {
+    "stale": "desactualizado"
+  },
+  "inventory": {
+    "title": "Tecnologías"
+  },
+  "projects": {
+    "live": "En vivo"
+  },
+  "live": {
+    "title": "en vivo"
+  }
+}

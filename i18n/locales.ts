@@ -11,7 +11,7 @@ export type Locale = (typeof allLocales)[number]
  * The locales the site serves. A locale goes live here once messages/<locale>.json exists
  * (npm run i18n:translate); until then its URLs 404.
  */
-export const locales: readonly Locale[] = ["en"]
+export const locales: readonly Locale[] = allLocales
 
 export const defaultLocale: Locale = "en"
 

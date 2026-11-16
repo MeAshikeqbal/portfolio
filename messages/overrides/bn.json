@@ -1,0 +1,26 @@
+{
+  "lab": {
+    "up": "চালু",
+    "upFor": "চালু · {uptime}",
+    "summary": "{up}/{total} চালু",
+    "down": "বন্ধ"
+  },
+  "homecave": {
+    "nodesUp": "{up}/{total} নোড চালু",
+    "upDay": "{pct} চালু · 24h",
+    "nodeUp": "চালু",
+    "nodeUpFor": "চালু · {uptime}",
+    "labSummary": "{up}/{total} চালু",
+    "nodeDown": "বন্ধ"
+  },
+  "systemBar": {
+    "build": "বিল্ড",
+    "local": "লোকাল"
+  },
+  "now": {
+    "stale": "পুরনো"
+  },
+  "og": {
+    "stale": "পুরনো"
+  }
+}

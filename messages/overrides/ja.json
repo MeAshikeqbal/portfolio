@@ -1,0 +1,29 @@
+{
+  "lab": {
+    "up": "稼働中",
+    "upFor": "稼働中 · {uptime}",
+    "summary": "{up}/{total} 稼働中",
+    "bar": "ラボ",
+    "down": "停止中"
+  },
+  "homecave": {
+    "nodesUp": "{up}/{total} ノード稼働中",
+    "upDay": "{pct} 稼働 · 24h",
+    "nodeUp": "稼働中",
+    "nodeUpFor": "稼働中 · {uptime}",
+    "labSummary": "{up}/{total} 稼働中",
+    "notReported": "ラボからの報告はまだありません",
+    "nodeDown": "停止中"
+  },
+  "home": {
+    "resume": "履歴書"
+  },
+  "nav": {
+    "writing": "執筆",
+    "contact": "お問い合わせ"
+  },
+  "systemBar": {
+    "build": "ビルド",
+    "local": "ローカル"
+  }
+}

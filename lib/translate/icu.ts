@@ -25,8 +25,7 @@ export interface Run {
 }
 
 type Slot =
-  | { kind: "atom"; element: MessageFormatElement }
-  | { kind: "tag"; name: string; run: PreparedRun }
+  { kind: "atom"; element: MessageFormatElement } | { kind: "tag"; name: string; run: PreparedRun }
 
 /** A run with what its placeholders stand for. */
 interface PreparedRun {
@@ -53,7 +52,8 @@ const NO_TRANSLATE_PATTERN = new RegExp(
     .sort((a, b) => b.length - a.length)
     .map((term) => term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"))
     .join("|")})\\b`,
-  "g",
+  // "jellyfin" in a sentence is still the media server, not a jellyfish.
+  "gi",
 )
 
 /** Literal text as HTML, with protected names wrapped so Google copies them. */
@@ -92,13 +92,15 @@ function prepareRun(elements: MessageFormatElement[], inPlural: boolean): Prepar
 function collect(run: PreparedRun, out: string[]) {
   if (/\S/.test(stripMarkup(run.html))) out.push(run.html)
   for (const slot of run.slots) if (slot.kind === "tag") collectTag(slot.run, out)
-  for (const { runs } of run.branches.values()) for (const branch of runs.values()) collect(branch, out)
+  for (const { runs } of run.branches.values())
+    for (const branch of runs.values()) collect(branch, out)
 }
 
 /** A tag's content is translated as part of its run, but its nested branches are not. */
 function collectTag(run: PreparedRun, out: string[]) {
   for (const slot of run.slots) if (slot.kind === "tag") collectTag(slot.run, out)
-  for (const { runs } of run.branches.values()) for (const branch of runs.values()) collect(branch, out)
+  for (const { runs } of run.branches.values())
+    for (const branch of runs.values()) collect(branch, out)
 }
 
 /** Text a translator would see, without our placeholders (empty means nothing to translate). */
@@ -122,6 +124,14 @@ const decodeHtml = (text: string) =>
     .replace(/&#39;|&#x27;|&apos;/g, "'")
     .replace(/&nbsp;/g, " ")
     .replace(/&amp;/g, "&")
+
+/**
+ * Google leaves a space where a tag ended ("<link>now page</link> , an idea"): punctuation
+ * goes back against the word before it.
+ */
+function tidyPunctuation(text: string): string {
+  return text.replace(/[ \t]+([,.;:!?)])/g, "$1")
+}
 
 /** Literal text as ICU: apostrophes doubled, braces quoted, `#` quoted inside plurals. */
 function escapeIcu(text: string, inPlural: boolean): string {
@@ -173,7 +183,7 @@ function finish(
     return marker
   })
   text = text.replace(KEEP, "$1").replace(/<[^>]+>/g, "")
-  text = escapeIcu(decodeHtml(text), run.inPlural)
+  text = escapeIcu(tidyPunctuation(decodeHtml(text)), run.inPlural)
   return text
     .replace(/\u0001(\d+)\u0001/g, (_, i: string) => atoms[Number(i)])
     .replace(/\u0000(\d+)\u0000/g, (_, i: string) => parts[Number(i)])

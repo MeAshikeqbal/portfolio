@@ -1,0 +1,35 @@
+{
+  "lab": {
+    "up": "online",
+    "upFor": "online · {uptime}",
+    "summary": "{up}/{total} online",
+    "down": "offline"
+  },
+  "homecave": {
+    "nodesUp": "{up}/{total} Nodes online",
+    "upDay": "{pct} online · 24h",
+    "nodeUp": "online",
+    "nodeUpFor": "online · {uptime}",
+    "labSummary": "{up}/{total} online",
+    "storage": "Speicher",
+    "nodeDown": "offline"
+  },
+  "home": {
+    "resume": "Lebenslauf"
+  },
+  "systemBar": {
+    "build": "Build"
+  },
+  "writing": {
+    "pinned": "angeheftet"
+  },
+  "now": {
+    "stale": "veraltet"
+  },
+  "og": {
+    "stale": "veraltet"
+  },
+  "inventory": {
+    "title": "Stack"
+  }
+}
