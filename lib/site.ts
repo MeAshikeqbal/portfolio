@@ -14,7 +14,6 @@ export const siteConfig = {
   title: "Ashik Eqbal - Software Engineer",
   description:
     "Writing and projects from Ashik Eqbal, a full-stack engineer who builds for the web, runs a homelab, and writes up what breaks.",
-  locale: "en_US",
   twitterHandle: "@me_ashikeqbal",
   role: "Software engineer",
   tagline: "Building for the web, running my own infrastructure, and writing up what breaks.",
@@ -43,10 +42,10 @@ export const siteConfig = {
   ],
   /** Primary navigation. Hash links point at home-page sections and work from any page. */
   nav: [
-    { label: "Writing", href: "/post" },
-    { label: "Projects", href: "/projects" },
-    { label: "Homecave", href: "/homecave" },
-    { label: "Contact", href: "/#contact" },
+    { key: "writing", href: "/post" },
+    { key: "projects", href: "/projects" },
+    { key: "homecave", href: "/homecave" },
+    { key: "contact", href: "/#contact" },
   ],
 } as const
 

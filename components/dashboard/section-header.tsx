@@ -1,5 +1,5 @@
 import { ArrowRight } from "lucide-react"
-import Link from "next/link"
+import { SiteLink } from "@/components/site/smart-link"
 import type { ReactNode } from "react"
 import { cn } from "@/lib/utils"
 
@@ -38,7 +38,7 @@ export function SectionHeader({
         // Negative margin lines the text up with the content edge; the padding keeps 44px targets.
         <div className="-mx-2 flex flex-wrap items-center">
           {actions.map((action) => (
-            <Link
+            <SiteLink
               key={action.href}
               href={action.href}
               className="inline-flex min-h-11 items-center gap-1.5 rounded-md px-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground [&_svg]:size-4"
@@ -46,7 +46,7 @@ export function SectionHeader({
               {action.icon}
               {action.label}
               {!action.icon && <ArrowRight aria-hidden />}
-            </Link>
+            </SiteLink>
           ))}
         </div>
       )}

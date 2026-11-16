@@ -1,4 +1,6 @@
 import type { NextConfig } from "next"
+import createNextIntlPlugin from "next-intl/plugin"
+import { defaultLocale, locales } from "./i18n/locales"
 
 /**
  * Content Security Policy for the public site.
@@ -40,8 +42,15 @@ const securityHeaders = [
   },
 ]
 
+/** Locale prefixes in URLs: every served locale but English, whose URLs stay unprefixed. */
+const prefixed = locales.filter((locale) => locale !== defaultLocale)
+
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  experimental: {
+    // app/global-not-found.tsx: the 404 for URLs outside the locale routing (e.g. /foo.php).
+    globalNotFound: true,
+  },
   // Shown in the system bar and footer next to the commit SHA. BUILD_SHA is the same commit for
   // client code (the Studio statusline), where VERCEL_GIT_COMMIT_SHA isn't available.
   env: {
@@ -79,6 +88,15 @@ const nextConfig: NextConfig = {
       { source: "/resume", destination: "/resume.pdf", permanent: false },
       // /uses became Homecave, the live homelab dashboard (its setup sections live there too).
       { source: "/uses", destination: "/homecave", permanent: true },
+      ...(prefixed.length > 0
+        ? [
+            {
+              source: `/:lang(${prefixed.join("|")})/uses`,
+              destination: "/:lang/homecave",
+              permanent: true,
+            },
+          ]
+        : []),
     ]
   },
   async headers() {
@@ -98,4 +116,7 @@ const nextConfig: NextConfig = {
   },
 }
 
-export default nextConfig
+// Points next-intl at i18n/request.ts (messages and locale per request).
+const withNextIntl = createNextIntlPlugin("./i18n/request.ts")
+
+export default withNextIntl(nextConfig)

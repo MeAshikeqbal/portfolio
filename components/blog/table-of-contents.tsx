@@ -1,5 +1,6 @@
 "use client"
 
+import { useTranslations } from "next-intl"
 import { useEffect, useState } from "react"
 import type { TocEntry } from "@/lib/portable-text"
 import { cn } from "@/lib/utils"
@@ -12,6 +13,7 @@ export function TableOfContents({
   entries: TocEntry[]
   className?: string
 }) {
+  const t = useTranslations("posts")
   const [active, setActive] = useState<string | null>(null)
 
   useEffect(() => {
@@ -33,8 +35,8 @@ export function TableOfContents({
   }, [entries])
 
   return (
-    <nav aria-label="On this page" className={className}>
-      <p className="mb-3 label-caps">on this page</p>
+    <nav aria-label={t("onThisPage")} className={className}>
+      <p className="mb-3 label-caps">{t("onThisPage")}</p>
       <ol className="space-y-2 border-l text-sm">
         {entries.map((entry) => (
           <li key={entry.id}>

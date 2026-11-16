@@ -1,0 +1,308 @@
+import { PortableText } from "@portabletext/react"
+import { ArrowLeft, ArrowRight } from "lucide-react"
+import type { Metadata } from "next"
+import Image from "next/image"
+import { getTranslations } from "next-intl/server"
+import { notFound } from "next/navigation"
+import { AuthorCard } from "@/components/blog/author-card"
+import { ReadingProgress } from "@/components/blog/reading-progress"
+import { TableOfContents } from "@/components/blog/table-of-contents"
+import { DataList, DataRow } from "@/components/dashboard/data-list"
+import { Container, GridBackdrop } from "@/components/dashboard/layout"
+import { Panel, PanelHeader } from "@/components/dashboard/panel"
+import { createPortableTextComponents } from "@/components/portable-text/components"
+import { JsonLd } from "@/components/seo/json-ld"
+import { TranslationNotice } from "@/components/site/translation-notice"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { getPost, getPostSlugs } from "@/lib/api"
+import { formatDate } from "@/lib/format"
+import { currentLocale, localizedPageMetadata } from "@/i18n/metadata"
+import { Link } from "@/i18n/navigation"
+import { servedLanguages } from "@/lib/metadata"
+import { rankRelated } from "@/lib/related"
+import { buildToc, readingTime, wordCount } from "@/lib/portable-text"
+import { siteConfig } from "@/lib/site"
+import { blogPostingSchema, breadcrumbSchema, jsonLdGraph } from "@/lib/structured-data"
+import { defaultLocale, localizedPath } from "@/i18n/locales"
+import { urlFor } from "@/sanity/lib/image"
+
+type Props = { params: Promise<{ slug: string }> }
+
+/** Prerender every published post at build time; new posts render on demand. */
+export async function generateStaticParams() {
+  const slugs = await getPostSlugs()
+  return slugs.map((slug) => ({ slug }))
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { slug } = await params
+  const [post, t] = await Promise.all([
+    getPost(slug, await currentLocale()),
+    getTranslations("meta"),
+  ])
+  if (!post?.title) return { title: t("postNotFound") }
+
+  const title = post.seo?.title || post.title
+  const description =
+    post.seo?.description ||
+    post.excerpt ||
+    t("postDescription", { title: post.title, name: post.author?.name ?? siteConfig.name })
+
+  return {
+    ...(await localizedPageMetadata({
+      title,
+      description,
+      path: `/post/${slug}`,
+      // Only the languages it's translated into; elsewhere the English copy is canonical.
+      available: servedLanguages(post.languages),
+      openGraph: {
+        type: "article",
+        publishedTime: post.publishedAt ?? undefined,
+        modifiedTime: post._updatedAt,
+        authors: post.author?.name ? [post.author.name] : undefined,
+        tags: post.categories?.flatMap((c) => (c.title ? [c.title] : [])),
+      },
+    })),
+    // Archived posts stay reachable but leave search results, like the site's own lists.
+    robots: post.seo?.noIndex || post.archived ? { index: false } : undefined,
+  }
+}
+
+export default async function PostPage({ params }: Props) {
+  const { slug } = await params
+  const locale = await currentLocale()
+  const [post, t] = await Promise.all([getPost(slug, locale), getTranslations("posts")])
+  if (!post) notFound()
+
+  const title = post.title ?? t("untitled")
+  // The language of the post's own words: this page's once translated, English until then.
+  const translated = servedLanguages(post.languages).includes(locale)
+  const contentLang = translated ? locale : defaultLocale
+  const { entries, idsByKey } = buildToc(post.body)
+  const minutes = readingTime(post.body)
+  const components = createPortableTextComponents(idsByKey)
+  const hasToc = entries.length >= 2
+  const related = rankRelated(post.related, post.categories)
+
+  const structuredData = jsonLdGraph(
+    blogPostingSchema({
+      slug,
+      title,
+      description: post.seo?.description || post.excerpt,
+      publishedAt: post.publishedAt,
+      updatedAt: post._updatedAt,
+      authorName: post.author?.name,
+      tags: post.categories?.flatMap((c) => (c.title ? [c.title] : [])),
+      wordCount: wordCount(post.body),
+      image: post.mainImage?.asset ? urlFor(post.mainImage).width(1200).url() : undefined,
+      locale,
+    }),
+    breadcrumbSchema([
+      { name: t("breadcrumbHome"), path: localizedPath("/", locale) },
+      { name: t("breadcrumbWriting"), path: localizedPath("/post", locale) },
+      { name: title, path: localizedPath(`/post/${slug}`, locale) },
+    ]),
+  )
+
+  return (
+    <>
+      <JsonLd data={structuredData} />
+      <ReadingProgress targetId="post-body" />
+      <main>
+        <article>
+          <header className="relative overflow-hidden border-b">
+            <GridBackdrop />
+            <Container className="relative max-w-5xl py-6 sm:py-14">
+              <Link
+                href="/post"
+                className="inline-flex items-center gap-1.5 label-caps transition-colors hover:text-foreground"
+              >
+                <ArrowLeft className="size-3.5" aria-hidden /> {t("allPosts")}
+              </Link>
+              {post.categories && post.categories.length > 0 && (
+                <ul
+                  className="mt-4 flex flex-wrap gap-x-3 label-caps sm:mt-6"
+                  aria-label={t("categories")}
+                >
+                  {post.categories.map((category) => (
+                    <li key={category._id}>
+                      <Link
+                        href={`/post?category=${encodeURIComponent(category.title ?? "")}`}
+                        className="transition-colors hover:text-foreground"
+                      >
+                        #{category.title?.toLocaleLowerCase(locale)}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              )}
+              {/* On the type scale: the headline step (1.875rem) on phones, 3rem from sm. */}
+              {/* Untranslated posts are English on every page; say so to screen readers. */}
+              <h1
+                lang={contentLang}
+                className="mt-2 max-w-3xl text-3xl leading-tight font-semibold tracking-tight text-balance sm:mt-3 sm:text-5xl"
+              >
+                {title}
+              </h1>
+              {post.excerpt && (
+                <p lang={contentLang} className="mt-4 max-w-2xl text-lg text-muted-foreground">
+                  {post.excerpt}
+                </p>
+              )}
+              <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted-foreground sm:mt-6">
+                <span className="flex items-center gap-2 text-foreground">
+                  <Avatar className="size-7">
+                    {post.author?.image?.asset && (
+                      <AvatarImage
+                        src={urlFor(post.author.image).width(64).height(64).url()}
+                        alt=""
+                      />
+                    )}
+                    <AvatarFallback className="text-xs">
+                      {(post.author?.name ?? siteConfig.name).slice(0, 2).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  {post.author?.name ?? siteConfig.name}
+                </span>
+                {post.publishedAt && (
+                  <time dateTime={post.publishedAt} className="label-caps">
+                    {formatDate(post.publishedAt, locale)}
+                  </time>
+                )}
+                <span className="label-caps">{t("minRead", { minutes })}</span>
+              </div>
+              <TranslationNotice
+                path={`/post/${slug}`}
+                scope={translated ? "content" : "english"}
+                className="mt-4"
+              />
+              {post.archived && (
+                <p className="mt-5 max-w-2xl rounded-md bg-status-idle-soft px-3 py-2 text-sm text-status-idle-fg">
+                  {t("archived")}
+                </p>
+              )}
+            </Container>
+          </header>
+
+          {post.mainImage?.asset && (
+            <Container className="max-w-5xl pt-4 sm:pt-8">
+              <Image
+                src={urlFor(post.mainImage).width(1600).fit("max").auto("format").url()}
+                alt={post.mainImage.alt || ""}
+                width={post.cover?.width ?? 1600}
+                height={post.cover?.height ?? 900}
+                priority
+                sizes="(min-width: 1024px) 1024px, 100vw"
+                placeholder={post.cover?.lqip ? "blur" : "empty"}
+                blurDataURL={post.cover?.lqip ?? undefined}
+                className="h-auto w-full rounded-lg border"
+              />
+            </Container>
+          )}
+
+          <Container
+            className={
+              hasToc
+                ? "grid max-w-5xl gap-10 py-6 sm:py-10 lg:grid-cols-[minmax(0,1fr)_13rem]"
+                : "max-w-3xl py-6 sm:py-10"
+            }
+          >
+            <div id="post-body" className="min-w-0">
+              {hasToc && (
+                <details className="mb-6 rounded-lg border bg-surface p-4 sm:mb-8 lg:hidden">
+                  <summary className="cursor-pointer label-caps">{t("onThisPage")}</summary>
+                  <ol className="mt-3 space-y-2 text-sm">
+                    {entries.map((entry) => (
+                      <li key={entry.id} className={entry.level === 3 ? "pl-4" : undefined}>
+                        <a
+                          href={`#${entry.id}`}
+                          className="text-muted-foreground hover:text-foreground"
+                        >
+                          {entry.text}
+                        </a>
+                      </li>
+                    ))}
+                  </ol>
+                </details>
+              )}
+              <div lang={contentLang} className="prose prose-lg max-w-none">
+                <PortableText value={post.body ?? []} components={components} />
+              </div>
+            </div>
+            {hasToc && (
+              <aside className="hidden lg:block">
+                <TableOfContents entries={entries} className="sticky top-24" />
+              </aside>
+            )}
+          </Container>
+
+          <footer className="border-t">
+            <Container className="max-w-5xl space-y-10 py-12">
+              <AuthorCard name={post.author?.name} />
+              {(post.previous || post.next) && (
+                <nav aria-label={t("morePosts")} className="grid gap-4 sm:grid-cols-2">
+                  {post.previous?.slug ? (
+                    <Link
+                      href={`/post/${post.previous.slug}`}
+                      className="group rounded-lg border bg-surface p-4 transition-colors hover:border-border-strong"
+                    >
+                      <span className="flex items-center gap-1.5 label-caps">
+                        <ArrowLeft className="size-3.5" aria-hidden /> {t("older")}
+                      </span>
+                      <span className="mt-1 block font-medium group-hover:underline">
+                        {post.previous.title}
+                      </span>
+                    </Link>
+                  ) : (
+                    <span aria-hidden />
+                  )}
+                  {post.next?.slug && (
+                    <Link
+                      href={`/post/${post.next.slug}`}
+                      className="group rounded-lg border bg-surface p-4 text-right transition-colors hover:border-border-strong"
+                    >
+                      <span className="flex items-center justify-end gap-1.5 label-caps">
+                        {t("newer")} <ArrowRight className="size-3.5" aria-hidden />
+                      </span>
+                      <span className="mt-1 block font-medium group-hover:underline">
+                        {post.next.title}
+                      </span>
+                    </Link>
+                  )}
+                </nav>
+              )}
+
+              {related.length > 0 && (
+                <section aria-labelledby="related-heading">
+                  <Panel>
+                    <PanelHeader title={<span id="related-heading">{t("related")}</span>} />
+                    <DataList>
+                      {related.map((related) => (
+                        <DataRow
+                          key={related._id}
+                          href={`/post/${related.slug}`}
+                          title={related.title ?? t("untitled")}
+                          description={related.excerpt}
+                          value={
+                            related.publishedAt && (
+                              <time
+                                dateTime={related.publishedAt}
+                                className="label-caps whitespace-nowrap"
+                              >
+                                {formatDate(related.publishedAt, locale)}
+                              </time>
+                            )
+                          }
+                        />
+                      ))}
+                    </DataList>
+                  </Panel>
+                </section>
+              )}
+            </Container>
+          </footer>
+        </article>
+      </main>
+    </>
+  )
+}

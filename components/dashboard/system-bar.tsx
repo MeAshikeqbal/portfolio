@@ -1,10 +1,11 @@
-import Link from "next/link"
+import { useLocale, useTranslations } from "next-intl"
 import { LabBarItem } from "@/components/lab/lab-badges"
 import { NowPlayingBarItem } from "@/components/live/now-playing-bar-item"
 import { formatDate } from "@/lib/format"
 import { siteConfig } from "@/lib/site"
 import { syncStatus, type Status } from "@/lib/status"
 import { cn } from "@/lib/utils"
+import { Link } from "@/i18n/navigation"
 import { Container } from "./layout"
 import { RelativeTime } from "./relative-time"
 import { StatusDot } from "./status-dot"
@@ -38,12 +39,14 @@ const CELL_LINK =
  * deployed build, which links to its commit.
  */
 export function SystemBar({ syncedAt, latestPostAt, notice, className }: SystemBarProps) {
+  const t = useTranslations("systemBar")
+  const locale = useLocale()
   const fullSha = process.env.VERCEL_GIT_COMMIT_SHA
-  const builtOn = formatDate(process.env.BUILD_TIME)
+  const builtOn = formatDate(process.env.BUILD_TIME, locale)
 
   return (
     // A labelled region, so the strip sits inside a landmark like the rest of the page.
-    <section aria-label="Site status" className={cn("border-b bg-surface", className)}>
+    <section aria-label={t("label")} className={cn("border-b bg-surface", className)}>
       <Container className="flex h-8 items-stretch label-caps">
         <div className="flex min-w-0 overflow-hidden">
           <div className="-ml-[13px] flex min-w-0 items-stretch">
@@ -67,7 +70,7 @@ export function SystemBar({ syncedAt, latestPostAt, notice, className }: SystemB
                     href="/post"
                     className={cn(CELL, CELL_LINK, syncedAt ? "hidden sm:flex" : "flex")}
                   >
-                    log · <RelativeTime iso={latestPostAt} />
+                    {t("log")} <RelativeTime iso={latestPostAt} />
                   </Link>
                 )}
                 {/* Only while something is playing, and only from lg: narrower bars have no room
@@ -79,17 +82,17 @@ export function SystemBar({ syncedAt, latestPostAt, notice, className }: SystemB
         </div>
 
         <span className="ml-auto hidden shrink-0 items-center gap-1.5 border-l pl-3 sm:flex">
-          build
+          {t("build")}
           {fullSha ? (
             <a
               href={`${siteConfig.repo}/commit/${fullSha}`}
               className={cn(CELL_LINK, "underline decoration-border underline-offset-4")}
-              title="This build's commit on GitHub"
+              title={t("commitTitle")}
             >
               {fullSha.slice(0, 7)}
             </a>
           ) : (
-            <span>local</span>
+            <span>{t("local")}</span>
           )}
           {builtOn && <span>· {builtOn}</span>}
         </span>

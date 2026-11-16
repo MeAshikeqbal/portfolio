@@ -1,7 +1,7 @@
 "use client"
 
 import Image from "next/image"
-import Link from "next/link"
+import { useLocale, useTranslations } from "next-intl"
 import { useMemo } from "react"
 import { ChipFilter } from "@/components/dashboard/chip-filter"
 import { Panel, PanelHeader } from "@/components/dashboard/panel"
@@ -10,6 +10,7 @@ import { useUrlParam } from "@/hooks/use-url-param"
 import type { PostCard } from "@/lib/api"
 import { formatDate } from "@/lib/format"
 import { urlFor } from "@/sanity/lib/image"
+import { Link } from "@/i18n/navigation"
 
 /** Searchable post list with category filters; both live in the URL (?q=, ?category=). */
 export function PostsBrowser({ posts }: { posts: PostCard[] }) {
@@ -45,6 +46,7 @@ export function PostsBrowserView({
   onQueryChange?: (value: string) => void
   onCategoryChange?: (value: string) => void
 }) {
+  const t = useTranslations("posts")
   const setQuery = onQueryChange
   const setCategory = onCategoryChange
 
@@ -69,17 +71,22 @@ export function PostsBrowserView({
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <SearchInput label="Search posts" value={query} onChange={setQuery} />
+        <SearchInput label={t("search")} value={query} onChange={setQuery} />
         <p className="label-caps" aria-live="polite">
-          {visible.length} of {posts.length} posts
+          {t("count", { visible: visible.length, total: posts.length })}
         </p>
       </div>
       {categories.length > 1 && (
-        <ChipFilter label="topic" options={categories} value={category} onChange={setCategory} />
+        <ChipFilter
+          label={t("filterTopic")}
+          options={categories}
+          value={category}
+          onChange={setCategory}
+        />
       )}
 
       <Panel>
-        <PanelHeader title="log" meta={<span>newest first</span>} />
+        <PanelHeader title={t("log")} meta={<span>{t("newestFirst")}</span>} />
         {visible.length > 0 ? (
           <ul className="divide-y">
             {visible.map((post) => (
@@ -89,7 +96,7 @@ export function PostsBrowserView({
             ))}
           </ul>
         ) : (
-          <p className="p-10 text-center text-muted-foreground">No posts match these filters.</p>
+          <p className="p-10 text-center text-muted-foreground">{t("empty")}</p>
         )}
       </Panel>
     </div>
@@ -97,6 +104,7 @@ export function PostsBrowserView({
 }
 
 function PostRow({ post }: { post: PostCard }) {
+  const locale = useLocale()
   return (
     <Link
       href={`/post/${post.slug}`}
@@ -119,10 +127,10 @@ function PostRow({ post }: { post: PostCard }) {
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap gap-x-3 label-caps">
           {post.publishedAt && (
-            <time dateTime={post.publishedAt}>{formatDate(post.publishedAt)}</time>
+            <time dateTime={post.publishedAt}>{formatDate(post.publishedAt, locale)}</time>
           )}
           {(post.categories ?? []).map((c) => (
-            <span key={c._id}>#{c.title?.toLowerCase()}</span>
+            <span key={c._id}>#{c.title?.toLocaleLowerCase(locale)}</span>
           ))}
         </div>
         <h2 className="mt-1 font-medium text-balance group-hover:underline">{post.title}</h2>

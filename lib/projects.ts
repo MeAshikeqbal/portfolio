@@ -20,15 +20,22 @@ export function shortLicense(name: string | null | undefined): string | null {
   return LICENSE_SHORT[name] ?? name
 }
 
+/** The words projectMeta needs, in the page's language (messages: projects.commits/pushed). */
+export interface ProjectMetaLabels {
+  locale: string
+  commits: (count: number) => string
+  pushed: (month: string) => string
+}
+
 /** Facts shown beside a project, skipping anything empty or zero. */
-export function projectMeta(project: Project): string[] {
+export function projectMeta(project: Project, labels: ProjectMetaLabels): string[] {
   const gh = project.githubData
-  const pushed = formatMonth(gh?.pushedAt)
+  const pushed = formatMonth(gh?.pushedAt, labels.locale)
   return [
     gh?.language,
     gh?.stars ? `★ ${gh.stars}` : null,
-    gh?.commits ? `${gh.commits} ${gh.commits === 1 ? "commit" : "commits"}` : null,
-    pushed ? `pushed ${pushed}` : null,
+    gh?.commits ? labels.commits(gh.commits) : null,
+    pushed ? labels.pushed(pushed) : null,
   ].filter((item): item is string => Boolean(item))
 }
 

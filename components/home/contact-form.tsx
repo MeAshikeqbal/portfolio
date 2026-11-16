@@ -2,6 +2,7 @@
 
 import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile"
 import { CircleCheck, LoaderCircle } from "lucide-react"
+import { useLocale, useTranslations } from "next-intl"
 import { useActionState, useEffect, useRef, useState, type ReactNode } from "react"
 import { submitContact, type ContactState } from "@/actions/submit-contact"
 import { HONEYPOT_FIELD, TURNSTILE_ACTION } from "@/lib/contact-fields"
@@ -14,7 +15,14 @@ import { Textarea } from "@/components/ui/textarea"
 
 const siteKey = process.env.NEXT_PUBLIC_CLOUDFLARE_TURNSTILE_SITE_KEY
 
+/** The widget's language: the page's, except Bengali, which Turnstile doesn't offer. */
+function turnstileLanguage(locale: string) {
+  return locale === "bn" ? "auto" : locale
+}
+
 export function ContactForm() {
+  const t = useTranslations("contact")
+  const locale = useLocale()
   const [state, action, pending] = useActionState<ContactState, FormData>(submitContact, {
     status: "idle",
   })
@@ -33,21 +41,26 @@ export function ContactForm() {
         role="status"
         className="flex animate-in flex-col items-start gap-3 py-6 duration-300 fade-in-0 motion-safe:slide-in-from-bottom-2"
       >
-        <StatusPill status="up">message sent</StatusPill>
+        <StatusPill status="up">{t("sentPill")}</StatusPill>
         <p className="flex items-center gap-2 text-lg font-medium">
-          <CircleCheck className="size-5 text-status-up-fg" aria-hidden /> Thanks, your message is
-          in.
+          <CircleCheck className="size-5 text-status-up-fg" aria-hidden /> {t("sentTitle")}
         </p>
-        <p className="text-muted-foreground">I&apos;ll get back to you by email.</p>
+        <p className="text-muted-foreground">{t("sentBody")}</p>
       </div>
     )
   }
 
-  const errors = state.fieldErrors ?? {}
+  const fieldErrors = state.fieldErrors ?? {}
+  const errors = {
+    name: fieldErrors.name && t(`errors.${fieldErrors.name}`),
+    email: fieldErrors.email && t(`errors.${fieldErrors.email}`),
+    message: fieldErrors.message && t(`errors.${fieldErrors.message}`),
+    turnstileToken: fieldErrors.turnstileToken && t(`errors.${fieldErrors.turnstileToken}`),
+  }
 
   return (
     <form action={action} className="space-y-5">
-      <Field id="contact-name" label="Name" error={errors.name}>
+      <Field id="contact-name" label={t("name")} error={errors.name}>
         <Input
           id="contact-name"
           name="name"
@@ -60,7 +73,7 @@ export function ContactForm() {
           aria-describedby={errors.name ? "contact-name-error" : undefined}
         />
       </Field>
-      <Field id="contact-email" label="Email" error={errors.email}>
+      <Field id="contact-email" label={t("email")} error={errors.email}>
         <Input
           id="contact-email"
           name="email"
@@ -73,7 +86,7 @@ export function ContactForm() {
           aria-describedby={errors.email ? "contact-email-error" : undefined}
         />
       </Field>
-      <Field id="contact-message" label="Message" error={errors.message}>
+      <Field id="contact-message" label={t("message")} error={errors.message}>
         <Textarea
           id="contact-message"
           name="message"
@@ -90,7 +103,7 @@ export function ContactForm() {
       {/* Honeypot: hidden from people and assistive tech; bots tend to fill it. */}
       <div aria-hidden className="hidden">
         <label>
-          Leave this field empty
+          {t("honeypot")}
           <input name={HONEYPOT_FIELD} tabIndex={-1} autoComplete="off" />
         </label>
       </div>
@@ -101,16 +114,19 @@ export function ContactForm() {
             <div className="absolute inset-0 flex items-center gap-3 rounded-md border px-3">
               {challenge === "loading" && <Skeleton className="size-6 shrink-0 rounded-full" />}
               <p role="status" className="text-sm text-muted-foreground">
-                {challenge === "failed"
-                  ? "The spam check couldn't load. Refresh the page, or use another channel."
-                  : "Loading spam check…"}
+                {challenge === "failed" ? t("challengeFailed") : t("challengeLoading")}
               </p>
             </div>
           )}
           <Turnstile
             ref={turnstile}
             siteKey={siteKey}
-            options={{ theme: "auto", size: "flexible", action: TURNSTILE_ACTION }}
+            options={{
+              theme: "auto",
+              size: "flexible",
+              action: TURNSTILE_ACTION,
+              language: turnstileLanguage(locale),
+            }}
             onWidgetLoad={() => setChallenge("ready")}
             onError={() => setChallenge("failed")}
           />
@@ -120,8 +136,7 @@ export function ContactForm() {
           role="note"
           className="rounded-md bg-status-warn-soft px-3 py-2 text-sm text-status-warn-fg"
         >
-          The contact form is unavailable right now. Please reach me through one of the other
-          channels instead.
+          {t("unavailable")}
         </p>
       )}
       {errors.turnstileToken && (
@@ -133,7 +148,7 @@ export function ContactForm() {
           role="alert"
           className="rounded-md bg-status-down-soft px-3 py-2 text-sm text-status-down-fg"
         >
-          {state.message}
+          {t(`errors.${state.message}`)}
           {/* The challenge has no field to point at, so its error is read out with the banner. */}
           {errors.turnstileToken && <span className="sr-only"> {errors.turnstileToken}</span>}
         </p>
@@ -141,7 +156,7 @@ export function ContactForm() {
 
       <Button type="submit" disabled={pending || !siteKey} className="w-full sm:w-auto">
         {pending && <LoaderCircle aria-hidden className="motion-safe:animate-spin" />}
-        {pending ? "Sending…" : "Send message"}
+        {pending ? t("sending") : t("send")}
       </Button>
     </form>
   )

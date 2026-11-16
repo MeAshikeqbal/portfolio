@@ -1,6 +1,7 @@
 "use client"
 
 import { Monitor, Moon, Sun } from "lucide-react"
+import { useTranslations } from "next-intl"
 import { useTheme } from "next-themes"
 import { Button } from "@/components/ui/button"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
@@ -9,9 +10,9 @@ import { withViewTransition } from "@/lib/view-transition"
 import { cn } from "@/lib/utils"
 
 const OPTIONS = [
-  { value: "system", label: "System theme", icon: Monitor },
-  { value: "light", label: "Light theme", icon: Sun },
-  { value: "dark", label: "Dark theme", icon: Moon },
+  { value: "system", label: "themeSystem", icon: Monitor },
+  { value: "light", label: "themeLight", icon: Sun },
+  { value: "dark", label: "themeDark", icon: Moon },
 ] as const
 
 /**
@@ -20,6 +21,7 @@ const OPTIONS = [
  * icon at the same size, since the stored choice isn't known on the server.
  */
 export function ThemeCycleButton({ className }: { className?: string }) {
+  const t = useTranslations("ui")
   const { theme, setTheme } = useTheme()
   const hydrated = useHydrated()
   const index = hydrated
@@ -37,8 +39,12 @@ export function ThemeCycleButton({ className }: { className?: string }) {
       variant="ghost"
       size="icon-sm"
       onClick={() => withViewTransition("theme", () => setTheme(next.value))}
-      aria-label={hydrated ? `Colour theme: ${current.value}` : "Colour theme"}
-      title={hydrated ? `Switch to ${next.label.toLowerCase()}` : undefined}
+      aria-label={
+        hydrated
+          ? t("themeCurrent", { theme: t("themeNames", { theme: current.value }) })
+          : t("themeLabel")
+      }
+      title={hydrated ? t("themeNext", { theme: next.value }) : undefined}
       className={cn("text-muted-foreground hover:text-foreground", className)}
     >
       <Icon className="size-4" />
@@ -48,6 +54,7 @@ export function ThemeCycleButton({ className }: { className?: string }) {
 
 /** Three-way theme switch (system / light / dark). Renders a same-size placeholder until hydrated. */
 export function ThemeToggle({ className }: { className?: string }) {
+  const t = useTranslations("ui")
   const { theme, setTheme } = useTheme()
   const hydrated = useHydrated()
 
@@ -58,15 +65,15 @@ export function ThemeToggle({ className }: { className?: string }) {
       variant="outline"
       value={hydrated ? (theme ?? "system") : ""}
       onValueChange={(value) => value && withViewTransition("theme", () => setTheme(value))}
-      aria-label="Colour theme"
+      aria-label={t("themeLabel")}
       className={cn("h-8", className)}
     >
       {OPTIONS.map(({ value, label, icon: Icon }) => (
         <ToggleGroupItem
           key={value}
           value={value}
-          aria-label={label}
-          title={label}
+          aria-label={t(label)}
+          title={t(label)}
           className="h-8 w-8 px-0 data-[state=on]:bg-surface-2 data-[state=on]:text-foreground"
         >
           <Icon className="size-3.5" />

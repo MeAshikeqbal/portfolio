@@ -1,5 +1,6 @@
 "use client"
 
+import { useTranslations } from "next-intl"
 import Image from "next/image"
 import { useState } from "react"
 import { cn } from "@/lib/utils"
@@ -17,13 +18,14 @@ export function LiveSiteShot({
   host: string
   className?: string
 }) {
+  const t = useTranslations("projects")
   const [failed, setFailed] = useState(false)
   if (failed) return null
   return (
     <figure className={cn(className)}>
       <Image
         src={src}
-        alt={`Screenshot of ${host}`}
+        alt={t("screenshotAlt", { host })}
         width={1792}
         height={1120}
         className="h-auto w-full rounded-lg border bg-surface-2"

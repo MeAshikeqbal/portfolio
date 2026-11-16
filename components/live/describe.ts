@@ -11,8 +11,12 @@ export function traktLabel(trakt: TraktActivity): string {
 
 export interface LiveLineContent {
   status: Status
-  verb: string
-  text: string
+  /** What's happening, as a code the UI translates (messages: live.verbs). */
+  verb: "listening" | "watching" | "jellyfin" | "lastPlayed" | "lastWatched"
+  /** The track or show; null for Jellyfin, which only reports a count. */
+  text: string | null
+  /** Jellyfin streams playing now. */
+  streams?: number
   /** Sort key for "last" items: newest wins. */
   at: string | null
 }
@@ -27,7 +31,7 @@ export function pickLiveLine(data: LiveActivity | null | undefined): LiveLineCon
   if (spotify?.state === "playing") {
     return {
       status: "up",
-      verb: "listening to",
+      verb: "listening",
       text: `${spotify.track} · ${spotify.artists}`,
       at: null,
     }
@@ -36,25 +40,19 @@ export function pickLiveLine(data: LiveActivity | null | undefined): LiveLineCon
     return { status: "up", verb: "watching", text: traktLabel(trakt), at: null }
   }
   if (jellyfin && jellyfin.streams > 0) {
-    const noun = jellyfin.streams === 1 ? "stream" : "streams"
-    return {
-      status: "up",
-      verb: "jellyfin",
-      text: `${jellyfin.streams} ${noun} right now`,
-      at: null,
-    }
+    return { status: "up", verb: "jellyfin", text: null, streams: jellyfin.streams, at: null }
   }
   const last: LiveLineContent[] = []
   if (spotify) {
     last.push({
       status: "idle",
-      verb: "last played",
+      verb: "lastPlayed",
       text: `${spotify.track} · ${spotify.artists}`,
       at: spotify.at,
     })
   }
   if (trakt)
-    last.push({ status: "idle", verb: "last watched", text: traktLabel(trakt), at: trakt.at })
+    last.push({ status: "idle", verb: "lastWatched", text: traktLabel(trakt), at: trakt.at })
   last.sort((a, b) => (b.at ?? "").localeCompare(a.at ?? ""))
   return last[0] ?? null
 }

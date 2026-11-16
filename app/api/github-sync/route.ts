@@ -1,4 +1,4 @@
-import { revalidatePath } from "next/cache"
+import { revalidatePages } from "@/lib/revalidate"
 import { type NextRequest, NextResponse } from "next/server"
 
 import { hasFreshSyncRequest, parseSyncIds, type SyncResponse } from "@/lib/github-sync-request"
@@ -26,9 +26,7 @@ export async function POST(req: NextRequest) {
   const results = await syncProjects(pending)
 
   if (results.some((result) => result.ok)) {
-    revalidatePath("/projects")
-    revalidatePath("/projects/[slug]", "page")
-    revalidatePath("/")
+    revalidatePages("/projects", "/projects/[slug]", "/")
   }
 
   const body: SyncResponse = {

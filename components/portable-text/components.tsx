@@ -1,5 +1,6 @@
 import type { PortableTextBlock, PortableTextComponents } from "@portabletext/react"
 import Image from "next/image"
+import { useTranslations } from "next-intl"
 import type { ReactNode } from "react"
 import { blockText, slugify } from "@/lib/portable-text"
 import { urlFor } from "@/sanity/lib/image"
@@ -32,9 +33,12 @@ interface CalloutValue {
 // A tinted panel with a hairline and a status dot + label, not a coloured side stripe: the
 // label carries the tone, and the system's panels are 1px all round.
 const CALLOUT_STYLES = {
-  note: { label: "Note", status: "info", className: "bg-status-info-soft" },
-  warning: { label: "Warning", status: "warn", className: "bg-status-warn-soft" },
-} as const satisfies Record<string, { label: string; status: Status; className: string }>
+  note: { label: "calloutNote", status: "info", className: "bg-status-info-soft" },
+  warning: { label: "calloutWarning", status: "warn", className: "bg-status-warn-soft" },
+} as const satisfies Record<
+  string,
+  { label: "calloutNote" | "calloutWarning"; status: Status; className: string }
+>
 
 /**
  * Renderers for the `blockContent` schema (sanity/schemaTypes/blockContentType.ts), shared by
@@ -55,13 +59,14 @@ export function createPortableTextComponents(
       value: PortableTextBlock
       children?: ReactNode
     }) {
+      const t = useTranslations("ui")
       const id = (value._key && headingIds.get(value._key)) || slugify(blockText(value as never))
       return (
         <Tag id={id} className="group scroll-mt-24">
           {children}
           <a
             href={`#${id}`}
-            aria-label="Link to this section"
+            aria-label={t("linkToSection")}
             className="ml-2 font-normal text-muted-foreground no-underline opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100"
           >
             #
@@ -85,26 +90,7 @@ export function createPortableTextComponents(
             highlightedLines={value.highlightedLines}
           />
         ) : null,
-      callout: ({ value }: { value: CalloutValue }) => {
-        if (!value?.text) return null
-        const tone = CALLOUT_STYLES[value.tone ?? "note"] ?? CALLOUT_STYLES.note
-        return (
-          <aside
-            className={cn("not-prose my-6 rounded-lg border px-4 py-3 text-sm", tone.className)}
-          >
-            <p className="mb-1 flex items-center gap-2 label-caps text-foreground">
-              {/* With a custom title, the dot still tells screen readers the tone. */}
-              <StatusDot
-                status={tone.status}
-                label={value.title ? tone.label : undefined}
-                className="size-1.5"
-              />
-              {value.title || tone.label}
-            </p>
-            <p className="leading-relaxed whitespace-pre-line text-foreground">{value.text}</p>
-          </aside>
-        )
-      },
+      callout: ({ value }: { value: CalloutValue }) => <Callout value={value} />,
       video: ({ value }: { value: VideoValue }) => <VideoFigure value={value} className="my-8" />,
       image: ({ value }: { value: ImageBlock }) => {
         if (!value?.asset?._ref) return null
@@ -140,3 +126,25 @@ export function createPortableTextComponents(
 
 /** Default renderers (headings get ids from their text). */
 export const portableTextComponents = createPortableTextComponents()
+
+/** A note or warning panel; the tone's label doubles as the title when there's none. */
+function Callout({ value }: { value: CalloutValue }) {
+  const t = useTranslations("ui")
+  if (!value?.text) return null
+  const tone = CALLOUT_STYLES[value.tone ?? "note"] ?? CALLOUT_STYLES.note
+  const label = t(tone.label)
+  return (
+    <aside className={cn("not-prose my-6 rounded-lg border px-4 py-3 text-sm", tone.className)}>
+      <p className="mb-1 flex items-center gap-2 label-caps text-foreground">
+        {/* With a custom title, the dot still tells screen readers the tone. */}
+        <StatusDot
+          status={tone.status}
+          label={value.title ? label : undefined}
+          className="size-1.5"
+        />
+        {value.title || label}
+      </p>
+      <p className="leading-relaxed whitespace-pre-line text-foreground">{value.text}</p>
+    </aside>
+  )
+}

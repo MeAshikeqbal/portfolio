@@ -1,29 +1,33 @@
 "use client"
 
+import { useTranslations } from "next-intl"
 import { cn } from "@/lib/utils"
 
 interface ChipFilterProps {
   label: string
   options: string[]
+  /** How an option reads; defaults to the option itself (values stay stable in the URL). */
+  formatOption?: (option: string) => string
   /** Selected option, or "" for all. */
   value: string
   onChange: (value: string) => void
 }
 
 /** A row of toggle chips for one filter dimension, with an "all" option. */
-export function ChipFilter({ label, options, value, onChange }: ChipFilterProps) {
+export function ChipFilter({ label, options, formatOption, value, onChange }: ChipFilterProps) {
+  const t = useTranslations("common")
   return (
     <div
       className="flex flex-wrap items-center gap-2"
       role="group"
-      aria-label={`Filter by ${label}`}
+      aria-label={t("filterBy", { label })}
     >
       <span className="w-16 label-caps">{label}</span>
       {["", ...options].map((option) => {
         const active = value === option
         return (
           <button
-            key={option || "all"}
+            key={option ? (formatOption?.(option) ?? option) : t("all")}
             type="button"
             aria-pressed={active}
             onClick={() => onChange(option)}
@@ -34,7 +38,7 @@ export function ChipFilter({ label, options, value, onChange }: ChipFilterProps)
                 : "text-muted-foreground hover:text-foreground",
             )}
           >
-            {option || "all"}
+            {option ? (formatOption?.(option) ?? option) : t("all")}
           </button>
         )
       })}

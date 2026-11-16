@@ -1,5 +1,6 @@
 "use client"
 
+import { useTranslations } from "next-intl"
 import { usePathname } from "next/navigation"
 import { StatusPill } from "@/components/dashboard/status-pill"
 import { useHydrated } from "@/hooks/use-hydrated"
@@ -9,6 +10,8 @@ import { useHydrated } from "@/hooks/use-hydrated"
  * already makes the preview state obvious, so the banner stays hidden there.)
  */
 export function DraftModeBanner() {
+  const t = useTranslations("status")
+  // The visible URL (with any locale prefix), not the locale-relative path.
   const pathname = usePathname()
   const hydrated = useHydrated()
   if (!hydrated || window.self !== window.top) return null
@@ -16,13 +19,13 @@ export function DraftModeBanner() {
   return (
     <div className="fixed bottom-4 left-4 z-50 flex items-center gap-3 rounded-full border bg-surface/95 py-1.5 pr-3 pl-1.5 shadow-md backdrop-blur">
       <StatusPill status="warn" pulse>
-        draft preview
+        {t("draftPreview")}
       </StatusPill>
       <a
         href={`/api/draft-mode/disable?redirect=${encodeURIComponent(pathname)}`}
         className="text-sm text-muted-foreground transition-colors hover:text-foreground"
       >
-        Exit
+        {t("exitDraft")}
       </a>
     </div>
   )

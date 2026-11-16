@@ -46,12 +46,17 @@ sync and webhook just report that they aren't configured.
 
 ```
 app/
-  (root)/            public site: home, /post, /post/[slug], /projects, /projects/[slug]
-  studio/            embedded Sanity Studio
-  styleguide/        living style guide (404 in production)
+  [lang]/            root layout per language (html lang, fonts, messages)
+    (site)/          public site: home, /post, /post/[slug], /projects, /projects/[slug]…
+    styleguide/      living style guide (404 in production)
+    opengraph-image.tsx
+  studio/            embedded Sanity Studio (its own root layout)
   api/               sanity-webhook (revalidation), sync-github-data (cron), github-sync (Studio)
   icons/             self-hosted Iconify SVGs for the skills inventory
-  opengraph-image.tsx, sitemap.ts, robots.ts, manifest.ts, rss.xml/
+  global-not-found.tsx, sitemap.ts, robots.ts, manifest.ts, rss.xml/
+i18n/                locales, routing, request config (next-intl)
+messages/            UI text per language; en.json is the source
+proxy.ts             locale routing
 components/
   dashboard/         design-system primitives (StatusPill, Panel, DataRow, Sparkline…)
   home/ blog/ projects/ site/ portable-text/ seo/
@@ -63,6 +68,30 @@ tests/unit, tests/e2e
 ```
 
 ## How things work
+
+- **Languages.** UI text lives in `messages/en.json` (ICU syntax) and is read with next-intl's
+  `useTranslations` / `getTranslations`; keys are type-checked against `en.json`. English URLs
+  stay unprefixed (`/post/foo`); other locales get a prefix (`/hi/post/foo`) once they are listed
+  in `i18n/locales.ts`. `proxy.ts` rewrites unprefixed URLs to the English tree and redirects
+  `/en/...` to them; files (`rss.xml`, `resume.pdf`…), `/api` and the Studio are left alone.
+  Internal links use `Link` from `i18n/navigation.ts` (or `SiteLink`, which keeps files
+  unprefixed). Dates and numbers go through `lib/format.ts` with the page's locale.
+- **Translations.** `npm run i18n:translate` machine-translates new and changed English messages
+  with Google Cloud Translation (`GOOGLE_TRANSLATE_API_KEY`) into `messages/<locale>.json`,
+  keeping ICU arguments, plurals and tags intact; `--dry-run` shows what it would send. Hand
+  fixes go in `messages/overrides/<locale>.json` and always win. `messages/.lock.json` records
+  which English each translation came from, and `tests/unit/messages.test.ts` fails when a
+  served locale is missing keys or is stale.
+- **Content translations.** On publish, the Sanity webhook (after responding) machine-translates
+  posts, projects, /now, Homecave, experience, education and categories into every served
+  language and stores each copy as a `translation` document (`translation-<lang>-<id>`, listed
+  under *Translations* in the Studio). Queries read each field from it when it exists and fall
+  back to English otherwise; a page without a translation says so, marks its text `lang="en"`
+  and canonicalizes to the English URL. Only changed text is re-sent (each copy keeps a memory
+  of translated segments), and ticking *Edited by hand* protects a corrected copy. Code blocks,
+  slugs, URLs, tech tags, company names, homelab machine names and GitHub READMEs are never
+  translated. Backfill or redo with
+  `npx sanity exec scripts/translate-content.ts --with-user-token` (dry run; add `-- --execute`).
 
 - **Content and freshness.** Every read goes through `sanityFetch` (`lib/api.ts`). Pages are
   static. `<SanityLive />` revalidates them when content is published, and the Sanity webhook

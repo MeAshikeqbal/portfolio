@@ -1,0 +1,53 @@
+{
+  "lab": {
+    "up": "चालू",
+    "upFor": "चालू · {uptime}",
+    "summary": "{up}/{total} चालू",
+    "bar": "लैब",
+    "down": "बंद"
+  },
+  "homecave": {
+    "nodesUp": "{up}/{total} नोड चालू",
+    "upDay": "{pct} चालू · 24h",
+    "nodeUp": "चालू",
+    "nodeUpFor": "चालू · {uptime}",
+    "labSummary": "{up}/{total} चालू",
+    "notReported": "लैब ने अभी तक रिपोर्ट नहीं भेजी है",
+    "nodeDown": "बंद"
+  },
+  "home": {
+    "resume": "रेज़्यूमे",
+    "statCommits": "कमिट/वर्ष"
+  },
+  "writing": {
+    "log": "लॉग"
+  },
+  "posts": {
+    "log": "लॉग"
+  },
+  "systemBar": {
+    "log": "लॉग ·",
+    "build": "बिल्ड",
+    "local": "लोकल"
+  },
+  "projects": {
+    "metricCommits": "कमिट",
+    "live": "लाइव"
+  },
+  "now": {
+    "stale": "पुराना"
+  },
+  "og": {
+    "stale": "पुराना"
+  },
+  "inventory": {
+    "title": "स्टैक"
+  },
+  "live": {
+    "title": "लाइव",
+    "idle": "निष्क्रिय"
+  },
+  "uptime": {
+    "present": "वर्तमान"
+  }
+}

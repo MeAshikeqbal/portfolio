@@ -1,19 +1,18 @@
 import { Container, Section } from "@/components/dashboard/layout"
 import { Panel, PanelBody, PanelHeader } from "@/components/dashboard/panel"
 import { SectionHeader } from "@/components/dashboard/section-header"
+import { useTranslations } from "next-intl"
 import { siteConfig } from "@/lib/site"
 import { ContactForm } from "./contact-form"
 
 export function ContactSection() {
+  const t = useTranslations("contact")
   return (
     <Section id="contact" className="border-t">
       <Container className="grid gap-10 lg:grid-cols-[1fr_1.3fr]">
         <div>
-          <SectionHeader
-            title="Get in touch"
-            description="Questions, collaboration ideas, or just saying hello. Send a message and I'll reply by email."
-          />
-          <p className="label-caps">other channels</p>
+          <SectionHeader title={t("title")} description={t("description")} />
+          <p className="label-caps">{t("otherChannels")}</p>
           <ul className="mt-3 space-y-2 text-sm">
             {siteConfig.socialLinks.map((channel) => (
               <li key={channel.href}>
@@ -30,7 +29,7 @@ export function ContactSection() {
           </ul>
         </div>
         <Panel>
-          <PanelHeader title="new message" meta={<span>spam-checked by turnstile</span>} />
+          <PanelHeader title={t("newMessage")} meta={<span>{t("spamChecked")}</span>} />
           <PanelBody>
             <ContactForm />
           </PanelBody>

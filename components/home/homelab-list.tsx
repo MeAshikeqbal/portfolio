@@ -1,4 +1,5 @@
-import Link from "next/link"
+import { useTranslations } from "next-intl"
+import { Link } from "@/i18n/navigation"
 import { LabNodeDot, LabNodeTrouble, LabSummary } from "@/components/lab/lab-badges"
 
 export interface HomelabItem {
@@ -21,6 +22,7 @@ export function HomelabList({
   /** The lab's machine names. When known, only those rows show (specs live on Homecave). */
   machines?: string[]
 }) {
+  const t = useTranslations("home")
   const named = (items ?? []).filter((item) => item.name?.trim())
   if (named.length === 0) return null
   const known = new Set(machines ?? [])
@@ -32,7 +34,7 @@ export function HomelabList({
     <div className="border-b">
       <div className="flex items-center justify-between px-4 pt-3 pb-3 label-caps sm:pb-0">
         <span className="flex items-center gap-2">
-          homelab
+          {t("homelab")}
           <LabSummary />
         </span>
         {/* The visible label is small; the padding gives it a 44px touch target. */}
@@ -40,14 +42,14 @@ export function HomelabList({
           href="/homecave"
           className="-my-3.5 -mr-2 inline-flex min-h-11 items-center px-2 transition-colors hover:text-foreground focus-visible:-outline-offset-2"
         >
-          live dashboard
+          {t("liveDashboard")}
         </Link>
       </div>
       {/* Phones get the header and its link only, so the hero stays inside the first screen
           and Writing starts where the visitor can see it. On wider screens: one grid, so every
           name and every description starts on the same line (dot · name · role · trouble). */}
       <ul
-        aria-label="Homelab"
+        aria-label={t("homelabList")}
         className="hidden grid-cols-[0.5rem_max-content_minmax(0,1fr)_auto] items-baseline gap-x-3 gap-y-1.5 px-4 pt-2 pb-3.5 text-sm sm:grid"
       >
         {homelab.map((item) => (

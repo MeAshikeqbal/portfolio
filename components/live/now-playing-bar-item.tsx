@@ -1,10 +1,11 @@
 "use client"
 
-import Link from "next/link"
+import { useTranslations } from "next-intl"
 import { useEffect, useRef, useState, type CSSProperties } from "react"
 import { StatusDot } from "@/components/dashboard/status-dot"
 import { useReducedMotion } from "@/hooks/use-reduced-motion"
 import { cn } from "@/lib/utils"
+import { Link } from "@/i18n/navigation"
 import { pickNowPlaying, type NowPlaying } from "./describe"
 import { progressText, usePlaybackProgress } from "./playback-progress"
 import { useLiveActivity } from "./use-live-activity"
@@ -87,16 +88,17 @@ export function NowPlayingBarItemView({
   /** Pins the progress clock (tests). */
   now?: number
 }) {
+  const t = useTranslations("live")
   const progress = usePlaybackProgress(item, now)
   return (
     <Link
       href="/now#live"
-      aria-label={`${item.kind === "listening" ? "Listening to" : "Watching"} ${item.text}`}
+      aria-label={t("barLabel", { kind: item.kind, text: item.text })}
       title={progress ? progressText(progress) : undefined}
       className={cn(className, "group relative max-w-96 min-w-0 shrink")}
     >
       <StatusDot status="up" pulse />
-      <span className="shrink-0">{item.kind}</span>
+      <span className="shrink-0">{t("barKind", { kind: item.kind })}</span>
       <Marquee text={item.text} />
       {progress && (
         <span aria-hidden className="absolute inset-x-0 bottom-0 h-px bg-border">
