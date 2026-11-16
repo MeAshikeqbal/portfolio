@@ -63,9 +63,9 @@ describe("sanity webhook", () => {
     expect(translateDocument).not.toHaveBeenCalled()
   })
 
-  it("ignores its own translation writes", async () => {
+  it("refreshes every page when a translation is written, without translating it", async () => {
     await call({ _id: "translation-de-post-1", _type: "translation" })
-    expect(revalidatePath).not.toHaveBeenCalled()
+    expect(revalidatePath).toHaveBeenCalledWith("/", "layout")
     expect(scheduled).toHaveLength(0)
   })
 
