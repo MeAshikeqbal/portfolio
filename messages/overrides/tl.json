@@ -1,0 +1,38 @@
+{
+  "lab": {
+    "up": "gumagana",
+    "upFor": "gumagana · {uptime}",
+    "summary": "{up}/{total} gumagana",
+    "down": "offline"
+  },
+  "homecave": {
+    "nodesUp": "{up}/{total} node ang gumagana",
+    "upDay": "{pct} gumagana · 24h",
+    "nodeUp": "gumagana",
+    "nodeUpFor": "gumagana · {uptime}",
+    "labSummary": "{up}/{total} gumagana",
+    "nodeDown": "offline"
+  },
+  "writing": {
+    "log": "talaan"
+  },
+  "posts": {
+    "log": "talaan"
+  },
+  "systemBar": {
+    "build": "build"
+  },
+  "home": {
+    "statCommits": "commits/taon"
+  },
+  "projects": {
+    "metricCommits": "commits",
+    "live": "Live"
+  },
+  "inventory": {
+    "title": "Stack"
+  },
+  "live": {
+    "title": "live"
+  }
+}

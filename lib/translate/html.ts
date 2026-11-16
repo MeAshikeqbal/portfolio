@@ -23,7 +23,8 @@ const NO_TRANSLATE_PATTERN = new RegExp(
     .sort((a, b) => b.length - a.length)
     .map((term) => term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"))
     .join("|")})\\b`,
-  "g",
+  // "jellyfin" in a sentence is still the media server, not a jellyfish.
+  "gi",
 )
 
 /** Plain text as HTML for the translator, protected names wrapped. */
@@ -31,7 +32,15 @@ export function textHtml(text: string): string {
   return escapeHtml(text).replace(NO_TRANSLATE_PATTERN, '<span translate="no">$1</span>')
 }
 
+/**
+ * Google leaves a space where a tag ended ("<link>now page</link> , an idea"): punctuation
+ * goes back against the word before it.
+ */
+export function tidyPunctuation(text: string): string {
+  return text.replace(/[ \t]+([,.;:!?)])/g, "$1")
+}
+
 /** The translator's HTML back to plain text: markup dropped, entities decoded. */
 export function htmlText(html: string): string {
-  return decodeHtml(html.replace(/<[^>]+>/g, ""))
+  return tidyPunctuation(decodeHtml(html.replace(/<[^>]+>/g, "")))
 }

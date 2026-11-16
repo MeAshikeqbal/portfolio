@@ -6,7 +6,7 @@ import {
   type SelectElement,
 } from "@formatjs/icu-messageformat-parser"
 import { printAST } from "@formatjs/icu-messageformat-parser/printer.js"
-import { decodeHtml, textHtml } from "./html"
+import { decodeHtml, textHtml, tidyPunctuation } from "./html"
 
 /**
  * Machine translation for ICU messages without breaking them.
@@ -149,7 +149,7 @@ function finish(
     return marker
   })
   text = text.replace(KEEP, "$1").replace(/<[^>]+>/g, "")
-  text = escapeIcu(decodeHtml(text), run.inPlural)
+  text = escapeIcu(tidyPunctuation(decodeHtml(text)), run.inPlural)
   return text
     .replace(/\u0001(\d+)\u0001/g, (_, i: string) => atoms[Number(i)])
     .replace(/\u0000(\d+)\u0000/g, (_, i: string) => parts[Number(i)])
