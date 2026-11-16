@@ -7,7 +7,7 @@ import { Container } from "@/components/dashboard/layout"
 import { ThemeCycleButton, ThemeToggle } from "@/components/theme-toggle"
 import type { CommandIndex } from "@/lib/api"
 import { CommandMenu } from "./command-menu"
-import { LanguageList, LanguageSwitcher } from "./language-switcher"
+import { LanguageSelect, LanguageSwitcher } from "./language-switcher"
 import { Button } from "@/components/ui/button"
 import { siteConfig } from "@/lib/site"
 import { cn } from "@/lib/utils"
@@ -154,9 +154,11 @@ export function SiteNav({ commandIndex }: { commandIndex?: CommandIndex }) {
               <span className="label-caps">{t("theme")}</span>
               <ThemeToggle />
             </div>
-            <div className="flex flex-col gap-2 px-3 pt-2">
-              <span className="label-caps">{t("language")}</span>
-              <LanguageList />
+            <div className="flex items-center justify-between px-3 pt-2">
+              <label htmlFor="mobile-language" className="label-caps">
+                {t("language")}
+              </label>
+              <LanguageSelect id="mobile-language" />
             </div>
           </Container>
         </nav>
