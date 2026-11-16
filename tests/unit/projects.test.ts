@@ -1,11 +1,13 @@
 import { describe, expect, it } from "vitest"
 import type { Project } from "@/lib/api"
 import {
+  adjacentProjects,
   byActivity,
   hasActivity,
   projectHref,
   projectMeta,
   projectTags,
+  relatedProjects,
   shortLicense,
 } from "@/lib/projects"
 
@@ -117,5 +119,48 @@ describe("byActivity", () => {
       p("mid", "2026-03-01T00:00:00Z"),
     ])
     expect(ordered.map((x) => x._id)).toEqual(["new", "mid", "old", "none", "archived-recent"])
+  })
+})
+
+describe("relatedProjects", () => {
+  const p = (slug: string, tech: string[], language?: string) => ({
+    slug,
+    tech,
+    githubData: language ? { language } : null,
+  })
+  const all = [
+    p("site", ["Next.js", "TypeScript", "Sanity"], "TypeScript"),
+    p("tui", ["Go", "Bubble Tea", "Sanity"], "Go"),
+    p("hst", ["Go", "Bubble Tea"], "Go"),
+    p("shop", ["Next.js", "TypeScript"], "TypeScript"),
+    p("blog", ["Next.js", "TypeScript"], "TypeScript"),
+    p("solo", ["Solidity"]),
+  ]
+
+  it("ranks rare shared tech above common tech", () => {
+    // tui shares only Sanity (2 projects) with site; shop/blog share Next.js + TypeScript (3 each).
+    const related = relatedProjects(all[1], all).map((r) => r.slug)
+    expect(related[0]).toBe("hst") // Go + Bubble Tea: both rare
+    expect(related).toContain("site") // Sanity
+    expect(related).not.toContain("tui")
+  })
+
+  it("leaves out projects with nothing in common, and matches case-insensitively", () => {
+    expect(relatedProjects(all[5], all)).toEqual([])
+    expect(relatedProjects(p("x", ["go"]), all).map((r) => r.slug)).toEqual(["tui", "hst"])
+  })
+
+  it("keeps list order on ties and respects the limit", () => {
+    expect(relatedProjects(all[3], all, 2).map((r) => r.slug)).toEqual(["site", "blog"])
+  })
+})
+
+describe("adjacentProjects", () => {
+  const list = [{ slug: "a" }, { slug: null }, { slug: "b" }, { slug: "c" }]
+
+  it("finds neighbours in list order, skipping projects without a page", () => {
+    expect(adjacentProjects("b", list)).toEqual({ previous: { slug: "a" }, next: { slug: "c" } })
+    expect(adjacentProjects("a", list)).toEqual({ previous: null, next: { slug: "b" } })
+    expect(adjacentProjects("zzz", list)).toEqual({ previous: null, next: null })
   })
 })
