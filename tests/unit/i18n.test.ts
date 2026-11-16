@@ -65,12 +65,59 @@ describe("revalidatePages", () => {
   })
 })
 
-describe("suggestedLocale", () => {
-  it("offers the first browser language the site speaks, unless the page is already in it", async () => {
-    const { suggestedLocale } = await import("@/components/site/language-suggest")
-    expect(suggestedLocale(["fr-FR", "en-GB"], "ja")).toBe("en")
-    expect(suggestedLocale(["en-US", "ja"], "en")).toBeNull()
-    expect(suggestedLocale(["fr", "pt"], "en")).toBeNull()
+describe("language hint", () => {
+  it("reads Accept-Language in order of preference", async () => {
+    const { acceptedLanguages } = await import("@/i18n/hint")
+    expect(acceptedLanguages("en-US,en;q=0.9,hi;q=0.95,*;q=0.1")).toEqual(["en-us", "hi", "en"])
+    expect(acceptedLanguages(null)).toEqual([])
+  })
+
+  it("maps where a visitor is to the language native there", async () => {
+    const { locationLocale } = await import("@/i18n/hint")
+    expect(locationLocale("JP", null)).toBe("ja")
+    expect(locationLocale("mx", "CMX")).toBe("es")
+    expect(locationLocale("BD", "13")).toBe("bn")
+    expect(locationLocale("IN", "WB")).toBe("bn")
+    expect(locationLocale("IN", "UP")).toBe("hi")
+    // English is the safer default across the rest of India, and elsewhere.
+    expect(locationLocale("IN", "TN")).toBeNull()
+    expect(locationLocale("US", "CA")).toBeNull()
+    expect(locationLocale(null, null)).toBeNull()
+  })
+
+  it("offers the browser's language first, then the local one, and keeps English the default", async () => {
+    const { languageHint } = await import("@/i18n/hint")
+    // An English browser in Delhi, on the English site: offer Hindi.
+    expect(languageHint({ current: "en", languages: ["en-us"], country: "IN", region: "DL" })).toBe(
+      "hi",
+    )
+    // The browser asks for Japanese: that wins over where they are.
+    expect(languageHint({ current: "en", languages: ["ja"], country: "DE" })).toBe("ja")
+    // Already reading in their language: nothing.
+    expect(languageHint({ current: "ja", languages: ["ja"], country: "JP" })).toBeNull()
+    expect(languageHint({ current: "ja", languages: ["en"], country: "JP" })).toBeNull()
+    // An English reader abroad from anywhere without a site language, on a translated page.
+    expect(languageHint({ current: "de", languages: ["en-gb"], country: "GB" })).toBe("en")
+    // An English reader at home on the English site: nothing.
+    expect(languageHint({ current: "en", languages: ["en-us"], country: "US" })).toBeNull()
+    // Filipino browsers read Tagalog.
+    expect(languageHint({ current: "en", languages: ["fil-ph"] })).toBe("tl")
+  })
+
+  it("answers with the offer worded in the suggested language, never cached", async () => {
+    const { GET } = await import("@/app/api/language-hint/route")
+    const { NextRequest } = await import("next/server")
+    const response = await GET(
+      new NextRequest("http://localhost/api/language-hint?current=en", {
+        headers: { "accept-language": "en-US", "x-vercel-ip-country": "JP" },
+      }),
+    )
+    expect(response.headers.get("cache-control")).toBe("private, no-store")
+    const body = await response.json()
+    expect(body.locale).toBe("ja")
+    expect(body.label).toBe("日本語")
+    expect(body.message).toContain("日本語")
+    expect(body.message).not.toBe("This page is available in 日本語.")
   })
 })
 
