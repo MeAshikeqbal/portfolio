@@ -31,7 +31,8 @@
     "log": "talaan"
   },
   "posts": {
-    "log": "talaan"
+    "log": "talaan",
+    "sourceSigned": "pgp-signed"
   },
   "systemBar": {
     "build": "build"

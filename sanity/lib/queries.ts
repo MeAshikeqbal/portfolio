@@ -47,6 +47,19 @@ const postCard = `
   author->{ name }
 `
 
+/** Every listed post's English original, for /llms-full.txt (fields: POST_SOURCE_PROJECTION). */
+export const POST_SOURCES_QUERY = defineQuery(`
+  *[${listedPost}] | order(publishedAt desc) {
+    _id,
+    title,
+    "slug": slug.current,
+    publishedAt,
+    "author": author->name,
+    excerpt,
+    body
+  }
+`)
+
 export const POSTS_QUERY = defineQuery(`
   *[${listedPost}] | order(publishedAt desc) { ${postCard} }
 `)
@@ -94,6 +107,26 @@ export const POST_QUERY = defineQuery(`
 
 export const POST_SLUGS_QUERY = defineQuery(`
   *[_type == "post" && ${published} && defined(slug.current)].slug.current
+`)
+
+/**
+ * A post's English original for /post/<slug>.md (lib/post-markdown.ts), with its signature.
+ * The fields are POST_SOURCE_PROJECTION, which scripts/sign-posts.ts signs from; a unit test
+ * keeps the two in step.
+ */
+export const POST_SOURCE_QUERY = defineQuery(`
+  *[_type == "post" && ${published} && slug.current == $slug][0] {
+    _id,
+    title,
+    "slug": slug.current,
+    publishedAt,
+    "author": author->name,
+    excerpt,
+    body,
+    "signature": *[_type == "postSignature" && _id == "signature-" + ^._id][0] {
+      sha256, signature, fingerprint, signedAt
+    }
+  }
 `)
 
 const projectFields = `

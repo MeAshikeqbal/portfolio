@@ -289,7 +289,13 @@
     "related": "関連エントリ",
     "untitled": "無題の投稿",
     "breadcrumbHome": "家",
-    "breadcrumbWriting": "書き込み"
+    "breadcrumbWriting": "書き込み",
+    "sourceTitle": "ソース",
+    "sourceSigned": "pgp署名済み",
+    "sourceText": "この記事の英語原文をプレーンなMarkdownで。オフラインで読んだり、ほかのツールに渡したりできます。",
+    "sourceSignedText": "この記事の英語原文をプレーンなMarkdownで。{date}に私のPGP鍵 {keyId} で署名しています。記事が変更されると、新しい本文に署名するまで署名は取り下げられます。",
+    "sourceMarkdown": "Markdown",
+    "sourceSignature": "署名"
   },
   "now": {
     "title": "今",

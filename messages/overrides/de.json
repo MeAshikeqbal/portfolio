@@ -49,5 +49,12 @@
   "common": {
     "more": "+{count} weitere",
     "fewer": "weniger anzeigen"
+  },
+  "posts": {
+    "sourceSigned": "pgp-signiert",
+    "sourceMarkdown": "Markdown",
+    "sourceSignature": "Signatur",
+    "sourceText": "Das englische Original dieses Beitrags als reines Markdown, zum Offline-Lesen oder für andere Tools.",
+    "sourceSignedText": "Das englische Original dieses Beitrags als reines Markdown, am {date} mit meinem PGP-Schlüssel {keyId} signiert. Ändert sich der Beitrag, wird die Signatur zurückgezogen, bis ich den neuen Text signiere."
   }
 }

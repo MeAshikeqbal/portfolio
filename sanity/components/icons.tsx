@@ -5,6 +5,7 @@ import {
   ExternalLink,
   FileText,
   FileUser,
+  FileSignature,
   FolderGit2,
   GraduationCap,
   House,
@@ -65,6 +66,7 @@ export const BlogIcon = studioIcon(FileText, "Blog")
 export const PortfolioIcon = studioIcon(Briefcase, "Portfolio")
 export const PersonalIcon = studioIcon(UserRound, "Personal")
 export const TranslationIcon = studioIcon(Languages, "Translation")
+export const SignatureIcon = studioIcon(FileSignature, "Signature")
 
 // Portable Text blocks
 export const CodeBlockIcon = studioIcon(SquareCode, "CodeBlock")

@@ -16,8 +16,31 @@ const DEFAULT_LOCALE_IMAGE = new RegExp(`^/${defaultLocale}(/.*)?/(opengraph|twi
  * Locale routing: rewrites unprefixed URLs to the English tree (app/[lang] with lang=en),
  * passes /hi, /ja… through, and redirects /en/... to the unprefixed URL.
  */
+/**
+ * Command-line clients (curl, wget, HTTPie, xh) asking for a page get it as plain text from
+ * app/api/text: `curl -L itsashik.dev`. Only unprefixed (English) pages that have a text view;
+ * anything asking for HTML gets HTML.
+ */
+const COMMAND_LINE = /^(curl|wget|httpie|xh)\//i
+const TEXT_PAGES = /^\/(?:(?:post|projects)(?:\/[^/]+)?|homecave|now|resume)?$/
+
+export function wantsText(request: NextRequest): boolean {
+  const agent = request.headers.get("user-agent") ?? ""
+  const accept = request.headers.get("accept") ?? ""
+  return (
+    COMMAND_LINE.test(agent) &&
+    !accept.includes("text/html") &&
+    TEXT_PAGES.test(request.nextUrl.pathname)
+  )
+}
+
 export default function proxy(request: NextRequest) {
   if (DEFAULT_LOCALE_IMAGE.test(request.nextUrl.pathname)) return NextResponse.next()
+  if (wantsText(request)) {
+    const url = request.nextUrl.clone()
+    url.pathname = `/api/text${request.nextUrl.pathname === "/" ? "" : request.nextUrl.pathname}`
+    return NextResponse.rewrite(url)
+  }
   return handleLocale(request)
 }
 

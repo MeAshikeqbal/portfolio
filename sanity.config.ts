@@ -35,6 +35,7 @@ import { codeInput } from "@sanity/code-input"
 
 /** One-off documents with fixed ids (see sanity/structure.ts): no create, delete or duplicate. */
 const SINGLETONS = new Set(["cv", "uses", "now"])
+const WRITTEN_BY_SCRIPTS = new Set(["translation", "postSignature"])
 const SINGLETON_ACTIONS = new Set(["publish", "discardChanges", "restore"])
 
 /** Shared look for both workspaces: theme, wordmark and the statusline under the navbar. */
@@ -78,11 +79,12 @@ export default defineConfig([
     ],
     document: {
       newDocumentOptions: (prev, { creationContext }) =>
-        // Translations are written by the site on publish, never created by hand.
+        // Translations are written by the site on publish and signatures by
+        // scripts/sign-posts.ts, never created by hand.
         (creationContext.type === "global"
           ? prev.filter((item) => !SINGLETONS.has(item.templateId))
           : prev
-        ).filter((item) => item.templateId !== "translation"),
+        ).filter((item) => !WRITTEN_BY_SCRIPTS.has(item.templateId)),
       actions: (prev, { schemaType }) => {
         const actions = SINGLETONS.has(schemaType)
           ? prev.filter(({ action }) => action && SINGLETON_ACTIONS.has(action))

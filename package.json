@@ -17,7 +17,8 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "studio:tokens": "sanity exec scripts/studio-tokens.ts && prettier --write sanity/theme/tokens.generated.ts",
-    "i18n:translate": "jiti scripts/translate-messages.ts"
+    "i18n:translate": "jiti scripts/translate-messages.ts",
+    "sign": "sanity exec scripts/sign-identity.ts && sanity exec scripts/sign-posts.ts --with-user-token"
   },
   "dependencies": {
     "@iconify-json/logos": "^1.2.19",
@@ -29,6 +30,7 @@
     "@octokit/rest": "^22.0.1",
     "@portabletext/react": "^8.0.1",
     "@portabletext/to-html": "^6.0.0",
+    "@react-pdf/renderer": "^4.9.0",
     "@sanity/code-input": "^7.3.15",
     "@sanity/icons": "^5.3.0",
     "@sanity/image-url": "^2.1.1",
