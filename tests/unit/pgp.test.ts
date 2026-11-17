@@ -41,7 +41,8 @@ describe("the key's address", () => {
   })
 })
 
-describe("the signed security.txt", () => {
+// Empty until the first `npm run sign` (the route 404s meanwhile); checked fully once signed.
+describe.skipIf(!signedSecurityTxt)("the signed security.txt", () => {
   const body = parseClearsigned(signedSecurityTxt)?.body ?? ""
   const expires = parseExpires(body)
 
