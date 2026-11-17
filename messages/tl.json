@@ -289,7 +289,13 @@
     "related": "mga kaugnay na entry",
     "untitled": "Post na walang pamagat",
     "breadcrumbHome": "Tahanan",
-    "breadcrumbWriting": "Pagsusulat"
+    "breadcrumbWriting": "Pagsusulat",
+    "sourceTitle": "pinagmulan",
+    "sourceSigned": "pgp-signed",
+    "sourceText": "Ang orihinal na post na ito ay nasa Ingles bilang simpleng Markdown, para sa pagbabasa offline o paglipat sa iba pang mga tool.",
+    "sourceSignedText": "Ang orihinal na Ingles ng post na ito ay simpleng Markdown, nilagdaan gamit ang aking PGP key {keyId} sa {date}. Kung magbabago ang post, aalisin ang lagda hanggang sa mapirmahan ko ang bagong teksto.",
+    "sourceMarkdown": "Markdown",
+    "sourceSignature": "Lagda"
   },
   "now": {
     "title": "Ngayon",

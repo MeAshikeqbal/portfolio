@@ -53,3 +53,42 @@ test.describe("security headers", () => {
     expect(violations).toEqual([])
   })
 })
+
+test.describe("keys and signatures", () => {
+  const slug = "a-beginner-s-guide-to-building-a-website-using-a-modern-javascript-framework"
+
+  test("security.txt is clearsigned, at the RFC 9116 path and the old one", async ({ request }) => {
+    const response = await request.get("/.well-known/security.txt")
+    // 404 until the first `npm run sign`; never an unsigned file.
+    test.skip(response.status() === 404, "security.txt isn't signed yet")
+    expect(response.status()).toBe(200)
+    const text = await response.text()
+    expect(text).toMatch(/^-----BEGIN PGP SIGNED MESSAGE-----/)
+    expect(text).toContain("Expires: ")
+    const old = await request.get("/security.txt", { maxRedirects: 0 })
+    expect(old.headers().location).toContain("/.well-known/security.txt")
+  })
+
+  test("WKD serves the key for hello@ in both layouts, and nothing else", async ({ request }) => {
+    for (const path of [
+      "/.well-known/openpgpkey/hu/im4cc8qhazwkfsi65a8us1bc5gzk1o4p",
+      "/.well-known/openpgpkey/itsashik.dev/hu/im4cc8qhazwkfsi65a8us1bc5gzk1o4p",
+    ]) {
+      const response = await request.get(path)
+      expect(response.status(), path).toBe(200)
+      expect(response.headers()["content-type"]).toBe("application/octet-stream")
+      expect(response.headers()["access-control-allow-origin"]).toBe("*")
+    }
+    expect((await request.get("/.well-known/openpgpkey/itsashik.dev/policy")).status()).toBe(200)
+    expect((await request.get("/.well-known/openpgpkey/hu/nobody")).status()).toBe(404)
+  })
+
+  test("a post's Markdown copy is served beside it, outside the index", async ({ request }) => {
+    const response = await request.get(`/post/${slug}.md`)
+    expect(response.status()).toBe(200)
+    expect(response.headers()["content-type"]).toBe("text/markdown; charset=utf-8")
+    expect(response.headers()["x-robots-tag"]).toBe("noindex")
+    expect(await response.text()).toContain(`canonical: https://www.itsashik.dev/post/${slug}`)
+    expect((await request.get("/post/no-such-post.md")).status()).toBe(404)
+  })
+})

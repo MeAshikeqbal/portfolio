@@ -17,7 +17,8 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "studio:tokens": "sanity exec scripts/studio-tokens.ts && prettier --write sanity/theme/tokens.generated.ts",
-    "i18n:translate": "jiti scripts/translate-messages.ts"
+    "i18n:translate": "jiti scripts/translate-messages.ts",
+    "sign": "sanity exec scripts/sign-identity.ts && sanity exec scripts/sign-posts.ts --with-user-token"
   },
   "dependencies": {
     "@iconify-json/logos": "^1.2.19",

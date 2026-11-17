@@ -289,7 +289,13 @@
     "related": "related entries",
     "untitled": "Untitled post",
     "breadcrumbHome": "Home",
-    "breadcrumbWriting": "Writing"
+    "breadcrumbWriting": "Writing",
+    "sourceTitle": "source",
+    "sourceSigned": "pgp-signed",
+    "sourceText": "This post's English original as plain Markdown, for reading offline or passing to other tools.",
+    "sourceSignedText": "This post's English original as plain Markdown, signed with my PGP key {keyId} on {date}. If the post changes, the signature is taken down until I sign the new text.",
+    "sourceMarkdown": "Markdown",
+    "sourceSignature": "Signature"
   },
   "now": {
     "title": "Now",

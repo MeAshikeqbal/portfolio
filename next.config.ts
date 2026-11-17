@@ -1,6 +1,7 @@
 import type { NextConfig } from "next"
 import createNextIntlPlugin from "next-intl/plugin"
 import { defaultLocale, locales } from "./i18n/locales"
+import { siteConfig } from "./lib/site"
 
 /**
  * Content Security Policy for the public site.
@@ -41,6 +42,13 @@ const securityHeaders = [
     value: "camera=(), microphone=(), geolocation=(), browsing-topics=(), interest-cohort=()",
   },
 ]
+
+/**
+ * The host OpenPGP clients ask first for the site's key (WKD's "advanced" layout, lib/wkd.ts):
+ * openpgpkey.itsashik.dev, a CNAME to this deployment. It serves only the key directory; any
+ * other path goes to the site proper.
+ */
+const wkdHost = `openpgpkey.${new URL(siteConfig.url).hostname.replace(/^www\./, "")}`
 
 /** Locale prefixes in URLs: every served locale but English, whose URLs stay unprefixed. */
 const prefixed = locales.filter((locale) => locale !== defaultLocale)
@@ -86,6 +94,14 @@ const nextConfig: NextConfig = {
     // Short, shareable alias for the CV served at /resume.pdf.
     return [
       { source: "/resume", destination: "/resume.pdf", permanent: false },
+      // RFC 9116 allows the old location as a redirect.
+      { source: "/security.txt", destination: "/.well-known/security.txt", permanent: true },
+      {
+        source: "/:path((?!\\.well-known/openpgpkey/).*)",
+        has: [{ type: "host", value: wkdHost }],
+        destination: `${siteConfig.url}/:path`,
+        permanent: false,
+      },
       // /uses became Homecave, the live homelab dashboard (its setup sections live there too).
       { source: "/uses", destination: "/homecave", permanent: true },
       ...(prefixed.length > 0

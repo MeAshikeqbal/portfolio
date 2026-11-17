@@ -35,8 +35,14 @@ function revalidateFor(type: string | undefined) {
       // Every post page, so renamed or unpublished slugs stop serving stale copies.
       // Homecave too: its log links incidents to the posts that write them up.
       revalidatePages("/post", "/post/[slug]", "/", "/homecave")
+      revalidatePath("/post/[file]", "page")
       revalidatePath("/rss.xml")
       revalidatePath("/sitemap.xml")
+      break
+    case "postSignature":
+      // The post page's signed mark and /post/<slug>.md.asc.
+      revalidatePages("/post/[slug]")
+      revalidatePath("/post/[file]", "page")
       break
     case "project":
       revalidatePages("/projects", "/projects/[slug]", "/")
