@@ -32,5 +32,11 @@
   },
   "common": {
     "more": "他{count}件"
+  },
+  "posts": {
+    "sourceMarkdown": "Markdown",
+    "sourceSignature": "署名",
+    "sourceSignedText": "この記事の英語原文をプレーンなMarkdownで。{date}に私のPGP鍵 {keyId} で署名しています。記事が変更されると、新しい本文に署名するまで署名は取り下げられます。",
+    "sourceText": "この記事の英語原文をプレーンなMarkdownで。オフラインで読んだり、ほかのツールに渡したりできます。"
   }
 }

@@ -142,6 +142,7 @@ export const structure: StructureResolver = (S, context) =>
             "now",
             "media.tag",
             "translation",
+            "postSignature",
           ].includes(item.getId()!),
       ),
     ])

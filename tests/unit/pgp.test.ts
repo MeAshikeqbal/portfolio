@@ -4,10 +4,11 @@ import * as openpgp from "openpgp"
 import { describe, expect, it } from "vitest"
 import { identityText } from "@/lib/identity"
 import { fingerprintGroups, keyValidity, parseClearsigned } from "@/lib/pgp"
-import { pgpKey, signedIdentity } from "@/lib/pgp.generated"
+import { pgpKey, signedIdentity, signedSecurityTxt } from "@/lib/pgp.generated"
+import { SECURITY_TXT_DAYS, parseExpires, securityTxt } from "@/lib/security-txt"
 import { siteConfig } from "@/lib/site"
 
-const RESIGN = "Re-sign it: npx sanity exec scripts/sign-identity.ts"
+const RESIGN = "Re-sign it: npm run sign"
 
 describe("the signed identity statement", () => {
   it("covers exactly the current statement (name, tagline, links)", () => {
@@ -29,6 +30,38 @@ describe("the signed identity statement", () => {
     const key = await openpgp.readKey({ armoredKey: pgpKey.publicKey })
     const expires = await key.getExpirationTime()
     expect(pgpKey.expiresAt).toBe(expires instanceof Date ? expires.toISOString() : null)
+  })
+})
+
+describe("the key's address", () => {
+  it("is the key's own user ID, so WKD serves the key for the right address", async () => {
+    const key = await openpgp.readKey({ armoredKey: pgpKey.publicKey })
+    const { user } = await key.getPrimaryUser()
+    expect(user.userID?.email.toLowerCase()).toBe(pgpKey.email)
+  })
+})
+
+describe("the signed security.txt", () => {
+  const body = parseClearsigned(signedSecurityTxt)?.body ?? ""
+  const expires = parseExpires(body)
+
+  it("covers exactly the current fields", () => {
+    expect(expires, RESIGN).not.toBeNull()
+    // Clearsigning drops the final newline; the fields are otherwise unchanged.
+    expect(body, RESIGN).toBe(securityTxt({ email: pgpKey.email, expires: expires! }).trimEnd())
+  })
+
+  it("verifies against the site's key", async () => {
+    const key = await openpgp.readKey({ armoredKey: pgpKey.publicKey })
+    const message = await openpgp.readCleartextMessage({ cleartextMessage: signedSecurityTxt })
+    const { signatures } = await openpgp.verify({ message, verificationKeys: key })
+    await expect(signatures[0].verified).resolves.toBe(true)
+  })
+
+  it("hasn't expired, and expires within a year (RFC 9116)", () => {
+    const left = (new Date(expires!).getTime() - Date.now()) / 86_400_000
+    expect(left, `security.txt has expired. ${RESIGN}`).toBeGreaterThan(0)
+    expect(left).toBeLessThanOrEqual(SECURITY_TXT_DAYS + 1)
   })
 })
 

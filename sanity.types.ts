@@ -37,6 +37,19 @@ export type PostReference = {
   [internalGroqTypeReferenceTo]?: "post"
 }
 
+export type PostSignature = {
+  _id: string
+  _type: "postSignature"
+  _createdAt: string
+  _updatedAt: string
+  _rev: string
+  post?: PostReference
+  sha256?: string
+  signature?: string
+  fingerprint?: string
+  signedAt?: string
+}
+
 export type ProjectReference = {
   _ref: string
   _type: "reference"
@@ -665,6 +678,7 @@ export type AllSanitySchemaTypes =
   | SanityImageAssetReference
   | CopmanyLogo
   | PostReference
+  | PostSignature
   | ProjectReference
   | NowReference
   | UsesReference
@@ -840,6 +854,25 @@ export type POST_QUERY_RESULT = {
 // Variable: POST_SLUGS_QUERY
 // Query: *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current)].slug.current
 export type POST_SLUGS_QUERY_RESULT = Array<string | null>
+
+// Source: sanity/lib/queries.ts
+// Variable: POST_SOURCE_QUERY
+// Query: *[_type == "post" && !(_id in path("drafts.**")) && slug.current == $slug][0] {    _id,    title,    "slug": slug.current,    publishedAt,    "author": author->name,    excerpt,    body,    "signature": *[_type == "postSignature" && _id == "signature-" + ^._id][0] {      sha256, signature, fingerprint, signedAt    }  }
+export type POST_SOURCE_QUERY_RESULT = {
+  _id: string
+  title: string | null
+  slug: string | null
+  publishedAt: string | null
+  author: string | null
+  excerpt: string | null
+  body: BlockContent | null
+  signature: {
+    sha256: string | null
+    signature: string | null
+    fingerprint: string | null
+    signedAt: string | null
+  } | null
+} | null
 
 // Source: sanity/lib/queries.ts
 // Variable: PROJECTS_QUERY
@@ -1163,6 +1196,7 @@ declare global {
     '\n  *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && archived != true]\n    | order(coalesce(featured, false) desc, publishedAt desc) [0...4] {\n      \n  _id,\n  "title": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.title, title),\n  "slug": slug.current,\n  "mainImage": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.mainImage, mainImage),\n  "lqip": mainImage.asset->metadata.lqip,\n  publishedAt,\n  "excerpt": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.excerpt, coalesce(excerpt, array::join(string::split(pt::text(body[_type == "block" && style == "normal"]), "")[0...200], ""))),\n  categories[]->{ _id, "title": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.title, title) },\n  author->{ name }\n,\n      "pinned": featured == true\n    }\n': LATEST_POSTS_QUERY_RESULT
     '\n  *[_type == "post" && !(_id in path("drafts.**")) && slug.current == $slug][0] {\n    _id,\n    "title": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.title, title),\n    "slug": slug.current,\n    author->{ name, image },\n    "mainImage": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.mainImage, mainImage),\n    "cover": mainImage.asset->metadata{ lqip, "width": dimensions.width, "height": dimensions.height },\n    // posts: how many listed posts share the category, so rare ones weigh more in "related".\n    categories[]->{ _id, "title": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.title, title), "posts": count(*[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && archived != true && references(^._id)]) },\n    publishedAt,\n    _updatedAt,\n    "body": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.body, body),\n    // Only a post\'s own excerpt leads the page; a translation also stores the derived one\n    // (for lists), which English never shows here.\n    "excerpt": select(defined(excerpt) => coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.excerpt, excerpt), null),\n    "seo": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.seo, seo),\n    archived,\n    "languages": ["en"] + *[_type == "translation" && source._ref == ^._id].language,\n    "previous": *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && archived != true && publishedAt < ^.publishedAt]\n      | order(publishedAt desc)[0] { "title": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.title, title), "slug": slug.current },\n    "next": *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && archived != true && publishedAt > ^.publishedAt]\n      | order(publishedAt asc)[0] { "title": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.title, title), "slug": slug.current },\n    // Every candidate sharing a category, ranked in lib/related.ts (rare shared topics first).\n    // The cap is only a payload guard, far above the site\'s post count: limiting by date\n    // first would drop an older rare-topic match before it could be ranked.\n    "related": *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && archived != true && _id != ^._id && count(categories[@._ref in ^.^.categories[]._ref]) > 0]\n      | order(publishedAt desc)[0...200] { \n  _id,\n  "title": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.title, title),\n  "slug": slug.current,\n  "mainImage": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.mainImage, mainImage),\n  "lqip": mainImage.asset->metadata.lqip,\n  publishedAt,\n  "excerpt": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.excerpt, coalesce(excerpt, array::join(string::split(pt::text(body[_type == "block" && style == "normal"]), "")[0...200], ""))),\n  categories[]->{ _id, "title": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.title, title) },\n  author->{ name }\n, "categoryIds": categories[]._ref }\n  }\n': POST_QUERY_RESULT
     '\n  *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current)].slug.current\n': POST_SLUGS_QUERY_RESULT
+    '\n  *[_type == "post" && !(_id in path("drafts.**")) && slug.current == $slug][0] {\n    _id,\n    title,\n    "slug": slug.current,\n    publishedAt,\n    "author": author->name,\n    excerpt,\n    body,\n    "signature": *[_type == "postSignature" && _id == "signature-" + ^._id][0] {\n      sha256, signature, fingerprint, signedAt\n    }\n  }\n': POST_SOURCE_QUERY_RESULT
     '\n  *[_type == "project" && !(_id in path("drafts.**"))] | order(orderRank asc, _createdAt desc) { \n  _id,\n  "title": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.title, title),\n  "slug": slug.current,\n  "description": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.description, description),\n  "mainImage": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.mainImage, mainImage),\n  publishedAt,\n  github,\n  url,\n  featured,\n  status,\n  tech,\n  githubData\n }\n': PROJECTS_QUERY_RESULT
     '\n  *[_type == "project" && !(_id in path("drafts.**")) && slug.current == $slug][0] {\n    \n  _id,\n  "title": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.title, title),\n  "slug": slug.current,\n  "description": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.description, description),\n  "mainImage": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.mainImage, mainImage),\n  publishedAt,\n  github,\n  url,\n  featured,\n  status,\n  tech,\n  githubData\n,\n    "body": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.body, body),\n    "seo": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.seo, seo),\n    "video": coalesce(*[_type == "translation" && _id == "translation-" + $lang + "-" + ^._id][0].content.video, video),\n    "languages": ["en"] + *[_type == "translation" && source._ref == ^._id].language,\n    // Only on the project page (lists don\'t carry READMEs).\n    "readme": select(showReadme != false => readme { markdown, path, ref })\n  }\n': PROJECT_QUERY_RESULT
     '\n  *[_type == "project" && !(_id in path("drafts.**")) && defined(slug.current)].slug.current\n': PROJECT_SLUGS_QUERY_RESULT

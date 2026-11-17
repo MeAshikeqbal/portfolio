@@ -289,7 +289,13 @@
     "related": "entradas relacionadas",
     "untitled": "Entrada sin título",
     "breadcrumbHome": "Hogar",
-    "breadcrumbWriting": "Escribiendo"
+    "breadcrumbWriting": "Escribiendo",
+    "sourceTitle": "fuente",
+    "sourceSigned": "firmado con pgp",
+    "sourceText": "El original en inglés de esta publicación como Markdown simple, para leerlo sin conexión o pasarlo a otras herramientas.",
+    "sourceSignedText": "El original en inglés de esta publicación como Markdown simple, firmado con mi clave PGP {keyId} el {date}. Si la publicación cambia, la firma se retira hasta que firme el texto nuevo.",
+    "sourceMarkdown": "Markdown",
+    "sourceSignature": "Firma"
   },
   "now": {
     "title": "Ahora",

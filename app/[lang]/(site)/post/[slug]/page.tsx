@@ -5,6 +5,7 @@ import Image from "next/image"
 import { getTranslations } from "next-intl/server"
 import { notFound } from "next/navigation"
 import { AuthorCard } from "@/components/blog/author-card"
+import { PostSource } from "@/components/blog/post-source"
 import { ReadingProgress } from "@/components/blog/reading-progress"
 import { TableOfContents } from "@/components/blog/table-of-contents"
 import { DataList, DataRow } from "@/components/dashboard/data-list"
@@ -14,7 +15,7 @@ import { createPortableTextComponents } from "@/components/portable-text/compone
 import { JsonLd } from "@/components/seo/json-ld"
 import { TranslationNotice } from "@/components/site/translation-notice"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { getPost, getPostSlugs } from "@/lib/api"
+import { getPost, getPostSlugs, getPostSource } from "@/lib/api"
 import { formatDate } from "@/lib/format"
 import { currentLocale, localizedPageMetadata } from "@/i18n/metadata"
 import { Link } from "@/i18n/navigation"
@@ -71,7 +72,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function PostPage({ params }: Props) {
   const { slug } = await params
   const locale = await currentLocale()
-  const [post, t] = await Promise.all([getPost(slug, locale), getTranslations("posts")])
+  const [post, source, t] = await Promise.all([
+    getPost(slug, locale),
+    getPostSource(slug),
+    getTranslations("posts"),
+  ])
   if (!post) notFound()
 
   const title = post.title ?? t("untitled")
@@ -298,6 +303,13 @@ export default async function PostPage({ params }: Props) {
                     </DataList>
                   </Panel>
                 </section>
+              )}
+
+              {source && (
+                <PostSource
+                  slug={slug}
+                  signedAt={source.signature ? source.signature.signedAt : false}
+                />
               )}
             </Container>
           </footer>
