@@ -44,7 +44,7 @@ export interface LabChange {
 export interface UptimeSummary {
   kind: UptimeRow["kind"]
   name: string
-  /** Share of the month's samples that were up; null with under a day of samples. */
+  /** Share of the month's samples that were up; null with no samples. */
   pct: number | null
   /** Samples down × 5 minutes, in seconds. */
   downS: number
@@ -225,7 +225,7 @@ function blocks() {
 
 function uptimeLine(row: UptimeSummary): Inline[] {
   const name = row.kind === "wan" ? "Internet line" : row.name
-  if (row.pct === null) return [{ bold: name }, ": under a day of samples"]
+  if (row.pct === null) return [{ bold: name }, ": no samples yet"]
   return [
     { bold: name },
     `: ${percent(row.pct)}`,

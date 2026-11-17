@@ -133,7 +133,8 @@ describe.skipIf(!shim)("store against a real Redis", () => {
     expect(rows.Jellyfin).toEqual({ up: 5, total: 5 })
     // Mini PC #2: up at 2, down when Tower saw it at 330 (300 was inside its window), up at 1200.
     expect(rows["Mini PC #2"]).toEqual({ up: 2, total: 3 })
-    // Under a day of samples: no percentage claimed.
-    expect(r!.uptime.every((row) => row.pct === null)).toBe(true)
+    // A percentage from whatever has been recorded, even under a day.
+    expect(r!.uptime.find((row) => row.name === "Mini PC #2")!.pct).toBe(66.6)
+    expect(r!.uptime.find((row) => row.name === "Jellyfin")!.pct).toBe(100)
   })
 })

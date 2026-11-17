@@ -186,8 +186,8 @@ describe("uptime bars", () => {
     )
     expect(rows.map((r) => [r.kind, r.name, r.pct])).toEqual([
       ["node", "Tower", 99.7],
-      ["wan", "Internet", null],
-      ["svc", "Jellyfin", null],
+      ["wan", "Internet", 100],
+      ["svc", "Jellyfin", 40],
     ])
     expect(rows[0].days).toEqual([null, { up: 288, total: 288 }, { up: 99, total: 100 }])
     expect(rows[0].days.map(dayLevel)).toEqual(["none", "up", "partial"])
