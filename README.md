@@ -176,7 +176,7 @@ tests/unit, tests/e2e
   Sanity (`postSignature`, written by the script, hidden from the Studio). The key is also
   published by WKD (`gpg --locate-keys hello@itsashik.dev`), which needs the
   `openpgpkey.itsashik.dev` CNAME (DNS only) pointing at this Vercel project.
-- **Plain text.** `curl -L itsashik.dev` (also wget, HTTPie, xh) gets the site as 80-column
+- **Plain text.** `curl -L itsashik.dev` (or `curl https://itsashik.dev`; also wget, HTTPie, xh) gets the site as 80-column
   text: home, `/post`, `/post/<slug>` (the Markdown), `/projects[/<slug>]`, `/homecave` (live),
   `/now` and `/resume`. `proxy.ts` rewrites those clients to `app/api/text`; browsers and
   anything asking for HTML are untouched. `/llms.txt` (llmstxt.org) and `/llms-full.txt` (every

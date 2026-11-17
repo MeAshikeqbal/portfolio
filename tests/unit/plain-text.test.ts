@@ -136,7 +136,7 @@ describe("the lab in text", () => {
     expect(text).toMatch(/VM disks\s+Mini PC #2 .*no data/)
     expect(text).toMatch(/Tower\s+99.9%/)
     expect(text).toMatch(/UTC\s+Frigate down\s+ongoing/)
-    expect(text.endsWith("JSON: curl -sL itsashik.dev/api/lab-status\n")).toBe(true)
+    expect(text.endsWith("JSON: curl -s https://itsashik.dev/api/lab-status\n")).toBe(true)
   })
 
   it("says so before the lab has reported", () => {
