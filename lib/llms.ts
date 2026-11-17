@@ -25,7 +25,7 @@ export function llmsText({
       "Every post is also served as Markdown at /post/<slug>.md (the English original); a",
       "signed post has its detached PGP signature at /post/<slug>.md.asc. The homelab's live",
       "status is JSON at /api/lab-status, and command-line clients get plain text:",
-      `curl ${new URL(siteConfig.url).hostname.replace(/^www\./, "")}`,
+      `curl -L ${new URL(siteConfig.url).hostname.replace(/^www\./, "")}`,
     ].join("\n"),
     [
       "## Posts",

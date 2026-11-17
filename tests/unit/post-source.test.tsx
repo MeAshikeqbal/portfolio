@@ -21,7 +21,7 @@ describe("PostSource", () => {
     )
     const commands = screen.getByRole("region", { name: /verify/i }).textContent
     expect(commands).toContain(
-      "curl -s -O itsashik.dev/post/nas.md -O itsashik.dev/post/nas.md.asc",
+      "curl -s -O https://itsashik.dev/post/nas.md -O https://itsashik.dev/post/nas.md.asc",
     )
     expect(commands).toContain("gpg --verify nas.md.asc nas.md")
   })

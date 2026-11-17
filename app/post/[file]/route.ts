@@ -5,7 +5,7 @@ import { absoluteUrl } from "@/lib/site"
  * /post/<slug>.md, a post's English original as Markdown, and /post/<slug>.md.asc, the
  * detached PGP signature over those exact bytes:
  *
- *   curl -sO itsashik.dev/post/<slug>.md -O itsashik.dev/post/<slug>.md.asc
+ *   curl -sO https://itsashik.dev/post/<slug>.md -O https://itsashik.dev/post/<slug>.md.asc
  *   gpg --verify <slug>.md.asc <slug>.md
  *
  * Files, so they sit outside the locale routing (proxy.ts skips paths with a dot). Prerendered

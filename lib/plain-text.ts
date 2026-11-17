@@ -8,7 +8,7 @@ import type { LabStatus } from "@/lib/lab/types"
 import { siteConfig } from "@/lib/site"
 
 /**
- * The site as plain text, for `curl itsashik.dev` (proxy.ts sends command-line clients
+ * The site as plain text, for `curl -L itsashik.dev` (proxy.ts sends command-line clients
  * here instead of HTML). 80 columns, no colour codes (they'd end up in files and pipes), and
  * every link written as a command you can paste.
  */
@@ -17,7 +17,11 @@ export const WIDTH = 80
 
 /** The short, curl-able host ("itsashik.dev"), which answers command-line clients itself. */
 export const HOST = new URL(siteConfig.url).hostname.replace(/^www\./, "")
-export const at = (path: string) => `${HOST}${path}`
+/**
+ * A copyable address on the bare domain, over HTTPS: it answers curl itself, but plain
+ * `curl itsashik.dev` starts on http://, which Vercel always redirects to https (hence -L there).
+ */
+export const at = (path: string) => `https://${HOST}${path}`
 
 /** Word-wraps `text` to `width`, every line prefixed with `indent`. */
 export function wrap(text: string, width = WIDTH, indent = ""): string {

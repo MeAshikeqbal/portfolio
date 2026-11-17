@@ -6,8 +6,8 @@ import { formatDate } from "@/lib/format"
 import { fingerprintGroups } from "@/lib/pgp"
 import { siteConfig } from "@/lib/site"
 
-// The bare domain: short enough for the panel, and it answers curl itself (no -L needed).
-const HOST = new URL(siteConfig.url).hostname.replace(/^www\./, "")
+// The bare domain over HTTPS answers curl itself, so no -L; short enough for the panel.
+const ORIGIN = `https://${new URL(siteConfig.url).hostname.replace(/^www\./, "")}`
 const LINK =
   "inline-flex items-center gap-1.5 text-muted-foreground transition-colors hover:text-foreground"
 
@@ -23,8 +23,8 @@ export function PostSource({ slug, signedAt }: { slug: string; signedAt: string 
   // The long key ID: the fingerprint's last four groups, as gpg prints it.
   const keyId = fingerprintGroups(siteConfig.pgpFingerprint).slice(-4).join(" ")
   const verify = [
-    `curl -s ${HOST}/pgp.asc | gpg --import`,
-    `curl -s -O ${HOST}/post/${slug}.md -O ${HOST}/post/${slug}.md.asc`,
+    `curl -s ${ORIGIN}/pgp.asc | gpg --import`,
+    `curl -s -O ${ORIGIN}/post/${slug}.md -O ${ORIGIN}/post/${slug}.md.asc`,
     `gpg --verify ${slug}.md.asc ${slug}.md`,
   ].join("\n")
 

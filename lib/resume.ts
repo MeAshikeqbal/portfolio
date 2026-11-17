@@ -6,7 +6,7 @@ import { SKILL_GROUPS } from "@/lib/skills"
 /**
  * The résumé, generated from the site's own content (experience, education, projects, skills,
  * writing), so it's never older than the site. One shape (`resumeData`) feeds both formats:
- * /resume.pdf (lib/resume-pdf.tsx) and /resume.md, which `curl itsashik.dev/resume` prints.
+ * /resume.pdf (lib/resume-pdf.tsx) and /resume.md, which `curl -L itsashik.dev/resume` prints.
  */
 export interface ResumeContent {
   experiences: readonly Experience[]
