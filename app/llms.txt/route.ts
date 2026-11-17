@@ -3,6 +3,8 @@ import { llmsText } from "@/lib/llms"
 
 // Prerendered; refreshed by `<SanityLive />` tag revalidation and the Sanity webhook.
 export const dynamic = "force-static"
+// Refreshed with the content, and at least hourly.
+export const revalidate = 3600
 
 /** llmstxt.org: the site, and where its plain-text copies are (lib/llms.ts). */
 export async function GET() {

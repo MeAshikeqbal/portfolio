@@ -2,7 +2,7 @@ import "server-only"
 
 import type { Locale } from "@/i18n/locales"
 import { postToMarkdown, signatureFor } from "@/lib/post-markdown"
-import { resumeMarkdown } from "@/lib/resume"
+import { resumeMarkdown, type ResumeContent } from "@/lib/resume"
 import { siteConfig } from "@/lib/site"
 import { dataset, projectId } from "@/sanity/env"
 import { sanityFetch } from "@/sanity/lib/live"
@@ -192,8 +192,8 @@ export async function getNow(lang: Locale) {
   return data
 }
 
-/** The résumé as Markdown, from experience, education, skills, projects and posts (English). */
-export async function getResumeMarkdown(): Promise<string> {
+/** What the generated résumé is built from (English). */
+export async function getResumeContent(): Promise<ResumeContent> {
   const [experiences, education, skills, projects, posts] = await Promise.all([
     getExperiences("en"),
     getEducation("en"),
@@ -201,5 +201,10 @@ export async function getResumeMarkdown(): Promise<string> {
     getProjects("en"),
     getPosts("en"),
   ])
-  return resumeMarkdown({ experiences, education, skills, projects, posts }, new Date())
+  return { experiences, education, skills, projects, posts }
+}
+
+/** The résumé as Markdown, from experience, education, skills, projects and posts. */
+export async function getResumeMarkdown(): Promise<string> {
+  return resumeMarkdown(await getResumeContent(), new Date())
 }

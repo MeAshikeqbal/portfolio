@@ -174,7 +174,10 @@ tests/unit, tests/e2e
   anything asking for HTML are untouched. `/llms.txt` (llmstxt.org) and `/llms-full.txt` (every
   post's Markdown) are for tools that read sites on someone's behalf. `/resume.md` is a résumé
   generated from the Studio's experience, education, projects, skills and posts
-  (`lib/resume.ts`); `/resume.pdf` stays the PDF uploaded in the Studio.
+  (`lib/resume.ts`), and so is `/resume.pdf` (`lib/resume-pdf.tsx`, Geist, A4, refreshed with
+  the content and at least hourly). The PDF uploaded in the Studio's *CV* document is only a
+  fallback if drawing ever fails. Fill in each job's description in the Studio: the résumé
+  prints exactly what's there.
 - **`/now`** is a singleton under *Personal Info*. It stays a 404, and isn't linked from the
   footer, ⌘K palette or sitemap, until it has published content. It turns its date pill amber
   once it hasn't been edited for `siteConfig.nowStaleAfterDays`.

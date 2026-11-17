@@ -4,10 +4,9 @@ import { siteConfig } from "@/lib/site"
 import { SKILL_GROUPS } from "@/lib/skills"
 
 /**
- * The résumé as Markdown, generated from the site's own content (experience, education,
- * projects, skills, writing), so it's never older than the site: /resume.md, and what
- * `curl -L itsashik.dev/resume` prints. /resume.pdf stays the designed PDF uploaded in the
- * Studio.
+ * The résumé, generated from the site's own content (experience, education, projects, skills,
+ * writing), so it's never older than the site. One shape (`resumeData`) feeds both formats:
+ * /resume.pdf (lib/resume-pdf.tsx) and /resume.md, which `curl -L itsashik.dev/resume` prints.
  */
 export interface ResumeContent {
   experiences: readonly Experience[]
@@ -17,95 +16,132 @@ export interface ResumeContent {
   posts: readonly PostCard[]
 }
 
+export interface ResumeEntry {
+  title: string
+  org: string
+  period: string
+  description: string
+}
+
+export interface ResumeData {
+  name: string
+  role: string
+  tagline: string
+  links: { label: string; url: string }[]
+  experience: ResumeEntry[]
+  education: ResumeEntry[]
+  projects: {
+    title: string
+    status: string | null
+    description: string
+    tech: string[]
+    url: string | null
+  }[]
+  skills: { label: string; names: string[] }[]
+  writing: { title: string; url: string; date: string | null }[]
+  /** "2026-11-17" */
+  generatedOn: string
+}
+
 const clean = (text: string | null | undefined) => text?.replace(/\s+/g, " ").trim() ?? ""
-const bare = (url: string) => url.replace(/^https?:\/\/(www\.)?/, "")
+export const bareUrl = (url: string) => url.replace(/^https?:\/\/(www\.)?/, "")
+
+export function resumeData(content: ResumeContent, generatedOn: Date): ResumeData {
+  const named = content.skills.filter((s) => s.name)
+  return {
+    name: siteConfig.name,
+    role: siteConfig.role,
+    tagline: siteConfig.tagline,
+    links: [
+      { label: "Site", url: siteConfig.url },
+      ...siteConfig.socialLinks
+        .filter((l) => l.id !== "twitter")
+        .map((l) => ({ label: l.label, url: l.href })),
+    ],
+    experience: content.experiences.flatMap((year) =>
+      (year.works ?? []).map((work) => ({
+        title: clean(work.name),
+        org: clean(work.company),
+        period: clean(year.year),
+        description: clean(work.desc),
+      })),
+    ),
+    education: content.education.map((school) => ({
+      title: clean(school.degree),
+      org: clean(school.school),
+      period: clean(school.year),
+      description: clean(school.desc),
+    })),
+    projects: byActivity([...content.projects])
+      .filter((p) => p.status !== "archived")
+      .map((p) => ({
+        title: clean(p.title),
+        status: p.status,
+        description: clean(p.description),
+        tech: (p.tech ?? []).slice(0, 5),
+        url: p.slug ? `${siteConfig.url}/projects/${p.slug}` : null,
+      })),
+    skills: SKILL_GROUPS.map((group) => ({
+      label: group.label,
+      names: named
+        .filter((s) => s.category && group.categories.includes(s.category))
+        .map((s) => s.name!),
+    })).filter((group) => group.names.length > 0),
+    writing: content.posts
+      .filter((p) => p.slug)
+      .slice(0, 3)
+      .map((p) => ({
+        title: clean(p.title),
+        url: `${siteConfig.url}/post/${p.slug}`,
+        date: p.publishedAt ? p.publishedAt.slice(0, 7) : null,
+      })),
+    generatedOn: generatedOn.toISOString().slice(0, 10),
+  }
+}
+
+const heading = (entry: ResumeEntry) =>
+  `### ${[entry.title, entry.org].filter(Boolean).join(", ")}${entry.period ? ` (${entry.period})` : ""}`
 
 export function resumeMarkdown(content: ResumeContent, generatedOn: Date): string {
-  const out: string[] = []
-  out.push(`# ${siteConfig.name}`)
-  out.push(
-    [
-      siteConfig.role,
-      bare(siteConfig.url),
-      ...siteConfig.socialLinks.filter((l) => l.id !== "twitter").map((l) => bare(l.href)),
-    ].join(" · "),
-  )
-  out.push(siteConfig.tagline)
-
-  const jobs = content.experiences.flatMap((year) =>
-    (year.works ?? []).map((work) => ({ year: clean(year.year), ...work })),
-  )
-  if (jobs.length > 0) {
-    out.push("## Experience")
-    for (const job of jobs) {
-      const role = clean(job.name)
-      const company = clean(job.company)
-      out.push(
-        [
-          `### ${[role, company].filter(Boolean).join(", ")}${job.year ? ` (${job.year})` : ""}`,
-          clean(job.desc),
-        ]
-          .filter(Boolean)
-          .join("\n\n"),
-      )
+  const data = resumeData(content, generatedOn)
+  const out: string[] = [
+    `# ${data.name}`,
+    [data.role, ...data.links.map((l) => bareUrl(l.url))].join(" · "),
+    data.tagline,
+  ]
+  const entries = (title: string, list: ResumeEntry[]) => {
+    if (list.length === 0) return
+    out.push(`## ${title}`)
+    for (const entry of list) {
+      out.push([heading(entry), entry.description].filter(Boolean).join("\n\n"))
     }
   }
-
-  if (content.education.length > 0) {
-    out.push("## Education")
-    for (const school of content.education) {
-      out.push(
-        [
-          `### ${[clean(school.degree), clean(school.school)].filter(Boolean).join(", ")}${school.year ? ` (${clean(school.year)})` : ""}`,
-          clean(school.desc),
-        ]
-          .filter(Boolean)
-          .join("\n\n"),
-      )
-    }
-  }
-
-  const projects = byActivity([...content.projects]).filter((p) => p.status !== "archived")
-  if (projects.length > 0) {
+  entries("Experience", data.experience)
+  entries("Education", data.education)
+  if (data.projects.length > 0) {
     out.push("## Projects")
     out.push(
-      projects
-        .map((project) => {
-          const link = project.slug ? ` ${siteConfig.url}/projects/${project.slug}` : ""
-          const tech = (project.tech ?? []).slice(0, 5).join(", ")
-          return `- **${clean(project.title)}**${project.status ? ` (${project.status})` : ""}: ${clean(project.description)}${tech ? ` _${tech}._` : ""}${link}`
-        })
-        .join("\n"),
-    )
-  }
-
-  const named = content.skills.filter((s) => s.name)
-  const groups = SKILL_GROUPS.map((group) => ({
-    label: group.label,
-    names: named
-      .filter((s) => s.category && group.categories.includes(s.category))
-      .map((s) => s.name!),
-  })).filter((group) => group.names.length > 0)
-  if (groups.length > 0) {
-    out.push("## Skills")
-    out.push(groups.map((group) => `- **${group.label}:** ${group.names.join(", ")}`).join("\n"))
-  }
-
-  const posts = content.posts.filter((p) => p.slug).slice(0, 3)
-  if (posts.length > 0) {
-    out.push("## Writing")
-    out.push(
-      posts
+      data.projects
         .map(
-          (post) =>
-            `- [${clean(post.title)}](${siteConfig.url}/post/${post.slug})${post.publishedAt ? ` (${post.publishedAt.slice(0, 7)})` : ""}`,
+          (p) =>
+            `- **${p.title}**${p.status ? ` (${p.status})` : ""}: ${p.description}` +
+            `${p.tech.length ? ` _${p.tech.join(", ")}._` : ""}${p.url ? ` ${p.url}` : ""}`,
         )
         .join("\n"),
     )
   }
-
+  if (data.skills.length > 0) {
+    out.push("## Skills")
+    out.push(data.skills.map((g) => `- **${g.label}:** ${g.names.join(", ")}`).join("\n"))
+  }
+  if (data.writing.length > 0) {
+    out.push("## Writing")
+    out.push(
+      data.writing.map((w) => `- [${w.title}](${w.url})${w.date ? ` (${w.date})` : ""}`).join("\n"),
+    )
+  }
   out.push(
-    `---\n\nGenerated from ${bare(siteConfig.url)} on ${generatedOn.toISOString().slice(0, 10)}. ` +
+    `---\n\nGenerated from ${bareUrl(siteConfig.url)} on ${data.generatedOn}. ` +
       `PDF: ${siteConfig.url}/resume.pdf`,
   )
   return `${out.join("\n\n")}\n`
