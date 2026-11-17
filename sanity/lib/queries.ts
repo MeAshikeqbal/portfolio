@@ -286,6 +286,24 @@ export const HOMECAVE_RECORD_QUERY = defineQuery(`{
   }
 }`)
 
+/**
+ * What the monthly lab report (app/api/lab-report) is drafted from, besides the lab's own
+ * record: the month's changelog, incident write-ups, the author and the Homelab category to
+ * file it under, and whether this month's report already exists (published or as a draft).
+ * Read with the raw perspective, so drafts are visible.
+ */
+export const LAB_REPORT_QUERY = defineQuery(`{
+  "changes": *[_type == "labChange" && ${published} && defined(title) && date >= $from && date <= $to] | order(date asc) {
+    date, title, note, category
+  },
+  "writeups": *[_type == "post" && ${published} && defined(incident) && defined(slug.current)] {
+    title, "slug": slug.current, incident
+  },
+  "author": *[_type == "author" && ${published} && name == $author][0]._id,
+  "category": *[_type == "category" && ${published} && title == "Homelab"][0]._id,
+  "existing": *[_id == $id || _id == "drafts." + $id][0]._id
+}`)
+
 export const NOW_QUERY = defineQuery(`
   *[_type == "now" && _id == "now"][0] {
     _updatedAt,

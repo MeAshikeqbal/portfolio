@@ -1,21 +1,11 @@
-import { timingSafeEqual } from "crypto"
 import { revalidatePages } from "@/lib/revalidate"
 import { type NextRequest, NextResponse } from "next/server"
+import { isCronAuthorized } from "@/lib/cron"
 import { syncProjects } from "@/lib/github-sync"
 import { GITHUB_PROJECTS_QUERY } from "@/sanity/lib/queries"
 import { writeClient } from "@/sanity/lib/write-client"
 
 export const maxDuration = 60
-
-function isAuthorized(req: NextRequest): boolean {
-  if (process.env.NODE_ENV === "development") return true
-  const secret = process.env.CRON_SECRET
-  const header = req.headers.get("authorization")
-  if (!secret || !header) return false
-  const expected = Buffer.from(`Bearer ${secret}`)
-  const received = Buffer.from(header)
-  return expected.length === received.length && timingSafeEqual(expected, received)
-}
 
 /**
  * Syncs GitHub stats and READMEs onto every project with a repo URL. New repositories are
@@ -24,7 +14,7 @@ function isAuthorized(req: NextRequest): boolean {
  * Called daily by Vercel Cron (GET, see vercel.json) with `Authorization: Bearer $CRON_SECRET`.
  */
 async function sync(req: NextRequest) {
-  if (!isAuthorized(req)) {
+  if (!isCronAuthorized(req)) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 })
   }
 

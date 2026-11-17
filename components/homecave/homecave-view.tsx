@@ -17,6 +17,7 @@ import { useTranslations } from "next-intl"
 import { cn } from "@/lib/utils"
 import { LabDashboard, type NodeSpec } from "./lab-dashboard"
 import { LabRecord } from "./lab-record"
+import { LabTopology } from "./lab-topology"
 
 /** Sections about the lab itself (Self-hosted, Network & access); the rest is the desk setup. */
 const isLabSection = (title: string | null | undefined) => /self-hosted|network/i.test(title ?? "")
@@ -75,6 +76,19 @@ export function HomecaveView({
           </p>
         </Container>
       </Section>
+
+      {lab && lab.nodes.length > 0 && (
+        <Section className="border-t">
+          <Container>
+            <SectionHeader title={t("topologyTitle")} description={t("topologyDescription")} />
+            <LabTopology
+              initial={lab}
+              renderedAt={renderedAt.toISOString()}
+              order={specs.map((s) => s.name)}
+            />
+          </Container>
+        </Section>
+      )}
 
       {(record || changes.length > 0) && (
         <Section className="border-t">

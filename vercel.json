@@ -4,6 +4,10 @@
     {
       "path": "/api/sync-github-data",
       "schedule": "0 3 * * *"
+    },
+    {
+      "path": "/api/lab-report",
+      "schedule": "0 6 1 * *"
     }
   ]
 }

@@ -23,7 +23,12 @@
     "uptimeLegend": "{level, select, up {कोई डाउनटाइम नहीं} partial {कुछ डाउनटाइम} down {अधिकतर ऑफ़लाइन} other {कोई डेटा नहीं}}",
     "uptimeDay": "{date}: {level, select, up {कोई डाउनटाइम नहीं} partial {कुछ डाउनटाइम, {pct} अपटाइम} down {अधिकतर ऑफ़लाइन, {pct} अपटाइम} other {कोई डेटा नहीं}}",
     "incident": "{kind, select, node {{state, select, nodata {{name} से कोई डेटा नहीं} other {{name} बंद}}} svc {{name} बंद} wan {इंटरनेट बंद} backup {{state, select, failed {बैकअप राउंड विफल} other {चेतावनियों के साथ बैकअप राउंड}}} other {{name}}}",
-    "recordDescription": "लैब हर रुकावट को होते ही दर्ज करती है, साथ में पिछले 90 दिनों का अपटाइम भी।"
+    "recordDescription": "लैब हर रुकावट को होते ही दर्ज करती है, साथ में पिछले 90 दिनों का अपटाइम भी।",
+    "topologyLabel": "लैब टोपोलॉजी",
+    "topologyEdge": "पब्लिक एज",
+    "topologyRole": "{role, select, edge {एज} dns {dns} gpu {gpu} backups {बैकअप} other {अन्य}}",
+    "topologyRtt": "{ms} ms",
+    "topologyBackupRound": "पिछला राउंड {status, select, ok {ठीक} warnings {चेतावनियों के साथ} other {विफल}}"
   },
   "home": {
     "resume": "रेज़्यूमे",

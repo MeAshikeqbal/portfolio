@@ -155,6 +155,14 @@ tests/unit, tests/e2e
     changelog*). A post's **Writes up a lab incident** date (Meta tab) links the matching
     incident to it. Optional phone alerts via ntfy (`NTFY_TOPIC`) and healthchecks.io dead-man
     pings are described in `scripts/lab-heartbeat/README.md`.
+  - **Topology** (below the dashboard): the lab top to bottom, live from the same public
+    status: the internet line, the public edge and DNS filter on the machines that run them,
+    each machine with its roles, services and pools, and the off-site backups.
+  - **Monthly lab report**: on the 1st at 06:00 UTC, Vercel Cron calls `/api/lab-report`,
+    which drafts a post about the month before (uptime, incidents with their write-ups, the
+    changelog) as `drafts.lab-report-YYYY-MM`, filed under *Homelab*, and pushes an ntfy note.
+    It never publishes or overwrites; edit it in the Studio and publish. `?month=2026-11`
+    redoes a finished month, `?dry=1` returns it without writing (`next dev` needs no secret).
   - **Snapshot** (button by the verdict) saves `/homecave/snapshot`, a PNG of the lab right
     now, rendered with `next/og` from the same public status and CDN-cached for 30s.
   - Env vars: `LAB_HEARTBEAT_SECRET`, plus Upstash (`UPSTASH_REDIS_REST_*` or `KV_REST_API_*`).

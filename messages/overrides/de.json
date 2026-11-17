@@ -17,7 +17,13 @@
     "writeup": "Zum Bericht",
     "logMeta": "letzte 30 Tage",
     "changeCategory": "{category, select, hardware {Hardware} storage {Speicher} network {Netzwerk} services {Dienste} security {Sicherheit} backups {Backups} other {andere}}",
-    "incident": "{kind, select, node {{state, select, nodata {Keine Daten von {name}} other {{name} ausgefallen}}} svc {{name} ausgefallen} wan {Internet ausgefallen} backup {{state, select, failed {Backup-Runde fehlgeschlagen} other {Backup-Runde mit Warnungen}}} other {{name}}}"
+    "incident": "{kind, select, node {{state, select, nodata {Keine Daten von {name}} other {{name} ausgefallen}}} svc {{name} ausgefallen} wan {Internet ausgefallen} backup {{state, select, failed {Backup-Runde fehlgeschlagen} other {Backup-Runde mit Warnungen}}} other {{name}}}",
+    "topologyEdge": "öffentlicher Edge-Proxy",
+    "topologyRole": "{role, select, edge {Edge} dns {DNS} gpu {GPU} backups {Backups} other {andere}}",
+    "topologyDns": "DNS-Filter",
+    "topologyPools": "Speicherpools auf {name}",
+    "topologyQueries": "{count, plural, one {# Anfrage} other {# Anfragen}}",
+    "topologyBackupRound": "letzter Lauf {status, select, ok {ok} warnings {mit Warnungen} other {fehlgeschlagen}}"
   },
   "home": {
     "resume": "Lebenslauf"

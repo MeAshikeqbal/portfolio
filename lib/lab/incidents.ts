@@ -153,11 +153,13 @@ export function buildIncidents(
   events: LabEvent[],
   states: Record<string, EntityState>,
   nowS: number,
+  /** How far back events count (the monthly report reaches back a whole month). */
+  keepS: number = EVENTS_KEEP_S,
 ): LabIncident[] {
   const out: LabIncident[] = []
   for (const e of events) {
     const entity = parseEntityId(e.id)
-    if (!entity || nowS - e.t > EVENTS_KEEP_S) continue
+    if (!entity || nowS - e.t > keepS) continue
     if (e.to === "nodata") {
       out.push({ ...entity, state: "nodata", start: e.t, end: e.t + e.d })
     } else if (isBadState(entity.kind, e.from)) {

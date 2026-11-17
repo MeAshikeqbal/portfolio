@@ -17,7 +17,15 @@
     "uptimeLegend": "{level, select, up {walang downtime} partial {ilang downtime} down {halos offline} other {walang datos}}",
     "incident": "{kind, select, node {{state, select, nodata {Walang datos mula sa {name}} other {Down ang {name}}}} svc {Down ang {name}} wan {Down ang Internet} backup {{state, select, failed {Nabigo ang backup round} other {Backup round na may mga babala}}} other {{name}}}",
     "recordDescription": "Itinatala ng lab ang bawat outage habang nangyayari ito, kasama ang uptime sa nakalipas na 90 araw.",
-    "changeCategory": "{category, select, hardware {hardware} storage {imbakan} network {network} services {mga serbisyo} security {seguridad} backups {mga backup} other {iba pa}}"
+    "changeCategory": "{category, select, hardware {hardware} storage {imbakan} network {network} services {mga serbisyo} security {seguridad} backups {mga backup} other {iba pa}}",
+    "topologyLabel": "Topolohiya ng lab",
+    "topologyEdge": "pampublikong edge",
+    "topologyDns": "dns filter",
+    "topologyRole": "{role, select, edge {edge} dns {dns} gpu {gpu} backups {mga backup} other {iba pa}}",
+    "topologyMachines": "{count, plural, one {# makina} other {# makina}}",
+    "topologyBlocked": "{pct} hinarangan",
+    "topologyQueries": "{count, plural, one {# query} other {# query}}",
+    "topologyBackupRound": "huling round {status, select, ok {ok} warnings {may mga babala} other {nabigo}}"
   },
   "writing": {
     "log": "talaan"

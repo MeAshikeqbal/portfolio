@@ -14,7 +14,14 @@
     "nodeDown": "caído",
     "uptimeLegend": "{level, select, up {sin tiempo de inactividad} partial {algo de inactividad} down {mayormente desconectado} other {no hay datos}}",
     "writeup": "Leer el análisis",
-    "incident": "{kind, select, node {{state, select, nodata {Sin datos de {name}} other {{name} caído}}} svc {{name} caído} wan {Internet caído} backup {{state, select, failed {Falló la ronda de copias de seguridad} other {Ronda de copias de seguridad con avisos}}} other {{name}}}"
+    "incident": "{kind, select, node {{state, select, nodata {Sin datos de {name}} other {{name} caído}}} svc {{name} caído} wan {Internet caído} backup {{state, select, failed {Falló la ronda de copias de seguridad} other {Ronda de copias de seguridad con avisos}}} other {{name}}}",
+    "topologyLabel": "Topología del laboratorio",
+    "topologyEdge": "entrada pública",
+    "topologyRole": "{role, select, edge {entrada} dns {dns} gpu {gpu} backups {copias} other {otro}}",
+    "topologyPools": "Pools de almacenamiento en {name}",
+    "topologyMachines": "{count, plural, one {# máquina} many {# máquinas} other {# máquinas}}",
+    "topologyQueries": "{count, plural, one {# consulta} many {# consultas} other {# consultas}}",
+    "topologyBackupRound": "última ronda {status, select, ok {ok} warnings {con advertencias} other {fallida}}"
   },
   "home": {
     "resume": "Currículum"
