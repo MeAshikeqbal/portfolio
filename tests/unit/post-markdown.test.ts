@@ -7,7 +7,7 @@ import {
   sanityImageUrl,
   signatureFor,
 } from "@/lib/post-markdown"
-import { POST_SOURCE_QUERY } from "@/sanity/lib/queries"
+import { POST_SOURCE_QUERY, POST_SOURCES_QUERY } from "@/sanity/lib/queries"
 
 const project = { projectId: "abc123", dataset: "production" }
 
@@ -210,6 +210,7 @@ describe("POST_SOURCE_QUERY", () => {
   it("projects exactly POST_SOURCE_PROJECTION's fields", () => {
     const squash = (s: string) => s.replace(/\s+/g, " ").trim()
     expect(squash(POST_SOURCE_QUERY)).toContain(squash(POST_SOURCE_PROJECTION))
+    expect(squash(POST_SOURCES_QUERY)).toContain(squash(POST_SOURCE_PROJECTION))
   })
 })
 

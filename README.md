@@ -168,6 +168,16 @@ tests/unit, tests/e2e
   Sanity (`postSignature`, written by the script, hidden from the Studio). The key is also
   published by WKD (`gpg --locate-keys hello@itsashik.dev`), which needs the
   `openpgpkey.itsashik.dev` CNAME (DNS only) pointing at this Vercel project.
+- **Plain text.** `curl -L itsashik.dev` (also wget, HTTPie, xh) gets the site as 80-column
+  text: home, `/post`, `/post/<slug>` (the Markdown), `/projects[/<slug>]`, `/homecave` (live),
+  `/now` and `/resume`. `proxy.ts` rewrites those clients to `app/api/text`; browsers and
+  anything asking for HTML are untouched. `/llms.txt` (llmstxt.org) and `/llms-full.txt` (every
+  post's Markdown) are for tools that read sites on someone's behalf. `/resume.md` is a résumé
+  generated from the Studio's experience, education, projects, skills and posts
+  (`lib/resume.ts`), and so is `/resume.pdf` (`lib/resume-pdf.tsx`, Geist, A4, refreshed with
+  the content and at least hourly). The PDF uploaded in the Studio's *CV* document is only a
+  fallback if drawing ever fails. Fill in each job's description in the Studio: the résumé
+  prints exactly what's there.
 - **`/now`** is a singleton under *Personal Info*. It stays a 404, and isn't linked from the
   footer, ⌘K palette or sitemap, until it has published content. It turns its date pill amber
   once it hasn't been edited for `siteConfig.nowStaleAfterDays`.

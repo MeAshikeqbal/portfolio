@@ -4,34 +4,9 @@ import { SectionHeader } from "@/components/dashboard/section-header"
 import { SkillIcon } from "@/components/skill-icon"
 import { getSkills, type Skill } from "@/lib/api"
 import { isMonochromeIcon } from "@/lib/icons"
+import { SKILL_GROUPS as GROUPS, type SkillCategory as Category } from "@/lib/skills"
 import { getTranslations } from "next-intl/server"
 import { cn } from "@/lib/utils"
-
-type Category = NonNullable<Skill["category"]>
-
-/** Display groups over the Studio's finer categories (sanity/schemaTypes/skillType.tsx). */
-const GROUPS: {
-  title: "frontend" | "backend" | "infrastructure" | "tools"
-  categories: Category[]
-}[] = [
-  { title: "frontend", categories: ["languages", "frontend"] },
-  { title: "backend", categories: ["backend", "api-development", "database", "testing"] },
-  {
-    title: "infrastructure",
-    categories: [
-      "linux-infrastructure",
-      "self-hosting",
-      "devops",
-      "cicd",
-      "networking",
-      "operating-systems",
-      "monitoring",
-      "cloud",
-      "security",
-    ],
-  },
-  { title: "tools", categories: ["ai-automation", "tools"] },
-]
 
 /** Skills shown per group before "show all". */
 const VISIBLE = 8

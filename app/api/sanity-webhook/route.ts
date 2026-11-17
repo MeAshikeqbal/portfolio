@@ -27,6 +27,9 @@ function isAuthorized(header: string | null, secret: string): boolean {
 // Translating a long post into six languages takes a few seconds; it runs after the response.
 export const maxDuration = 60
 
+/** Types the résumé and llms files are built from. */
+const GENERATED_FROM = new Set(["post", "project", "experiences", "education", "skills", "now"])
+
 /** Pages showing a document type, in every language. */
 function revalidateFor(type: string | undefined) {
   switch (type) {
@@ -53,6 +56,12 @@ function revalidateFor(type: string | undefined) {
       break
     default:
       revalidatePath("/", "layout")
+  }
+  // Files generated from the content: the résumé and the plain-text copies.
+  if (type && GENERATED_FROM.has(type)) {
+    for (const path of ["/resume.pdf", "/resume.md", "/llms.txt", "/llms-full.txt"]) {
+      revalidatePath(path)
+    }
   }
 }
 

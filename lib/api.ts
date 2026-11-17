@@ -2,6 +2,7 @@ import "server-only"
 
 import type { Locale } from "@/i18n/locales"
 import { postToMarkdown, signatureFor } from "@/lib/post-markdown"
+import { resumeMarkdown, type ResumeContent } from "@/lib/resume"
 import { siteConfig } from "@/lib/site"
 import { dataset, projectId } from "@/sanity/env"
 import { sanityFetch } from "@/sanity/lib/live"
@@ -17,6 +18,7 @@ import {
   POST_QUERY,
   POST_SLUGS_QUERY,
   POST_SOURCE_QUERY,
+  POST_SOURCES_QUERY,
   POSTS_QUERY,
   PROJECT_QUERY,
   PROJECT_SLUGS_QUERY,
@@ -90,6 +92,12 @@ export async function getPostSource(slug: string): Promise<PostSourceFile | null
   if (!data) return null
   const markdown = postToMarkdown(data, { projectId, dataset })
   return { markdown, signature: signatureFor(markdown, data.signature, siteConfig.pgpFingerprint) }
+}
+
+/** Every listed post's English original as Markdown, newest first (/llms-full.txt). */
+export async function getPostSources(): Promise<string[]> {
+  const { data } = await sanityFetch({ query: POST_SOURCES_QUERY, stega: false })
+  return data.map((post) => postToMarkdown(post, { projectId, dataset }))
 }
 
 /**
@@ -182,4 +190,21 @@ export async function getHomecaveRecord(lang: Locale) {
 export async function getNow(lang: Locale) {
   const { data } = await sanityFetch({ query: NOW_QUERY, params: { lang }, stega: false })
   return data
+}
+
+/** What the generated résumé is built from (English). */
+export async function getResumeContent(): Promise<ResumeContent> {
+  const [experiences, education, skills, projects, posts] = await Promise.all([
+    getExperiences("en"),
+    getEducation("en"),
+    getSkills(),
+    getProjects("en"),
+    getPosts("en"),
+  ])
+  return { experiences, education, skills, projects, posts }
+}
+
+/** The résumé as Markdown, from experience, education, skills, projects and posts. */
+export async function getResumeMarkdown(): Promise<string> {
+  return resumeMarkdown(await getResumeContent(), new Date())
 }

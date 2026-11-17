@@ -93,7 +93,13 @@ const nextConfig: NextConfig = {
   async redirects() {
     // Short, shareable alias for the CV served at /resume.pdf.
     return [
-      { source: "/resume", destination: "/resume.pdf", permanent: false },
+      // Command-line clients get the text résumé there instead (proxy.ts).
+      {
+        source: "/resume",
+        destination: "/resume.pdf",
+        permanent: false,
+        missing: [{ type: "header", key: "user-agent", value: "(?:curl|[Ww]get|HTTPie|xh)/.*" }],
+      },
       // RFC 9116 allows the old location as a redirect.
       { source: "/security.txt", destination: "/.well-known/security.txt", permanent: true },
       {
