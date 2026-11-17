@@ -74,7 +74,9 @@ export const POST_QUERY = defineQuery(`
     publishedAt,
     _updatedAt,
     "body": coalesce(${tr}.body, body),
-    "excerpt": coalesce(${tr}.excerpt, excerpt),
+    // Only a post's own excerpt leads the page; a translation also stores the derived one
+    // (for lists), which English never shows here.
+    "excerpt": select(defined(excerpt) => coalesce(${tr}.excerpt, excerpt), null),
     "seo": coalesce(${tr}.seo, seo),
     archived,
     ${languages},
