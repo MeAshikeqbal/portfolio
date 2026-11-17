@@ -260,7 +260,7 @@ export function homecaveText(
     .filter((row) => row.kind !== "svc")
     .map((row) => [
       `  ${row.kind === "wan" ? "Internet" : row.name}`,
-      row.pct === null ? "under a day of samples" : `${row.pct}%`,
+      row.pct === null ? "no samples yet" : `${row.pct}%`,
     ])
   const incidents = (record?.incidents ?? [])
     .slice(0, 8)

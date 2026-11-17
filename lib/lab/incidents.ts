@@ -202,7 +202,7 @@ export interface UptimeRow {
   name: string
   /** One per day in `LabReliability.days`, null where nothing was sampled. */
   days: (UptimeDay | null)[]
-  /** Share of all samples that were up, over the days with data; null with under a day. */
+  /** Share of all samples that were up, over the days with data; null with no samples. */
   pct: number | null
 }
 
@@ -244,8 +244,8 @@ export function buildUptime(rollups: Record<string, string>[], days: string[]): 
       up += day.up
       total += day.total
     }
-    // A day's worth of samples before claiming a percentage.
-    row.pct = total >= SAMPLES_PER_DAY ? Math.floor((up / total) * 1000) / 10 : null
+    // Whatever has been recorded so far; the panel says since when.
+    row.pct = total > 0 ? Math.floor((up / total) * 1000) / 10 : null
   }
   const order = { node: 0, wan: 1, svc: 2 }
   return [...rows.values()].sort(
