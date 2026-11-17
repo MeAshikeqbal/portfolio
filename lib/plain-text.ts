@@ -8,14 +8,14 @@ import type { LabStatus } from "@/lib/lab/types"
 import { siteConfig } from "@/lib/site"
 
 /**
- * The site as plain text, for `curl -L itsashik.dev` (proxy.ts sends command-line clients
+ * The site as plain text, for `curl itsashik.dev` (proxy.ts sends command-line clients
  * here instead of HTML). 80 columns, no colour codes (they'd end up in files and pipes), and
  * every link written as a command you can paste.
  */
 
 export const WIDTH = 80
 
-/** The short, curl-able host ("itsashik.dev"); the apex redirects to www, hence curl -L. */
+/** The short, curl-able host ("itsashik.dev"), which answers command-line clients itself. */
 export const HOST = new URL(siteConfig.url).hostname.replace(/^www\./, "")
 export const at = (path: string) => `${HOST}${path}`
 
@@ -124,7 +124,7 @@ export function postList(posts: readonly TextPost[], { excerpts = false } = {}):
     .map((post) =>
       [
         `${day(post.publishedAt).padEnd(10)}  ${post.title ?? "Untitled"}`,
-        `            curl -sL ${at(`/post/${post.slug}`)}`,
+        `            curl -s ${at(`/post/${post.slug}`)}`,
         ...(excerpts && post.excerpt
           ? [wrap(excerptLine(post.excerpt), WIDTH, "            ")]
           : []),
@@ -150,7 +150,7 @@ export function projectList(projects: readonly TextProject[]): string {
       [
         `${project.title ?? project.slug}${project.status ? `  [${project.status}]` : ""}`,
         ...(project.description ? [wrap(project.description.trim(), WIDTH, "  ")] : []),
-        `  curl -sL ${at(`/projects/${project.slug}`)}`,
+        `  curl -s ${at(`/projects/${project.slug}`)}`,
       ].join("\n"),
     )
     .join("\n\n")
@@ -280,19 +280,19 @@ export function homecaveText(
     uptime.length > 0 && columns(uptime).join("\n"),
     record && rule("log", "30 days"),
     record && (incidents.length > 0 ? columns(incidents).join("\n") : "  Nothing has gone wrong."),
-    `JSON: curl -sL ${at("/api/lab-status")}`,
+    `JSON: curl -s ${at("/api/lab-status")}`,
   )
 }
 
 /** What you can ask for next, as commands. */
 export function commands(): string {
   return columns([
-    [`curl -sL ${at("/post")}`, "all posts"],
-    [`curl -sL ${at("/post/<slug>")}`, "a post, as Markdown"],
-    [`curl -sL ${at("/projects")}`, "projects"],
-    [`curl -sL ${at("/homecave")}`, "the homelab, live"],
-    [`curl -sL ${at("/now")}`, "what I'm doing now"],
-    [`curl -sL ${at("/resume")}`, "résumé"],
-    [`curl -sL ${at("/pgp.asc")} | gpg --import`, "my PGP key"],
+    [`curl -s ${at("/post")}`, "all posts"],
+    [`curl -s ${at("/post/<slug>")}`, "a post, as Markdown"],
+    [`curl -s ${at("/projects")}`, "projects"],
+    [`curl -s ${at("/homecave")}`, "the homelab, live"],
+    [`curl -s ${at("/now")}`, "what I'm doing now"],
+    [`curl -s ${at("/resume")}`, "résumé"],
+    [`curl -s ${at("/pgp.asc")} | gpg --import`, "my PGP key"],
   ]).join("\n")
 }

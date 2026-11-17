@@ -18,7 +18,7 @@ const DEFAULT_LOCALE_IMAGE = new RegExp(`^/${defaultLocale}(/.*)?/(opengraph|twi
  */
 /**
  * Command-line clients (curl, wget, HTTPie, xh) asking for a page get it as plain text from
- * app/api/text: `curl -L itsashik.dev`. Only unprefixed (English) pages that have a text view;
+ * app/api/text: `curl itsashik.dev`. Only unprefixed (English) pages that have a text view;
  * anything asking for HTML gets HTML.
  */
 const COMMAND_LINE = /^(curl|wget|httpie|xh)\//i

@@ -43,7 +43,7 @@ type Params = { params: Promise<{ path?: string[] }> }
 const text = (body: string, status = 200) =>
   new Response(body, { status, headers: { "content-type": "text/plain; charset=utf-8" } })
 
-const notFound = () => text(page("Not found.", `Try: curl -sL ${at("/")}`), 404)
+const notFound = () => text(page("Not found.", `Try: curl -s ${at("/")}`), 404)
 
 async function lab() {
   const [status, uses] = await Promise.all([

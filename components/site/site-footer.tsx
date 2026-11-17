@@ -13,7 +13,7 @@ import { KeyValidity } from "./key-validity"
 import { Link } from "@/i18n/navigation"
 
 const ARMOR = "font-mono text-[0.6875rem] leading-5 text-muted-foreground select-none"
-// The apex redirects to www, hence `-L`; short enough to fit the panel.
+// The bare domain answers curl itself (no `-L` needed); short enough to fit the panel.
 const HOST = new URL(siteConfig.url).hostname.replace(/^www\./, "")
 const LINK = "transition-colors hover:text-foreground"
 
@@ -184,8 +184,8 @@ function SigningKey() {
   const locale = useLocale()
   const groups = fingerprintGroups(pgpKey.fingerprint)
   const verify = [
-    `curl -sL ${HOST}/pgp.asc | gpg --import`,
-    `curl -sL ${HOST}/identity.asc | gpg --verify`,
+    `curl -s ${HOST}/pgp.asc | gpg --import`,
+    `curl -s ${HOST}/identity.asc | gpg --verify`,
   ].join("\n")
 
   return (
