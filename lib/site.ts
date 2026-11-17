@@ -5,7 +5,7 @@
 const socials = {
   github: "https://github.com/MeAshikEqbal",
   linkedin: "https://linkedin.com/in/itsashik",
-  twitter: "https://x.com/me_ashikeqbal",
+  twitter: "https://x.com/itsashik_03",
 } as const
 
 export const siteConfig = {
@@ -14,7 +14,7 @@ export const siteConfig = {
   title: "Ashik Eqbal - Software Engineer",
   description:
     "Writing and projects from Ashik Eqbal, a full-stack engineer who builds for the web, runs a homelab, and writes up what breaks.",
-  twitterHandle: "@me_ashikeqbal",
+  twitterHandle: "@itsashik_03",
   role: "Software engineer",
   tagline: "Building for the web, running my own infrastructure, and writing up what breaks.",
   /**
