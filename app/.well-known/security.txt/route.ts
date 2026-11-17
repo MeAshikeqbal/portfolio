@@ -9,6 +9,8 @@ export const dynamic = "force-static"
  *   curl -sL itsashik.dev/.well-known/security.txt | gpg --verify
  */
 export function GET() {
+  // Until `npm run sign` has run there's nothing to publish: no file beats an unsigned one.
+  if (!signedSecurityTxt) return new Response("Not found\n", { status: 404 })
   return new Response(signedSecurityTxt, {
     headers: { "content-type": "text/plain; charset=utf-8" },
   })
