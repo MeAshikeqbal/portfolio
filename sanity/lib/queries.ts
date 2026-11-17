@@ -47,6 +47,19 @@ const postCard = `
   author->{ name }
 `
 
+/** Every listed post's English original, for /llms-full.txt (fields: POST_SOURCE_PROJECTION). */
+export const POST_SOURCES_QUERY = defineQuery(`
+  *[${listedPost}] | order(publishedAt desc) {
+    _id,
+    title,
+    "slug": slug.current,
+    publishedAt,
+    "author": author->name,
+    excerpt,
+    body
+  }
+`)
+
 export const POSTS_QUERY = defineQuery(`
   *[${listedPost}] | order(publishedAt desc) { ${postCard} }
 `)

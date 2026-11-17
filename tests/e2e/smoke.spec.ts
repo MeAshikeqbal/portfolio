@@ -71,3 +71,33 @@ test.describe("smoke", () => {
     expect(errors).toEqual([])
   })
 })
+
+test.describe("plain text", () => {
+  const curl = { "user-agent": "curl/8.9.1", accept: "*/*" }
+
+  test("curl gets the home page as text; a browser still gets HTML", async ({ request }) => {
+    const text = await request.get("/", { headers: curl })
+    expect(text.headers()["content-type"]).toBe("text/plain; charset=utf-8")
+    expect(await text.text()).toContain("── writing")
+    const html = await request.get("/", { headers: { accept: "text/html" } })
+    expect(html.headers()["content-type"]).toContain("text/html")
+  })
+
+  test("curl gets the text résumé at /resume; browsers keep the PDF redirect", async ({
+    request,
+  }) => {
+    const text = await request.get("/resume", { headers: curl, maxRedirects: 0 })
+    expect(text.status()).toBe(200)
+    expect(await text.text()).toMatch(/^# Ashik Eqbal/)
+    const browser = await request.get("/resume", { maxRedirects: 0 })
+    expect(browser.headers().location).toContain("/resume.pdf")
+  })
+
+  test("llms.txt, llms-full.txt and resume.md are served", async ({ request }) => {
+    const llms = await request.get("/llms.txt")
+    expect(await llms.text()).toMatch(/^# Ashik Eqbal\n\n> /)
+    expect((await request.get("/llms-full.txt")).status()).toBe(200)
+    const resume = await request.get("/resume.md")
+    expect(resume.headers()["content-type"]).toBe("text/markdown; charset=utf-8")
+  })
+})
