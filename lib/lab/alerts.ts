@@ -77,28 +77,39 @@ export async function sendAlerts(
   env: Env = process.env,
   fetchImpl: Fetch = fetch,
 ): Promise<number> {
-  const topic = env.NTFY_TOPIC
-  if (!topic || events.length === 0) return 0
-  const base = (env.NTFY_URL || "https://ntfy.sh").replace(/\/+$/, "")
+  if (!env.NTFY_TOPIC || events.length === 0) return 0
   const alerts = events.map(alertFor).filter((a): a is Alert => a !== null)
   let sent = 0
   for (const alert of alerts) {
-    try {
-      // JSON publishing: titles with any characters, no header encoding.
-      const response = await fetchImpl(base, {
-        method: "POST",
-        headers: {
-          "content-type": "application/json",
-          ...(env.NTFY_TOKEN && { authorization: `Bearer ${env.NTFY_TOKEN}` }),
-        },
-        body: JSON.stringify({ topic, ...alert, click: absoluteUrl("/homecave") }),
-        cache: "no-store",
-        signal: AbortSignal.timeout(5000),
-      })
-      if (response.ok) sent += 1
-    } catch {
-      // Best effort: the incident is logged either way.
-    }
+    if (await sendPush({ ...alert, click: absoluteUrl("/homecave") }, env, fetchImpl)) sent += 1
   }
   return sent
+}
+
+/** One push to the owner's ntfy topic; false when unconfigured or it didn't go. Never throws. */
+export async function sendPush(
+  push: Alert & { click: string },
+  env: Env = process.env,
+  fetchImpl: Fetch = fetch,
+): Promise<boolean> {
+  const topic = env.NTFY_TOPIC
+  if (!topic) return false
+  const base = (env.NTFY_URL || "https://ntfy.sh").replace(/\/+$/, "")
+  try {
+    // JSON publishing: titles with any characters, no header encoding.
+    const response = await fetchImpl(base, {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        ...(env.NTFY_TOKEN && { authorization: `Bearer ${env.NTFY_TOKEN}` }),
+      },
+      body: JSON.stringify({ topic, ...push }),
+      cache: "no-store",
+      signal: AbortSignal.timeout(5000),
+    })
+    return response.ok
+  } catch {
+    // Best effort: whatever it's about is recorded either way.
+    return false
+  }
 }

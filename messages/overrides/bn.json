@@ -13,7 +13,10 @@
     "labSummary": "{up}/{total} চালু",
     "nodeDown": "বন্ধ",
     "uptimeLegend": "{level, select, up {কোন ডাউনটাইম নেই} partial {কিছু ডাউনটাইম} down {বেশিরভাগ অফলাইন} other {কোন ডেটা নেই}}",
-    "incidentPool": "{node}-এ {name}: {state}"
+    "incidentPool": "{node}-এ {name}: {state}",
+    "topologyEdge": "পাবলিক এজ",
+    "topologyRole": "{role, select, edge {এজ} dns {dns} gpu {gpu} backups {ব্যাকআপ} other {অন্যান্য}}",
+    "topologyRtt": "{ms} ms"
   },
   "systemBar": {
     "build": "বিল্ড",

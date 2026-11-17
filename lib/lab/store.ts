@@ -305,6 +305,39 @@ function pairs(raw: unknown): Record<string, string> {
   return out
 }
 
+/** The raw reliability record for some UTC days: current states, recent events, rollups. */
+export interface LabRecordRaw {
+  states: Record<string, EntityState>
+  /** Newest first, up to EVENTS_MAX. */
+  events: LabEvent[]
+  /** One per day, in `days` order. */
+  rollups: Record<string, string>[]
+}
+
+async function readRecord(
+  config: { url: string; token: string },
+  days: string[],
+  fetchImpl: Fetch,
+  revalidate?: number,
+): Promise<LabRecordRaw | null> {
+  const keyList = [STATE_KEY, EVENTS_KEY, ...days.map(dayKeyName)]
+  const raw = (await command(
+    config,
+    ["EVAL", RELIABILITY_SCRIPT, keyList.length, ...keyList, EVENTS_MAX],
+    { fetchImpl, revalidate },
+  )) as unknown[]
+  if (!Array.isArray(raw)) return null
+  const states: Record<string, EntityState> = {}
+  for (const [id, value] of Object.entries(pairs(raw[0]))) {
+    const state = parseState(value)
+    if (state) states[id] = state
+  }
+  const events = (Array.isArray(raw[1]) ? raw[1] : [])
+    .map(parseEvent)
+    .filter((e): e is LabEvent => e !== null)
+  return { states, events, rollups: raw.slice(2).map(pairs) }
+}
+
 /**
  * Incidents (30 days, plus anything still going) and 90 days of uptime bars, in one EVAL.
  * Null when unconfigured or unreachable; empty lists before the first transition or sample.
@@ -318,30 +351,31 @@ export async function readLabReliability(
   if (!config) return null
   const now = options.now ?? new Date()
   const days = lastDays(now, UPTIME_DAYS)
-  const keyList = [STATE_KEY, EVENTS_KEY, ...days.map(dayKeyName)]
   try {
-    const raw = (await command(
-      config,
-      ["EVAL", RELIABILITY_SCRIPT, keyList.length, ...keyList, EVENTS_MAX],
-      { fetchImpl, revalidate: options.revalidate },
-    )) as unknown[]
-    if (!Array.isArray(raw)) return null
-    const states: Record<string, EntityState> = {}
-    for (const [id, value] of Object.entries(pairs(raw[0]))) {
-      const state = parseState(value)
-      if (state) states[id] = state
-    }
-    const events = (Array.isArray(raw[1]) ? raw[1] : [])
-      .map(parseEvent)
-      .filter((e): e is LabEvent => e !== null)
+    const record = await readRecord(config, days, fetchImpl, options.revalidate)
+    if (!record) return null
     return {
-      incidents: buildIncidents(events, states, Math.floor(now.getTime() / 1000)),
+      incidents: buildIncidents(record.events, record.states, Math.floor(now.getTime() / 1000)),
       days,
-      uptime: buildUptime(raw.slice(2).map(pairs), days),
+      uptime: buildUptime(record.rollups, days),
     }
   } catch {
     return null
   }
+}
+
+/**
+ * The raw record for the given UTC days (a month, for the monthly report), uncached. Throws
+ * when Redis can't be reached, so a cron run fails loudly; null when it isn't configured.
+ */
+export async function readLabDays(
+  days: string[],
+  env: Env = process.env,
+  fetchImpl: Fetch = fetch,
+): Promise<LabRecordRaw | null> {
+  const config = redisConfig(env)
+  if (!config) return null
+  return readRecord(config, days, fetchImpl)
 }
 
 /** 15-minute buckets over the last 24h, averaged; availability from the up/down samples. */

@@ -17,7 +17,14 @@
     "uptimeLegend": "{level, select, up {ダウンタイムなし} partial {ダウンタイムあり} down {ほぼオフライン} other {データなし}}",
     "writeup": "記事を読む",
     "changeCategory": "{category, select, hardware {ハードウェア} storage {ストレージ} network {ネットワーク} services {サービス} security {セキュリティ} backups {バックアップ} other {その他}}",
-    "recordDescription": "ラボで起きた障害を発生時にすべて記録し、過去90日間の稼働状況も表示します。"
+    "recordDescription": "ラボで起きた障害を発生時にすべて記録し、過去90日間の稼働状況も表示します。",
+    "topologyRole": "{role, select, edge {エッジ} dns {dns} gpu {gpu} backups {バックアップ} other {その他}}",
+    "topologyOn": "{node}上",
+    "topologyBlocked": "{pct}ブロック",
+    "topologyUsed": "{pct}使用",
+    "topologyBackupRound": "最終実行 {status, select, ok {正常} warnings {警告あり} other {失敗}}",
+    "topologyMachines": "{count, plural, other {#台のマシン}}",
+    "topologyQueries": "{count, plural, other {#件のクエリ}}"
   },
   "home": {
     "resume": "履歴書"
