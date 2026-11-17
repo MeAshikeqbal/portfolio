@@ -92,3 +92,36 @@ test.describe("keys and signatures", () => {
     expect((await request.get("/post/no-such-post.md")).status()).toBe(404)
   })
 })
+
+test.describe("the bare domain", () => {
+  const apex = (path: string, agent: string) => ({
+    path,
+    options: { headers: { host: "itsashik.dev", "user-agent": agent }, maxRedirects: 0 },
+  })
+  const browser = "Mozilla/5.0 (X11; Linux x86_64) Chrome/130"
+
+  test("sends browsers to www, path and query intact", async ({ request }) => {
+    const { path, options } = apex("/post?category=Homelab", browser)
+    const response = await request.get(path, options)
+    expect(response.status()).toBe(308)
+    expect(response.headers().location).toBe("https://www.itsashik.dev/post?category=Homelab")
+  })
+
+  test("answers command-line clients itself", async ({ request }) => {
+    for (const path of ["/", "/pgp.asc", "/resume"]) {
+      const { options } = apex(path, "curl/8.9.1")
+      expect((await request.get(path, options)).status(), path).toBe(200)
+    }
+  })
+
+  test("serves the WKD key directory, but sends security.txt to its canonical www copy", async ({
+    request,
+  }) => {
+    const wkd = apex("/.well-known/openpgpkey/hu/im4cc8qhazwkfsi65a8us1bc5gzk1o4p", browser)
+    expect((await request.get(wkd.path, wkd.options)).status()).toBe(200)
+    const sec = apex("/.well-known/security.txt", "curl/8.9.1")
+    const response = await request.get(sec.path, sec.options)
+    expect(response.status()).toBe(308)
+    expect(response.headers().location).toBe("https://www.itsashik.dev/.well-known/security.txt")
+  })
+})

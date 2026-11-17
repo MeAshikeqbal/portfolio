@@ -50,6 +50,18 @@ const securityHeaders = [
  */
 const wkdHost = `openpgpkey.${new URL(siteConfig.url).hostname.replace(/^www\./, "")}`
 
+/**
+ * The bare domain (itsashik.dev) answers command-line clients itself, so `curl itsashik.dev`
+ * works without -L, and serves WKD's direct layout. Browsers are sent to the canonical www
+ * address, as before. Matches the user agents proxy.ts gives the text view.
+ */
+const apexHost = new URL(siteConfig.url).hostname.replace(/^www\./, "")
+const commandLine = {
+  type: "header",
+  key: "user-agent",
+  value: "(?:curl|[Ww]get|HTTPie|xh)/.*",
+} as const
+
 /** Locale prefixes in URLs: every served locale but English, whose URLs stay unprefixed. */
 const prefixed = locales.filter((locale) => locale !== defaultLocale)
 
@@ -93,13 +105,24 @@ const nextConfig: NextConfig = {
   async redirects() {
     // Short, shareable alias for the CV served at /resume.pdf.
     return [
-      // Command-line clients get the text résumé there instead (proxy.ts).
+      // Bare domain: security.txt's signed Canonical line names the www copy (RFC 9116 says
+      // not to trust one fetched elsewhere), so it always goes there.
       {
-        source: "/resume",
-        destination: "/resume.pdf",
-        permanent: false,
-        missing: [{ type: "header", key: "user-agent", value: "(?:curl|[Ww]get|HTTPie|xh)/.*" }],
+        source: "/.well-known/security.txt",
+        has: [{ type: "host", value: apexHost }],
+        destination: `${siteConfig.url}/.well-known/security.txt`,
+        permanent: true,
       },
+      // Bare domain: browsers to www; command-line clients and the key directory stay here.
+      {
+        source: "/:path((?!\\.well-known/openpgpkey/).*)",
+        has: [{ type: "host", value: apexHost }],
+        missing: [commandLine],
+        destination: `${siteConfig.url}/:path`,
+        permanent: true,
+      },
+      // Command-line clients get the text résumé there instead (proxy.ts).
+      { source: "/resume", destination: "/resume.pdf", permanent: false, missing: [commandLine] },
       // RFC 9116 allows the old location as a redirect.
       { source: "/security.txt", destination: "/.well-known/security.txt", permanent: true },
       {
